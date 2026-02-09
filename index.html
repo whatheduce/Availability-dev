@@ -12,15 +12,23 @@
       padding: 0;
     }
 
-    body {
-      font-family: "Inter", sans-serif;
-      text-align: center;
-      margin: 0;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #c5d5e4, #ffffff);
-      background-attachment: fixed;
-      background-size: cover;
-    }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  margin: 0;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 215, 0, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(0, 122, 255, 0.08),
+      transparent 40%
+    ),
+    linear-gradient(180deg, #f9fafb, #eef1f5);
+  min-height: 100vh;
+}
+
     h1 { margin: 10px 0; }
 
     /* user select (tap-to-enter) */
@@ -471,3 +479,4 @@ if (user) {
 
 </body>
 </html>
+
