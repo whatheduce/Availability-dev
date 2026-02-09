@@ -289,16 +289,16 @@ async function toggleAvailability(cell) {
   const time = cell.dataset.time;
 
   const { data: existing } = await supabase
-    .from("availability")
+    .from("availability_dev")
     .select("*")
     .eq("day", day)
     .eq("time", time)
     .eq("name", user.name);
 
   if (existing && existing.length) {
-    await supabase.from("availability").delete().eq("id", existing[0].id);
+    await supabase.from("availability_dev").delete().eq("id", existing[0].id);
   } else {
-    await supabase.from("availability").insert([
+    await supabase.from("availability_dev").insert([
       { day, time, name: user.name, color: user.color }
     ]);
   }
@@ -308,7 +308,7 @@ async function toggleAvailability(cell) {
 
 /* === Render dots + gold === */
 async function loadAvailability() {
-  const { data } = await supabase.from("availability").select("*");
+  const { data } = await supabase.from("availability_dev").select("*");
   const cells = table.querySelectorAll("td[data-day]");
 
   cells.forEach(cell => {
@@ -390,22 +390,22 @@ async function loadAvailability() {
 
 /* === Daily shift === */
 async function shiftAvailabilityDates() {
-  await supabase.from("availability").delete().eq("day", 0);
+  await supabase.from("availability_dev").delete().eq("day", 0);
 
   const { data: rows } = await supabase
-    .from("availability")
+    .from("availability_dev")
     .select("*")
     .order("day", { ascending: true });
 
   for (const r of rows) {
     if (r.day >= 1 && r.day <= 29) {
-      await supabase.from("availability")
+      await supabase.from("availability_dev")
         .update({ day: r.day - 1 })
         .eq("id", r.id);
     }
   }
 
-  await supabase.from("availability").delete().eq("day", 29);
+  await supabase.from("availability_dev").delete().eq("day", 29);
 }
 
 async function dailyShiftIfNeeded() {
