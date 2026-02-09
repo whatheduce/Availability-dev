@@ -29,7 +29,13 @@ body {
   min-height: 100vh;
 }
 
-    h1 { margin: 10px 0; }
+    h1 {
+  font-weight: 600;
+  font-size: 28px;
+  margin-top: 30px;
+  letter-spacing: -0.5px;
+}
+
 
     /* user select (tap-to-enter) */
     #user-select {
@@ -83,6 +89,7 @@ table {
     td:hover {
       background: #bdbdbd;
       box-shadow: inset 0 0 0 2px #d0e2ff;
+      transition: background0.2s ease;
     }
     th {
       position: sticky;
@@ -137,6 +144,7 @@ table {
 
     td {
       transition: box-shadow 0.3s ease, background 0.3s ease;
+      border-radius: 8px;
     }
     td > .dot-container {
       display: flex;
@@ -485,6 +493,7 @@ if (user) {
 
 </body>
 </html>
+
 
 
 
