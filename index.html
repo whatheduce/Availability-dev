@@ -231,6 +231,32 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  /* === Invite Token + Current Table === */
+const params = new URLSearchParams(window.location.search);
+const inviteToken = params.get("token");
+
+let currentTable = null;
+
+async function loadTable() {
+  if (!inviteToken) {
+    console.error("No invite token in URL");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("tables")
+    .select("*")
+    .eq("invite_token", inviteToken)
+    .single();
+
+  if (error || !data) {
+    console.error("Invalid invite link");
+    return;
+  }
+
+  currentTable = data;
+}
+
 
 /* DOM refs */
 const table = document.getElementById("availabilityTable");
@@ -315,13 +341,18 @@ async function toggleAvailability(cell) {
     .select("*")
     .eq("day", day)
     .eq("time", time)
-    .eq("name", user.name);
+    .eq("name", user.name)
+    .eq("tableid", currentTable.id);
 
   if (existing && existing.length) {
     await supabase.from("availability_dev").delete().eq("id", existing[0].id);
   } else {
     await supabase.from("availability_dev").insert([
-      { day, time, name: user.name, color: user.color }
+      { day,
+       time,
+       name: user.name,
+       color: user.color,
+       table_id: currentTable.id }
     ]);
   }
 
@@ -330,7 +361,11 @@ async function toggleAvailability(cell) {
 
 /* === Render dots + gold === */
 async function loadAvailability() {
-  const { data } = await supabase.from("availability_dev").select("*");
+  const { data } = await supabase
+  .from("availability_dev")
+  .select("*")
+  .eq("table_id", currentTable.id);
+
   const cells = table.querySelectorAll("td[data-day]");
 
   cells.forEach(cell => {
@@ -475,24 +510,35 @@ function selectUser(u) {
 }
 
 /* === Startup === */
-buildCalendar(getStartDate());
+async function startApp() {
+  await loadTable();
 
-if (user) {
-  document.getElementById("calendar").style.display = "block";
-  legendDiv.style.display = "block";
-  document.getElementById("user-select").style.display = "none";
-  document.querySelector(".footer-text").style.display = "block";
-  dailyShiftIfNeeded().then(loadAvailability);
-} else {
-  document.getElementById("calendar").style.display = "none";
-  legendDiv.style.display = "none";
-  showUserSelect();
-  dailyShiftIfNeeded();
+  if (!currentTable) return;
+
+  buildCalendar(getStartDate());
+
+  if (user) {
+    document.getElementById("calendar").style.display = "block";
+    legendDiv.style.display = "block";
+    document.getElementById("user-select").style.display = "none";
+    document.querySelector(".footer-text").style.display = "block";
+    await dailyShiftIfNeeded();
+    await loadAvailability();
+  } else {
+    document.getElementById("calendar").style.display = "none";
+    legendDiv.style.display = "none";
+    showUserSelect();
+    await dailyShiftIfNeeded();
+  }
 }
+
+startApp();
+
 </script>
 
 </body>
 </html>
+
 
 
 
