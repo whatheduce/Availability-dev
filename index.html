@@ -230,6 +230,14 @@ table {
   <div id="legendList"></div>
 </div>
 
+<div id="owner-controls" style="display:none; text-align:center; margin-top:20px;">
+  <h3>Owner Controls</h3>
+  <button id="reset-board">Reset Availability</button>
+  <button id="delete-board">Delete Board</button>
+</div>
+
+
+  
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -244,19 +252,22 @@ const manageToken = params.get("manage");
 
 let currentTable = null;
 
+
+  
 async function loadTable() {
-  if (!inviteToken) {
-    return;
-  }
+  if (!inviteToken && !manageToken) return;
+
+  let queryField = inviteToken ? "invite_token" : "owner_token";
+  let tokenValue = inviteToken || manageToken;
 
   const { data, error } = await supabase
     .from("tables")
     .select("*")
-    .eq("invite_token", inviteToken)
+    .eq(queryField, tokenValue)
     .single();
 
   if (error || !data) {
-    console.error("Invalid invite link");
+    console.error("Invalid link");
     return;
   }
 
@@ -267,6 +278,8 @@ async function loadTable() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
 
+
+  
 async function createBoard() {
   const nameInput = document.getElementById("board-name");
   const name = nameInput.value.trim();
@@ -297,6 +310,7 @@ async function createBoard() {
   window.location.href = `?token=${inviteToken}`;
 }
 
+  
 /* DOM refs */
 const table = document.getElementById("availabilityTable");
 const legendDiv = document.getElementById("legend");
@@ -368,6 +382,7 @@ function buildCalendar(startDate) {
   });
 }
 
+  
 /* === Toggle (insert/remove Supabase row) === */
 async function toggleAvailability(cell) {
   if (!user || !currentTable) return;
@@ -580,6 +595,38 @@ function selectUser(u) {
   buildCalendar(getStartDate());
   loadAvailability();
 }
+
+  
+  async function resetBoard() {
+  if (!currentTable) return;
+
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
+
+  await loadAvailability();
+}
+
+  
+  async function deleteBoard() {
+  if (!currentTable) return;
+
+  if (!confirm("Are you sure you want to permanently delete this board?")) return;
+
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
+
+  await supabase
+    .from("tables")
+    .delete()
+    .eq("id", currentTable.id);
+
+  window.location.href = "/";
+}
+
   
                                                                                                 /* === Startup === */
 async function startApp() {
@@ -614,8 +661,16 @@ async function startApp() {
   buildCalendar(getStartDate());
 
   if (manageToken) {
-    document.getElementById("owner-controls").style.display = "block";
-  }
+  document.getElementById("owner-controls").style.display = "block";
+
+  document
+    .getElementById("reset-board")
+    .addEventListener("click", resetBoard);
+
+  document
+    .getElementById("delete-board")
+    .addEventListener("click", deleteBoard);
+}
 
   if (user) {
     document.getElementById("calendar").style.display = "block";
@@ -639,6 +694,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
