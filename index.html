@@ -245,7 +245,6 @@ let currentTable = null;
 
 async function loadTable() {
   if (!inviteToken) {
-    console.error("No invite token in URL");
     return;
   }
 
@@ -583,14 +582,39 @@ function selectUser(u) {
   
                                                                                                 /* === Startup === */
 async function startApp() {
-    document
-      .getElementById("create-board-btn")
-      .addEventListener("click", createBoard);
+  // Attach create button handler
+  const createBtn = document.getElementById("create-board-btn");
+  if (createBtn) {
+    createBtn.addEventListener("click", createBoard);
+  }
+
   await loadTable();
 
-  if (!currentTable) return;
+  const createSection = document.getElementById("create-board");
+
+  if (!inviteToken && !manageToken) {
+    // No token → show create board only
+    createSection.style.display = "block";
+    document.getElementById("calendar").style.display = "none";
+    legendDiv.style.display = "none";
+    showUserSelect();
+    return;
+  }
+
+  if (!currentTable) {
+    // Invalid token
+    createSection.style.display = "block";
+    return;
+  }
+
+  // Valid token
+  createSection.style.display = "none";
 
   buildCalendar(getStartDate());
+
+  if (manageToken) {
+    document.getElementById("owner-controls").style.display = "block";
+  }
 
   if (user) {
     document.getElementById("calendar").style.display = "block";
@@ -607,12 +631,14 @@ async function startApp() {
   }
 }
 
+
 startApp();
 
 </script>
 
 </body>
 </html>
+
 
 
 
