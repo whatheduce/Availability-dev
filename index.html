@@ -199,7 +199,13 @@ table {
 
 <h1>Group Availability</h1>
 
-<!-- user selection -->
+                                                                                  <!-- user selection -->
+<div id="create-board" style="text-align:center; margin-top:20px;">
+  <h2>Create New Availability Board</h2>
+  <input id="board-name" placeholder="Board name" />
+  <button id="create-board-btn">Create</button>
+</div>
+  
 <div id="user-select">
   <h2>Select your name</h2>
   <div id="user-buttons"></div>
@@ -226,6 +232,10 @@ table {
 
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+function generateToken() {
+  return crypto.randomUUID() + crypto.randomUUID();
+}
 
 /* Supabase credentials (unchanged) */
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
@@ -257,6 +267,39 @@ async function loadTable() {
   currentTable = data;
 }
 
+  function generateToken() {
+  return crypto.randomUUID() + crypto.randomUUID();
+}
+
+async function createBoard() {
+  const nameInput = document.getElementById("board-name");
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    alert("Please enter a board name");
+    return;
+  }
+
+  const inviteToken = generateToken();
+  const ownerToken = generateToken();
+
+  const { data, error } = await supabase
+    .from("tables")
+    .insert([{
+      name,
+      invite_token: inviteToken,
+      owner_token: ownerToken
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating board:", error);
+    return;
+  }
+
+  window.location.href = `?token=${inviteToken}`;
+}
 
 /* DOM refs */
 const table = document.getElementById("availabilityTable");
@@ -541,8 +584,11 @@ function selectUser(u) {
   buildCalendar(getStartDate());
   loadAvailability();
 }
+                                                                                                /* === Startup === */
+  document
+  .getElementById("create-board-btn")
+  .addEventListener("click", createBoard);
 
-/* === Startup === */
 async function startApp() {
   await loadTable();
 
@@ -571,6 +617,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
