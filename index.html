@@ -240,6 +240,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
   /* === Invite Token + Current Table === */
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("token");
+const manageToken = params.get("manage");
 
 let currentTable = null;
 
@@ -638,6 +639,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
