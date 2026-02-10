@@ -345,17 +345,24 @@ async function toggleAvailability(cell) {
     .eq("tableid", currentTable.id);
 
   if (existing && existing.length) {
-    await supabase.from("availability_dev").delete().eq("id", existing[0].id);
-  } else {
-    await supabase.from("availability_dev").insert([
-      { day,
-       time,
-       name: user.name,
-       color: user.color,
-       table_id: currentTable.id }
-    ]);
-  }
-
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("day", day)
+    .eq("time", time)
+    .eq("name", user.name)
+    .eq("table_id", currentTable.id);
+} else {
+  await supabase
+    .from("availability_dev")
+    .insert([{
+      day,
+      time,
+      name: user.name,
+      color: user.color,
+      table_id: currentTable.id
+    }]);
+}
   await loadAvailability();
 }
 
@@ -538,6 +545,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
