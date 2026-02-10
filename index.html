@@ -233,10 +233,6 @@ table {
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-function generateToken() {
-  return crypto.randomUUID() + crypto.randomUUID();
-}
-
 /* Supabase credentials (unchanged) */
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
@@ -584,12 +580,12 @@ function selectUser(u) {
   buildCalendar(getStartDate());
   loadAvailability();
 }
+  
                                                                                                 /* === Startup === */
-  document
-  .getElementById("create-board-btn")
-  .addEventListener("click", createBoard);
-
 async function startApp() {
+    document
+      .getElementById("create-board-btn")
+      .addEventListener("click", createBoard);
   await loadTable();
 
   if (!currentTable) return;
@@ -617,6 +613,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
