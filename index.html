@@ -331,40 +331,55 @@ function buildCalendar(startDate) {
 
 /* === Toggle (insert/remove Supabase row) === */
 async function toggleAvailability(cell) {
-  if (!user) return;
+  if (!user || !currentTable) return;
 
   const day = parseInt(cell.dataset.day, 10);
   const time = cell.dataset.time;
 
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from("availability_dev")
     .select("*")
     .eq("day", day)
     .eq("time", time)
     .eq("name", user.name)
-    .eq("tableid", currentTable.id);
+    .eq("table_id", currentTable.id);
+
+  if (selectError) {
+    console.error("Select error:", selectError);
+    return;
+  }
 
   if (existing && existing.length) {
-  await supabase
-    .from("availability_dev")
-    .delete()
-    .eq("day", day)
-    .eq("time", time)
-    .eq("name", user.name)
-    .eq("table_id", currentTable.id);
-} else {
-  await supabase
-    .from("availability_dev")
-    .insert([{
-      day,
-      time,
-      name: user.name,
-      color: user.color,
-      table_id: currentTable.id
-    }]);
-}
+    const { error: deleteError } = await supabase
+      .from("availability_dev")
+      .delete()
+      .eq("day", day)
+      .eq("time", time)
+      .eq("name", user.name)
+      .eq("table_id", currentTable.id);
+
+    if (deleteError) {
+      console.error("Delete error:", deleteError);
+    }
+  } else {
+    const { error: insertError } = await supabase
+      .from("availability_dev")
+      .insert([{
+        day,
+        time,
+        name: user.name,
+        color: user.color,
+        table_id: currentTable.id
+      }]);
+
+    if (insertError) {
+      console.error("Insert error:", insertError);
+    }
+  }
+
   await loadAvailability();
 }
+
 
 /* === Render dots + gold === */
 async function loadAvailability() {
@@ -545,6 +560,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
