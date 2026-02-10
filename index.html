@@ -469,22 +469,33 @@ async function loadAvailability() {
 
 /* === Daily shift === */
 async function shiftAvailabilityDates() {
-  await supabase.from("availability_dev").delete().eq("day", 0);
+  if (!currentTable) return;
+  await supabase
+  .from("availability_dev")
+  .delete()
+  .eq("day", 0)
+  .eq("table_id", currentTable.id);
 
   const { data: rows } = await supabase
-    .from("availability_dev")
-    .select("*")
-    .order("day", { ascending: true });
+  .from("availability_dev")
+  .select("*")
+  .eq("table_id", currentTable.id)
+  .order("day", { ascending: true });
 
   for (const r of rows) {
     if (r.day >= 1 && r.day <= 29) {
       await supabase.from("availability_dev")
-        .update({ day: r.day - 1 })
-        .eq("id", r.id);
+      .update({ day: r.day - 1 })
+      .eq("id", r.id)
+      .eq("table_id", currentTable.id);
     }
   }
 
-  await supabase.from("availability_dev").delete().eq("day", 29);
+  await supabase
+  .from("availability_dev")
+  .delete()
+  .eq("day", 29)
+  .eq("table_id", currentTable.id);
 }
 
 async function dailyShiftIfNeeded() {
@@ -560,6 +571,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
