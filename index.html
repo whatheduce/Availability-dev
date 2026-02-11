@@ -399,50 +399,49 @@ function setStartDate(date) {
 }
 
 
-function buildCalendar(startDate) {
+function buildCalendar() {
+  const table = document.getElementById("calendar");
   table.innerHTML = "";
 
-  /* header */
+  if (!currentTable) return;
+
+  const times = currentTable.row_structure || [];
+
+  // 🔹 Build header row (days)
   const headerRow = document.createElement("tr");
-  const empty = document.createElement("th");
-  headerRow.appendChild(empty);
+  headerRow.appendChild(document.createElement("th"));
 
-  for (let i = 0; i < 30; i++) {
-    const d = new Date(startDate);
-    d.setDate(d.getDate() + i);
+  const days = 30; // still fixed for now
 
+  for (let d = 1; d <= days; d++) {
     const th = document.createElement("th");
-    th.className = "day-header";
-    th.innerHTML =
-      `${d.toLocaleDateString("en-US", { weekday: "short" })}<br>` +
-      `<span class="monthday">${d.getDate()}/${d.getMonth() + 1}</span>`;
-
+    th.textContent = d;
     headerRow.appendChild(th);
   }
 
   table.appendChild(headerRow);
 
-  /* time rows */
-  const times = currentTable.row_structure || [];
-  times.forEach(time => {
+  // 🔹 Build rows based on row_structure
+  times.forEach(timeObj => {
     const row = document.createElement("tr");
 
-    const label = document.createElement("td");
-    label.className = "time-label";
-    label.textContent = time.label;
-    row.appendChild(label);
+    const labelCell = document.createElement("td");
+    labelCell.textContent = timeObj.label;
+    labelCell.style.fontWeight = "bold";
+    row.appendChild(labelCell);
 
-    for (let d = 0; d < 30; d++) {
+    for (let d = 1; d <= days; d++) {
       const cell = document.createElement("td");
       cell.dataset.day = d;
-      cell.dataset.time = time.label;
-      cell.addEventListener("click", () => toggleAvailability(cell));
+      cell.dataset.time = timeObj.label;
+      cell.addEventListener("click", toggleCell);
       row.appendChild(cell);
     }
 
     table.appendChild(row);
   });
 }
+
 
   
 /* === Toggle (insert/remove Supabase row) === */
@@ -851,6 +850,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
