@@ -313,13 +313,14 @@ async function loadTable() {
   }
 
   currentTable = data;
+  document.getElementById("create-board").style.display = "none";
+  document.getElementById("calendar").style.display = "table";
+                                                                                                          console.log("Table loaded:", currentTable);
 }
 
   function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
-
-
   
 async function createBoard() {
   const nameInput = document.getElementById("board-name");
@@ -492,6 +493,7 @@ function buildCalendar() {
 
     table.appendChild(row);
   });
+                                                                                          console.log("Building calendar...");
 }
 
 
@@ -907,6 +909,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
