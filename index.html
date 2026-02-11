@@ -241,26 +241,33 @@ body {
   <div id="board-setup" style="display:none;">
 
     <div id="name-step">
-      <h2>Name Your Calendar</h2>
-      <input id="board-name" placeholder="Calendar name" />
-      <button id="confirm-name" class="primary-btn">
-        Continue
-      </button>
-    </div>
+  <h2>Name Your Calendar</h2>
+  <input id="board-name" placeholder="Calendar name" />
 
-    <div id="row-builder" style="display:none; margin-top:25px;">
-      <h3>Define Time Blocks</h3>
-      <div id="rows-container"></div>
-      <button id="add-row">Add Time Block</button>
+  <div style="margin-top:20px; text-align:left;">
+    <strong>Choose Structure:</strong><br>
 
-      <div style="margin-top:20px;">
-        <button id="create-board-btn" class="primary-btn">
-          Create Calendar
-        </button>
-      </div>
-    </div>
+    <label>
+      <input type="radio" name="structure" value="custom" checked>
+      Custom (Free – up to 4 time blocks)
+    </label><br>
 
+    <label>
+      <input type="radio" name="structure" value="quick_meetup">
+      Quick Meetup (Pro)
+    </label><br>
+
+    <label>
+      <input type="radio" name="structure" value="dinner_plan">
+      Dinner Plan (Pro)
+    </label>
   </div>
+
+  <button id="confirm-name" class="primary-btn" style="margin-top:20px;">
+    Continue
+  </button>
+</div>
+
 </div>
 
 
@@ -691,7 +698,11 @@ function selectUser(u) {
   
   function addRowInput(name = "") {
   const container = document.getElementById("rows-container");
-  if (!container) return;
+
+  if (container.children.length >= 4) {
+    alert("Free version allows up to 4 time blocks.");
+    return;
+  }
 
   const input = document.createElement("input");
   input.placeholder = "Time block (e.g. Dinner)";
@@ -699,6 +710,7 @@ function selectUser(u) {
 
   container.appendChild(input);
 }
+
 
 function showBoardSetup() {
   document.getElementById("start-create").style.display = "none";
@@ -720,14 +732,43 @@ function confirmBoardName() {
     return;
   }
 
-  document.getElementById("row-builder").style.display = "block";
+  const selectedStructure = document.querySelector(
+    'input[name="structure"]:checked'
+  ).value;
 
-  const rowsContainer = document.getElementById("rows-container");
-  if (rowsContainer.children.length === 0) {
-    addRowInput();
+  const rowBuilder = document.getElementById("row-builder");
+
+  if (selectedStructure === "custom") {
+    rowBuilder.style.display = "block";
+
+    const rowsContainer = document.getElementById("rows-container");
+    if (rowsContainer.children.length === 0) {
+      addRowInput();
+    }
+  } else {
+    // Prebuilt selected
+    rowBuilder.style.display = "none";
+
+    // Store selected structure temporarily
+    window.selectedPrebuiltStructure = selectedStructure;
+
+    document.getElementById("create-board-btn").style.display = "inline-block";
   }
 }
 
+
+const PREBUILT_STRUCTURES = {
+  quick_meetup: [
+    { label: "Morning" },
+    { label: "Afternoon" },
+    { label: "Evening" }
+  ],
+  dinner_plan: [
+    { label: "Early Dinner" },
+    { label: "Dinner" },
+    { label: "Late Dinner" }
+  ]
+};
 
 
 
@@ -842,6 +883,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
