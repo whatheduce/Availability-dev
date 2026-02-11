@@ -400,6 +400,56 @@ function setStartDate(date) {
   localStorage.setItem("startDate", date.toISOString());
 }
 
+async function toggleCell(e) {
+  if (!user || !currentTable) return;
+
+  const cell = e.target;
+  const day = cell.dataset.day;
+  const time = cell.dataset.time;
+
+  if (!day || !time) return;
+
+  // Check if entry already exists
+  const { data: existing } = await supabase
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id)
+    .eq("day", day)
+    .eq("time", time)
+    .eq("name", user.name);
+
+  if (existing && existing.length > 0) {
+    // Remove entry
+    await supabase
+      .from("availability_dev")
+      .delete()
+      .eq("table_id", currentTable.id)
+      .eq("day", day)
+      .eq("time", time)
+      .eq("name", user.name);
+
+    cell.innerHTML = "";
+  } else {
+    // Add entry
+    await supabase
+      .from("availability_dev")
+      .insert({
+        table_id: currentTable.id,
+        day,
+        time,
+        name: user.name,
+        color: user.color
+      });
+
+    const dot = document.createElement("div");
+    dot.style.width = "8px";
+    dot.style.height = "8px";
+    dot.style.borderRadius = "50%";
+    dot.style.background = user.color;
+    dot.style.margin = "auto";
+    cell.appendChild(dot);
+  }
+}  
 
 function buildCalendar() {
   const table = document.getElementById("calendar");
@@ -857,6 +907,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
