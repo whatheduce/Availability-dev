@@ -314,7 +314,9 @@ async function loadTable() {
 
   currentTable = data;
   document.getElementById("create-board").style.display = "none";
-  document.getElementById("calendar").style.display = "table";
+  document.getElementById("calendar").style.display = "block";
+  document.getElementById("identity-section").style.display = "none";
+
                                                                                                           console.log("Table loaded:", currentTable);
 }
 
@@ -909,6 +911,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
