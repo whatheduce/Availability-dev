@@ -666,9 +666,22 @@ function selectUser(u) {
   container.appendChild(input);
 }
 
+
+
+
+
+
+
+  
   
                                                                                                 /* === Startup === */
 async function startApp() {
+    // Attach identity button FIRST
+  const saveIdentityBtn = document.getElementById("save-identity");
+  if (saveIdentityBtn) {
+    saveIdentityBtn.addEventListener("click", saveIdentity);
+  }
+
   const globalName = localStorage.getItem("globalUserName");
 
 if (!globalName) {
@@ -754,6 +767,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
