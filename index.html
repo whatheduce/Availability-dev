@@ -197,7 +197,6 @@ table {
 </head>
 <body>
 
-<h1>Group Availability</h1>
 
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px;">
@@ -206,23 +205,25 @@ table {
   <button id="save-identity">Continue</button>
 </div>
                                                                           
-<div id="create-board" style="text-align:center; margin-top:20px;">
-  <h2>Create New Availability Board</h2>
+<div id="create-board">
 
-  <input id="board-name" placeholder="Board name" />
-  <button id="create-board-btn">Create</button>
+  <button id="start-create">Create New Calendar</button>
 
-  <div id="row-builder" style="margin-top:20px;">
-    <h3>Define Time Blocks</h3>
-    <div id="rows-container"></div>
-    <button id="add-row">Add Row</button>
+  <div id="board-setup" style="display:none; margin-top:20px;">
+    <h2>Name Your Calendar</h2>
+    <input id="board-name" placeholder="Calendar name" />
+
+    <div id="row-builder" style="margin-top:20px;">
+      <h3>Define Time Blocks</h3>
+      <div id="rows-container"></div>
+      <button id="add-row">Add Row</button>
+    </div>
+
+    <button id="create-board-btn">Create Calendar</button>
   </div>
+
 </div>
 
-<div id="user-select">
-  <h2>Select your name</h2>
-  <div id="user-buttons"></div>
-</div>
 
 <!-- calendar -->
 <div id="calendar">
@@ -350,14 +351,6 @@ const legendList = document.getElementById("legendList");
 
 /* persistent user */
 let user = JSON.parse(localStorage.getItem("user") || "null");
-
-/* 4 permanent users */
-const predefinedUsers = [
-  { name: "Duce",  color: "#0000FF" },
-  { name: "Mike",  color: "#0BDA51" },
-  { name: "Gway",  color: "#D3D3D3" },
-  { name: "Bone",  color: "#FFEF00" }
-];
 
 /* === Date tracking === */
 function getStartDate() {
@@ -599,22 +592,6 @@ async function dailyShiftIfNeeded() {
   await loadAvailability();
 }
 
-/* === User Selection UI === */
-function showUserSelect() {
-  document.getElementById("user-select").style.display = "block";
-  const btnArea = document.getElementById("user-buttons");
-  btnArea.innerHTML = "";
-
-  predefinedUsers.forEach(u => {
-    const btn = document.createElement("button");
-    btn.className = "user-btn";
-    btn.textContent = u.name;
-    btn.style.background = u.color;
-    btn.onclick = () => selectUser(u);
-    btnArea.appendChild(btn);
-  });
-}
-
 function selectUser(u) {
   user = { name: u.name, color: u.color };
   localStorage.setItem("user", JSON.stringify(user));
@@ -683,6 +660,16 @@ function selectUser(u) {
   container.appendChild(input);
 }
 
+function showBoardSetup() {
+  document.getElementById("start-create").style.display = "none";
+  document.getElementById("board-setup").style.display = "block";
+
+  // ensure at least one row input exists
+  const rowsContainer = document.getElementById("rows-container");
+  if (rowsContainer.children.length === 0) {
+    addRowInput();
+  }
+}
 
 
 
@@ -717,6 +704,11 @@ document.getElementById("identity-section").style.display = "none";
   if (createBtn) {
     createBtn.addEventListener("click", createBoard);
   }
+  
+  const startCreateBtn = document.getElementById("start-create");
+if (startCreateBtn) {
+  startCreateBtn.addEventListener("click", showBoardSetup);
+}
 
   const addRowBtn = document.getElementById("add-row");
 if (addRowBtn) {
@@ -732,7 +724,6 @@ if (addRowBtn) {
     createSection.style.display = "block";
     document.getElementById("calendar").style.display = "none";
     legendDiv.style.display = "none";
-    showUserSelect();
     const rowsContainer = document.getElementById("rows-container");
       if (rowsContainer && rowsContainer.children.length === 0) {
           addRowInput(); // creates the first row automatically
@@ -789,6 +780,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
