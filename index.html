@@ -35,13 +35,13 @@ body {
   margin-top: 30px;
   letter-spacing: -0.5px;
 }
-
-
+    
     /* user select (tap-to-enter) */
     #user-select {
       display: block;
       margin: 20px auto;
     }
+    
     #user-buttons {
       display: flex;
       justify-content: center;
@@ -49,6 +49,7 @@ body {
       flex-wrap: wrap;
       margin-top: 12px;
     }
+    
     .user-btn {
       color: #fff;
       border: none;
@@ -63,17 +64,43 @@ body {
       overflow-x: auto;
       display: none;
     }
-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  margin: 0 auto;
-  min-width: 700px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  overflow: hidden;
-}
+
+    .centered-container {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .centered-container input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .primary-btn {
+      padding: 10px 18px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    #rows-container input {
+      margin-top: 10px;
+    }
+
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0 auto;
+      min-width: 700px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
 
     th, td {
       border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -205,24 +232,37 @@ table {
   <button id="save-identity">Continue</button>
 </div>
                                                                           
-<div id="create-board">
+<div id="create-board" class="centered-container">
 
-  <button id="start-create">Create New Calendar</button>
+  <button id="start-create" class="primary-btn">
+    Create New Calendar
+  </button>
 
-  <div id="board-setup" style="display:none; margin-top:20px;">
-    <h2>Name Your Calendar</h2>
-    <input id="board-name" placeholder="Calendar name" />
+  <div id="board-setup" style="display:none;">
 
-    <div id="row-builder" style="margin-top:20px;">
-      <h3>Define Time Blocks</h3>
-      <div id="rows-container"></div>
-      <button id="add-row">Add Row</button>
+    <div id="name-step">
+      <h2>Name Your Calendar</h2>
+      <input id="board-name" placeholder="Calendar name" />
+      <button id="confirm-name" class="primary-btn">
+        Continue
+      </button>
     </div>
 
-    <button id="create-board-btn">Create Calendar</button>
-  </div>
+    <div id="row-builder" style="display:none; margin-top:25px;">
+      <h3>Define Time Blocks</h3>
+      <div id="rows-container"></div>
+      <button id="add-row">Add Time Block</button>
 
+      <div style="margin-top:20px;">
+        <button id="create-board-btn" class="primary-btn">
+          Create Calendar
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>
+
 
 
 <!-- calendar -->
@@ -663,8 +703,25 @@ function selectUser(u) {
 function showBoardSetup() {
   document.getElementById("start-create").style.display = "none";
   document.getElementById("board-setup").style.display = "block";
+}
 
   // ensure at least one row input exists
+  const rowsContainer = document.getElementById("rows-container");
+  if (rowsContainer.children.length === 0) {
+    addRowInput();
+  }
+
+function confirmBoardName() {
+  const nameInput = document.getElementById("board-name");
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    alert("Please enter a calendar name");
+    return;
+  }
+
+  document.getElementById("row-builder").style.display = "block";
+
   const rowsContainer = document.getElementById("rows-container");
   if (rowsContainer.children.length === 0) {
     addRowInput();
@@ -705,6 +762,11 @@ document.getElementById("identity-section").style.display = "none";
     createBtn.addEventListener("click", createBoard);
   }
   
+  const confirmNameBtn = document.getElementById("confirm-name");
+if (confirmNameBtn) {
+  confirmNameBtn.addEventListener("click", confirmBoardName);
+}
+
   const startCreateBtn = document.getElementById("start-create");
 if (startCreateBtn) {
   startCreateBtn.addEventListener("click", showBoardSetup);
@@ -780,6 +842,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
