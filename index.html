@@ -29,13 +29,6 @@ body {
   min-height: 100vh;
 }
 
-    h1 {
-  font-weight: 600;
-  font-size: 28px;
-  margin-top: 30px;
-  letter-spacing: -0.5px;
-}
-
     #calendar {
       margin: 20px auto;
       overflow-x: auto;
@@ -184,7 +177,7 @@ body {
     /* Gold glowing highlight */
     .gold-cell {
       background: linear-gradient(165deg, #ffd700, #ffea8a);
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0/7), inset 0 0 8px rgba(255,215,0,0.6);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7), inset 0 0 8px rgba(255,215,0,0.6);
       animation: goldPulse 1.6s infinite ease-in-out;
     }
 
@@ -347,8 +340,6 @@ if (selectedStructure === "custom") {
   timeBlocks = PREBUILT_STRUCTURES[selectedStructure];
 }
 
-
-
   if (timeBlocks.length === 0) {
     alert("Please add at least one time block");
     return;
@@ -383,8 +374,8 @@ const table = document.getElementById("availabilityTable");
 const legendDiv = document.getElementById("legend");
 const legendList = document.getElementById("legendList");
 
-/* persistent user */
-let user = JSON.parse(localStorage.getItem("user") || "null");
+let user = null;
+
 
 /* === Date tracking === */
 function getStartDate() {
@@ -619,20 +610,6 @@ async function dailyShiftIfNeeded() {
   setStartDate(today);
   await loadAvailability();
 }
-
-function selectUser(u) {
-  user = { name: u.name, color: u.color };
-  localStorage.setItem("user", JSON.stringify(user));
-
-  document.getElementById("user-select").style.display = "none";
-  document.getElementById("calendar").style.display = "block";
-  legendDiv.style.display = "block";
-  document.querySelector(".footer-text").style.display = "block";
-
-  buildCalendar(getStartDate());
-  loadAvailability();
-}
-
   
   async function resetBoard() {
   if (!currentTable) return;
@@ -776,13 +753,13 @@ if (!globalName) {
   return;
 }
 
-document.getElementById("identity-section").style.display = "none";
+// If we DO have a saved name:
+user = {
+  name: globalName,
+  color: "#" + globalName.charCodeAt(0).toString(16).padEnd(6, "0")
+};
 
-  // Attach create button handler
-  const createBtn = document.getElementById("create-board-btn");
-  if (createBtn) {
-    createBtn.addEventListener("click", createBoard);
-  }
+document.getElementById("identity-section").style.display = "none";
   
   const confirmNameBtn = document.getElementById("confirm-name");
 if (confirmNameBtn) {
@@ -845,14 +822,12 @@ if (addRowBtn) {
   if (user) {
     document.getElementById("calendar").style.display = "block";
     legendDiv.style.display = "block";
-    document.getElementById("user-select").style.display = "none";
     document.querySelector(".footer-text").style.display = "block";
     await dailyShiftIfNeeded();
     await loadAvailability();
   } else {
     document.getElementById("calendar").style.display = "none";
     legendDiv.style.display = "none";
-    showUserSelect();
     await dailyShiftIfNeeded();
   }
 }
@@ -864,6 +839,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
