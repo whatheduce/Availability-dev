@@ -213,13 +213,12 @@ table {
   <button id="create-board-btn">Create</button>
 
   <div id="row-builder" style="margin-top:20px;">
-    <h3>Define Participants</h3>
+    <h3>Define Time Blocks</h3>
     <div id="rows-container"></div>
     <button id="add-row">Add Row</button>
   </div>
 </div>
 
-  
 <div id="user-select">
   <h2>Select your name</h2>
   <div id="user-buttons"></div>
@@ -303,6 +302,23 @@ async function createBoard() {
     return;
   }
 
+  // 👇 NEW: Collect time blocks
+  const rowInputs = document.querySelectorAll("#rows-container input");
+
+  const timeBlocks = [];
+
+  rowInputs.forEach(input => {
+    const value = input.value.trim();
+    if (value) {
+      timeBlocks.push({ label: value });
+    }
+  });
+
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+
   const inviteToken = generateToken();
   const ownerToken = generateToken();
 
@@ -311,7 +327,8 @@ async function createBoard() {
     .insert([{
       name,
       invite_token: inviteToken,
-      owner_token: ownerToken
+      owner_token: ownerToken,
+      row_structure: timeBlocks   // 👈 NEW FIELD
     }])
     .select()
     .single();
@@ -323,6 +340,7 @@ async function createBoard() {
 
   window.location.href = `?token=${inviteToken}`;
 }
+
 
   
 /* DOM refs */
@@ -375,7 +393,7 @@ function buildCalendar(startDate) {
   table.appendChild(headerRow);
 
   /* time rows */
-  const times = ["Morning", "Pre-Lunch", "Post-Lunch", "Dinner", "Late-Evening"];
+  const times = currentTable.row_structure || [];
   times.forEach(time => {
     const row = document.createElement("tr");
 
@@ -656,15 +674,15 @@ function selectUser(u) {
   
   function addRowInput(name = "") {
   const container = document.getElementById("rows-container");
+  if (!container) return;
 
   const input = document.createElement("input");
-  input.placeholder = "Participant name";
+  input.placeholder = "Time block (e.g. Dinner)";
   input.value = name;
-  input.style.display = "block";
-  input.style.margin = "5px auto";
 
   container.appendChild(input);
 }
+
 
 
 
@@ -715,6 +733,10 @@ if (addRowBtn) {
     document.getElementById("calendar").style.display = "none";
     legendDiv.style.display = "none";
     showUserSelect();
+    const rowsContainer = document.getElementById("rows-container");
+      if (rowsContainer && rowsContainer.children.length === 0) {
+          addRowInput(); // creates the first row automatically
+      }
     return;
   }
 
@@ -767,6 +789,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
