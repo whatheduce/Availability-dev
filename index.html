@@ -233,7 +233,19 @@ body {
     Continue
   </button>
 </div>
+    <div id="row-builder" style="display:none; margin-top:25px;">
+    <h3>Define Time Blocks</h3>
 
+    <div id="rows-container"></div>
+
+    <button id="add-row">Add Time Block</button>
+
+      <div style="margin-top:20px;">
+        <button id="create-board-btn" class="primary-btn">
+          Create Calendar
+        </button>
+      </div>
+    </div>
 </div>
 
 
@@ -657,6 +669,8 @@ async function dailyShiftIfNeeded() {
   function addRowInput(name = "") {
   const container = document.getElementById("rows-container");
 
+  if (!container) return; // Prevent crash
+
   if (container.children.length >= 4) {
     alert("Free version allows up to 4 time blocks.");
     return;
@@ -668,7 +682,6 @@ async function dailyShiftIfNeeded() {
 
   container.appendChild(input);
 }
-
 
 function showBoardSetup() {
   document.getElementById("start-create").style.display = "none";
@@ -832,13 +845,13 @@ if (addRowBtn) {
   }
 }
 
-
-startApp();
+document.addEventListener("DOMContentLoaded", startApp);
 
 </script>
 
 </body>
 </html>
+
 
 
 
