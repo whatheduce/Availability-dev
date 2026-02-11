@@ -188,8 +188,10 @@ body {
     }
   </style>
 </head>
-<body>
 
+
+  
+<body>
 
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px;">
@@ -788,6 +790,11 @@ if (addRowBtn) {
   addRowBtn.addEventListener("click", () => addRowInput());
 }
 
+  const createBtn = document.getElementById("create-board-btn");
+if (createBtn) {
+  createBtn.addEventListener("click", createBoard);
+}
+  
   await loadTable();
 
   const createSection = document.getElementById("create-board");
@@ -850,6 +857,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
