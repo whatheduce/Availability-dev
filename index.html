@@ -35,29 +35,6 @@ body {
   margin-top: 30px;
   letter-spacing: -0.5px;
 }
-    
-    /* user select (tap-to-enter) */
-    #user-select {
-      display: block;
-      margin: 20px auto;
-    }
-    
-    #user-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-    
-    .user-btn {
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      font-size: 18px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
 
     #calendar {
       margin: 20px auto;
@@ -113,11 +90,7 @@ body {
       box-sizing: border-box;
       overflow: hidden;
     }
-    td:hover {
-      background: #bdbdbd;
-      box-shadow: inset 0 0 0 2px #d0e2ff;
-      transition: background0.2s ease;
-    }
+
     th {
       position: sticky;
       top: 0;
@@ -350,10 +323,14 @@ async function createBoard() {
     return;
   }
 
-  // 👇 NEW: Collect time blocks
-  const rowInputs = document.querySelectorAll("#rows-container input");
+  let timeBlocks = [];
 
-  const timeBlocks = [];
+const selectedStructure = document.querySelector(
+  'input[name="structure"]:checked'
+).value;
+
+if (selectedStructure === "custom") {
+  const rowInputs = document.querySelectorAll("#rows-container input");
 
   rowInputs.forEach(input => {
     const value = input.value.trim();
@@ -361,6 +338,16 @@ async function createBoard() {
       timeBlocks.push({ label: value });
     }
   });
+
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+} else {
+  timeBlocks = PREBUILT_STRUCTURES[selectedStructure];
+}
+
+
 
   if (timeBlocks.length === 0) {
     alert("Please add at least one time block");
@@ -408,7 +395,7 @@ function setStartDate(date) {
   localStorage.setItem("startDate", date.toISOString());
 }
 
-/* === Build Calendar (5 rows, 30 days) === */
+
 function buildCalendar(startDate) {
   table.innerHTML = "";
 
@@ -439,13 +426,13 @@ function buildCalendar(startDate) {
 
     const label = document.createElement("td");
     label.className = "time-label";
-    label.textContent = time;
+    label.textContent = time.label;
     row.appendChild(label);
 
     for (let d = 0; d < 30; d++) {
       const cell = document.createElement("td");
       cell.dataset.day = d;
-      cell.dataset.time = time;
+      cell.dataset.time = time.label;
       cell.addEventListener("click", () => toggleAvailability(cell));
       row.appendChild(cell);
     }
@@ -564,13 +551,7 @@ async function loadAvailability() {
       const dotContainer = document.createElement("div");
       dotContainer.className = "dot-container";
 
-      const order = ["Duce", "Mike", "Gway", "Bone"];
-
-      const sorted = entries.slice().sort((a, b) => {
-        return order.indexOf(a.name) - order.indexOf(b.name);
-      });
-
-      sorted.forEach(entry => {
+      entries.forEach(entry => {
         const dot = document.createElement("div");
         dot.className = "dot";
         dot.style.background = entry.color;
@@ -883,6 +864,7 @@ startApp();
 
 </body>
 </html>
+
 
 
 
