@@ -313,12 +313,10 @@ async function loadTable() {
   }
 
   currentTable = data;
-  document.getElementById("create-board").style.display = "none";
-  document.getElementById("calendar").style.display = "block";
-  document.getElementById("identity-section").style.display = "none";
-                                                                                                          console.log("Table loaded:", currentTable);
-  buildCalendar();
+
+  console.log("Table loaded:", currentTable);
 }
+
 
   function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
@@ -853,17 +851,26 @@ if (createBtn) {
 
   const createSection = document.getElementById("create-board");
 
-  if (!inviteToken && !manageToken) {
-    // No token → show create board only
-    createSection.style.display = "block";
-    document.getElementById("calendar").style.display = "none";
-    legendDiv.style.display = "none";
-    const rowsContainer = document.getElementById("rows-container");
-      if (rowsContainer && rowsContainer.children.length === 0) {
-          addRowInput(); // creates the first row automatically
-      }
-    return;
-  }
+if (!inviteToken && !manageToken) {
+  createSection.style.display = "block";
+  document.getElementById("calendar").style.display = "none";
+  legendDiv.style.display = "none";
+  return;
+}
+
+if (!currentTable) {
+  createSection.style.display = "block";
+  return;
+}
+
+// Valid token
+createSection.style.display = "none";
+document.getElementById("calendar").style.display = "block";
+legendDiv.style.display = "block";
+
+buildCalendar();
+await loadAvailability();
+
 
   if (!currentTable) {
     // Invalid token
@@ -909,6 +916,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
