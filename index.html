@@ -34,6 +34,7 @@ body {
       overflow-x: auto;
       display: block;
       min-height: 200px;
+      padding: 20px;
     }
 
     .centered-container {
@@ -68,8 +69,19 @@ body {
     }
 
     #availabilityTable { 
+      display: table;
+      border-collapse: collapse;
+      width: max-content;
+      min-width: 700px;
       background: white !important; 
       outline: 3px solid red !important; 
+    }
+
+    #availabilityTable th, 
+    #availabilityTable td {
+      border: 1px solid #000;
+      min-width: 70px;
+      height: 50px;
     }
 
     th, td {
@@ -813,6 +825,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
