@@ -304,13 +304,16 @@ async function loadTable() {
 
   console.log("Table loaded:", currentTable);
 
-  // 👇 ADD THESE LINES BACK
+  // SHOW calendar immediately
   document.getElementById("create-board").style.display = "none";
+  document.getElementById("identity-section").style.display = "none";
   document.getElementById("calendar").style.display = "block";
+  legendDiv.style.display = "block";
 
   buildCalendar();
   await loadAvailability();
 }
+
 
 
 
@@ -855,11 +858,6 @@ if (!inviteToken && !manageToken) {
   return;
 }
 
-if (!currentTable) {
-  createSection.style.display = "block";
-  return;
-}
-
   if (manageToken) {
   document.getElementById("owner-controls").style.display = "block";
 
@@ -895,6 +893,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
