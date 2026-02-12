@@ -497,59 +497,6 @@ function buildCalendar() {
 }
 
 
-  
-/* === Toggle (insert/remove Supabase row) === */
-async function toggleAvailability(cell) {
-  if (!user || !currentTable) return;
-
-  const day = parseInt(cell.dataset.day, 10);
-  const time = cell.dataset.time;
-
-  const { data: existing, error: selectError } = await supabase
-    .from("availability_dev")
-    .select("*")
-    .eq("day", day)
-    .eq("time", time)
-    .eq("name", user.name)
-    .eq("table_id", currentTable.id);
-
-  if (selectError) {
-    console.error("Select error:", selectError);
-    return;
-  }
-
-  if (existing && existing.length) {
-    const { error: deleteError } = await supabase
-      .from("availability_dev")
-      .delete()
-      .eq("day", day)
-      .eq("time", time)
-      .eq("name", user.name)
-      .eq("table_id", currentTable.id);
-
-    if (deleteError) {
-      console.error("Delete error:", deleteError);
-    }
-  } else {
-    const { error: insertError } = await supabase
-      .from("availability_dev")
-      .insert([{
-        day,
-        time,
-        name: user.name,
-        color: user.color,
-        table_id: currentTable.id
-      }]);
-
-    if (insertError) {
-      console.error("Insert error:", insertError);
-    }
-  }
-
-  await loadAvailability();
-}
-
-
 /* === Render dots + gold === */
 async function loadAvailability() {
   const { data } = await supabase
@@ -848,6 +795,10 @@ if (createBtn) {
 }
   
   await loadTable();
+  if (currentTable) {
+  document.querySelector(".footer-text").style.display = "block";
+  await dailyShiftIfNeeded();
+}
 
 const createSection = document.getElementById("create-board");
 
@@ -873,17 +824,6 @@ if (!inviteToken && !manageToken) {
     .getElementById("save-identity")
     .addEventListener("click", saveIdentity);
 }
-
-  if (user) {
-    document.getElementById("calendar").style.display = "block";
-    legendDiv.style.display = "block";
-    document.querySelector(".footer-text").style.display = "block";
-    await dailyShiftIfNeeded();
-  } else {
-    document.getElementById("calendar").style.display = "none";
-    legendDiv.style.display = "none";
-    await dailyShiftIfNeeded();
-  }
 }
 
 document.addEventListener("DOMContentLoaded", startApp);
@@ -893,6 +833,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
