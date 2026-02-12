@@ -300,7 +300,15 @@ async function loadTable() {
   currentTable = data;
 
   console.log("Table loaded:", currentTable);
+
+  // 👇 ADD THESE LINES BACK
+  document.getElementById("create-board").style.display = "none";
+  document.getElementById("calendar").style.display = "block";
+
+  buildCalendar();
+  await loadAvailability();
 }
+
 
 
   function generateToken() {
@@ -849,14 +857,6 @@ if (!currentTable) {
   return;
 }
 
-// Valid token
-createSection.style.display = "none";
-document.getElementById("calendar").style.display = "block";
-legendDiv.style.display = "block";
-
-buildCalendar();
-await loadAvailability();
-
   if (manageToken) {
   document.getElementById("owner-controls").style.display = "block";
 
@@ -892,6 +892,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
