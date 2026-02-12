@@ -849,7 +849,7 @@ if (createBtn) {
   
   await loadTable();
 
-  const createSection = document.getElementById("create-board");
+const createSection = document.getElementById("create-board");
 
 if (!inviteToken && !manageToken) {
   createSection.style.display = "block";
@@ -870,16 +870,6 @@ legendDiv.style.display = "block";
 
 buildCalendar();
 await loadAvailability();
-
-
-  if (!currentTable) {
-    // Invalid token
-    createSection.style.display = "block";
-    return;
-  }
-
-  // Valid token
-  createSection.style.display = "none";
 
   if (manageToken) {
   document.getElementById("owner-controls").style.display = "block";
@@ -917,6 +907,7 @@ window.addEventListener("load", startApp);
 
 </body>
 </html>
+
 
 
 
