@@ -452,6 +452,7 @@ async function toggleCell(e) {
 }  
 
 function buildCalendar() {
+                                                                                  console.log("Times:", currentTable.row_structure);
   const table = document.getElementById("availabilityTable");
   table.innerHTML = "";
 
@@ -915,6 +916,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
