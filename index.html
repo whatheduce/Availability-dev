@@ -479,9 +479,9 @@ function buildCalendar() {
     const row = document.createElement("tr");
 
     const labelCell = document.createElement("td");
-    labelCell.textContent = timeObj.label;
-    labelCell.style.fontWeight = "bold";
-    row.appendChild(labelCell);
+      labelCell.textContent = timeObj.label;
+      labelCell.classList.add("time-label");
+      row.appendChild(labelCell);
 
     for (let d = 1; d <= days; d++) {
       const cell = document.createElement("td");
@@ -916,6 +916,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
