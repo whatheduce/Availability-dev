@@ -176,11 +176,8 @@ body {
     }
   </style>
 </head>
-
-
   
 <body>
-
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px;">
   <h2>Enter Your Name</h2>
@@ -238,15 +235,12 @@ body {
     </div>
 </div>
 
-
-
-<!-- calendar -->
-<div id="calendar">
+<div id="calendar" style="display:none;">
   <table id="availabilityTable"></table>
 </div>
 
 <!-- footer (outside the table) -->
-<div class="footer-text">
+<div class="footer-text" style="display:none;">
   - Morning denotes availability starting quite early, assumedly before 10am. <br>
   - Pre-Lunch means you'd be around for lunch, probably starting something like 11-12am. <br>
   - Post-Lunch you're looking at something around 1-3pm, up until around dinner time. <br>
@@ -254,7 +248,7 @@ body {
   - Late-Evening we're talking about you around after our earlier 9pm finishes until late, like 11+ or so.
 </div>
 
-<div id="legend">
+<div id="legend" style="display:none;">
   <h3>Legend</h3>
   <div id="legendList"></div>
 </div>
@@ -264,6 +258,10 @@ body {
   <button id="reset-board">Reset Availability</button>
   <button id="delete-board">Delete Board</button>
 </div>
+
+
+
+
 
 
   
@@ -286,8 +284,8 @@ let currentTable = null;
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
 
-  let queryField = inviteToken ? "invite_token" : "owner_token";
-  let tokenValue = inviteToken || manageToken;
+  const queryField = inviteToken ? "invite_token" : "owner_token";
+  const tokenValue = inviteToken || manageToken;
 
   const { data, error } = await supabase
     .from("tables")
@@ -296,26 +294,21 @@ async function loadTable() {
     .single();
 
   if (error || !data) {
-    console.error("Invalid link");
+    console.error("Invalid link", error);
     return;
   }
 
   currentTable = data;
 
-  console.log("Table loaded:", currentTable);
-
-  // SHOW calendar immediately
-  document.getElementById("create-board").style.display = "none";
   document.getElementById("identity-section").style.display = "none";
+  document.getElementById("create-board").style.display = "none";
   document.getElementById("calendar").style.display = "block";
-  legendDiv.style.display = "block";
+  document.getElementById("legend").style.display = "block";
+  document.querySelector(".footer-text").style.display = "block";
 
   buildCalendar();
   await loadAvailability();
 }
-
-
-
 
   function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
@@ -815,6 +808,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
