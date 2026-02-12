@@ -792,40 +792,21 @@ async function startApp() {
     document.getElementById("identity-section").style.display = "none";
   }
 
+    // Show/hide sections based on token
+  const createSection = document.getElementById("create-board");
+
+  if (!inviteToken && !manageToken) {
+    createSection.style.display = "block";
+    document.getElementById("calendar").style.display = "none";
+    legendDiv.style.display = "none";
+  } else {
+    // token present: loadTable() will take over showing calendar if valid
+    createSection.style.display = "none";
+  }
+
   // Load table if token exists
   await loadTable();
 }
-
-const createSection = document.getElementById("create-board");
-
-// If no token in URL → show create screen
-if (!inviteToken && !manageToken) {
-  createSection.style.display = "block";
-  document.getElementById("calendar").style.display = "none";
-  legendDiv.style.display = "none";
-  return;
-}
-
-// If token exists but table failed
-if (!currentTable) {
-  createSection.style.display = "block";
-  return;
-}
-
-// If we reach here → valid table already shown by loadTable()
-
-if (manageToken) {
-  document.getElementById("owner-controls").style.display = "block";
-
-  document
-    .getElementById("reset-board")
-    .addEventListener("click", resetBoard);
-
-  document
-    .getElementById("delete-board")
-    .addEventListener("click", deleteBoard);
-}
-
 
 document.addEventListener("DOMContentLoaded", startApp);
 
@@ -834,6 +815,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
