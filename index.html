@@ -878,7 +878,6 @@ await loadAvailability();
     legendDiv.style.display = "block";
     document.querySelector(".footer-text").style.display = "block";
     await dailyShiftIfNeeded();
-    await loadAvailability();
   } else {
     document.getElementById("calendar").style.display = "none";
     legendDiv.style.display = "none";
@@ -886,13 +885,14 @@ await loadAvailability();
   }
 }
 
-window.addEventListener("load", startApp);
+document.addEventListener("DOMContentLoaded", startApp);
 
 
 </script>
 
 </body>
 </html>
+
 
 
 
