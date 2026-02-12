@@ -750,51 +750,51 @@ const PREBUILT_STRUCTURES = {
   
                                                                                                 /* === Startup === */
 async function startApp() {
-    // Attach identity button FIRST
+  console.log("App starting...");
+
+  // Always attach identity button
   const saveIdentityBtn = document.getElementById("save-identity");
   if (saveIdentityBtn) {
     saveIdentityBtn.addEventListener("click", saveIdentity);
   }
 
-  const globalName = localStorage.getItem("globalUserName");
-
-if (!globalName) {
-  document.getElementById("identity-section").style.display = "block";
-  document.getElementById("create-board").style.display = "none";
-  document.getElementById("calendar").style.display = "none";
-  legendDiv.style.display = "none";
-  return;
-}
-
-// If we DO have a saved name:
-user = {
-  name: globalName,
-  color: "#" + globalName.charCodeAt(0).toString(16).padEnd(6, "0")
-};
-
-document.getElementById("identity-section").style.display = "none";
-  
-  const confirmNameBtn = document.getElementById("confirm-name");
-if (confirmNameBtn) {
-  confirmNameBtn.addEventListener("click", confirmBoardName);
-}
-
+  // Always attach create flow buttons
   const startCreateBtn = document.getElementById("start-create");
-if (startCreateBtn) {
-  startCreateBtn.addEventListener("click", showBoardSetup);
-}
+  if (startCreateBtn) {
+    startCreateBtn.addEventListener("click", showBoardSetup);
+  }
+
+  const confirmNameBtn = document.getElementById("confirm-name");
+  if (confirmNameBtn) {
+    confirmNameBtn.addEventListener("click", confirmBoardName);
+  }
 
   const addRowBtn = document.getElementById("add-row");
-if (addRowBtn) {
-  addRowBtn.addEventListener("click", () => addRowInput());
-}
+  if (addRowBtn) {
+    addRowBtn.addEventListener("click", () => addRowInput());
+  }
 
   const createBtn = document.getElementById("create-board-btn");
-if (createBtn) {
-  createBtn.addEventListener("click", createBoard);
-}
-  
+  if (createBtn) {
+    createBtn.addEventListener("click", createBoard);
+  }
+
+  // Identity logic
+  const globalName = localStorage.getItem("globalUserName");
+
+  if (!globalName) {
+    document.getElementById("identity-section").style.display = "block";
+  } else {
+    user = {
+      name: globalName,
+      color: "#" + globalName.charCodeAt(0).toString(16).padEnd(6, "0")
+    };
+    document.getElementById("identity-section").style.display = "none";
+  }
+
+  // Load table if token exists
   await loadTable();
+}
 
 const createSection = document.getElementById("create-board");
 
@@ -834,6 +834,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
