@@ -504,7 +504,7 @@ async function toggleCell(e) {
     .eq("table_id", currentTable.id)
     .eq("day", day)
     .eq("time", time)
-    .eq("name", user.name);
+    .eq("user_id", user.id);
 
   if (existing && existing.length > 0) {
     // Remove entry
@@ -514,7 +514,7 @@ async function toggleCell(e) {
       .eq("table_id", currentTable.id)
       .eq("day", day)
       .eq("time", time)
-      .eq("name", user.name);
+      .eq("user_id", user.id);
 
     cell.innerHTML = "";
   } else {
@@ -525,6 +525,7 @@ async function toggleCell(e) {
         table_id: currentTable.id,
         day,
         time,
+        user_id: user.id,
         name: user.name,
         color: user.color
       });
@@ -603,10 +604,13 @@ async function loadAvailability() {
 
   /* Legend */
   const users = {};
-  data.forEach(r => { users[r.name] = r.color; });
+  data.forEach(r => {
+    const key = r.user_id || r.name; // fallback for old rows
+    if (!users[key]) users[key] = { name: r.name, color: r.color };
+  });
 
   legendList.innerHTML = "";
-  Object.entries(users).forEach(([name, color]) => {
+  Object.values(users).forEach(({ name, color }) => {
     const div = document.createElement("div");
     div.className = "legend-item";
     div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
@@ -751,6 +755,7 @@ async function dailyShiftIfNeeded() {
   }
 
   localStorage.setItem("globalUserName", name);
+  getOrCreateUserId();
   location.reload();
 }
   
@@ -810,6 +815,14 @@ function confirmBoardName() {
 }
 }
 
+function getOrCreateUserId() {
+  let id = localStorage.getItem("globalUserId");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("globalUserId", id);
+  }
+  return id;
+}
 
 const PREBUILT_STRUCTURES = {
   quick_meetup: [
@@ -878,6 +891,7 @@ async function startApp() {
     document.getElementById("identity-section").style.display = "block";
   } else {
     user = {
+      id: getOrCreateUserId();
       name: globalName,
       color: "#" + globalName.charCodeAt(0).toString(16).padEnd(6, "0")
     };
@@ -907,6 +921,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
