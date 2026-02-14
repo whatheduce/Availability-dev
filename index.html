@@ -422,7 +422,7 @@ async function createBoard() {
 
   let timeBlocks = [];
 
-const structureChoice = selectedStructureChoice || "custom";
+const structureChoice = selectedStructure || "custom";
 
 if (structureChoice === "custom") {
   const rowInputs = document.querySelectorAll("#rows-container input");
@@ -792,7 +792,7 @@ function confirmBoardName() {
   }
 
     // Dev-only for now (pro dropdown is disabled)
-  const structureChoice = selectedStructureChoice || "custom";
+  const structureChoice = selectedStructure || "custom";
 
   const rowBuilder = document.getElementById("row-builder");
 
@@ -804,13 +804,10 @@ function confirmBoardName() {
       addRowInput();
     }
   } else {
-    // Prebuilt selected
-    rowBuilder.style.display = "none";
-
-    // Store selected structure temporarily
-    window.selectedPrebuiltStructure = selected;
-
-    document.getElementById("create-board-btn").style.display = "inline-block";
+  rowBuilder.style.display = "none";
+  window.selectedPrebuiltStructure = structureChoice;
+  document.getElementById("create-board-btn").style.display = "inline-block";
+}
   }
 }
 
@@ -911,6 +908,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
