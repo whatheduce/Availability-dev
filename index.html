@@ -891,7 +891,7 @@ async function startApp() {
     document.getElementById("identity-section").style.display = "block";
   } else {
     user = {
-      id: getOrCreateUserId();
+      id: getOrCreateUserId(),
       name: globalName,
       color: "#" + globalName.charCodeAt(0).toString(16).padEnd(6, "0")
     };
@@ -921,6 +921,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
