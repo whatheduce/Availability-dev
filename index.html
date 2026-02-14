@@ -519,7 +519,7 @@ async function toggleCell(e) {
     cell.innerHTML = "";
   } else {
     // Add entry
-    await supabase
+    const { error } = await supabase
       .from("availability_dev")
       .insert({
         table_id: currentTable.id,
@@ -530,6 +530,12 @@ async function toggleCell(e) {
         color: user.color
       });
 
+    if (error) {
+      console.warn("Insert failed (likely duplicate):", error);
+      await loadAvailability();
+      return;
+    }
+    
     const dot = document.createElement("div");
     dot.style.width = "8px";
     dot.style.height = "8px";
@@ -921,6 +927,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
