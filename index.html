@@ -192,8 +192,78 @@ body {
       50% { box-shadow: 0 0 50px rgba(255,215,0,0.5); }
       100% { box-shadow: 0 0 25px rgba(255,215,0,1); }
     }
+
+    .structure-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.structure-card {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.structure-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.18);
+}
+
+.structure-card.active {
+  outline: 2px solid rgba(0, 122, 255, 0.35);
+  box-shadow: 0 12px 26px rgba(0, 122, 255, 0.12);
+}
+
+.structure-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.structure-subtitle {
+  font-size: 13px;
+  color: #555;
+}
+
+.pro-heading {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.pro-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: #f1f1f1;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.pro-select:disabled {
+  opacity: 0.8;
+}
+
+.pro-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #888;
+}
+
   </style>
 </head>
+
+
+
+
   
 <body>
                                                                                        <!-- user selection -->
@@ -215,24 +285,31 @@ body {
   <h2>Name Your Calendar</h2>
   <input id="board-name" placeholder="Calendar name" />
 
-  <div style="margin-top:20px; text-align:left;">
-    <strong>Choose Structure:</strong><br>
+  <div class="structure-row">
 
-    <label>
-      <input type="radio" name="structure" value="custom" checked>
-      Custom (Free – up to 4 time blocks)
-    </label><br>
-
-    <label>
-      <input type="radio" name="structure" value="quick_meetup">
-      Quick Meetup (Pro)
-    </label><br>
-
-    <label>
-      <input type="radio" name="structure" value="dinner_plan">
-      Dinner Plan (Pro)
-    </label>
+  <!-- LEFT: Dev custom -->
+  <div class="structure-left">
+    <div id="dev-custom-card" class="structure-card active">
+      <div class="structure-title">Dev Custom</div>
+      <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
+    </div>
   </div>
+
+  <!-- RIGHT: Pro dropdown (disabled) -->
+  <div class="structure-right">
+    <div class="pro-heading">Professional Structures</div>
+
+    <select id="pro-structure-select" class="pro-select" disabled>
+      <option>Custom</option>
+      <option>Executive Sprint</option>
+      <option>Corporate Dinner</option>
+    </select>
+
+    <div class="pro-hint">Pro features (locked)</div>
+  </div>
+
+</div>
+
 
   <button id="confirm-name" class="primary-btn" style="margin-top:20px;">
     Continue
@@ -297,6 +374,7 @@ const inviteToken = params.get("token");
 const manageToken = params.get("manage");
 
 let currentTable = null;
+let selectedStructure = "custom"; // dev-only selectable for now
 
 
   
@@ -344,9 +422,7 @@ async function createBoard() {
 
   let timeBlocks = [];
 
-const selectedStructure = document.querySelector(
-  'input[name="structure"]:checked'
-).value;
+const selectedStructure = selectedStructure || "custom"; // dev-only for now
 
 if (selectedStructure === "custom") {
   const rowInputs = document.querySelectorAll("#rows-container input");
@@ -715,13 +791,13 @@ function confirmBoardName() {
     return;
   }
 
-  const selectedStructure = document.querySelector(
-    'input[name="structure"]:checked'
-  ).value;
+    // Dev-only for now (pro dropdown is disabled)
+  const selected = selectedStructure || "custom";
+
 
   const rowBuilder = document.getElementById("row-builder");
 
-  if (selectedStructure === "custom") {
+  if (selected === "custom") {
     rowBuilder.style.display = "block";
 
     const rowsContainer = document.getElementById("rows-container");
@@ -733,7 +809,7 @@ function confirmBoardName() {
     rowBuilder.style.display = "none";
 
     // Store selected structure temporarily
-    window.selectedPrebuiltStructure = selectedStructure;
+    window.selectedPrebuiltStructure = selected;
 
     document.getElementById("create-board-btn").style.display = "inline-block";
   }
@@ -791,6 +867,15 @@ async function startApp() {
     createBtn.addEventListener("click", createBoard);
   }
 
+      // Dev Custom selection (only option for now)
+  const devCard = document.getElementById("dev-custom-card");
+    if (devCard) {
+      devCard.addEventListener("click", () => {
+        selectedStructure = "custom";
+        devCard.classList.add("active");
+      });
+   }
+
   // Identity logic
   const globalName = localStorage.getItem("globalUserName");
 
@@ -827,6 +912,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
