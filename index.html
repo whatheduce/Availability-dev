@@ -379,6 +379,17 @@ const inviteToken = params.get("token");
 const manageToken = params.get("manage");
 
 let currentTable = null;
+let availabilityChannel = null;
+let tableChannel = null;
+
+let availabilityRefreshTimer = null;
+function scheduleAvailabilityRefresh() {
+  clearTimeout(availabilityRefreshTimer);
+  availabilityRefreshTimer = setTimeout(() => {
+    if (currentTable) loadAvailability();
+  }, 150);
+}
+
 let selectedStructure = "custom"; // dev-only selectable for now
 
   
@@ -395,6 +406,52 @@ async function rollForwardIfNeeded(tableId) {
   return data || 0;
 }
 
+function subscribeRealtime() {
+  if (!currentTable) return;
+
+  // Clean up existing channels (important if loadTable runs again)
+  if (availabilityChannel) supabase.removeChannel(availabilityChannel);
+  if (tableChannel) supabase.removeChannel(tableChannel);
+
+  // Availability changes for this board
+  availabilityChannel = supabase
+    .channel(`availability:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "availability_dev",
+        filter: `table_id=eq.${currentTable.id}`
+      },
+      () => scheduleAvailabilityRefresh()
+    )
+    .subscribe((status) => {
+      console.log("availability channel:", status);
+    });
+
+  // Board changes (start_date / row_structure updates)
+  tableChannel = supabase
+    .channel(`table:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "tables",
+        filter: `id=eq.${currentTable.id}`
+      },
+      async (payload) => {
+        currentTable = { ...currentTable, ...payload.new };
+        buildCalendar();
+        await loadAvailability();
+      }
+    )
+    .subscribe((status) => {
+      console.log("table channel:", status);
+    });
+}
+  
   
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
@@ -430,7 +487,7 @@ if (!refreshErr && refreshed) currentTable = refreshed;
   document.getElementById("calendar").style.display = "block";
   document.getElementById("legend").style.display = "block";
   document.querySelector(".footer-text").style.display = "block";
-
+  subscribeRealtime();
   buildCalendar();
   await loadAvailability();
 }
@@ -1012,6 +1069,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
