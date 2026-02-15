@@ -797,7 +797,7 @@ async function toggleCell(e) {
     
     const dot = document.createElement("div");
       dot.className = "dot pop-in";
-      dot.style.backgroundColor = user.color;
+      dot.style.background = user.color;
       cell.appendChild(dot);
   }
 }  
@@ -892,9 +892,9 @@ function buildCalendar() {
 /* === Render dots + gold === */
 async function loadAvailability() {
   const { data } = await supabase
-  .from("availability_dev")
-  .select("*")
-  .eq("table_id", currentTable.id);
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id);
 
   const cells = table.querySelectorAll("td[data-day]");
 
@@ -939,9 +939,7 @@ async function loadAvailability() {
 
     if (entries.length === 4) {
       cell.classList.add("gold-cell");
-      
       goldDays.add(parseInt(day, 10));
-
       return;
     }
 
@@ -951,19 +949,24 @@ async function loadAvailability() {
 
       entries.forEach(entry => {
         const dot = document.createElement("div");
-          dot.className = "dot";
-          dot.style.background = entry.color;
-          dot.title = entry.name;
+        dot.className = "dot";
+        dot.style.background = entry.color;
+        dot.title = entry.name;
 
-      // Animate only the current user's dot
-      if (user && entry.user_id === user.id) {
-        dot.classList.add("pop-in");
-      }
+        // Animate only the current user's dot
+        if (user && entry.user_id === user.id) {
+          dot.classList.add("pop-in");
+        }
 
-  dotContainer.appendChild(dot);
-    });
+        dotContainer.appendChild(dot);
+      });
 
-    const headerCells = table.querySelectorAll("th.day-header");
+      cell.appendChild(dotContainer);
+    }
+  });
+
+  // Gold header highlighting (after we've computed goldDays)
+  const headerCells = table.querySelectorAll("th.day-header");
   headerCells.forEach(th => {
     const dayNum = parseInt(th.dataset.day, 10);
     if (goldDays.has(dayNum)) th.classList.add("gold-header");
@@ -1208,6 +1211,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
