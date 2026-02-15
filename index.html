@@ -356,6 +356,10 @@ body {
   - Late-Evening we're talking about you around after our earlier 9pm finishes until late, like 11+ or so.
 </div>
 
+<div id="presence" style="display:none; text-align:center; margin-top:14px; color:#555; font-size:14px;">
+  Viewing now: <span id="presence-count">1</span>
+</div>  
+  
 <div id="legend" style="display:none;">
   <h3>Legend</h3>
   <div id="legendList"></div>
@@ -391,7 +395,27 @@ function scheduleAvailabilityRefresh() {
 }
 
 let selectedStructure = "custom"; // dev-only selectable for now
+let presenceChannel = null;
 
+  
+function renderPresence() {
+  const wrap = document.getElementById("presence");
+  const countEl = document.getElementById("presence-count");
+  if (!wrap || !countEl || !presenceChannel) return;
+
+  const state = presenceChannel.presenceState(); // { key: [metas...] }
+  const metas = Object.values(state).flat();
+  const uniqueUsers = new Map();
+
+  metas.forEach(m => {
+    // de-dupe by user_id (a user can have multiple metas if multiple tabs)
+    if (m.user_id) uniqueUsers.set(m.user_id, m);
+  });
+
+  wrap.style.display = "block";
+  countEl.textContent = String(uniqueUsers.size || 0);
+}
+  
   
 async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
@@ -406,6 +430,47 @@ async function rollForwardIfNeeded(tableId) {
   return data || 0;
 }
 
+
+function subscribePresence() {
+  if (!currentTable) return;
+
+  // Clean up if re-subscribing
+  if (presenceChannel) supabase.removeChannel(presenceChannel);
+
+  // Ensure we have some identity to track
+  const safeUserId = user?.id || localStorage.getItem("globalUserId") || crypto.randomUUID();
+  if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
+
+  const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
+
+  presenceChannel = supabase
+    .channel(`presence:${currentTable.id}`, {
+      config: { presence: { key: safeUserId } }
+    })
+    .on("presence", { event: "sync" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "join" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "leave" }, () => {
+      renderPresence();
+    })
+    .subscribe(async (status) => {
+      // helpful during dev
+      console.log("presence channel:", status);
+
+      if (status === "SUBSCRIBED") {
+        await presenceChannel.track({
+          user_id: safeUserId,
+          name: safeName,
+          at: new Date().toISOString()
+        });
+      }
+    });
+}
+  
+  
 function subscribeRealtime() {
   if (!currentTable) return;
 
@@ -488,6 +553,7 @@ if (!refreshErr && refreshed) currentTable = refreshed;
   document.getElementById("legend").style.display = "block";
   document.querySelector(".footer-text").style.display = "block";
   subscribeRealtime();
+  subscribePresence();
   buildCalendar();
   await loadAvailability();
 }
@@ -1069,6 +1135,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
