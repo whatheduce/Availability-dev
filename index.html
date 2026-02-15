@@ -73,8 +73,6 @@ body {
       border-collapse: collapse;
       width: max-content;
       min-width: 700px;
-      background: white !important; 
-      outline: 3px solid red !important; 
     }
 
     #availabilityTable th, 
@@ -591,15 +589,6 @@ const legendList = document.getElementById("legendList");
 let user = null;
 
 
-/* === Date tracking === */
-function getStartDate() {
-  const stored = localStorage.getItem("startDate");
-  return stored ? new Date(stored) : new Date();
-}
-function setStartDate(date) {
-  localStorage.setItem("startDate", date.toISOString());
-}
-
 async function toggleCell(e) {
   if (!user || !currentTable) return;
 
@@ -825,52 +814,6 @@ async function loadAvailability() {
   });
 }
 
-
-/* === Daily shift === */
-async function shiftAvailabilityDates() {
-  if (!currentTable) return;
-  await supabase
-  .from("availability_dev")
-  .delete()
-  .eq("day", 0)
-  .eq("table_id", currentTable.id);
-
-  const { data: rows } = await supabase
-  .from("availability_dev")
-  .select("*")
-  .eq("table_id", currentTable.id)
-  .order("day", { ascending: true });
-
-  for (const r of rows) {
-    if (r.day >= 1 && r.day <= 29) {
-      await supabase.from("availability_dev")
-      .update({ day: r.day - 1 })
-      .eq("id", r.id)
-      .eq("table_id", currentTable.id);
-    }
-  }
-
-  await supabase
-  .from("availability_dev")
-  .delete()
-  .eq("day", 29)
-  .eq("table_id", currentTable.id);
-}
-
-async function dailyShiftIfNeeded() {
-  const today = new Date();
-  const saved = getStartDate();
-
-  const tISO = today.toISOString().split("T")[0];
-  const sISO = saved ? saved.toISOString().split("T")[0] : null;
-
-  if (!saved) { setStartDate(today); return; }
-  if (tISO === sISO) return;
-
-  await shiftAvailabilityDates();
-  setStartDate(today);
-  await loadAvailability();
-}
   
   async function resetBoard() {
   if (!currentTable) return;
@@ -1080,6 +1023,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
