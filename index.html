@@ -302,8 +302,13 @@ body {
   <!-- LEFT: Dev custom -->
   <div class="structure-left">
     <div id="dev-custom-card" class="structure-card active">
-      <div class="structure-title">Dev Custom</div>
-      <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
+    <div class="structure-title">Dev Custom</div>
+    <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
+    </div>
+
+    <div id="meals-card" class="structure-card" style="margin-top:12px;">
+      <div class="structure-title">Meals</div>
+      <div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
     </div>
   </div>
 
@@ -328,18 +333,19 @@ body {
   </button>
 </div>
     <div id="row-builder" style="display:none; margin-top:25px;">
-    <h3>Define Time Blocks</h3>
+  <h3>Define Time Blocks</h3>
 
-    <div id="rows-container"></div>
+  <div id="rows-container"></div>
 
-    <button id="add-row">Add Time Block</button>
+  <button id="add-row">Add Time Block</button>
+</div>
 
-      <div style="margin-top:20px;">
-        <button id="create-board-btn" class="primary-btn">
-          Create Calendar
-        </button>
-      </div>
-    </div>
+<div id="create-actions" style="display:none; margin-top:20px;">
+  <button id="create-board-btn" class="primary-btn">
+    Create Calendar
+  </button>
+</div>
+
 </div>
 </div>
 
@@ -1046,25 +1052,27 @@ function confirmBoardName() {
     return;
   }
 
-    // Dev-only for now (pro dropdown is disabled)
+  // Dev-only structures (cards)
   const structureChoice = selectedStructure || "custom";
 
   const rowBuilder = document.getElementById("row-builder");
+  const createActions = document.getElementById("create-actions");
+  const rowsContainer = document.getElementById("rows-container");
+
+  // Always show the "Create Calendar" action area after Continue
+  if (createActions) createActions.style.display = "block";
 
   if (structureChoice === "custom") {
+    // Show row inputs + ensure at least one input exists
     rowBuilder.style.display = "block";
-
-    const rowsContainer = document.getElementById("rows-container");
-    if (rowsContainer.children.length === 0) {
-      addRowInput();
-    }
+    if (rowsContainer && rowsContainer.children.length === 0) addRowInput();
   } else {
-  rowBuilder.style.display = "none";
-  window.selectedPrebuiltStructure = structureChoice;
-  document.getElementById("create-board-btn").style.display = "inline-block";
-}
+    // Prebuilt (e.g. meals)
+    rowBuilder.style.display = "none";
+  }
 }
 
+  
 function getOrCreateUserId() {
   let id = localStorage.getItem("globalUserId");
   if (!id) {
@@ -1074,7 +1082,13 @@ function getOrCreateUserId() {
   return id;
 }
 
+  
 const PREBUILT_STRUCTURES = {
+  meals: [
+    { label: "Breakfast" },
+    { label: "Lunch" },
+    { label: "Dinner" }
+  ],
   quick_meetup: [
     { label: "Morning" },
     { label: "Afternoon" },
@@ -1086,6 +1100,7 @@ const PREBUILT_STRUCTURES = {
     { label: "Late Dinner" }
   ]
 };
+
 
 
 
@@ -1127,14 +1142,30 @@ async function startApp() {
     createBtn.addEventListener("click", createBoard);
   }
 
-      // Dev Custom selection (only option for now)
-  const devCard = document.getElementById("dev-custom-card");
-    if (devCard) {
-      devCard.addEventListener("click", () => {
-        selectedStructure = "custom";
-        devCard.classList.add("active");
-      });
-   }
+      // Structure selection (Dev Custom + Meals)
+function setActiveStructureCard(activeId) {
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("active", id === activeId);
+  });
+}
+
+const devCard = document.getElementById("dev-custom-card");
+if (devCard) {
+  devCard.addEventListener("click", () => {
+    selectedStructure = "custom";
+    setActiveStructureCard("dev-custom-card");
+  });
+}
+
+const mealsCard = document.getElementById("meals-card");
+if (mealsCard) {
+  mealsCard.addEventListener("click", () => {
+    selectedStructure = "meals";
+    setActiveStructureCard("meals-card");
+  });
+}
 
   // Identity logic
 user = buildUserFromStorage();
@@ -1168,6 +1199,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
