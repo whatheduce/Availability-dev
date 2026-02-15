@@ -94,6 +94,7 @@ body {
       top: 0;
       z-index: 5;
     }
+    
     .day-header { font-weight: bold; }
     .monthday {
       font-size: 13px;
@@ -101,6 +102,7 @@ body {
       margin-top: -34px;
       display: block;
     }
+    
     .time-label {
       font-weight: 600;
       width: 120px;
@@ -194,69 +196,69 @@ body {
     }
 
     .structure-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 20px;
-  text-align: left;
-}
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+      text-align: left;
+    }
 
-.structure-card {
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(0,0,0,0.12);
-  border-radius: 14px;
-  padding: 16px;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-}
+    .structure-card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
 
-.structure-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.08);
-  border-color: rgba(0,0,0,0.18);
-}
+    .structure-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+      border-color: rgba(0,0,0,0.18);
+    }
 
-.structure-card.active {
-  outline: 2px solid rgba(0, 122, 255, 0.35);
-  box-shadow: 0 12px 26px rgba(0, 122, 255, 0.12);
-}
+    .structure-card.active {
+      outline: 2px solid rgba(0, 122, 255, 0.35);
+      box-shadow: 0 12px 26px rgba(0, 122, 255, 0.12);
+    }
 
-.structure-title {
-  font-weight: 700;
-  font-size: 16px;
-  margin-bottom: 4px;
-}
+    .structure-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
 
-.structure-subtitle {
-  font-size: 13px;
-  color: #555;
-}
+    .structure-subtitle {
+      font-size: 13px;
+      color: #555;
+    }
 
-.pro-heading {
-  font-weight: 700;
-  margin-bottom: 8px;
-}
+    .pro-heading {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
 
-.pro-select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: #f1f1f1;
-  color: #777;
-  cursor: not-allowed;
-}
+    .pro-select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #f1f1f1;
+      color: #777;
+      cursor: not-allowed;
+    }
 
-.pro-select:disabled {
-  opacity: 0.8;
-}
+    .pro-select:disabled {
+      opacity: 0.8;
+    }
 
-.pro-hint {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #888;
-}
+    .pro-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #888;
+    }
 
   </style>
 </head>
@@ -284,6 +286,18 @@ body {
     <div id="name-step">
   <h2>Name Your Calendar</h2>
   <input id="board-name" placeholder="Calendar name" />
+
+  <div style="margin-top:14px; text-align:left;">
+  <label for="host-timezone" style="display:block; font-weight:600; margin-bottom:6px;">
+    Calendar Timezone
+  </label>
+  <select id="host-timezone" style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
+    <option>Loading timezones…</option>
+  </select>
+  <div style="font-size:12px; color:#666; margin-top:6px;">
+    This controls when the calendar rolls over at midnight.
+  </div>
+</div>
 
   <div class="structure-row">
 
@@ -410,6 +424,73 @@ async function loadTable() {
   function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
+
+function getDetectedTimeZone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+function yyyyMmDdInTimeZone(date, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+
+  const y = parts.find(p => p.type === "year").value;
+  const m = parts.find(p => p.type === "month").value;
+  const d = parts.find(p => p.type === "day").value;
+  return `${y}-${m}-${d}`; // YYYY-MM-DD
+}
+
+  
+function getTimeZoneListPinned() {
+  const detected = getDetectedTimeZone();
+
+  // Best case: browser can list all IANA time zones
+  if (Intl.supportedValuesOf) {
+    const all = Intl.supportedValuesOf("timeZone");
+    // Put detected first, then the rest alphabetically
+    return [detected, ...all.filter(tz => tz !== detected).sort()];
+  }
+
+  // Fallback: small curated list + detected pinned
+  const fallback = [
+    "UTC",
+    "Australia/Brisbane",
+    "Australia/Sydney",
+    "Australia/Melbourne",
+    "Australia/Perth",
+    "Pacific/Auckland",
+    "America/Los_Angeles",
+    "America/New_York",
+    "Europe/London",
+    "Europe/Paris",
+    "Asia/Singapore",
+    "Asia/Tokyo"
+  ];
+
+  const unique = Array.from(new Set([detected, ...fallback]));
+  return [detected, ...unique.filter(tz => tz !== detected)];
+}
+
+function populateHostTimezoneSelect() {
+  const select = document.getElementById("host-timezone");
+  if (!select) return;
+
+  const tzs = getTimeZoneListPinned();
+  select.innerHTML = "";
+
+  tzs.forEach((tz, idx) => {
+    const opt = document.createElement("option");
+    opt.value = tz;
+    opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
+    select.appendChild(opt);
+  });
+
+  select.value = tzs[0];
+}
+
   
 async function createBoard() {
   const nameInput = document.getElementById("board-name");
@@ -449,6 +530,8 @@ if (structureChoice === "custom") {
 
   const inviteToken = generateToken();
   const ownerToken = generateToken();
+  const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
+  const startDate = yyyyMmDdInTimeZone(new Date(), tz);
 
   const { data, error } = await supabase
     .from("tables")
@@ -456,7 +539,9 @@ if (structureChoice === "custom") {
       name,
       invite_token: inviteToken,
       owner_token: ownerToken,
-      row_structure: timeBlocks   // 👈 NEW FIELD
+      row_structure: timeBlocks,
+      host_tz: tz,
+      start_date: startDate
     }])
     .select()
     .single();
@@ -853,6 +938,8 @@ const PREBUILT_STRUCTURES = {
                                                                                                 /* === Startup === */
 async function startApp() {
   console.log("App starting...");
+  
+  populateHostTimezoneSelect();
 
   // Always attach identity button
   const saveIdentityBtn = document.getElementById("save-identity");
@@ -927,6 +1014,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
