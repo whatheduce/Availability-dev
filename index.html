@@ -516,7 +516,19 @@ function subscribeRealtime() {
       console.log("table channel:", status);
     });
 }
+
   
+function buildUserFromStorage() {
+  const name = localStorage.getItem("globalUserName");
+  if (!name) return null;
+
+  return {
+    id: getOrCreateUserId(),
+    name,
+    color: "#" + name.charCodeAt(0).toString(16).padEnd(6, "0")
+  };
+}
+
   
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
@@ -547,17 +559,36 @@ const { data: refreshed, error: refreshErr } = await supabase
   .single();
 
 if (!refreshErr && refreshed) currentTable = refreshed;
-  document.getElementById("identity-section").style.display = "none";
-  document.getElementById("create-board").style.display = "none";
-  document.getElementById("calendar").style.display = "block";
-  document.getElementById("legend").style.display = "block";
-  document.querySelector(".footer-text").style.display = "block";
-  subscribeRealtime();
-  subscribePresence();
-  buildCalendar();
-  await loadAvailability();
+  // Always hide board creation when viewing a board
+document.getElementById("create-board").style.display = "none";
+
+// Build user from storage (incognito won't have one yet)
+user = buildUserFromStorage();
+
+if (!user) {
+  // No identity yet → force name entry first
+  document.getElementById("identity-section").style.display = "block";
+  document.getElementById("calendar").style.display = "none";
+  document.getElementById("legend").style.display = "none";
+  document.querySelector(".footer-text").style.display = "none";
+  document.getElementById("presence").style.display = "none";
+  return; // ⛔ stop here until they enter a name
 }
 
+// User exists → show the calendar UI
+document.getElementById("identity-section").style.display = "none";
+document.getElementById("calendar").style.display = "block";
+document.getElementById("legend").style.display = "block";
+document.querySelector(".footer-text").style.display = "block";
+
+// Now that UI is visible, start realtime + render
+subscribeRealtime();
+subscribePresence();
+
+buildCalendar();
+await loadAvailability();
+
+  
   function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
@@ -690,7 +721,6 @@ if (structureChoice === "custom") {
 
   window.location.href = `?token=${inviteToken}`;
 }
-
 
   
 /* DOM refs */
@@ -968,8 +998,16 @@ async function loadAvailability() {
 
   localStorage.setItem("globalUserName", name);
   getOrCreateUserId();
-  location.reload();
+
+  // If we're on a board link, just load it now (no full reload needed)
+  user = buildUserFromStorage();
+  if (inviteToken || manageToken) {
+    loadTable();
+  } else {
+    location.reload();
+  }
 }
+
   
   function addRowInput(name = "") {
   const container = document.getElementById("rows-container");
@@ -1099,18 +1137,13 @@ async function startApp() {
    }
 
   // Identity logic
-  const globalName = localStorage.getItem("globalUserName");
+user = buildUserFromStorage();
 
-  if (!globalName) {
-    document.getElementById("identity-section").style.display = "block";
-  } else {
-    user = {
-      id: getOrCreateUserId(),
-      name: globalName,
-      color: "#" + globalName.charCodeAt(0).toString(16).padEnd(6, "0")
-    };
-    document.getElementById("identity-section").style.display = "none";
-  }
+if (!user) {
+  document.getElementById("identity-section").style.display = "block";
+} else {
+  document.getElementById("identity-section").style.display = "none";
+}
 
     // Show/hide sections based on token
   const createSection = document.getElementById("create-board");
@@ -1135,6 +1168,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
