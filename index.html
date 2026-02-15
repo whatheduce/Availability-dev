@@ -393,7 +393,7 @@ let selectedStructure = "custom"; // dev-only selectable for now
   
 async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed", {
-    p_table_id: tableId
+    p_table_id: currentTableId
   });
 
   if (error) {
@@ -1091,6 +1091,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
