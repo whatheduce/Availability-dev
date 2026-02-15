@@ -258,6 +258,16 @@ body {
       color: #888;
     }
 
+    @keyframes dotPopIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .dot.pop-in {
+      animation: dotPopIn 120ms ease-out;
+      transform-origin: center;
+    }
+
   </style>
 </head>
 
@@ -786,12 +796,9 @@ async function toggleCell(e) {
     }
     
     const dot = document.createElement("div");
-    dot.style.width = "8px";
-    dot.style.height = "8px";
-    dot.style.borderRadius = "50%";
-    dot.style.background = user.color;
-    dot.style.margin = "auto";
-    cell.appendChild(dot);
+      dot.className = "dot pop-in";
+      dot.style.backgroundColor = user.color;
+      cell.appendChild(dot);
   }
 }  
 
@@ -944,13 +951,16 @@ async function loadAvailability() {
 
       entries.forEach(entry => {
         const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.style.background = entry.color;
-        dot.title = entry.name;
-        dotContainer.appendChild(dot);
-      });
+          dot.className = "dot";
+          dot.style.background = entry.color;
+          dot.title = entry.name;
 
-      cell.appendChild(dotContainer);
+      // Animate only the current user's dot
+      if (user && entry.user_id === user.id) {
+        dot.classList.add("pop-in");
+      }
+
+  dotContainer.appendChild(dot);
     }
   });
 
@@ -1199,6 +1209,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
