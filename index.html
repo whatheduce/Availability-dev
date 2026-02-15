@@ -390,6 +390,19 @@ const manageToken = params.get("manage");
 let currentTable = null;
 let selectedStructure = "custom"; // dev-only selectable for now
 
+  
+async function rollForwardIfNeeded(tableId) {
+  const { data, error } = await supabase.rpc("roll_board_if_needed", {
+    p_table_id: tableId
+  });
+
+  if (error) {
+    console.error("roll_board_if_needed failed:", error);
+    return 0;
+  }
+
+  return data || 0; // returns delta days shifted
+}
 
   
 async function loadTable() {
@@ -410,6 +423,19 @@ async function loadTable() {
   }
 
   currentTable = data;
+  // Roll board forward based on host timezone + start_date (any visitor can trigger)
+const shifted = await rollForwardIfNeeded(currentTable.id);
+
+// If it shifted, re-fetch the table row so currentTable.start_date is now correct
+if (shifted > 0) {
+  const { data: refreshed, error: refreshErr } = await supabase
+    .from("tables")
+    .select("*")
+    .eq("id", currentTable.id)
+    .single();
+
+  if (!refreshErr && refreshed) currentTable = refreshed;
+}
 
   document.getElementById("identity-section").style.display = "none";
   document.getElementById("create-board").style.display = "none";
@@ -1065,6 +1091,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
