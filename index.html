@@ -361,13 +361,6 @@ body {
   <div id="legendList"></div>
 </div>
 
-<div id="owner-controls" style="display:none; text-align:center; margin-top:20px;">
-  <h3>Owner Controls</h3>
-  <button id="reset-board">Reset Availability</button>
-  <button id="delete-board">Delete Board</button>
-</div>
-
-
 
 
 
@@ -393,7 +386,7 @@ async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
     p_table_id: tableId
   });
-                                                                          console.log("RPC roll_board_if_needed:", { tableId, data, error, type: typeof tableId });
+
   if (error) {
     console.error("roll_board_if_needed failed:", error);
     return 0;
@@ -432,10 +425,6 @@ const { data: refreshed, error: refreshErr } = await supabase
   .single();
 
 if (!refreshErr && refreshed) currentTable = refreshed;
-
-console.log("After refresh:", { shifted, start_date: currentTable.start_date, host_tz: currentTable.host_tz });
-
-
   document.getElementById("identity-section").style.display = "none";
   document.getElementById("create-board").style.display = "none";
   document.getElementById("calendar").style.display = "block";
@@ -592,7 +581,7 @@ let user = null;
 async function toggleCell(e) {
   if (!user || !currentTable) return;
 
-  const cell = e.target;
+  const cell = e.currentTarget;
   const day = cell.dataset.day;
   const time = cell.dataset.time;
 
@@ -1023,6 +1012,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
