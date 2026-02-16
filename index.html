@@ -590,7 +590,11 @@ function subscribeRealtime() {
         table: "availability_dev",
         filter: `table_id=eq.${currentTable.id}`
       },
-      (payload) => handleAvailabilityChange(payload)
+      (payload) => {
+        console.log("AVAILABILITY EVENT:", payload.eventType, payload);
+        handleAvailabilityChange(payload);
+    }
+
     )
     .subscribe((status) => {
       console.log("availability channel:", status);
@@ -1340,6 +1344,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
