@@ -279,10 +279,18 @@ body {
 <body>
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px;">
-  <h2>Enter Your Name</h2>
-  <input id="identity-name" placeholder="Your name" />
+  <h2>Choose Your Name & Colour</h2>
+
+  <input id="identity-name" placeholder="Your name" style="margin-bottom:12px;" />
+
+  <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;">
+    <label for="identity-color" style="font-weight:600;">Dot colour</label>
+    <input id="identity-color" type="color" value="#2d7ff9" style="width:46px; height:34px; border:none; background:transparent; padding:0;" />
+  </div>
+
   <button id="save-identity">Continue</button>
 </div>
+
                                                                           
 <div id="create-board" class="centered-container">
 
@@ -537,12 +545,13 @@ function subscribeRealtime() {
   
 function buildUserFromStorage() {
   const name = localStorage.getItem("globalUserName");
-  if (!name) return null;
+  const color = localStorage.getItem("globalUserColor");
+  if (!name || !color) return null;
 
   return {
     id: getOrCreateUserId(),
     name,
-    color: "#" + name.charCodeAt(0).toString(16).padEnd(6, "0")
+    color
   };
 }
 
@@ -1020,18 +1029,28 @@ async function loadAvailability() {
 
   function saveIdentity() {
   const input = document.getElementById("identity-name");
-  const name = input.value.trim();
+  const colorInput = document.getElementById("identity-color");
+
+  const name = (input?.value || "").trim();
+  const color = (colorInput?.value || "").trim();
 
   if (!name) {
     alert("Please enter your name");
     return;
   }
+  if (!color) {
+    alert("Please choose a dot colour");
+    return;
+  }
 
   localStorage.setItem("globalUserName", name);
+  localStorage.setItem("globalUserColor", color);
   getOrCreateUserId();
 
-  // If we're on a board link, just load it now (no full reload needed)
+  // Rebuild user from storage (now includes color)
   user = buildUserFromStorage();
+
+  // If we're on a board link, load it now (no full reload needed)
   if (inviteToken || manageToken) {
     loadTable();
   } else {
@@ -1201,6 +1220,18 @@ if (!user) {
   document.getElementById("identity-section").style.display = "none";
 }
 
+// If user is missing (new/incognito), prefill the colour picker from storage or random
+const colorEl = document.getElementById("identity-color");
+if (colorEl) {
+  const stored = localStorage.getItem("globalUserColor");
+  if (stored) {
+    colorEl.value = stored;
+  } else {
+    // random nice-ish default
+    colorEl.value = "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
+  }
+}
+  
     // Show/hide sections based on token
   const createSection = document.getElementById("create-board");
 
@@ -1224,6 +1255,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
