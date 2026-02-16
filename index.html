@@ -414,7 +414,7 @@ let tableChannel = null;
   
 let fullRefreshTimer = null;
 // Full refresh only after the board has been idle for a while
-function scheduleFullRefreshIdle(ms = 10000) {
+function scheduleFullRefreshIdle(ms = 20000) {
   clearTimeout(fullRefreshTimer);
   fullRefreshTimer = setTimeout(() => {
     if (currentTable) loadAvailability();
@@ -523,7 +523,7 @@ function handleAvailabilityChange(payload) {
     // Remove that user's dot
     removeDot(entry.user_id);
     // Keep gold/legend correct with a later idle refresh
-    scheduleFullRefreshIdle(10000);
+    scheduleFullRefreshIdle(20000);
     return;
   }
 
@@ -546,7 +546,7 @@ function handleAvailabilityChange(payload) {
     dotContainer.appendChild(dot);
 
     // Keep gold/legend correct with a later idle refresh
-    scheduleFullRefreshIdle(10000);
+    scheduleFullRefreshIdle(20000);
     return;
   }
 
@@ -567,7 +567,7 @@ function handleAvailabilityChange(payload) {
     dot.dataset.userId = entry.user_id;
     dotContainer.appendChild(dot);
 
-    scheduleFullRefreshIdle(10000);
+    scheduleFullRefreshIdle(20000);
   }
 }
   
@@ -861,7 +861,15 @@ async function toggleCell(e) {
       .eq("time", time)
       .eq("user_id", user.id);
 
-    cell.innerHTML = "";
+      // ✅ Remove only THIS user's dot (leave other users' dots)
+      const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
+      if (myDot) myDot.remove();
+
+      const container = cell.querySelector(".dot-container");
+      if (container && container.children.length === 0) {
+        container.remove();
+  }
+
   } else {
     // Add entry
     const { error } = await supabase
@@ -1332,6 +1340,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
