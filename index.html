@@ -171,6 +171,7 @@ body {
       align-items: center;
       gap: 6px;
       width: 100%;
+      height: 100%;
     }
     
     .dot {
@@ -795,10 +796,25 @@ async function toggleCell(e) {
       return;
     }
     
+    const dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+
+    // Reuse existing container if present (important when other users already have dots here)
+    let dotContainer = cell.querySelector(".dot-container");
+      if (!dotContainer) {
+        dotContainer = document.createElement("div");
+        dotContainer.className = "dot-container";
+        cell.appendChild(dotContainer);
+      }
+
     const dot = document.createElement("div");
       dot.className = "dot pop-in";
       dot.style.background = user.color;
-      cell.appendChild(dot);
+
+      // Optional: tag it so we can remove it cleanly if user toggles off immediately
+      dot.dataset.userId = user.id;
+
+      dotContainer.appendChild(dot);
   }
 }  
 
@@ -1211,6 +1227,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
