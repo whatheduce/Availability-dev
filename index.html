@@ -796,9 +796,6 @@ async function toggleCell(e) {
       return;
     }
     
-    const dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
-
     // Reuse existing container if present (important when other users already have dots here)
     let dotContainer = cell.querySelector(".dot-container");
       if (!dotContainer) {
@@ -1227,6 +1224,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
