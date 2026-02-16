@@ -501,7 +501,11 @@ function subscribePresence() {
 
 function handleAvailabilityChange(payload) {
   // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
-  const entry = payload.new || payload.old;
+  const entry =
+  payload.eventType === "DELETE"
+    ? payload.old
+    : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
+
   if (!entry) return;
 
   // Find the specific cell
@@ -1362,6 +1366,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
