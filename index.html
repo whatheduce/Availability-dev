@@ -411,13 +411,16 @@ let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;
 
-let availabilityRefreshTimer = null;
-function scheduleAvailabilityRefresh() {
-  clearTimeout(availabilityRefreshTimer);
-  availabilityRefreshTimer = setTimeout(() => {
+  
+let fullRefreshTimer = null;
+// Full refresh only after the board has been idle for a while
+function scheduleFullRefreshIdle(ms = 10000) {
+  clearTimeout(fullRefreshTimer);
+  fullRefreshTimer = setTimeout(() => {
     if (currentTable) loadAvailability();
-  }, 150);
+  }, ms);
 }
+
 
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
@@ -494,6 +497,79 @@ function subscribePresence() {
       }
     });
 }
+
+function handleAvailabilityChange(payload) {
+  // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
+  const entry = payload.new || payload.old;
+  if (!entry) return;
+
+  // Find the specific cell
+  const cell = table.querySelector(
+    `td[data-day="${entry.day}"][data-time="${entry.time}"]`
+  );
+  if (!cell) return;
+
+  // Ensure dot container exists for inserts
+  let dotContainer = cell.querySelector(".dot-container");
+
+  // Helper to remove a user's dot from this cell
+  function removeDot(userId) {
+    const dot = cell.querySelector(`.dot[data-user-id="${userId}"]`);
+    if (dot) dot.remove();
+    if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
+  }
+
+  if (payload.eventType === "DELETE") {
+    // Remove that user's dot
+    removeDot(entry.user_id);
+    // Keep gold/legend correct with a later idle refresh
+    scheduleFullRefreshIdle(10000);
+    return;
+  }
+
+  if (payload.eventType === "INSERT") {
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+      cell.appendChild(dotContainer);
+    }
+
+    // Avoid duplicates
+    if (cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) return;
+
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.background = entry.color;
+    dot.title = entry.name;
+    dot.dataset.userId = entry.user_id;
+
+    dotContainer.appendChild(dot);
+
+    // Keep gold/legend correct with a later idle refresh
+    scheduleFullRefreshIdle(10000);
+    return;
+  }
+
+  if (payload.eventType === "UPDATE") {
+    // If updates ever happen, safest is: remove old user dot and add new (rare)
+    removeDot(entry.user_id);
+
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+      cell.appendChild(dotContainer);
+    }
+
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.background = entry.color;
+    dot.title = entry.name;
+    dot.dataset.userId = entry.user_id;
+    dotContainer.appendChild(dot);
+
+    scheduleFullRefreshIdle(10000);
+  }
+}
   
   
 function subscribeRealtime() {
@@ -514,7 +590,7 @@ function subscribeRealtime() {
         table: "availability_dev",
         filter: `table_id=eq.${currentTable.id}`
       },
-      () => scheduleAvailabilityRefresh()
+      (payload) => handleAvailabilityChange(payload)
     )
     .subscribe((status) => {
       console.log("availability channel:", status);
@@ -974,6 +1050,7 @@ async function loadAvailability() {
         dot.className = "dot";
         dot.style.background = entry.color;
         dot.title = entry.name;
+        dot.dataset.userId = entry.user_id;
 
         // Animate only the current user's dot
         if (user && entry.user_id === user.id) {
@@ -1255,6 +1332,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
