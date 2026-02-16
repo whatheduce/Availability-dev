@@ -417,6 +417,7 @@ let fullRefreshTimer = null;
 function scheduleFullRefreshIdle(ms = 20000) {
   clearTimeout(fullRefreshTimer);
   fullRefreshTimer = setTimeout(() => {
+    console.log("Idle refresh running");
     if (currentTable) loadAvailability();
   }, ms);
 }
@@ -513,15 +514,30 @@ function handleAvailabilityChange(payload) {
   let dotContainer = cell.querySelector(".dot-container");
 
   // Helper to remove a user's dot from this cell
-  function removeDot(userId) {
-    const dot = cell.querySelector(`.dot[data-user-id="${userId}"]`);
-    if (dot) dot.remove();
-    if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
-  }
+  function removeDot(entryObj) {
+  // Prefer user_id (best), fall back to name (works for legacy rows / missing user_id on delete payload)
+  let selector = null;
+
+    if (entryObj.user_id) {
+      selector = `.dot[data-user-id="${entryObj.user_id}"]`;
+    } else if (entryObj.name) {
+      selector = `.dot[data-name="${CSS.escape(entryObj.name)}"]`;
+    } else {
+      return;
+    }
+
+  const dot = cell.querySelector(selector);
+  if (dot) dot.remove();
+
+  // Re-check container after removal
+  dotContainer = cell.querySelector(".dot-container");
+  if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
+}
+
 
   if (payload.eventType === "DELETE") {
     // Remove that user's dot
-    removeDot(entry.user_id);
+    removeDot(entry);
     // Keep gold/legend correct with a later idle refresh
     scheduleFullRefreshIdle(20000);
     return;
@@ -552,7 +568,7 @@ function handleAvailabilityChange(payload) {
 
   if (payload.eventType === "UPDATE") {
     // If updates ever happen, safest is: remove old user dot and add new (rare)
-    removeDot(entry.user_id);
+    removeDot(entry);
 
     if (!dotContainer) {
       dotContainer = document.createElement("div");
@@ -907,6 +923,7 @@ async function toggleCell(e) {
 
       // Optional: tag it so we can remove it cleanly if user toggles off immediately
       dot.dataset.userId = user.id;
+      dot.dataset.name = user.name;
 
       dotContainer.appendChild(dot);
   }
@@ -1063,6 +1080,7 @@ async function loadAvailability() {
         dot.style.background = entry.color;
         dot.title = entry.name;
         dot.dataset.userId = entry.user_id;
+        dot.dataset.name = entry.name;
 
         // Animate only the current user's dot
         if (user && entry.user_id === user.id) {
@@ -1344,6 +1362,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
