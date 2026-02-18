@@ -805,7 +805,13 @@ async function loadTable() {
     .single();
 
   if (error || !data) {
-    console.error("Invalid link", error);
+    console.warn("No board found");
+
+    // Show create screen instead
+    document.getElementById("create-board").style.display = "block";
+    document.getElementById("calendar").style.display = "none";
+    legendDiv.style.display = "none";
+
     return;
   }
 
@@ -1499,7 +1505,8 @@ const PREBUILT_STRUCTURES = {
   
                                                                                                 /* === Startup === */
 async function startApp() {
-  console.log("App starting...");
+  try {
+    console.log("App starting...");
   
   populateHostTimezoneSelect();
   
@@ -1594,11 +1601,11 @@ const createSection = document.getElementById("create-board");
     createSection.style.display = "none";
   }
 
-
   // Load table if token exists
   await loadTable();
-  
-  document.body.style.visibility = "visible";
+  } finally {
+    document.body.style.visibility = "visible";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", startApp);
@@ -1608,6 +1615,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
