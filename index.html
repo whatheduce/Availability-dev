@@ -1002,6 +1002,16 @@ if (!isPro && goldThreshold >= 6) {
     }])
     .select()
     .single();
+  
+    if (!error && data && user?.id) {
+      await supabase
+        .from("board_members")
+        .upsert({
+          board_id: data.id,
+          user_id: user.id,
+          role: "owner"
+        });
+    }
 
   if (error) {
     console.error("Error creating board:", error);
@@ -1598,6 +1608,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
