@@ -538,24 +538,62 @@ function ensureLegendUser(entry) {
 }
 
   
-function applyGoldStateForCell(cell, day) {
-  const goldThreshold = Number(currentTable?.gold_threshold);
-    if (!Number.isFinite(goldThreshold)) return; // or skip gold logic
+async function rebuildDotsForCell(cell) {
+  if (!currentTable) return;
 
-  const dotContainer = cell.querySelector(".dot-container");
-  const dotCount = dotContainer ? dotContainer.children.length : 0;
+  const day = cell.dataset.day;
+  const time = cell.dataset.time;
 
-  // Turn gold on
-  if (dotCount >= goldThreshold) {
-    cell.classList.add("gold-cell");
-    if (dotContainer) dotContainer.remove(); // match your loadAvailability behaviour (no dots on gold)
-  } else {
-    // Turn gold off
-    cell.classList.remove("gold-cell");
-  }
+  const { data } = await supabase
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id)
+    .eq("day", day)
+    .eq("time", time);
+
+  if (!data || data.length === 0) return;
+
+  let dotContainer = document.createElement("div");
+  dotContainer.className = "dot-container";
+
+  data.forEach(entry => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.background = entry.color;
+    dot.title = entry.name;
+    dot.dataset.userId = entry.user_id;
+    dot.dataset.name = entry.name;
+
+    dotContainer.appendChild(dot);
+  });
+
+  cell.appendChild(dotContainer);
+}
 
   
-  // Update the day header to gold if ANY cell in that day is gold
+function applyGoldStateForCell(cell, day) {
+  const goldThreshold = currentTable?.gold_threshold ?? 4;
+
+  let dotContainer = cell.querySelector(".dot-container");
+  const dotCount = dotContainer ? dotContainer.children.length : 0;
+
+  // 🟡 TURN GOLD ON
+  if (dotCount >= goldThreshold) {
+    cell.classList.add("gold-cell");
+    if (dotContainer) dotContainer.remove();
+  }
+
+  // ⚪ TURN GOLD OFF
+  else {
+    const wasGold = cell.classList.contains("gold-cell");
+    cell.classList.remove("gold-cell");
+
+    // ⭐ If we just transitioned FROM gold → normal
+    // we must rebuild the dots for this cell from DB
+    if (wasGold) rebuildDotsForCell(cell);
+  }
+
+  // Update day header
   const dayNum = parseInt(day, 10);
   const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
   if (!th) return;
@@ -565,6 +603,7 @@ function applyGoldStateForCell(cell, day) {
   else th.classList.remove("gold-header");
 }
 
+  
   
 function handleAvailabilityChange(payload) {
   // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
@@ -1531,6 +1570,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
