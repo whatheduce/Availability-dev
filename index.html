@@ -1200,12 +1200,19 @@ async function loadAvailability() {
   });
 
   legendList.innerHTML = "";
-  Object.values(users).forEach(({ name, color }) => {
+    Object.entries(users).forEach(([key, { name, color }]) => {
     const div = document.createElement("div");
     div.className = "legend-item";
-    div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
-    legendList.appendChild(div);
-  });
+
+      if (key) {
+        if (r.user_id) div.dataset.userId = r.user_id;
+          else div.dataset.name = name;
+      }
+
+  div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
+  legendList.appendChild(div);
+});
+
 
   /* Group by cell */
   const map = {};
@@ -1570,6 +1577,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
