@@ -320,7 +320,7 @@ body {
 
   <!-- LEFT: Dev custom -->
   <div class="structure-left">
-    <div id="dev-custom-card" class="structure-card active">
+    <div id="dev-custom-card" class="structure-card">
     <div class="structure-title">Dev Custom</div>
     <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
     </div>
@@ -343,14 +343,13 @@ body {
 
     <div class="pro-hint">Pro features (locked)</div>
   </div>
-
+    <button id="go-create" class="primary-btn" style="margin-top:20px; display:none;">
+      Create Calendar
+    </button>
 </div>
-
-
-  <button id="confirm-name" class="primary-btn" style="margin-top:20px;">
-    Continue
-  </button>
 </div>
+    
+  <div id="details-step" style="display:none;">   
     <div id="row-builder" style="display:none; margin-top:25px;">
   <h3>Define Time Blocks</h3>
 
@@ -363,6 +362,7 @@ body {
   <button id="create-board-btn" class="primary-btn">
     Create Calendar
   </button>
+</div>
 </div>
 
 </div>
@@ -1190,6 +1190,28 @@ async function loadAvailability() {
 function showBoardSetup() {
   document.getElementById("start-create").style.display = "none";
   document.getElementById("board-setup").style.display = "block";
+
+  // Reset pages
+  const nameStep = document.getElementById("name-step");
+  const detailsStep = document.getElementById("details-step");
+  const rowBuilder = document.getElementById("row-builder");
+  const createActions = document.getElementById("create-actions");
+
+  if (nameStep) nameStep.style.display = "block";
+  if (detailsStep) detailsStep.style.display = "none";
+  if (rowBuilder) rowBuilder.style.display = "none";
+  if (createActions) createActions.style.display = "none";
+
+  // Hide the page-2 create button until a structure is clicked
+  const goBtn = document.getElementById("go-create");
+  if (goBtn) goBtn.style.display = "none";
+
+  // Clear structure selection highlight + require click
+  selectedStructure = null;
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
 }
 
   // ensure at least one row input exists
@@ -1198,34 +1220,58 @@ function showBoardSetup() {
     addRowInput();
   }
 
-function confirmBoardName() {
+function proceedFromStructure() {
   const nameInput = document.getElementById("board-name");
-  const name = nameInput.value.trim();
+  const name = nameInput?.value.trim();
 
   if (!name) {
     alert("Please enter a calendar name");
     return;
   }
 
-  // Dev-only structures (cards)
-  const structureChoice = selectedStructure || "custom";
+  if (!selectedStructure) {
+    alert("Please choose a calendar structure");
+    return;
+  }
 
+  // If Meals (prebuilt), create immediately (skip details page)
+  if (selectedStructure !== "custom") {
+    createBoard(); // uses PREBUILT_STRUCTURES[selectedStructure]
+    return;
+  }
+
+  // Custom -> go to "page 3" (details)
+  const nameStep = document.getElementById("name-step");
+  const detailsStep = document.getElementById("details-step");
   const rowBuilder = document.getElementById("row-builder");
   const createActions = document.getElementById("create-actions");
   const rowsContainer = document.getElementById("rows-container");
 
-  // Always show the "Create Calendar" action area after Continue
+  if (nameStep) nameStep.style.display = "none";
+  if (detailsStep) detailsStep.style.display = "block";
+
+  if (rowBuilder) rowBuilder.style.display = "block";
   if (createActions) createActions.style.display = "block";
 
-  if (structureChoice === "custom") {
-    // Show row inputs + ensure at least one input exists
-    rowBuilder.style.display = "block";
-    if (rowsContainer && rowsContainer.children.length === 0) addRowInput();
-  } else {
-    // Prebuilt (e.g. meals)
-    rowBuilder.style.display = "none";
+  if (rowsContainer && rowsContainer.children.length === 0) {
+    addRowInput();
   }
 }
+
+
+function setActiveStructureCard(activeId) {
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("active", id === activeId);
+  });
+}
+
+  
+function showGoCreate() {
+  const btn = document.getElementById("go-create");
+  if (btn) btn.style.display = "inline-block";
+}  
 
   
 function getOrCreateUserId() {
@@ -1282,10 +1328,10 @@ async function startApp() {
     startCreateBtn.addEventListener("click", showBoardSetup);
   }
 
-  const confirmNameBtn = document.getElementById("confirm-name");
-  if (confirmNameBtn) {
-    confirmNameBtn.addEventListener("click", confirmBoardName);
-  }
+  const goCreateBtn = document.getElementById("go-create");
+    if (goCreateBtn) {
+      goCreateBtn.addEventListener("click", proceedFromStructure);
+    }
 
   const addRowBtn = document.getElementById("add-row");
   if (addRowBtn) {
@@ -1298,19 +1344,13 @@ async function startApp() {
   }
 
       // Structure selection (Dev Custom + Meals)
-function setActiveStructureCard(activeId) {
-  ["dev-custom-card", "meals-card"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle("active", id === activeId);
-  });
-}
 
 const devCard = document.getElementById("dev-custom-card");
 if (devCard) {
   devCard.addEventListener("click", () => {
     selectedStructure = "custom";
     setActiveStructureCard("dev-custom-card");
+    showGoCreate();
   });
 }
 
@@ -1319,6 +1359,7 @@ if (mealsCard) {
   mealsCard.addEventListener("click", () => {
     selectedStructure = "meals";
     setActiveStructureCard("meals-card");
+    showGoCreate();
   });
 }
 
@@ -1366,6 +1407,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
