@@ -316,6 +316,26 @@ body {
   </div>
 </div>
 
+  <div style="margin-top:14px; text-align:left;">
+  <label for="gold-threshold" style="display:block; font-weight:600; margin-bottom:6px;">
+    Gold threshold
+  </label>
+
+  <select id="gold-threshold" style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
+    <option value="2">2 people</option>
+    <option value="3">3 people</option>
+    <option value="4" selected>4 people</option>
+    <option value="5">5 people</option>
+    <option value="6">6 people</option>
+    <option value="7">7 people</option>
+    <option value="8">8 people</option>
+  </select>
+
+  <div style="font-size:12px; color:#666; margin-top:6px;">
+    Cells turn gold when the number of dots meets or exceeds this value.
+  </div>
+</div>
+
   <div class="structure-row">
 
   <!-- LEFT: Dev custom -->
@@ -537,7 +557,6 @@ function handleAvailabilityChange(payload) {
   dotContainer = cell.querySelector(".dot-container");
   if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
 }
-
 
   if (payload.eventType === "DELETE") {
     // Remove that user's dot
@@ -826,6 +845,7 @@ if (structureChoice === "custom") {
   const ownerToken = generateToken();
   const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
   const startDate = yyyyMmDdInTimeZone(new Date(), tz);
+  const goldThreshold = parseInt(document.getElementById("gold-threshold")?.value || "4", 10);
 
   const { data, error } = await supabase
     .from("tables")
@@ -835,7 +855,8 @@ if (structureChoice === "custom") {
       owner_token: ownerToken,
       row_structure: timeBlocks,
       host_tz: tz,
-      start_date: startDate
+      start_date: startDate,
+      gold_threshold: goldThreshold
     }])
     .select()
     .single();
@@ -1060,6 +1081,7 @@ async function loadAvailability() {
   });
 
   const goldDays = new Set();
+  const goldThreshold = currentTable?.gold_threshold ?? 4;
 
   /* Render cells */
   document.querySelectorAll("td[data-day]").forEach(cell => {
@@ -1068,7 +1090,7 @@ async function loadAvailability() {
     const key = `${day}-${time}`;
     const entries = map[key] || [];
 
-    if (entries.length === 4) {
+    if (entries.length >= goldThreshold) {
       cell.classList.add("gold-cell");
       goldDays.add(parseInt(day, 10));
       return;
@@ -1407,6 +1429,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
