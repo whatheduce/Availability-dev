@@ -621,19 +621,23 @@ function handleAvailabilityChange(payload) {
       cell.appendChild(dotContainer);
     }
 
-    // Avoid duplicates
-    if (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) return;
-    if (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`)) return;
+    // Avoid duplicate DOT creation, but DO NOT return early (we still need gold/legend updates)
+    const alreadyHasDot =
+      (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) ||
+      (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`));
 
-    const dot = document.createElement("div");
-    dot.className = "dot";
-    dot.style.background = entry.color;
-    dot.title = entry.name;
-    dot.dataset.userId = entry.user_id;
-    dot.dataset.name = entry.name;
+    if (!alreadyHasDot) {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dot.style.background = entry.color;
+      dot.title = entry.name;
+      dot.dataset.userId = entry.user_id;
+      dot.dataset.name = entry.name;
 
-    dotContainer.appendChild(dot);
+      dotContainer.appendChild(dot);
+    }
 
+    // Always run these even if the dot already existed (this fixes the “clicking user” case)
     ensureLegendUser(entry);
     applyGoldStateForCell(cell, entry.day);
 
@@ -1527,6 +1531,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
