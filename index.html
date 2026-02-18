@@ -515,6 +515,57 @@ function subscribePresence() {
     });
 }
 
+  
+function ensureLegendUser(entry) {
+  if (!entry) return;
+  const key = entry.user_id || entry.name;
+  if (!key) return;
+
+  // already present?
+  const existing = legendList.querySelector(
+    entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
+                  : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
+  );
+  if (existing) return;
+
+  const div = document.createElement("div");
+  div.className = "legend-item";
+  if (entry.user_id) div.dataset.userId = entry.user_id;
+  if (entry.name) div.dataset.name = entry.name;
+
+  div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
+  legendList.appendChild(div);
+}
+
+  
+function applyGoldStateForCell(cell, day) {
+  const goldThreshold = Number(currentTable?.gold_threshold);
+    if (!Number.isFinite(goldThreshold)) return; // or skip gold logic
+
+  const dotContainer = cell.querySelector(".dot-container");
+  const dotCount = dotContainer ? dotContainer.children.length : 0;
+
+  // Turn gold on
+  if (dotCount >= goldThreshold) {
+    cell.classList.add("gold-cell");
+    if (dotContainer) dotContainer.remove(); // match your loadAvailability behaviour (no dots on gold)
+  } else {
+    // Turn gold off
+    cell.classList.remove("gold-cell");
+  }
+
+  
+  // Update the day header to gold if ANY cell in that day is gold
+  const dayNum = parseInt(day, 10);
+  const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+  if (!th) return;
+
+  const anyGoldInDay = !!table.querySelector(`td[data-day="${dayNum}"].gold-cell`);
+  if (anyGoldInDay) th.classList.add("gold-header");
+  else th.classList.remove("gold-header");
+}
+
+  
 function handleAvailabilityChange(payload) {
   // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
   const entry =
@@ -557,6 +608,7 @@ function handleAvailabilityChange(payload) {
   if (payload.eventType === "DELETE") {
     // Remove that user's dot
     removeDot(entry);
+    applyGoldStateForCell(cell, entry.day);
     // Keep gold/legend correct with a later idle refresh
     scheduleFullRefreshIdle(20000);
     return;
@@ -570,15 +622,20 @@ function handleAvailabilityChange(payload) {
     }
 
     // Avoid duplicates
-    if (cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) return;
+    if (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) return;
+    if (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`)) return;
 
     const dot = document.createElement("div");
     dot.className = "dot";
     dot.style.background = entry.color;
     dot.title = entry.name;
     dot.dataset.userId = entry.user_id;
+    dot.dataset.name = entry.name;
 
     dotContainer.appendChild(dot);
+
+    ensureLegendUser(entry);
+    applyGoldStateForCell(cell, entry.day);
 
     // Keep gold/legend correct with a later idle refresh
     scheduleFullRefreshIdle(20000);
@@ -1116,7 +1173,8 @@ async function loadAvailability() {
   });
 
   const goldDays = new Set();
-  const goldThreshold = currentTable?.gold_threshold ?? 4;
+  const goldThreshold = Number(currentTable?.gold_threshold);
+    if (!Number.isFinite(goldThreshold)) return; // or skip gold logic
 
   /* Render cells */
   document.querySelectorAll("td[data-day]").forEach(cell => {
@@ -1469,6 +1527,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
