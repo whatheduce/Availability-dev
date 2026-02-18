@@ -1007,6 +1007,7 @@ if (!isPro && goldThreshold >= 6) {
     return;
   }
 
+  localStorage.setItem("lastBoardToken", inviteToken);
   window.location.href = `?token=${inviteToken}`;
 }
 
@@ -1570,7 +1571,7 @@ const createSection = document.getElementById("create-board");
     const lastToken = localStorage.getItem("lastBoardToken");
 
     if (lastToken && user) {
-      window.location.href = `?token=${lastToken}`;
+      window.location.href = `${window.location.pathname}?token=${lastToken}`;
       return;
     }
 
@@ -1594,6 +1595,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
