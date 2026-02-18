@@ -27,6 +27,7 @@ body {
     ),
     linear-gradient(180deg, #f9fafb, #eef1f5);
   min-height: 100vh;
+  visibility: hidden;
 }
 
     #calendar {
@@ -1586,6 +1587,8 @@ const createSection = document.getElementById("create-board");
 
   // Load table if token exists
   await loadTable();
+  
+  document.body.style.visibility = "visible";
 }
 
 document.addEventListener("DOMContentLoaded", startApp);
@@ -1595,6 +1598,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
