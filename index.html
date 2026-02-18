@@ -809,6 +809,12 @@ async function loadTable() {
   }
 
   currentTable = data;
+  
+  // ⭐ remember this board for next time
+if (inviteToken) {
+  localStorage.setItem("lastBoardToken", inviteToken);
+}
+
   // Roll board forward based on host timezone + start_date (any visitor can trigger)
 const shifted = await rollForwardIfNeeded(currentTable.id);
 
@@ -1558,17 +1564,24 @@ if (colorEl) {
   }
 }
   
-    // Show/hide sections based on token
-  const createSection = document.getElementById("create-board");
-
+const createSection = document.getElementById("create-board");
+// ⭐ If no token in URL, try to open last board
   if (!inviteToken && !manageToken) {
+    const lastToken = localStorage.getItem("lastBoardToken");
+
+    if (lastToken && user) {
+      window.location.href = `?token=${lastToken}`;
+      return;
+    }
+
+    // No recent board → show create screen
     createSection.style.display = "block";
     document.getElementById("calendar").style.display = "none";
     legendDiv.style.display = "none";
   } else {
-    // token present: loadTable() will take over showing calendar if valid
     createSection.style.display = "none";
   }
+
 
   // Load table if token exists
   await loadTable();
@@ -1581,6 +1594,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
