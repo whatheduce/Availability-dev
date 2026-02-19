@@ -1185,14 +1185,13 @@ function populateHostTimezoneSelect() {
   
 async function createBoard() {
   const au = await getAuthUser();
-  console.log("AUTH UID creating board:", au.id, "profile user:", user);
-
     if (!au) {
       showAuthOverlay("Please sign in before creating a calendar.");
       return;
     }
   const nameInput = document.getElementById("board-name");
   const name = nameInput.value.trim();
+  console.log("AUTH UID creating board:", au.id, "profile user:", user);
 
   if (!name) {
     alert("Please enter a board name");
@@ -1257,6 +1256,7 @@ if (structureChoice === "custom") {
       name,
       invite_token: inviteToken,
       owner_token: ownerToken,
+      owner_id: au.id,
       row_structure: timeBlocks,
       host_tz: tz,
       start_date: startDate,
@@ -1299,6 +1299,7 @@ let user = null;
 
 
 async function toggleCell(e) {
+  console.log("toggle", { hasUser: !!user, hasTable: !!currentTable });
   if (!user || !currentTable) return;
   
   const au = await getAuthUser();
@@ -1875,6 +1876,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
