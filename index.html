@@ -1293,22 +1293,30 @@ let user = null;
 async function toggleCell(e) {
   if (!user || !currentTable) return;
 
+  const au = await getAuthUser();
+  if (!au) {
+    showAuthOverlay("Please sign in to edit availability.");
+    return;
+  }
+  const myUid = au.id;
+
   const cell = e.currentTarget;
   const day = cell.dataset.day;
   const time = cell.dataset.time;
 
   if (!day || !time) return;
 
-  // Check if entry already exists
+  // Check if entry already exists (USE AUTH UID)
   const { data: existing } = await supabase
     .from("availability_dev")
-    .select("*")
+    .select("id")
     .eq("table_id", currentTable.id)
     .eq("day", day)
     .eq("time", time)
-    .eq("user_id", user.id);
+    .eq("user_id", myUid);
 
   if (existing && existing.length > 0) {
+
     // Remove entry
     await supabase
       .from("availability_dev")
@@ -1316,18 +1324,19 @@ async function toggleCell(e) {
       .eq("table_id", currentTable.id)
       .eq("day", day)
       .eq("time", time)
-      .eq("user_id", user.id);
+      .eq("user_id", myUid);
 
-      // ✅ Remove only THIS user's dot (leave other users' dots)
-      const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
-      if (myDot) myDot.remove();
+    // Remove only THIS user's dot
+    const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+    if (myDot) myDot.remove();
 
-      const container = cell.querySelector(".dot-container");
-      if (container && container.children.length === 0) {
-        container.remove();
-  }
+    const container = cell.querySelector(".dot-container");
+    if (container && container.children.length === 0) {
+      container.remove();
+    }
 
   } else {
+
     // Add entry
     const { error } = await supabase
       .from("availability_dev")
@@ -1335,36 +1344,34 @@ async function toggleCell(e) {
         table_id: currentTable.id,
         day,
         time,
-        user_id: user.id,
+        user_id: myUid,   // ✅ AUTH UID
         name: user.name,
         color: user.color
       });
 
     if (error) {
-      console.warn("Insert failed (likely duplicate):", error);
+      console.warn("Insert failed:", error);
       await loadAvailability();
       return;
     }
-    
-    // Reuse existing container if present (important when other users already have dots here)
+
     let dotContainer = cell.querySelector(".dot-container");
-      if (!dotContainer) {
-        dotContainer = document.createElement("div");
-        dotContainer.className = "dot-container";
-        cell.appendChild(dotContainer);
-      }
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+      cell.appendChild(dotContainer);
+    }
 
     const dot = document.createElement("div");
-      dot.className = "dot pop-in";
-      dot.style.background = user.color;
+    dot.className = "dot pop-in";
+    dot.style.background = user.color;
 
-      // Optional: tag it so we can remove it cleanly if user toggles off immediately
-      dot.dataset.userId = user.id;
-      dot.dataset.name = user.name;
+    dot.dataset.userId = myUid;   // ✅ AUTH UID
+    dot.dataset.name = user.name;
 
-      dotContainer.appendChild(dot);
+    dotContainer.appendChild(dot);
   }
-}  
+}
 
   
 function parseYMD(ymd) {
@@ -1885,6 +1892,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
