@@ -1293,85 +1293,79 @@ let user = null;
 async function toggleCell(e) {
   if (!user || !currentTable) return;
 
-  const au = await getAuthUser();
-  if (!au) {
-    showAuthOverlay("Please sign in to edit availability.");
-    return;
-  }
-  const myUid = au.id;
-
-  const cell = (e && e.currentTarget) ? e.currentTarget : this;
+  const cell = e?.currentTarget || e;
   if (!cell || !cell.dataset) return;
 
   const day = cell.dataset.day;
   const time = cell.dataset.time;
   if (!day || !time) return;
 
-  // Check if entry already exists (USE AUTH UID)
-  const { data: existing } = await supabase
+  // 1) Try DELETE first (atomic-ish toggle)
+  const { error: delErr, count: deletedCount } = await supabase
     .from("availability_dev")
-    .select("id")
+    .delete({ count: "exact" })
     .eq("table_id", currentTable.id)
     .eq("day", day)
     .eq("time", time)
-    .eq("user_id", myUid);
+    .eq("user_id", user.id);
 
-  if (existing && existing.length > 0) {
+  if (delErr) {
+    console.warn("Delete failed:", delErr);
+    await loadAvailability();
+    return;
+  }
 
-    // Remove entry
-    await supabase
-      .from("availability_dev")
-      .delete()
-      .eq("table_id", currentTable.id)
-      .eq("day", day)
-      .eq("time", time)
-      .eq("user_id", myUid);
-
-    // Remove only THIS user's dot
-    const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+  // If we deleted something, update UI and stop.
+  if ((deletedCount || 0) > 0) {
+    const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
     if (myDot) myDot.remove();
 
     const container = cell.querySelector(".dot-container");
-    if (container && container.children.length === 0) {
-      container.remove();
-    }
+    if (container && container.children.length === 0) container.remove();
 
-  } else {
+    // optional: re-evaluate gold immediately for this cell
+    // await rebuildDotsForCell(cell); // only if you need it
+    return;
+  }
 
-    // Add entry
-    const { error } = await supabase
-      .from("availability_dev")
-      .insert({
-        table_id: currentTable.id,
-        day,
-        time,
-        user_id: myUid,   // ✅ AUTH UID
-        name: user.name,
-        color: user.color
-      });
+  // 2) Nothing deleted -> INSERT
+  const { error: insErr } = await supabase
+    .from("availability_dev")
+    .insert({
+      table_id: currentTable.id,
+      day,
+      time,
+      user_id: user.id,
+      name: user.name,
+      color: user.color
+    });
 
-    if (error) {
-      console.warn("Insert failed:", error);
+  if (insErr) {
+    // If it’s a duplicate, treat it like “already on” and just refresh that cell
+    if (insErr.code === "23505") {
       await loadAvailability();
       return;
     }
 
-    let dotContainer = cell.querySelector(".dot-container");
-    if (!dotContainer) {
-      dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
-      cell.appendChild(dotContainer);
-    }
-
-    const dot = document.createElement("div");
-    dot.className = "dot pop-in";
-    dot.style.background = user.color;
-
-    dot.dataset.userId = myUid;   // ✅ AUTH UID
-    dot.dataset.name = user.name;
-
-    dotContainer.appendChild(dot);
+    console.warn("Insert failed:", insErr);
+    await loadAvailability();
+    return;
   }
+
+  // UI add dot immediately
+  let dotContainer = cell.querySelector(".dot-container");
+  if (!dotContainer) {
+    dotContainer = document.createElement("div");
+    dotContainer.className = "dot-container";
+    cell.appendChild(dotContainer);
+  }
+
+  const dot = document.createElement("div");
+  dot.className = "dot pop-in";
+  dot.style.background = user.color;
+  dot.dataset.userId = user.id;       // IMPORTANT: matches your removal selector
+  dot.dataset.name = user.name;
+  dotContainer.appendChild(dot);
 }
 
   
@@ -1893,6 +1887,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
