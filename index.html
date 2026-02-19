@@ -1013,7 +1013,7 @@ async function loadTable() {
     .from("tables")
     .select("*")
     .eq(queryField, tokenValue)
-    .maybesingle();
+    .maybeSingle();
 
   if (error) {
   console.error("Error loading table:", error);
@@ -1858,6 +1858,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
