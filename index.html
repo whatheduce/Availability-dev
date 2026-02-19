@@ -728,6 +728,26 @@ function ensureLegendUser(entry) {
   legendList.appendChild(div);
 }
 
+
+async function ensureMembership(boardId) {
+  const au = await getAuthUser();
+  if (!au) return false;
+
+  const { error } = await supabase
+    .from("board_members")
+    .upsert({
+      board_id: boardId,
+      user_id: au.id,
+      role: "member"
+    });
+
+  if (error) {
+    console.warn("ensureMembership failed:", error);
+    return false;
+  }
+  return true;
+}
+  
   
 async function rebuildDotsForCell(cell) {
   if (!currentTable) return;
@@ -1046,6 +1066,8 @@ if (!hydrated) {
   return;
 }
 
+  await ensureMembership(currentTable.id);
+
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
 document.getElementById("calendar").style.display = "block";
@@ -1207,9 +1229,7 @@ if (!isPro && goldThreshold >= 6) {
     .single();
   
     if (!error && data && user?.id) {
-      await supabase
-        .from("board_members")
-        .upsert({
+      await supabase.from("board_members").upsert({
           board_id: data.id,
           user_id: user.id,
           role: "owner"
@@ -1829,6 +1849,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
