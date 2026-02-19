@@ -1184,6 +1184,11 @@ function populateHostTimezoneSelect() {
 
   
 async function createBoard() {
+  const au = await getAuthUser();
+    if (!au) {
+      showAuthOverlay("Please sign in before creating a calendar.");
+      return;
+    }
   const nameInput = document.getElementById("board-name");
   const name = nameInput.value.trim();
 
@@ -1868,6 +1873,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
