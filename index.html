@@ -467,9 +467,7 @@ const manageToken = params.get("manage");
 
 let currentTable = null;
 let availabilityChannel = null;
-let tableChannel = null;
-
-  
+let tableChannel = null;  
 let fullRefreshTimer = null;
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
@@ -1046,8 +1044,6 @@ if (!data) {
 
 currentTable = data;
 
-
-  currentTable = data;
   
   // ⭐ remember this board for next time
 if (inviteToken) {
@@ -1214,7 +1210,7 @@ if (structureChoice === "custom") {
   const ownerToken = generateToken();
   const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
   const startDate = yyyyMmDdInTimeZone(new Date(), tz);
-r
+  
   // --- Gold threshold (required) ---
   const goldRaw = document.getElementById("gold-threshold")?.value || "";
     if (!goldRaw) {
@@ -1248,14 +1244,6 @@ if (!isPro && goldThreshold >= 6) {
     }])
     .select()
     .single();
-  
-    if (!error && data && user?.id) {
-      await supabase.from("board_members").upsert({
-          board_id: data.id,
-          user_id: user.id,
-          role: "owner"
-        });
-    }
 
   if (error) {
     console.error("Error creating board:", error);
@@ -1356,7 +1344,7 @@ if (insErr) {
   const dot = document.createElement("div");
   dot.className = "dot pop-in";
   dot.style.background = user.color;
-  dot.dataset.userId = user.id;       // IMPORTANT: matches your removal selector
+  dot.dataset.userId = myUid;       
   dot.dataset.name = user.name;
   dotContainer.appendChild(dot);
 }
@@ -1466,11 +1454,11 @@ async function loadAvailability() {
     cell.classList.remove("gold-cell");
   });
 
-  if (!data) return;
+  if (!rows) return;
 
   /* Legend */
   const users = {};
-  data.forEach(r => {
+  rows.forEach(r => {
     const key = r.user_id || r.name; // fallback for old rows
     if (!users[key]) users[key] = { name: r.name, color: r.color };
   });
@@ -1492,11 +1480,9 @@ async function loadAvailability() {
   legendList.appendChild(div);
 });
 
-
-
   /* Group by cell */
   const map = {};
-  data.forEach(entry => {
+  rows.forEach(entry => {
     const key = `${entry.day}-${entry.time}`;
     if (!map[key]) map[key] = [];
     map[key].push(entry);
@@ -1884,6 +1870,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
