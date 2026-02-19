@@ -1292,6 +1292,13 @@ let user = null;
 
 async function toggleCell(e) {
   if (!user || !currentTable) return;
+  
+  const au = await getAuthUser();
+    if (!au) {
+      showAuthOverlay("Please sign in to edit availability.");
+      return;
+    }
+    const myUid = au.id;
 
   const cell = e?.currentTarget || e;
   if (!cell || !cell.dataset) return;
@@ -1302,53 +1309,43 @@ async function toggleCell(e) {
 
   // 1) Try DELETE first (atomic-ish toggle)
   const { error: delErr, count: deletedCount } = await supabase
-    .from("availability_dev")
-    .delete({ count: "exact" })
-    .eq("table_id", currentTable.id)
-    .eq("day", day)
-    .eq("time", time)
-    .eq("user_id", user.id);
+  .from("availability_dev")
+  .delete({ count: "exact" })
+  .eq("table_id", currentTable.id)
+  .eq("day", day)
+  .eq("time", time)
+  .eq("user_id", myUid);
 
-  if (delErr) {
-    console.warn("Delete failed:", delErr);
-    await loadAvailability();
-    return;
-  }
+if (delErr) {
+  console.warn("Delete failed:", delErr);
+  await loadAvailability();
+  return;
+}
 
-  // If we deleted something, update UI and stop.
-  if ((deletedCount || 0) > 0) {
-    const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
-    if (myDot) myDot.remove();
+if ((deletedCount || 0) > 0) {
+  await loadAvailability();
+  return;
+}
 
-    const container = cell.querySelector(".dot-container");
-    if (container && container.children.length === 0) container.remove();
+// INSERT if nothing deleted
+const { error: insErr } = await supabase
+  .from("availability_dev")
+  .insert({
+    table_id: currentTable.id,
+    day,
+    time,
+    user_id: myUid,
+    name: user.name,
+    color: user.color
+  });
 
-    // optional: re-evaluate gold immediately for this cell
-    // await rebuildDotsForCell(cell); // only if you need it
-    return;
-  }
+if (insErr) {
+  console.warn("Insert failed:", insErr);
+  await loadAvailability();
+  return;
+}
 
-  // 2) Nothing deleted -> INSERT
-  const { error: insErr } = await supabase
-    .from("availability_dev")
-    .insert({
-      table_id: currentTable.id,
-      day,
-      time,
-      user_id: user.id,
-      name: user.name,
-      color: user.color
-    });
-
-  if (insErr) {
-    // If it’s a duplicate, treat it like “already on” and just refresh that cell
-    if (insErr.code === "23505") {
-      await loadAvailability();
-      return;
-    }
-
-    console.warn("Insert failed:", insErr);
-    await loadAvailability();
+await loadAvailability();
     return;
   }
 
@@ -1457,10 +1454,14 @@ function buildCalendar() {
 
 /* === Render dots + gold === */
 async function loadAvailability() {
-  const { data } = await supabase
+  const { data: rows, error } = await supabase
     .from("availability_dev")
     .select("*")
     .eq("table_id", currentTable.id);
+      if (error) {
+      console.error("loadAvailability failed:", error);
+      return;
+    }
 
   const cells = table.querySelectorAll("td[data-day]");
 
@@ -1887,6 +1888,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
