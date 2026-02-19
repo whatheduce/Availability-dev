@@ -1490,7 +1490,7 @@ async function loadAvailability() {
 
   const goldDays = new Set();
   const goldThreshold = Number(currentTable?.gold_threshold);
-    if (!Number.isFinite(goldThreshold)) return; // or skip gold logic
+  const enableGold = Number.isFinite(goldThreshold);
 
   /* Render cells */
   document.querySelectorAll("td[data-day]").forEach(cell => {
@@ -1499,7 +1499,7 @@ async function loadAvailability() {
     const key = `${day}-${time}`;
     const entries = map[key] || [];
 
-    if (entries.length >= goldThreshold) {
+    if (enableGold && entries.length >= goldThreshold) {
       cell.classList.add("gold-cell");
       goldDays.add(parseInt(day, 10));
       return;
@@ -1870,6 +1870,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
