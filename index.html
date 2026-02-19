@@ -1185,6 +1185,8 @@ function populateHostTimezoneSelect() {
   
 async function createBoard() {
   const au = await getAuthUser();
+  console.log("AUTH UID creating board:", au.id, "profile user:", user);
+
     if (!au) {
       showAuthOverlay("Please sign in before creating a calendar.");
       return;
@@ -1244,10 +1246,10 @@ if (structureChoice === "custom") {
       alert("Gold threshold must be between 1 and 30.");
       return;
     }
-if (!isPro && goldThreshold >= 6) {
-  alert("Free version allows gold threshold up to 5.");
-  return;
-}
+    if (!isPro && goldThreshold >= 6) {
+      alert("Free version allows gold threshold up to 5.");
+      return;
+    }
 
   const { data, error } = await supabase
     .from("tables")
@@ -1273,15 +1275,15 @@ if (!isPro && goldThreshold >= 6) {
   .upsert(
     {
       board_id: data.id,
-      user_id: user.id,
+      user_id: au.id,
       role: "owner"
     },
     { onConflict: "board_id,user_id" }
   );
 
-if (bmErr) {
-  console.warn("board_members owner upsert failed:", bmErr);
-}
+  if (bmErr) {
+    console.warn("board_members owner upsert failed:", bmErr);
+  }
   
   localStorage.setItem("lastBoardToken", inviteToken);
   window.location.href = `?token=${inviteToken}`;
@@ -1873,6 +1875,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
