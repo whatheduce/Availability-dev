@@ -292,6 +292,47 @@ body {
   <button id="save-identity">Continue</button>
 </div>
 
+<!-- AUTH OVERLAY (blur + single form) -->
+<div id="auth-overlay" style="
+  position:fixed; inset:0; display:none; z-index:9999;
+  background:rgba(255,255,255,0.35); backdrop-filter: blur(8px);
+">
+  <div style="
+    max-width:420px; margin:80px auto; background:rgba(255,255,255,0.92);
+    border:1px solid rgba(0,0,0,0.12); border-radius:16px; padding:18px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+    text-align:left;
+  ">
+    <div style="font-weight:800; font-size:18px; margin-bottom:6px;">
+      Sign in to access this calendar
+    </div>
+    <div id="auth-subtitle" style="font-size:13px; color:#666; margin-bottom:12px;">
+      Create an account or sign in to continue.
+    </div>
+
+    <input id="auth-email" placeholder="Email" type="email"
+      style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
+
+    <input id="auth-password" placeholder="Password" type="password"
+      style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+
+    <button id="auth-submit" class="primary-btn" style="width:100%;">
+      Continue
+    </button>
+
+    <div style="display:flex; justify-content:space-between; margin-top:10px; gap:10px;">
+      <button id="auth-toggle-mode" class="primary-btn" style="flex:1; background:#f3f4f6;">
+        Create account
+      </button>
+      <button id="auth-forgot" class="primary-btn" style="flex:1; background:#f3f4f6;">
+        Forgot password
+      </button>
+    </div>
+
+    <div id="auth-msg" style="margin-top:10px; font-size:13px; color:#b00020; display:none;"></div>
+  </div>
+</div>
+
                                                                           
 <div id="create-board" class="centered-container">
 
@@ -477,6 +518,154 @@ async function rollForwardIfNeeded(tableId) {
 }
 
 
+async function getAuthUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) return null;
+  return data.user || null;
+}
+
+  
+async function getOrCreateProfile({ name, color }) {
+  const user = await getAuthUser();
+  if (!user) return null;
+
+  // try fetch
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  // create
+  const { data: created, error } = await supabase
+    .from("profiles")
+    .insert({ user_id: user.id, name, color })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Profile create failed:", error);
+    return null;
+  }
+  return created;
+}
+
+
+let authMode = "signin"; // "signin" or "signup"
+
+function showAuthOverlay(msg = "") {
+  const overlay = document.getElementById("auth-overlay");
+  const message = document.getElementById("auth-msg");
+  const toggle = document.getElementById("auth-toggle-mode");
+  const subtitle = document.getElementById("auth-subtitle");
+  if (!overlay || !toggle || !subtitle) return;
+
+  overlay.style.display = "block";
+
+  if (authMode === "signin") {
+    toggle.textContent = "Create account";
+    subtitle.textContent = "Sign in to continue.";
+  } else {
+    toggle.textContent = "I already have an account";
+    subtitle.textContent = "Create your account (you must confirm your email).";
+  }
+
+  if (message) {
+    if (msg) {
+      message.style.display = "block";
+      message.textContent = msg;
+    } else {
+      message.style.display = "none";
+      message.textContent = "";
+    }
+  }
+}
+
+function hideAuthOverlay() {
+  const overlay = document.getElementById("auth-overlay");
+  if (overlay) overlay.style.display = "none";
+}
+
+async function hydrateUserFromAuth() {
+  const au = await getAuthUser();
+  if (!au) return null;
+
+  // If they don't have a profile yet, we will create it using whatever is in identity inputs
+  // (keeps your existing “name + colour” concept)
+  const nameInput = document.getElementById("identity-name");
+  const colorInput = document.getElementById("identity-color");
+  const name = (nameInput?.value || localStorage.getItem("globalUserName") || "").trim();
+  const color = (colorInput?.value || localStorage.getItem("globalUserColor") || "#2d7ff9").trim();
+
+  const profile = await getOrCreateProfile({ name: name || "User", color });
+
+  if (!profile) return null;
+
+  // Set your app-level user object
+  user = {
+    id: au.id,
+    name: profile.name,
+    color: profile.color
+  };
+
+  // Optional: keep for UI convenience (NOT identity anymore)
+  localStorage.setItem("globalUserName", user.name);
+  localStorage.setItem("globalUserColor", user.color);
+
+  return user;
+}
+
+async function handleAuthSubmit() {
+  const emailEl = document.getElementById("auth-email");
+  const passEl = document.getElementById("auth-password");
+  const msgEl = document.getElementById("auth-msg");
+
+  const email = (emailEl?.value || "").trim();
+  const password = (passEl?.value || "").trim();
+
+  if (!email || !password) {
+    showAuthOverlay("Please enter email and password.");
+    return;
+  }
+
+  if (msgEl) { msgEl.style.display = "none"; msgEl.textContent = ""; }
+
+  if (authMode === "signup") {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      showAuthOverlay(error.message || "Sign up failed.");
+      return;
+    }
+    // Confirm email is ON: user must confirm before sign-in session works reliably
+    showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
+    authMode = "signin";
+    return;
+  }
+
+  // signin
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    showAuthOverlay(error.message || "Sign in failed.");
+    return;
+  }
+
+  const hydrated = await hydrateUserFromAuth();
+  if (!hydrated) {
+    showAuthOverlay("Signed in, but failed to load your profile.");
+    return;
+  }
+
+  hideAuthOverlay();
+
+  // Now proceed to board or create screen
+  if (inviteToken || manageToken) {
+    await loadTable(); // will now have user set
+  }
+}
+  
+
 function subscribePresence() {
   if (!currentTable) return;
 
@@ -484,7 +673,8 @@ function subscribePresence() {
   if (presenceChannel) supabase.removeChannel(presenceChannel);
 
   // Ensure we have some identity to track
-  const safeUserId = user?.id || localStorage.getItem("globalUserId") || crypto.randomUUID();
+  const safeUserId = user?.id;
+  if (!safeUserId) return; // no auth user yet, don’t track presence
   if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
 
   const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
@@ -573,7 +763,8 @@ async function rebuildDotsForCell(cell) {
 
   
 function applyGoldStateForCell(cell, day) {
-  const goldThreshold = currentTable?.gold_threshold ?? 4;
+  const goldThreshold = Number(currentTable?.gold_threshold);
+    if (!Number.isFinite(goldThreshold)) return;
 
   let dotContainer = cell.querySelector(".dot-container");
   const dotCount = dotContainer ? dotContainer.children.length : 0;
@@ -836,17 +1027,23 @@ if (!refreshErr && refreshed) currentTable = refreshed;
   // Always hide board creation when viewing a board
 document.getElementById("create-board").style.display = "none";
 
-// Build user from storage (incognito won't have one yet)
-user = buildUserFromStorage();
-
-if (!user) {
-  // No identity yet → force name entry first
-  document.getElementById("identity-section").style.display = "block";
-  document.getElementById("calendar").style.display = "none";
+// Use Supabase Auth identity (not localStorage UUID)
+const au = await getAuthUser();
+if (!au) {
+  // Not signed in → show blurred auth overlay and stop
+  showAuthOverlay();
+  document.getElementById("calendar").style.display = "block"; // show shell behind blur if you want
   document.getElementById("legend").style.display = "none";
   document.querySelector(".footer-text").style.display = "none";
   document.getElementById("presence").style.display = "none";
-  return; // ⛔ stop here until they enter a name
+  return;
+}
+
+// Signed in → hydrate user from profile
+const hydrated = await hydrateUserFromAuth();
+if (!hydrated) {
+  showAuthOverlay("Signed in, but profile could not be loaded.");
+  return;
 }
 
 // User exists → show the calendar UI
@@ -1562,14 +1759,30 @@ if (mealsCard) {
   });
 }
 
-  // Identity logic
-user = buildUserFromStorage();
+// Auth overlay events
+document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
 
-if (!user) {
-  document.getElementById("identity-section").style.display = "block";
-} else {
-  document.getElementById("identity-section").style.display = "none";
-}
+document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
+  authMode = (authMode === "signin") ? "signup" : "signin";
+  showAuthOverlay();
+});
+
+document.getElementById("auth-forgot")?.addEventListener("click", async () => {
+  const email = (document.getElementById("auth-email")?.value || "").trim();
+  if (!email) {
+    showAuthOverlay("Enter your email first, then click Forgot password.");
+    return;
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if (error) {
+    showAuthOverlay(error.message || "Failed to send reset email.");
+    return;
+  }
+  showAuthOverlay("Password reset email sent. Check your inbox.");
+});
+
 
 // If user is missing (new/incognito), prefill the colour picker from storage or random
 const colorEl = document.getElementById("identity-color");
@@ -1588,7 +1801,8 @@ const createSection = document.getElementById("create-board");
   if (!inviteToken && !manageToken) {
     const lastToken = localStorage.getItem("lastBoardToken");
 
-    if (lastToken && user) {
+    const au = await getAuthUser();
+      if (lastToken && au) {
       window.location.href = `${window.location.pathname}?token=${lastToken}`;
       return;
     }
@@ -1615,6 +1829,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
