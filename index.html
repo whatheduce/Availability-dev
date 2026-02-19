@@ -733,20 +733,32 @@ async function ensureMembership(boardId) {
   const au = await getAuthUser();
   if (!au) return false;
 
+  // if membership already exists, do nothing
+  const { data: existing, error: selErr } = await supabase
+    .from("board_members")
+    .select("role")
+    .eq("board_id", boardId)
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (selErr) {
+    console.warn("ensureMembership select failed:", selErr);
+    // still try insert as a fallback
+  }
+
+  if (existing) return true;
+
   const { error } = await supabase
     .from("board_members")
-    .upsert({
-      board_id: boardId,
-      user_id: au.id,
-      role: "member"
-    });
+    .insert({ board_id: boardId, user_id: au.id, role: "member" });
 
   if (error) {
-    console.warn("ensureMembership failed:", error);
+    console.warn("ensureMembership insert failed:", error);
     return false;
   }
   return true;
 }
+
   
   
 async function rebuildDotsForCell(cell) {
@@ -1202,7 +1214,7 @@ if (structureChoice === "custom") {
   const ownerToken = generateToken();
   const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
   const startDate = yyyyMmDdInTimeZone(new Date(), tz);
-
+r
   // --- Gold threshold (required) ---
   const goldRaw = document.getElementById("gold-threshold")?.value || "";
     if (!goldRaw) {
@@ -1250,6 +1262,21 @@ if (!isPro && goldThreshold >= 6) {
     return;
   }
 
+  const { error: bmErr } = await supabase
+  .from("board_members")
+  .upsert(
+    {
+      board_id: data.id,
+      user_id: user.id,
+      role: "owner"
+    },
+    { onConflict: "board_id,user_id" }
+  );
+
+if (bmErr) {
+  console.warn("board_members owner upsert failed:", bmErr);
+}
+  
   localStorage.setItem("lastBoardToken", inviteToken);
   window.location.href = `?token=${inviteToken}`;
 }
@@ -1858,6 +1885,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
