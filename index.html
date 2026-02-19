@@ -1300,10 +1300,11 @@ async function toggleCell(e) {
   }
   const myUid = au.id;
 
-  const cell = e.currentTarget;
+  const cell = (e && e.currentTarget) ? e.currentTarget : this;
+  if (!cell || !cell.dataset) return;
+
   const day = cell.dataset.day;
   const time = cell.dataset.time;
-
   if (!day || !time) return;
 
   // Check if entry already exists (USE AUTH UID)
@@ -1892,6 +1893,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
