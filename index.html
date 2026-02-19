@@ -1013,18 +1013,27 @@ async function loadTable() {
     .from("tables")
     .select("*")
     .eq(queryField, tokenValue)
-    .single();
+    .maybesingle();
 
-  if (error || !data) {
-    console.warn("No board found");
+  if (error) {
+  console.error("Error loading table:", error);
+}
 
-    // Show create screen instead
-    document.getElementById("create-board").style.display = "block";
-    document.getElementById("calendar").style.display = "none";
-    legendDiv.style.display = "none";
+if (!data) {
+  // No board exists for this token (e.g., DB wiped or invalid link)
+  document.getElementById("create-board").style.display = "block";
+  document.getElementById("calendar").style.display = "none";
+  legendDiv.style.display = "none";
 
-    return;
-  }
+  // optional: clear stale remembered board
+  localStorage.removeItem("lastBoardToken");
+
+  alert("That calendar link is no longer valid (calendar not found). Please create a new calendar.");
+  return;
+}
+
+currentTable = data;
+
 
   currentTable = data;
   
@@ -1849,6 +1858,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
