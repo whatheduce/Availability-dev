@@ -1333,20 +1333,8 @@ if (insErr) {
   return;
 }
 
-  // UI add dot immediately
-  let dotContainer = cell.querySelector(".dot-container");
-  if (!dotContainer) {
-    dotContainer = document.createElement("div");
-    dotContainer.className = "dot-container";
-    cell.appendChild(dotContainer);
-  }
-
-  const dot = document.createElement("div");
-  dot.className = "dot pop-in";
-  dot.style.background = user.color;
-  dot.dataset.userId = myUid;       
-  dot.dataset.name = user.name;
-  dotContainer.appendChild(dot);
+await loadAvailability();
+return;
 }
 
   
@@ -1588,9 +1576,6 @@ async function loadAvailability() {
   localStorage.setItem("globalUserName", name);
   localStorage.setItem("globalUserColor", color);
   getOrCreateUserId();
-
-  // Rebuild user from storage (now includes color)
-  user = buildUserFromStorage();
 
   // If we're on a board link, load it now (no full reload needed)
   if (inviteToken || manageToken) {
@@ -1870,6 +1855,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
