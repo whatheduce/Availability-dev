@@ -1255,18 +1255,23 @@ if (!isPro && goldThreshold >= 6) {
       name,
       invite_token: inviteToken,
       owner_token: ownerToken,
+      owner_id: au.id,
       row_structure: timeBlocks,
       host_tz: tz,
       start_date: startDate,
       gold_threshold: goldThreshold
     }])
-    .select()
+    .select("id")
     .single();
 
   if (error) {
     console.error("Error creating board:", error);
     return;
   }
+  if (!data) {
+  console.error("Board created but no row returned (RLS SELECT likely blocking).");
+  return;
+}
 
   const { error: bmErr } = await supabase
   .from("board_members")
@@ -1873,6 +1878,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
