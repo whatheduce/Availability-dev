@@ -1277,17 +1277,12 @@ if (fetchErr || !created) {
   console.error("Board insert succeeded but could not fetch id. Check SELECT RLS on tables.", fetchErr);
   return;
 }
-  
-  if (!data) {
-  console.error("Board created but no row returned (RLS SELECT likely blocking).");
-  return;
-}
 
   const { error: bmErr } = await supabase
   .from("board_members")
   .upsert(
     {
-      board_id: data.id,
+      board_id: created.id,
       user_id: au.id,
       role: "owner"
     },
@@ -1888,6 +1883,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
