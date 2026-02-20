@@ -1,384 +1,425 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Availability Calendar</title>
-<style>
-html, body {
-height: 100%;
-margin: 0;
-padding: 0;
-}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Availability Calendar</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
 body {
-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-margin: 0;
-background: radial-gradient(
-circle at 20% 20%,
-rgba(255, 215, 0, 0.08),
-transparent 40%
-),
-radial-gradient(
-circle at 80% 30%,
-rgba(0, 122, 255, 0.08),
-transparent 40%
-),
-linear-gradient(180deg, #f9fafb, #eef1f5);
-min-height: 100vh;
-visibility: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  margin: 0;
+  background: radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 215, 0, 0.08),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(0, 122, 255, 0.08),
+      transparent 40%
+    ),
+    linear-gradient(180deg, #f9fafb, #eef1f5);
+  min-height: 100vh;
+  visibility: hidden;
 }
 
-#calendar {
-margin: 40px auto;
-overflow-x: auto;
-display: block;
-min-height: 200px;
-padding: 20px;
-}
+    #calendar {
+      margin: 40px auto;
+      overflow-x: auto;
+      display: block;
+      min-height: 200px;
+      padding: 20px;
+    }
 
-.centered-container {
-max-width: 500px;
-margin: 60px auto;
-padding: 20px;
-text-align: center;
-}
+    .centered-container {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 20px;
+      text-align: center;
+    }
 
-.centered-container input {
-width: 100%;
-padding: 10px;
-margin-top: 10px;
-margin-bottom: 15px;
-font-size: 16px;
-}
+    .centered-container input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
 
-.primary-btn {
-padding: 10px 18px;
-font-size: 15px;
-cursor: pointer;
-}
+    .primary-btn {
+      padding: 10px 18px;
+      font-size: 15px;
+      cursor: pointer;
+    }
 
-#rows-container input {
-margin-top: 10px;
-}
+    #rows-container input {
+      margin-top: 10px;
+    }
 
-table {
-border-collapse: separate;
-margin: 20px;
-display: table;
-}
+    table {
+      border-collapse: separate;
+      margin: 20px;
+      display: table;
+    }
 
-#availabilityTable { 
-display: table;
-border-collapse: collapse;
-width: max-content;
-min-width: 700px;
-}
+    #availabilityTable { 
+      display: table;
+      border-collapse: collapse;
+      width: max-content;
+      min-width: 700px;
+    }
 
-#availabilityTable th, 
-#availabilityTable td {
-border: 1px solid #000;
-min-width: 70px;
-height: 50px;
-}
+    #availabilityTable th, 
+    #availabilityTable td {
+      border: 1px solid #000;
+      min-width: 70px;
+      height: 50px;
+    }
 
-th, td {
-border: 1px solid black;
-padding: 10px;
-}
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+    }
 
-th {
-position: sticky;
-top: 0;
-z-index: 5;
-}
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    
+    .day-header { font-weight: bold; }
+    .monthday {
+      font-size: 13px;
+      color: #555;
+      margin-top: -34px;
+      display: block;
+    }
+    
+    .time-label {
+      font-weight: 600;
+      width: 120px;
+      border-right: 1px solid #b1b1b1;
+      position: sticky;
+      left: 0;
+      z-index: 4;
+    }
 
-.day-header { font-weight: bold; }
-.monthday {
-font-size: 13px;
-color: #555;
-margin-top: -34px;
-display: block;
-}
+    #legend {
+      margin-top: 20px;
+      text-align: left;
+      width: 280px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: none;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+      
+    }
+    .color-box {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border: 1px solid #ccc;
+    }
 
-.time-label {
-font-weight: 600;
-width: 120px;
-border-right: 1px solid #b1b1b1;
-position: sticky;
-left: 0;
-z-index: 4;
-}
+    .footer-text {
+      text-align: left;
+      margin-left: 20px;
+      margin-top: 8px;
+      margin-bottom: 30px;
+      display: none;
+    }
 
-#legend {
-margin-top: 20px;
-text-align: left;
-width: 280px;
-background: #fff;
-padding: 10px;
-border-radius: 6px;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-display: none;
-}
+    td {
+      transition: box-shadow 0.3s ease, background 0.3s ease;
+      border-radius: 8px;
+    }
+    td > .dot-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
 
-.legend-item {
-display: flex;
-align-items: center;
-margin: 5px 0;
+    .gold-header {
+      background: linear-gradient(135deg, gold, #ffef9f) !important;
+      color: #6a5200 !important;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+      font-weight: 700;
+    }
 
-}
-.color-box {
-width: 20px;
-height: 20px;
-margin-right: 8px;
-border: 1px solid #ccc;
-}
+    td:hover {
+      outline: 1px solid rgba(255, 215, 0, 0.3);
+      cursor: pointer;
+    }
 
-.footer-text {
-text-align: left;
-margin-left: 20px;
-margin-top: 8px;
-margin-bottom: 30px;
-display: none;
-}
+    .dot-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      flex: 0 0 auto;
+    }
 
-td {
-transition: box-shadow 0.3s ease, background 0.3s ease;
-border-radius: 8px;
-}
-td > .dot-container {
-display: flex;
-justify-content: center;
-align-items: center;
-width: 100%;
-}
+    .gold-cell {
+      background: linear-gradient(165deg, #ffd700, #ffea8a);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7), inset 0 0 8px rgba(255,215,0,0.6);
+      animation: goldPulse 1.6s infinite ease-in-out;
+    }
 
-.gold-header {
-background: linear-gradient(135deg, gold, #ffef9f) !important;
-color: #6a5200 !important;
-box-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-font-weight: 700;
-}
+    @keyframes goldPulse {
+      0% { box-shadow: 0 0 25px rgba(255,215,0,1); }
+      50% { box-shadow: 0 0 50px rgba(255,215,0,0.5); }
+      100% { box-shadow: 0 0 25px rgba(255,215,0,1); }
+    }
 
-td:hover {
-outline: 1px solid rgba(255, 215, 0, 0.3);
-cursor: pointer;
-}
+    .structure-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+      text-align: left;
+    }
 
-.dot-container {
-display: flex;
-justify-content: center;
-align-items: center;
-gap: 6px;
-width: 100%;
-height: 100%;
-}
+    .structure-card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+    }
 
-.dot {
-width: 16px;
-height: 16px;
-border-radius: 50%;
-border: 1px solid rgba(0, 0, 0, 0.2);
-flex: 0 0 auto;
-}
+    .structure-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+      border-color: rgba(0,0,0,0.18);
+    }
 
-.gold-cell {
-background: linear-gradient(165deg, #ffd700, #ffea8a);
-box-shadow: 0 0 8px rgba(255, 215, 0, 0.7), inset 0 0 8px rgba(255,215,0,0.6);
-animation: goldPulse 1.6s infinite ease-in-out;
-}
+    .structure-card.active {
+      outline: 2px solid rgba(0, 122, 255, 0.35);
+      box-shadow: 0 12px 26px rgba(0, 122, 255, 0.12);
+    }
 
-@keyframes goldPulse {
-0% { box-shadow: 0 0 25px rgba(255,215,0,1); }
-50% { box-shadow: 0 0 50px rgba(255,215,0,0.5); }
-100% { box-shadow: 0 0 25px rgba(255,215,0,1); }
-}
+    .structure-title {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
 
-.structure-row {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 16px;
-margin-top: 20px;
-text-align: left;
-}
+    .structure-subtitle {
+      font-size: 13px;
+      color: #555;
+    }
 
-.structure-card {
-background: rgba(255,255,255,0.9);
-border: 1px solid rgba(0,0,0,0.12);
-border-radius: 14px;
-padding: 16px;
-cursor: pointer;
-user-select: none;
-transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
-}
+    .pro-heading {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
 
-.structure-card:hover {
-transform: translateY(-1px);
-box-shadow: 0 10px 22px rgba(0,0,0,0.08);
-border-color: rgba(0,0,0,0.18);
-}
+    .pro-select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12);
+      background: #f1f1f1;
+      color: #777;
+      cursor: not-allowed;
+    }
 
-.structure-card.active {
-outline: 2px solid rgba(0, 122, 255, 0.35);
-box-shadow: 0 12px 26px rgba(0, 122, 255, 0.12);
-}
+    .pro-select:disabled {
+      opacity: 0.8;
+    }
 
-.structure-title {
-font-weight: 700;
-font-size: 16px;
-margin-bottom: 4px;
-}
+    .pro-hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #888;
+    }
 
-.structure-subtitle {
-font-size: 13px;
-color: #555;
-}
+    @keyframes dotPopIn {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
 
-.pro-heading {
-font-weight: 700;
-margin-bottom: 8px;
-}
+    .dot.pop-in {
+      animation: dotPopIn 120ms ease-out;
+      transform-origin: center;
+    }
 
-.pro-select {
-width: 100%;
-padding: 10px;
-border-radius: 12px;
-border: 1px solid rgba(0,0,0,0.12);
-background: #f1f1f1;
-color: #777;
-cursor: not-allowed;
-}
-
-.pro-select:disabled {
-opacity: 0.8;
-}
-
-.pro-hint {
-margin-top: 8px;
-font-size: 12px;
-color: #888;
-}
-
-@keyframes dotPopIn {
-from { transform: scale(0.5); opacity: 0; }
-to   { transform: scale(1); opacity: 1; }
-}
-
-.dot.pop-in {
-animation: dotPopIn 120ms ease-out;
-transform-origin: center;
-}
-
-</style>
+  </style>
 </head>
 
 
 
 
-
+  
 <body>
-<!-- user selection -->
+                                                                                       <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px;">
-<h2>Choose Your Name & Colour</h2>
+  <h2>Choose Your Name & Colour</h2>
 
-<input id="identity-name" placeholder="Your name" style="margin-bottom:12px;" />
+  <input id="identity-name" placeholder="Your name" style="margin-bottom:12px;" />
 
-<div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;">
-<label for="identity-color" style="font-weight:600;">Dot colour</label>
-<input id="identity-color" type="color" value="#2d7ff9" style="width:46px; height:34px; border:none; background:transparent; padding:0;" />
+  <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;">
+    <label for="identity-color" style="font-weight:600;">Dot colour</label>
+    <input id="identity-color" type="color" value="#2d7ff9" style="width:46px; height:34px; border:none; background:transparent; padding:0;" />
+  </div>
+
+  <button id="save-identity">Continue</button>
 </div>
 
-<button id="save-identity">Continue</button>
+<!-- AUTH OVERLAY (blur + single form) -->
+<div id="auth-overlay" style="
+  position:fixed; inset:0; display:none; z-index:9999;
+  background:rgba(255,255,255,0.35); backdrop-filter: blur(8px);
+">
+  <div style="
+    max-width:420px; margin:80px auto; background:rgba(255,255,255,0.92);
+    border:1px solid rgba(0,0,0,0.12); border-radius:16px; padding:18px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+    text-align:left;
+  ">
+    <div style="font-weight:800; font-size:18px; margin-bottom:6px;">
+      Sign in to access this calendar
+    </div>
+    <div id="auth-subtitle" style="font-size:13px; color:#666; margin-bottom:12px;">
+      Create an account or sign in to continue.
+    </div>
+
+    <input id="auth-email" placeholder="Email" type="email"
+      style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
+
+    <input id="auth-password" placeholder="Password" type="password"
+      style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+
+    <button id="auth-submit" class="primary-btn" style="width:100%;">
+      Continue
+    </button>
+
+    <div style="display:flex; justify-content:space-between; margin-top:10px; gap:10px;">
+      <button id="auth-toggle-mode" class="primary-btn" style="flex:1; background:#f3f4f6;">
+        Create account
+      </button>
+      <button id="auth-forgot" class="primary-btn" style="flex:1; background:#f3f4f6;">
+        Forgot password
+      </button>
+    </div>
+
+    <div id="auth-msg" style="margin-top:10px; font-size:13px; color:#b00020; display:none;"></div>
+  </div>
 </div>
 
-
+                                                                          
 <div id="create-board" class="centered-container">
 
-<button id="start-create" class="primary-btn">
-Create New Calendar
-</button>
+  <button id="start-create" class="primary-btn">
+    Create New Calendar
+  </button>
 
-<div id="board-setup" style="display:none;">
+  <div id="board-setup" style="display:none;">
 
-<div id="name-step">
-<h2>Name Your Calendar</h2>
-<input id="board-name" placeholder="Calendar name" />
+    <div id="name-step">
+  <h2>Name Your Calendar</h2>
+  <input id="board-name" placeholder="Calendar name" />
 
-<div style="margin-top:14px; text-align:left;">
-<label for="host-timezone" style="display:block; font-weight:600; margin-bottom:6px;">
-Calendar Timezone
-</label>
-<select id="host-timezone" style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
-<option>Loading timezones…</option>
-</select>
-<div style="font-size:12px; color:#666; margin-top:6px;">
-This controls when the calendar rolls over at midnight.
-</div>
-</div>
-
-<div class="structure-row">
-
-<!-- LEFT: Dev custom -->
-<div class="structure-left">
-<div id="dev-custom-card" class="structure-card">
-<div class="structure-title">Dev Custom</div>
-<div class="structure-subtitle">Use custom time blocks (dev mode)</div>
+  <div style="margin-top:14px; text-align:left;">
+  <label for="host-timezone" style="display:block; font-weight:600; margin-bottom:6px;">
+    Calendar Timezone
+  </label>
+  <select id="host-timezone" style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
+    <option>Loading timezones…</option>
+  </select>
+  <div style="font-size:12px; color:#666; margin-top:6px;">
+    This controls when the calendar rolls over at midnight.
+  </div>
 </div>
 
-<div id="meals-card" class="structure-card" style="margin-top:12px;">
-<div class="structure-title">Meals</div>
-<div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
+  <div class="structure-row">
+
+  <!-- LEFT: Dev custom -->
+  <div class="structure-left">
+    <div id="dev-custom-card" class="structure-card">
+    <div class="structure-title">Dev Custom</div>
+    <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
+    </div>
+
+    <div id="meals-card" class="structure-card" style="margin-top:12px;">
+      <div class="structure-title">Meals</div>
+      <div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Pro dropdown (disabled) -->
+  <div class="structure-right">
+    <div class="pro-heading">Professional Structures</div>
+
+    <select id="pro-structure-select" class="pro-select" disabled>
+      <option>Custom</option>
+      <option>Executive Sprint</option>
+      <option>Corporate Dinner</option>
+    </select>
+
+    <div class="pro-hint">Pro features (locked)</div>
+  </div>
+    <button id="go-create" class="primary-btn" style="margin-top:20px; display:none;">
+      Create Calendar
+    </button>
 </div>
 </div>
+    
+  <div id="details-step" style="display:none;">   
+    <div id="row-builder" style="display:none; margin-top:25px;">
+  <h3>Define Time Blocks</h3>
 
-<!-- RIGHT: Pro dropdown (disabled) -->
-<div class="structure-right">
-<div class="pro-heading">Professional Structures</div>
+  <div id="rows-container"></div>
 
-<select id="pro-structure-select" class="pro-select" disabled>
-<option>Custom</option>
-<option>Executive Sprint</option>
-<option>Corporate Dinner</option>
-</select>
-
-<div class="pro-hint">Pro features (locked)</div>
+  <button id="add-row">Add Time Block</button>
 </div>
-<button id="go-create" class="primary-btn" style="margin-top:20px; display:none;">
-Create Calendar
-</button>
-</div>
-</div>
-
-<div id="details-step" style="display:none;">   
-<div id="row-builder" style="display:none; margin-top:25px;">
-<h3>Define Time Blocks</h3>
-
-<div id="rows-container"></div>
-
-<button id="add-row">Add Time Block</button>
-</div>
-
+    
 <div id="gold-threshold-wrap" style="margin-top:18px; text-align:left;">
-<label for="gold-threshold" style="display:block; font-weight:600; margin-bottom:6px;">
-Gold threshold
-</label>
+  <label for="gold-threshold" style="display:block; font-weight:600; margin-bottom:6px;">
+    Gold threshold
+   </label>
 
-<select id="gold-threshold"
-style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
-<option value="" selected disabled>Select a number…</option>
-<!-- options will be populated by JS so we can disable 6–30 cleanly -->
-</select>
+   <select id="gold-threshold"
+    style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
+    <option value="" selected disabled>Select a number…</option>
+    <!-- options will be populated by JS so we can disable 6–30 cleanly -->
+  </select>
 
-<div style="font-size:12px; color:#666; margin-top:6px;">
-Cells turn gold when dots meet or exceed this number.
+  <div style="font-size:12px; color:#666; margin-top:6px;">
+     Cells turn gold when dots meet or exceed this number.
+  </div>
 </div>
-</div>
-
+    
 <div id="create-actions" style="display:none; margin-top:20px;">
-<button id="create-board-btn" class="primary-btn">
-Create Calendar
-</button>
+  <button id="create-board-btn" class="primary-btn">
+    Create Calendar
+  </button>
 </div>
 </div>
 
@@ -386,32 +427,32 @@ Create Calendar
 </div>
 
 <div id="calendar" style="display:none;">
-<table id="availabilityTable"></table>
+  <table id="availabilityTable"></table>
 </div>
 
 <!-- footer (outside the table) -->
 <div class="footer-text" style="display:none;">
-- Morning denotes availability starting quite early, assumedly before 10am. <br>
-- Pre-Lunch means you'd be around for lunch, probably starting something like 11-12am. <br>
-- Post-Lunch you're looking at something around 1-3pm, up until around dinner time. <br>
-- Dinner I'd say falls around the 5pm+ region, ending around 9pm. <br>
-- Late-Evening we're talking about you around after our earlier 9pm finishes until late, like 11+ or so.
+  - Morning denotes availability starting quite early, assumedly before 10am. <br>
+  - Pre-Lunch means you'd be around for lunch, probably starting something like 11-12am. <br>
+  - Post-Lunch you're looking at something around 1-3pm, up until around dinner time. <br>
+  - Dinner I'd say falls around the 5pm+ region, ending around 9pm. <br>
+  - Late-Evening we're talking about you around after our earlier 9pm finishes until late, like 11+ or so.
 </div>
 
 <div id="presence" style="display:none; text-align:center; margin-top:14px; color:#555; font-size:14px;">
-Viewing now: <span id="presence-count">1</span>
+  Viewing now: <span id="presence-count">1</span>
 </div>  
-
+  
 <div id="legend" style="display:none;">
-<h3>Legend</h3>
-<div id="legendList"></div>
+  <h3>Legend</h3>
+  <div id="legendList"></div>
 </div>
 
 
 
 
 
-
+  
 <script type="module">
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -419,429 +460,643 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-/* === Invite Token + Current Table === */
+  /* === Invite Token + Current Table === */
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("token");
 const manageToken = params.get("manage");
 
 let currentTable = null;
 let availabilityChannel = null;
-let tableChannel = null;
-
-
+let tableChannel = null;  
 let fullRefreshTimer = null;
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
-clearTimeout(fullRefreshTimer);
-fullRefreshTimer = setTimeout(() => {
-console.log("Idle refresh running");
-if (currentTable) loadAvailability();
-}, ms);
+  clearTimeout(fullRefreshTimer);
+  fullRefreshTimer = setTimeout(() => {
+    console.log("Idle refresh running");
+    if (currentTable) loadAvailability();
+  }, ms);
 }
 
 
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
 
-
+  
 function renderPresence() {
-const wrap = document.getElementById("presence");
-const countEl = document.getElementById("presence-count");
-if (!wrap || !countEl || !presenceChannel) return;
+  const wrap = document.getElementById("presence");
+  const countEl = document.getElementById("presence-count");
+  if (!wrap || !countEl || !presenceChannel) return;
 
-const state = presenceChannel.presenceState(); // { key: [metas...] }
-const metas = Object.values(state).flat();
-const uniqueUsers = new Map();
+  const state = presenceChannel.presenceState(); // { key: [metas...] }
+  const metas = Object.values(state).flat();
+  const uniqueUsers = new Map();
 
-metas.forEach(m => {
-// de-dupe by user_id (a user can have multiple metas if multiple tabs)
-if (m.user_id) uniqueUsers.set(m.user_id, m);
-});
+  metas.forEach(m => {
+    // de-dupe by user_id (a user can have multiple metas if multiple tabs)
+    if (m.user_id) uniqueUsers.set(m.user_id, m);
+  });
 
-wrap.style.display = "block";
-countEl.textContent = String(uniqueUsers.size || 0);
+  wrap.style.display = "block";
+  countEl.textContent = String(uniqueUsers.size || 0);
 }
-
-
+  
+  
 async function rollForwardIfNeeded(tableId) {
-const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
-p_table_id: tableId
-});
+  const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
+    p_table_id: tableId
+  });
 
-if (error) {
-console.error("roll_board_if_needed failed:", error);
-return 0;
+  if (error) {
+    console.error("roll_board_if_needed failed:", error);
+    return 0;
+  }
+
+  return data || 0;
 }
 
-return data || 0;
+
+async function getAuthUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) return null;
+  return data.user || null;
 }
 
+  
+async function getOrCreateProfile({ name, color }) {
+  const user = await getAuthUser();
+  if (!user) return null;
+
+  // try fetch
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  // create
+  const { data: created, error } = await supabase
+    .from("profiles")
+    .insert({ user_id: user.id, name, color })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Profile create failed:", error);
+    return null;
+  }
+  return created;
+}
+
+
+let authMode = "signin"; // "signin" or "signup"
+
+function showAuthOverlay(msg = "") {
+  const overlay = document.getElementById("auth-overlay");
+  const message = document.getElementById("auth-msg");
+  const toggle = document.getElementById("auth-toggle-mode");
+  const subtitle = document.getElementById("auth-subtitle");
+  if (!overlay || !toggle || !subtitle) return;
+
+  overlay.style.display = "block";
+
+  if (authMode === "signin") {
+    toggle.textContent = "Create account";
+    subtitle.textContent = "Sign in to continue.";
+  } else {
+    toggle.textContent = "I already have an account";
+    subtitle.textContent = "Create your account (you must confirm your email).";
+  }
+
+  if (message) {
+    if (msg) {
+      message.style.display = "block";
+      message.textContent = msg;
+    } else {
+      message.style.display = "none";
+      message.textContent = "";
+    }
+  }
+}
+
+function hideAuthOverlay() {
+  const overlay = document.getElementById("auth-overlay");
+  if (overlay) overlay.style.display = "none";
+}
+
+async function hydrateUserFromAuth() {
+  const au = await getAuthUser();
+  if (!au) return null;
+
+  // If they don't have a profile yet, we will create it using whatever is in identity inputs
+  // (keeps your existing “name + colour” concept)
+  const nameInput = document.getElementById("identity-name");
+  const colorInput = document.getElementById("identity-color");
+  const name = (nameInput?.value || localStorage.getItem("globalUserName") || "").trim();
+  const color = (colorInput?.value || localStorage.getItem("globalUserColor") || "#2d7ff9").trim();
+
+  const profile = await getOrCreateProfile({ name: name || "User", color });
+
+  if (!profile) return null;
+
+  // Set your app-level user object
+  user = {
+    id: au.id,
+    name: profile.name,
+    color: profile.color
+  };
+
+  // Optional: keep for UI convenience (NOT identity anymore)
+  localStorage.setItem("globalUserName", user.name);
+  localStorage.setItem("globalUserColor", user.color);
+
+  return user;
+}
+
+async function handleAuthSubmit() {
+  const emailEl = document.getElementById("auth-email");
+  const passEl = document.getElementById("auth-password");
+  const msgEl = document.getElementById("auth-msg");
+
+  const email = (emailEl?.value || "").trim();
+  const password = (passEl?.value || "").trim();
+
+  if (!email || !password) {
+    showAuthOverlay("Please enter email and password.");
+    return;
+  }
+
+  if (msgEl) { msgEl.style.display = "none"; msgEl.textContent = ""; }
+
+  if (authMode === "signup") {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      showAuthOverlay(error.message || "Sign up failed.");
+      return;
+    }
+    // Confirm email is ON: user must confirm before sign-in session works reliably
+    showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
+    authMode = "signin";
+    return;
+  }
+
+  // signin
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    showAuthOverlay(error.message || "Sign in failed.");
+    return;
+  }
+
+  const hydrated = await hydrateUserFromAuth();
+  if (!hydrated) {
+    showAuthOverlay("Signed in, but failed to load your profile.");
+    return;
+  }
+
+  hideAuthOverlay();
+
+  // Now proceed to board or create screen
+  if (inviteToken || manageToken) {
+    await loadTable(); // will now have user set
+  }
+}
+  
 
 function subscribePresence() {
-if (!currentTable) return;
+  if (!currentTable) return;
 
-// Clean up if re-subscribing
-if (presenceChannel) supabase.removeChannel(presenceChannel);
+  // Clean up if re-subscribing
+  if (presenceChannel) supabase.removeChannel(presenceChannel);
 
-// Ensure we have some identity to track
-const safeUserId = user?.id || localStorage.getItem("globalUserId") || crypto.randomUUID();
-if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
+  // Ensure we have some identity to track
+  const safeUserId = user?.id;
+  if (!safeUserId) return; // no auth user yet, don’t track presence
+  if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
 
-const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
+  const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
 
-presenceChannel = supabase
-.channel(`presence:${currentTable.id}`, {
-config: { presence: { key: safeUserId } }
-})
-.on("presence", { event: "sync" }, () => {
-renderPresence();
-})
-.on("presence", { event: "join" }, () => {
-renderPresence();
-})
-.on("presence", { event: "leave" }, () => {
-renderPresence();
-})
-.subscribe(async (status) => {
-// helpful during dev
-console.log("presence channel:", status);
+  presenceChannel = supabase
+    .channel(`presence:${currentTable.id}`, {
+      config: { presence: { key: safeUserId } }
+    })
+    .on("presence", { event: "sync" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "join" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "leave" }, () => {
+      renderPresence();
+    })
+    .subscribe(async (status) => {
+      // helpful during dev
+      console.log("presence channel:", status);
 
-if (status === "SUBSCRIBED") {
-await presenceChannel.track({
-user_id: safeUserId,
-name: safeName,
-at: new Date().toISOString()
-});
+      if (status === "SUBSCRIBED") {
+        await presenceChannel.track({
+          user_id: safeUserId,
+          name: safeName,
+          at: new Date().toISOString()
+        });
+      }
+    });
 }
-});
-}
 
-
+  
 function ensureLegendUser(entry) {
-if (!entry) return;
-const key = entry.user_id || entry.name;
-if (!key) return;
+  if (!entry) return;
+  const key = entry.user_id || entry.name;
+  if (!key) return;
 
-// already present?
-const existing = legendList.querySelector(
-entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
-: `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
-);
-if (existing) return;
+  // already present?
+  const existing = legendList.querySelector(
+    entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
+                  : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
+  );
+  if (existing) return;
 
-const div = document.createElement("div");
-div.className = "legend-item";
-if (entry.user_id) div.dataset.userId = entry.user_id;
-if (entry.name) div.dataset.name = entry.name;
+  const div = document.createElement("div");
+  div.className = "legend-item";
+  if (entry.user_id) div.dataset.userId = entry.user_id;
+  if (entry.name) div.dataset.name = entry.name;
 
-div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
-legendList.appendChild(div);
+  div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
+  legendList.appendChild(div);
 }
 
 
+async function ensureMembership(boardId) {
+  const au = await getAuthUser();
+  if (!au) return false;
+
+  // if membership already exists, do nothing
+  const { data: existing, error: selErr } = await supabase
+    .from("board_members")
+    .select("role")
+    .eq("board_id", boardId)
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (selErr) {
+    console.warn("ensureMembership select failed:", selErr);
+    // still try insert as a fallback
+  }
+
+  if (existing) return true;
+
+  const { error } = await supabase
+    .from("board_members")
+    .insert({ board_id: boardId, user_id: au.id, role: "member" });
+
+  if (error) {
+    console.warn("ensureMembership insert failed:", error);
+    return false;
+  }
+  return true;
+}
+
+  
+  
 async function rebuildDotsForCell(cell) {
-if (!currentTable) return;
+  if (!currentTable) return;
 
-const day = cell.dataset.day;
-const time = cell.dataset.time;
+  const day = cell.dataset.day;
+  const time = cell.dataset.time;
 
-const { data } = await supabase
-.from("availability_dev")
-.select("*")
-.eq("table_id", currentTable.id)
-.eq("day", day)
-.eq("time", time);
+  const { data } = await supabase
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id)
+    .eq("day", day)
+    .eq("time", time);
 
-if (!data || data.length === 0) return;
+  if (!data || data.length === 0) return;
 
-let dotContainer = document.createElement("div");
-dotContainer.className = "dot-container";
+  let dotContainer = document.createElement("div");
+  dotContainer.className = "dot-container";
 
-data.forEach(entry => {
-const dot = document.createElement("div");
-dot.className = "dot";
-dot.style.background = entry.color;
-dot.title = entry.name;
-dot.dataset.userId = entry.user_id;
-dot.dataset.name = entry.name;
+  data.forEach(entry => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.background = entry.color;
+    dot.title = entry.name;
+    dot.dataset.userId = entry.user_id;
+    dot.dataset.name = entry.name;
 
-dotContainer.appendChild(dot);
-});
+    dotContainer.appendChild(dot);
+  });
 
-cell.appendChild(dotContainer);
+  cell.appendChild(dotContainer);
 }
 
-
+  
 function applyGoldStateForCell(cell, day) {
-const goldThreshold = currentTable?.gold_threshold ?? 4;
+  const goldThreshold = Number(currentTable?.gold_threshold);
+    if (!Number.isFinite(goldThreshold)) return;
 
-let dotContainer = cell.querySelector(".dot-container");
-const dotCount = dotContainer ? dotContainer.children.length : 0;
+  let dotContainer = cell.querySelector(".dot-container");
+  const dotCount = dotContainer ? dotContainer.children.length : 0;
 
-// 🟡 TURN GOLD ON
-if (dotCount >= goldThreshold) {
-cell.classList.add("gold-cell");
-if (dotContainer) dotContainer.remove();
+  // 🟡 TURN GOLD ON
+  if (dotCount >= goldThreshold) {
+    cell.classList.add("gold-cell");
+    if (dotContainer) dotContainer.remove();
+  }
+
+  // ⚪ TURN GOLD OFF
+  else {
+    const wasGold = cell.classList.contains("gold-cell");
+    cell.classList.remove("gold-cell");
+
+    // ⭐ If we just transitioned FROM gold → normal
+    // we must rebuild the dots for this cell from DB
+    if (wasGold) rebuildDotsForCell(cell);
+  }
+
+  // Update day header
+  const dayNum = parseInt(day, 10);
+  const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+  if (!th) return;
+
+  const anyGoldInDay = !!table.querySelector(`td[data-day="${dayNum}"].gold-cell`);
+  if (anyGoldInDay) th.classList.add("gold-header");
+  else th.classList.remove("gold-header");
 }
 
-// ⚪ TURN GOLD OFF
-else {
-const wasGold = cell.classList.contains("gold-cell");
-cell.classList.remove("gold-cell");
-
-// ⭐ If we just transitioned FROM gold → normal
-// we must rebuild the dots for this cell from DB
-if (wasGold) rebuildDotsForCell(cell);
-}
-
-// Update day header
-const dayNum = parseInt(day, 10);
-const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
-if (!th) return;
-
-const anyGoldInDay = !!table.querySelector(`td[data-day="${dayNum}"].gold-cell`);
-if (anyGoldInDay) th.classList.add("gold-header");
-else th.classList.remove("gold-header");
-}
-
-
-
+  
+  
 function handleAvailabilityChange(payload) {
-// For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
-const entry =
-payload.eventType === "DELETE"
-? payload.old
-: (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
+  // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
+  const entry =
+  payload.eventType === "DELETE"
+    ? payload.old
+    : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
 
-if (!entry) return;
+  if (!entry) return;
 
-// Find the specific cell
-const cell = table.querySelector(
-`td[data-day="${entry.day}"][data-time="${entry.time}"]`
-);
-if (!cell) return;
+  // Find the specific cell
+  const cell = table.querySelector(
+    `td[data-day="${entry.day}"][data-time="${entry.time}"]`
+  );
+  if (!cell) return;
 
-// Ensure dot container exists for inserts
-let dotContainer = cell.querySelector(".dot-container");
+  // Ensure dot container exists for inserts
+  let dotContainer = cell.querySelector(".dot-container");
 
-// Helper to remove a user's dot from this cell
-function removeDot(entryObj) {
-// Prefer user_id (best), fall back to name (works for legacy rows / missing user_id on delete payload)
-let selector = null;
+  // Helper to remove a user's dot from this cell
+  function removeDot(entryObj) {
+  // Prefer user_id (best), fall back to name (works for legacy rows / missing user_id on delete payload)
+  let selector = null;
 
-if (entryObj.user_id) {
-selector = `.dot[data-user-id="${entryObj.user_id}"]`;
-} else if (entryObj.name) {
-selector = `.dot[data-name="${CSS.escape(entryObj.name)}"]`;
-} else {
-return;
+    if (entryObj.user_id) {
+      selector = `.dot[data-user-id="${entryObj.user_id}"]`;
+    } else if (entryObj.name) {
+      selector = `.dot[data-name="${CSS.escape(entryObj.name)}"]`;
+    } else {
+      return;
+    }
+
+  const dot = cell.querySelector(selector);
+  if (dot) dot.remove();
+
+  // Re-check container after removal
+  dotContainer = cell.querySelector(".dot-container");
+  if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
 }
 
-const dot = cell.querySelector(selector);
-if (dot) dot.remove();
+  if (payload.eventType === "DELETE") {
+    // Remove that user's dot
+    removeDot(entry);
+    applyGoldStateForCell(cell, entry.day);
+    // Keep gold/legend correct with a later idle refresh
+    scheduleFullRefreshIdle(20000);
+    return;
+  }
 
-// Re-check container after removal
-dotContainer = cell.querySelector(".dot-container");
-if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
+  if (payload.eventType === "INSERT") {
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+      cell.appendChild(dotContainer);
+    }
+
+    // Avoid duplicate DOT creation, but DO NOT return early (we still need gold/legend updates)
+    const alreadyHasDot =
+      (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) ||
+      (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`));
+
+    if (!alreadyHasDot) {
+      const dot = document.createElement("div");
+      dot.className = "dot";
+      dot.style.background = entry.color;
+      dot.title = entry.name;
+      dot.dataset.userId = entry.user_id;
+      dot.dataset.name = entry.name;
+
+      dotContainer.appendChild(dot);
+    }
+
+    // Always run these even if the dot already existed (this fixes the “clicking user” case)
+    ensureLegendUser(entry);
+    applyGoldStateForCell(cell, entry.day);
+
+    // Keep gold/legend correct with a later idle refresh
+    scheduleFullRefreshIdle(20000);
+    return;
+  }
+
+  if (payload.eventType === "UPDATE") {
+    // If updates ever happen, safest is: remove old user dot and add new (rare)
+    removeDot(entry);
+
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+      cell.appendChild(dotContainer);
+    }
+
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.background = entry.color;
+    dot.title = entry.name;
+    dot.dataset.userId = entry.user_id;
+    dotContainer.appendChild(dot);
+
+    scheduleFullRefreshIdle(20000);
+  }
 }
-
-if (payload.eventType === "DELETE") {
-// Remove that user's dot
-removeDot(entry);
-applyGoldStateForCell(cell, entry.day);
-// Keep gold/legend correct with a later idle refresh
-scheduleFullRefreshIdle(20000);
-return;
-}
-
-if (payload.eventType === "INSERT") {
-if (!dotContainer) {
-dotContainer = document.createElement("div");
-dotContainer.className = "dot-container";
-cell.appendChild(dotContainer);
-}
-
-// Avoid duplicate DOT creation, but DO NOT return early (we still need gold/legend updates)
-const alreadyHasDot =
-(entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) ||
-(!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`));
-
-if (!alreadyHasDot) {
-const dot = document.createElement("div");
-dot.className = "dot";
-dot.style.background = entry.color;
-dot.title = entry.name;
-dot.dataset.userId = entry.user_id;
-dot.dataset.name = entry.name;
-
-dotContainer.appendChild(dot);
-}
-
-// Always run these even if the dot already existed (this fixes the “clicking user” case)
-ensureLegendUser(entry);
-applyGoldStateForCell(cell, entry.day);
-
-// Keep gold/legend correct with a later idle refresh
-scheduleFullRefreshIdle(20000);
-return;
-}
-
-if (payload.eventType === "UPDATE") {
-// If updates ever happen, safest is: remove old user dot and add new (rare)
-removeDot(entry);
-
-if (!dotContainer) {
-dotContainer = document.createElement("div");
-dotContainer.className = "dot-container";
-cell.appendChild(dotContainer);
-}
-
-const dot = document.createElement("div");
-dot.className = "dot";
-dot.style.background = entry.color;
-dot.title = entry.name;
-dot.dataset.userId = entry.user_id;
-dotContainer.appendChild(dot);
-
-scheduleFullRefreshIdle(20000);
-}
-}
-
-
+  
+  
 function subscribeRealtime() {
-if (!currentTable) return;
+  if (!currentTable) return;
 
-// Clean up existing channels (important if loadTable runs again)
-if (availabilityChannel) supabase.removeChannel(availabilityChannel);
-if (tableChannel) supabase.removeChannel(tableChannel);
+  // Clean up existing channels (important if loadTable runs again)
+  if (availabilityChannel) supabase.removeChannel(availabilityChannel);
+  if (tableChannel) supabase.removeChannel(tableChannel);
 
-// Availability changes for this board
-availabilityChannel = supabase
-.channel(`availability:${currentTable.id}`)
-.on(
-"postgres_changes",
-{
-event: "*",
-schema: "public",
-table: "availability_dev",
-filter: `table_id=eq.${currentTable.id}`
-},
-(payload) => {
-console.log("AVAILABILITY EVENT:", payload.eventType, payload);
-handleAvailabilityChange(payload);
+  // Availability changes for this board
+  availabilityChannel = supabase
+    .channel(`availability:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "availability_dev",
+        filter: `table_id=eq.${currentTable.id}`
+      },
+      (payload) => {
+        console.log("AVAILABILITY EVENT:", payload.eventType, payload);
+        handleAvailabilityChange(payload);
+    }
+
+    )
+    .subscribe((status) => {
+      console.log("availability channel:", status);
+    });
+
+  // Board changes (start_date / row_structure updates)
+  tableChannel = supabase
+    .channel(`table:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "tables",
+        filter: `id=eq.${currentTable.id}`
+      },
+      async (payload) => {
+        currentTable = { ...currentTable, ...payload.new };
+        buildCalendar();
+        await loadAvailability();
+      }
+    )
+    .subscribe((status) => {
+      console.log("table channel:", status);
+    });
 }
 
-)
-.subscribe((status) => {
-console.log("availability channel:", status);
-});
-
-// Board changes (start_date / row_structure updates)
-tableChannel = supabase
-.channel(`table:${currentTable.id}`)
-.on(
-"postgres_changes",
-{
-event: "UPDATE",
-schema: "public",
-table: "tables",
-filter: `id=eq.${currentTable.id}`
-},
-async (payload) => {
-currentTable = { ...currentTable, ...payload.new };
-buildCalendar();
-await loadAvailability();
-}
-)
-.subscribe((status) => {
-console.log("table channel:", status);
-});
-}
-
-
+  
 function populateGoldThresholdSelect(isPro) {
-const sel = document.getElementById("gold-threshold");
-if (!sel) return;
+  const sel = document.getElementById("gold-threshold");
+  if (!sel) return;
 
-// clear existing (keep the placeholder)
-sel.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
+  // clear existing (keep the placeholder)
+  sel.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
 
-for (let n = 1; n <= 30; n++) {
-const opt = document.createElement("option");
-opt.value = String(n);
-opt.textContent = `${n}`;
+  for (let n = 1; n <= 30; n++) {
+    const opt = document.createElement("option");
+    opt.value = String(n);
+    opt.textContent = `${n}`;
 
-// Free: 1–5 enabled, 6–30 disabled
-if (!isPro && n >= 6) opt.disabled = true;
+    // Free: 1–5 enabled, 6–30 disabled
+    if (!isPro && n >= 6) opt.disabled = true;
 
-sel.appendChild(opt);
+    sel.appendChild(opt);
+  }
 }
-}
 
-
+  
 function buildUserFromStorage() {
-const name = localStorage.getItem("globalUserName");
-const color = localStorage.getItem("globalUserColor");
-if (!name || !color) return null;
+  const name = localStorage.getItem("globalUserName");
+  const color = localStorage.getItem("globalUserColor");
+  if (!name || !color) return null;
 
-return {
-id: getOrCreateUserId(),
-name,
-color
-};
+  return {
+    id: getOrCreateUserId(),
+    name,
+    color
+  };
 }
 
-
+  
 async function loadTable() {
-if (!inviteToken && !manageToken) return;
+  if (!inviteToken && !manageToken) return;
 
-const queryField = inviteToken ? "invite_token" : "owner_token";
-const tokenValue = inviteToken || manageToken;
+  const queryField = inviteToken ? "invite_token" : "owner_token";
+  const tokenValue = inviteToken || manageToken;
 
-const { data, error } = await supabase
-.from("tables")
-.select("*")
-.eq(queryField, tokenValue)
-.single();
+  const { data, error } = await supabase
+    .from("tables")
+    .select("*")
+    .eq(queryField, tokenValue)
+    .maybeSingle();
 
-if (error || !data) {
-console.error("Invalid link", error);
-return;
+  if (error) {
+  console.error("Error loading table:", error);
+}
+
+if (!data) {
+  // No board exists for this token (e.g., DB wiped or invalid link)
+  document.getElementById("create-board").style.display = "block";
+  document.getElementById("calendar").style.display = "none";
+  legendDiv.style.display = "none";
+
+  // optional: clear stale remembered board
+  localStorage.removeItem("lastBoardToken");
+
+  alert("That calendar link is no longer valid (calendar not found). Please create a new calendar.");
+  return;
 }
 
 currentTable = data;
 
-// ⭐ remember this board for next time
+  
+  // ⭐ remember this board for next time
 if (inviteToken) {
-localStorage.setItem("lastBoardToken", inviteToken);
+  localStorage.setItem("lastBoardToken", inviteToken);
 }
 
-// Roll board forward based on host timezone + start_date (any visitor can trigger)
+  // Roll board forward based on host timezone + start_date (any visitor can trigger)
 const shifted = await rollForwardIfNeeded(currentTable.id);
 
 // Always refetch so the UI always uses the DB's current start_date/host_tz
 const { data: refreshed, error: refreshErr } = await supabase
-.from("tables")
-.select("*")
-.eq("id", currentTable.id)
-.single();
+  .from("tables")
+  .select("*")
+  .eq("id", currentTable.id)
+  .single();
 
 if (!refreshErr && refreshed) currentTable = refreshed;
-// Always hide board creation when viewing a board
+  // Always hide board creation when viewing a board
 document.getElementById("create-board").style.display = "none";
 
-// Build user from storage (incognito won't have one yet)
-user = buildUserFromStorage();
+// Use Supabase Auth identity (not localStorage UUID)
+const au = await getAuthUser();
+if (!au) {
+  // Not signed in → show blurred auth overlay and stop interactions
+  showAuthOverlay();
 
-if (!user) {
-// No identity yet → force name entry first
-document.getElementById("identity-section").style.display = "block";
-document.getElementById("calendar").style.display = "none";
-document.getElementById("legend").style.display = "none";
-document.querySelector(".footer-text").style.display = "none";
-document.getElementById("presence").style.display = "none";
-return; // ⛔ stop here until they enter a name
+  document.getElementById("identity-section").style.display = "none";
+  document.getElementById("create-board").style.display = "none";
+
+  // Show the calendar BEHIND the blur, but build it so there's something there
+  document.getElementById("calendar").style.display = "block";
+  document.getElementById("legend").style.display = "none";
+  document.querySelector(".footer-text").style.display = "none";
+  document.getElementById("presence").style.display = "none";
+
+  // ✅ Build grid so cells exist (clicks will still do nothing because user is null)
+  buildCalendar();
+
+  // Optional: try loadAvailability (if RLS blocks selects while logged out, it’ll just stay empty)
+  await loadAvailability();
+
+  return;
 }
+
+
+// Signed in → hydrate user from profile
+const hydrated = await hydrateUserFromAuth();
+if (!hydrated) {
+  showAuthOverlay("Signed in, but profile could not be loaded.");
+  return;
+}
+
+  await ensureMembership(currentTable.id);
 
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
@@ -856,173 +1111,183 @@ subscribePresence();
 buildCalendar();
 await loadAvailability();
 }
-
-function generateToken() {
-return crypto.randomUUID() + crypto.randomUUID();
+  
+  function generateToken() {
+  return crypto.randomUUID() + crypto.randomUUID();
 }
 
 function getDetectedTimeZone() {
-return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 }
 
 function yyyyMmDdInTimeZone(date, timeZone) {
-const parts = new Intl.DateTimeFormat("en-CA", {
-timeZone,
-year: "numeric",
-month: "2-digit",
-day: "2-digit"
-}).formatToParts(date);
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
 
-const y = parts.find(p => p.type === "year").value;
-const m = parts.find(p => p.type === "month").value;
-const d = parts.find(p => p.type === "day").value;
-return `${y}-${m}-${d}`; // YYYY-MM-DD
+  const y = parts.find(p => p.type === "year").value;
+  const m = parts.find(p => p.type === "month").value;
+  const d = parts.find(p => p.type === "day").value;
+  return `${y}-${m}-${d}`; // YYYY-MM-DD
 }
 
-
+  
 function getTimeZoneListPinned() {
-const detected = getDetectedTimeZone();
+  const detected = getDetectedTimeZone();
 
-// Best case: browser can list all IANA time zones
-if (Intl.supportedValuesOf) {
-const all = Intl.supportedValuesOf("timeZone");
-// Put detected first, then the rest alphabetically
-return [detected, ...all.filter(tz => tz !== detected).sort()];
-}
+  // Best case: browser can list all IANA time zones
+  if (Intl.supportedValuesOf) {
+    const all = Intl.supportedValuesOf("timeZone");
+    // Put detected first, then the rest alphabetically
+    return [detected, ...all.filter(tz => tz !== detected).sort()];
+  }
 
-// Fallback: small curated list + detected pinned
-const fallback = [
-"UTC",
-"Australia/Brisbane",
-"Australia/Sydney",
-"Australia/Melbourne",
-"Australia/Perth",
-"Pacific/Auckland",
-"America/Los_Angeles",
-"America/New_York",
-"Europe/London",
-"Europe/Paris",
-"Asia/Singapore",
-"Asia/Tokyo"
-];
+  // Fallback: small curated list + detected pinned
+  const fallback = [
+    "UTC",
+    "Australia/Brisbane",
+    "Australia/Sydney",
+    "Australia/Melbourne",
+    "Australia/Perth",
+    "Pacific/Auckland",
+    "America/Los_Angeles",
+    "America/New_York",
+    "Europe/London",
+    "Europe/Paris",
+    "Asia/Singapore",
+    "Asia/Tokyo"
+  ];
 
-const unique = Array.from(new Set([detected, ...fallback]));
-return [detected, ...unique.filter(tz => tz !== detected)];
+  const unique = Array.from(new Set([detected, ...fallback]));
+  return [detected, ...unique.filter(tz => tz !== detected)];
 }
 
 function populateHostTimezoneSelect() {
-const select = document.getElementById("host-timezone");
-if (!select) return;
+  const select = document.getElementById("host-timezone");
+  if (!select) return;
 
-const tzs = getTimeZoneListPinned();
-select.innerHTML = "";
+  const tzs = getTimeZoneListPinned();
+  select.innerHTML = "";
 
-tzs.forEach((tz, idx) => {
-const opt = document.createElement("option");
-opt.value = tz;
-opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
-select.appendChild(opt);
-});
+  tzs.forEach((tz, idx) => {
+    const opt = document.createElement("option");
+    opt.value = tz;
+    opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
+    select.appendChild(opt);
+  });
 
-select.value = tzs[0];
+  select.value = tzs[0];
 }
 
-
+  
 async function createBoard() {
-const nameInput = document.getElementById("board-name");
-const name = nameInput.value.trim();
+  const au = await getAuthUser();
+    if (!au) {
+      showAuthOverlay("Please sign in before creating a calendar.");
+      return;
+    }
+  const nameInput = document.getElementById("board-name");
+  const name = nameInput.value.trim();
 
-if (!name) {
-alert("Please enter a board name");
-return;
-}
+  if (!name) {
+    alert("Please enter a board name");
+    return;
+  }
 
-let timeBlocks = [];
+  let timeBlocks = [];
 
 const structureChoice = selectedStructure || "custom";
 
 if (structureChoice === "custom") {
-const rowInputs = document.querySelectorAll("#rows-container input");
+  const rowInputs = document.querySelectorAll("#rows-container input");
 
-rowInputs.forEach(input => {
-const value = input.value.trim();
-if (value) {
-timeBlocks.push({ label: value });
-}
-});
-
-if (timeBlocks.length === 0) {
-alert("Please add at least one time block");
-return;
-}
-} else {
-timeBlocks = PREBUILT_STRUCTURES[structureChoice];
-}
-
-if (timeBlocks.length === 0) {
-alert("Please add at least one time block");
-return;
-}
-
-const inviteToken = generateToken();
-const ownerToken = generateToken();
-const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
-const startDate = yyyyMmDdInTimeZone(new Date(), tz);
-
-// --- Gold threshold (required) ---
-const goldRaw = document.getElementById("gold-threshold")?.value || "";
-if (!goldRaw) {
-alert("Please select a gold threshold.");
-return;
-}
-const goldThreshold = parseInt(goldRaw, 10);
-
-// TEMP: until you implement real Pro accounts
-const isPro = false;
-
-if (!Number.isFinite(goldThreshold) || goldThreshold < 1 || goldThreshold > 30) {
-alert("Gold threshold must be between 1 and 30.");
-return;
-}
-if (!isPro && goldThreshold >= 6) {
-alert("Free version allows gold threshold up to 5.");
-return;
-}
-
-const { data, error } = await supabase
-.from("tables")
-.insert([{
-name,
-invite_token: inviteToken,
-owner_token: ownerToken,
-row_structure: timeBlocks,
-host_tz: tz,
-start_date: startDate,
-gold_threshold: goldThreshold
-}])
-.select()
-.single();
-  
-    if (!error && data && user?.id) {
-      await supabase
-        .from("board_members")
-        .upsert({
-          board_id: data.id,
-          user_id: user.id,
-          role: "owner"
-        });
+  rowInputs.forEach(input => {
+    const value = input.value.trim();
+    if (value) {
+      timeBlocks.push({ label: value });
     }
+  });
 
-if (error) {
-console.error("Error creating board:", error);
-return;
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+} else {
+  timeBlocks = PREBUILT_STRUCTURES[structureChoice];
 }
 
-localStorage.setItem("lastBoardToken", inviteToken);
-window.location.href = `?token=${inviteToken}`;
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+
+  const inviteToken = generateToken();
+  const ownerToken = generateToken();
+  const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
+  const startDate = yyyyMmDdInTimeZone(new Date(), tz);
+  
+  // --- Gold threshold (required) ---
+  const goldRaw = document.getElementById("gold-threshold")?.value || "";
+    if (!goldRaw) {
+      alert("Please select a gold threshold.");
+      return;
+    }
+    const goldThreshold = parseInt(goldRaw, 10);
+
+    // TEMP: until you implement real Pro accounts
+    const isPro = false;
+
+    if (!Number.isFinite(goldThreshold) || goldThreshold < 1 || goldThreshold > 30) {
+      alert("Gold threshold must be between 1 and 30.");
+      return;
+    }
+if (!isPro && goldThreshold >= 6) {
+  alert("Free version allows gold threshold up to 5.");
+  return;
 }
 
+  const { data, error } = await supabase
+    .from("tables")
+    .insert([{
+      name,
+      invite_token: inviteToken,
+      owner_token: ownerToken,
+      row_structure: timeBlocks,
+      host_tz: tz,
+      start_date: startDate,
+      gold_threshold: goldThreshold
+    }])
+    .select()
+    .single();
 
+  if (error) {
+    console.error("Error creating board:", error);
+    return;
+  }
+
+  const { error: bmErr } = await supabase
+  .from("board_members")
+  .upsert(
+    {
+      board_id: data.id,
+      user_id: user.id,
+      role: "owner"
+    },
+    { onConflict: "board_id,user_id" }
+  );
+
+if (bmErr) {
+  console.warn("board_members owner upsert failed:", bmErr);
+}
+  
+  localStorage.setItem("lastBoardToken", inviteToken);
+  window.location.href = `?token=${inviteToken}`;
+}
+
+  
 /* DOM refs */
 const table = document.getElementById("availabilityTable");
 const legendDiv = document.getElementById("legend");
@@ -1032,392 +1297,374 @@ let user = null;
 
 
 async function toggleCell(e) {
-if (!user || !currentTable) return;
+  if (!user || !currentTable) return;
+  
+  const au = await getAuthUser();
+    if (!au) {
+      showAuthOverlay("Please sign in to edit availability.");
+      return;
+    }
+    const myUid = au.id;
 
-const cell = e.currentTarget;
-const day = cell.dataset.day;
-const time = cell.dataset.time;
+  const cell = e?.currentTarget || e;
+  if (!cell || !cell.dataset) return;
 
-if (!day || !time) return;
+  const day = cell.dataset.day;
+  const time = cell.dataset.time;
+  if (!day || !time) return;
 
-// Check if entry already exists
-const { data: existing } = await supabase
-.from("availability_dev")
-.select("*")
-.eq("table_id", currentTable.id)
-.eq("day", day)
-.eq("time", time)
-.eq("user_id", user.id);
+  // 1) Try DELETE first (atomic-ish toggle)
+  const { error: delErr, count: deletedCount } = await supabase
+  .from("availability_dev")
+  .delete({ count: "exact" })
+  .eq("table_id", currentTable.id)
+  .eq("day", day)
+  .eq("time", time)
+  .eq("user_id", myUid);
 
-if (existing && existing.length > 0) {
-// Remove entry
-await supabase
-.from("availability_dev")
-.delete()
-.eq("table_id", currentTable.id)
-.eq("day", day)
-.eq("time", time)
-.eq("user_id", user.id);
-
-// ✅ Remove only THIS user's dot (leave other users' dots)
-const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
-if (myDot) myDot.remove();
-
-const container = cell.querySelector(".dot-container");
-if (container && container.children.length === 0) {
-container.remove();
+if (delErr) {
+  console.warn("Delete failed:", delErr);
+  await loadAvailability();
+  return;
 }
 
-} else {
-// Add entry
-const { error } = await supabase
-.from("availability_dev")
-.insert({
-table_id: currentTable.id,
-day,
-time,
-user_id: user.id,
-name: user.name,
-color: user.color
-});
+if ((deletedCount || 0) > 0) {
+  await loadAvailability();
+  return;
+}
 
-if (error) {
-console.warn("Insert failed (likely duplicate):", error);
+// INSERT if nothing deleted
+const { error: insErr } = await supabase
+  .from("availability_dev")
+  .insert({
+    table_id: currentTable.id,
+    day,
+    time,
+    user_id: myUid,
+    name: user.name,
+    color: user.color
+  });
+
+if (insErr) {
+  console.warn("Insert failed:", insErr);
+  await loadAvailability();
+  return;
+}
+
 await loadAvailability();
 return;
 }
 
-// Reuse existing container if present (important when other users already have dots here)
-let dotContainer = cell.querySelector(".dot-container");
-if (!dotContainer) {
-dotContainer = document.createElement("div");
-dotContainer.className = "dot-container";
-cell.appendChild(dotContainer);
-}
-
-const dot = document.createElement("div");
-dot.className = "dot pop-in";
-dot.style.background = user.color;
-
-// Optional: tag it so we can remove it cleanly if user toggles off immediately
-dot.dataset.userId = user.id;
-dot.dataset.name = user.name;
-
-dotContainer.appendChild(dot);
-}
-}  
-
-
+  
 function parseYMD(ymd) {
-const [y, m, d] = ymd.split("-").map(Number);
-return { y, m, d };
+  const [y, m, d] = ymd.split("-").map(Number);
+  return { y, m, d };
 }
 
-
+  
 function addDaysYMD(startYmd, offsetDays) {
-const { y, m, d } = parseYMD(startYmd);
-const dt = new Date(Date.UTC(y, m - 1, d));
-dt.setUTCDate(dt.getUTCDate() + offsetDays);
-const yy = dt.getUTCFullYear();
-const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
-const dd = String(dt.getUTCDate()).padStart(2, "0");
-return `${yy}-${mm}-${dd}`;
+  const { y, m, d } = parseYMD(startYmd);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + offsetDays);
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
 }
 
-
+  
 function formatHeaderLabel(ymd) {
-const { y, m, d } = parseYMD(ymd);
-const dt = new Date(Date.UTC(y, m - 1, d));
-const weekday = dt.toLocaleDateString("en-AU", { weekday: "short", timeZone: "UTC" });
-const month = dt.toLocaleDateString("en-AU", { month: "short", timeZone: "UTC" });
-return { weekday, monthDay: `${d} ${month}` };
+  const { y, m, d } = parseYMD(ymd);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  const weekday = dt.toLocaleDateString("en-AU", { weekday: "short", timeZone: "UTC" });
+  const month = dt.toLocaleDateString("en-AU", { month: "short", timeZone: "UTC" });
+  return { weekday, monthDay: `${d} ${month}` };
 }
 
-
+  
 function buildCalendar() {
-console.log("Times:", currentTable?.row_structure);
+  console.log("Times:", currentTable?.row_structure);
 
-const table = document.getElementById("availabilityTable");
-table.innerHTML = "";
+  const table = document.getElementById("availabilityTable");
+  table.innerHTML = "";
 
-if (!currentTable) return;
+  if (!currentTable) return;
 
-const times = currentTable.row_structure || [];
-const days = 30;
+  const times = currentTable.row_structure || [];
+  const days = 30;
 
-// --- Header row (ONE time only) ---
-const headerRow = document.createElement("tr");
-headerRow.appendChild(document.createElement("th")); // top-left blank corner
+  // --- Header row (ONE time only) ---
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th")); // top-left blank corner
 
-const startYmd =
-currentTable.start_date ||
-yyyyMmDdInTimeZone(new Date(), currentTable.host_tz || getDetectedTimeZone());
+  const startYmd =
+    currentTable.start_date ||
+    yyyyMmDdInTimeZone(new Date(), currentTable.host_tz || getDetectedTimeZone());
 
-for (let dayNum = 1; dayNum <= days; dayNum++) {
-const ymd = addDaysYMD(startYmd, dayNum - 1);
-const { weekday, monthDay } = formatHeaderLabel(ymd);
+  for (let dayNum = 1; dayNum <= days; dayNum++) {
+    const ymd = addDaysYMD(startYmd, dayNum - 1);
+    const { weekday, monthDay } = formatHeaderLabel(ymd);
 
-const th = document.createElement("th");
-th.classList.add("day-header");
-th.dataset.day = String(dayNum);
-th.innerHTML = `
-     <div style="font-weight:700;">${weekday}</div>
-     <span class="monthday">${monthDay}</span>
-   `;
-headerRow.appendChild(th);
-}
+    const th = document.createElement("th");
+    th.classList.add("day-header");
+    th.dataset.day = String(dayNum);
+    th.innerHTML = `
+      <div style="font-weight:700;">${weekday}</div>
+      <span class="monthday">${monthDay}</span>
+    `;
+    headerRow.appendChild(th);
+  }
 
-table.appendChild(headerRow);
+  table.appendChild(headerRow);
 
-// --- Body rows (time blocks) ---
-times.forEach(timeObj => {
-const row = document.createElement("tr");
+  // --- Body rows (time blocks) ---
+  times.forEach(timeObj => {
+    const row = document.createElement("tr");
 
-const labelCell = document.createElement("td");
-labelCell.textContent = timeObj.label;
-labelCell.classList.add("time-label");
-row.appendChild(labelCell);
+    const labelCell = document.createElement("td");
+    labelCell.textContent = timeObj.label;
+    labelCell.classList.add("time-label");
+    row.appendChild(labelCell);
 
-for (let dayNum = 1; dayNum <= days; dayNum++) {
-const cell = document.createElement("td");
-cell.dataset.day = String(dayNum);
-cell.dataset.time = timeObj.label;
-cell.addEventListener("click", toggleCell);
-row.appendChild(cell);
-}
+    for (let dayNum = 1; dayNum <= days; dayNum++) {
+      const cell = document.createElement("td");
+      cell.dataset.day = String(dayNum);
+      cell.dataset.time = timeObj.label;
+      cell.addEventListener("click", toggleCell);
+      row.appendChild(cell);
+    }
 
-table.appendChild(row);
-});
+    table.appendChild(row);
+  });
 
-console.log("Building calendar...");
+  console.log("Building calendar...");
 }
 
 
 
 /* === Render dots + gold === */
 async function loadAvailability() {
-const { data } = await supabase
-.from("availability_dev")
-.select("*")
-.eq("table_id", currentTable.id);
+  const { data: rows, error } = await supabase
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id);
+      if (error) {
+      console.error("loadAvailability failed:", error);
+      return;
+    }
 
-const cells = table.querySelectorAll("td[data-day]");
+  const cells = table.querySelectorAll("td[data-day]");
 
-cells.forEach(cell => {
-cell.innerHTML = "";
-cell.classList.remove("gold-cell");
+  cells.forEach(cell => {
+    cell.innerHTML = "";
+    cell.classList.remove("gold-cell");
+  });
+
+  if (!rows) return;
+
+  /* Legend */
+  const users = {};
+  rows.forEach(r => {
+    const key = r.user_id || r.name; // fallback for old rows
+    if (!users[key]) users[key] = { name: r.name, color: r.color };
+  });
+
+  legendList.innerHTML = "";
+
+    Object.entries(users).forEach(([key, { name, color }]) => {
+      const div = document.createElement("div");
+      div.className = "legend-item";
+
+      // If key looks like a UUID → treat as user_id
+      if (key.includes("-")) {
+        div.dataset.userId = key;
+      } else {
+        div.dataset.name = name;
+      }
+
+  div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
+  legendList.appendChild(div);
 });
 
-if (!data) return;
+  /* Group by cell */
+  const map = {};
+  rows.forEach(entry => {
+    const key = `${entry.day}-${entry.time}`;
+    if (!map[key]) map[key] = [];
+    map[key].push(entry);
+  });
 
-/* Legend */
-const users = {};
-data.forEach(r => {
-const key = r.user_id || r.name; // fallback for old rows
-if (!users[key]) users[key] = { name: r.name, color: r.color };
-});
+  const goldDays = new Set();
+  const goldThreshold = Number(currentTable?.gold_threshold);
+  const enableGold = Number.isFinite(goldThreshold);
 
-legendList.innerHTML = "";
+  /* Render cells */
+  document.querySelectorAll("td[data-day]").forEach(cell => {
+    const day = cell.dataset.day;
+    const time = cell.dataset.time;
+    const key = `${day}-${time}`;
+    const entries = map[key] || [];
 
-Object.entries(users).forEach(([key, { name, color }]) => {
-const div = document.createElement("div");
-div.className = "legend-item";
+    if (enableGold && entries.length >= goldThreshold) {
+      cell.classList.add("gold-cell");
+      goldDays.add(parseInt(day, 10));
+      return;
+    }
 
-// If key looks like a UUID → treat as user_id
-if (key.includes("-")) {
-div.dataset.userId = key;
-} else {
-div.dataset.name = name;
+    if (entries.length > 0) {
+      const dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+
+      entries.forEach(entry => {
+        const dot = document.createElement("div");
+        dot.className = "dot";
+        dot.style.background = entry.color;
+        dot.title = entry.name;
+        dot.dataset.userId = entry.user_id;
+        dot.dataset.name = entry.name;
+
+        // Animate only the current user's dot
+        if (user && entry.user_id === user.id) {
+          dot.classList.add("pop-in");
+        }
+
+        dotContainer.appendChild(dot);
+      });
+
+      cell.appendChild(dotContainer);
+    }
+  });
+
+  // Gold header highlighting (after we've computed goldDays)
+  const headerCells = table.querySelectorAll("th.day-header");
+  headerCells.forEach(th => {
+    const dayNum = parseInt(th.dataset.day, 10);
+    if (goldDays.has(dayNum)) th.classList.add("gold-header");
+    else th.classList.remove("gold-header");
+  });
 }
 
-div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
-legendList.appendChild(div);
-});
+  
+  async function resetBoard() {
+  if (!currentTable) return;
 
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
 
-
-/* Group by cell */
-const map = {};
-data.forEach(entry => {
-const key = `${entry.day}-${entry.time}`;
-if (!map[key]) map[key] = [];
-map[key].push(entry);
-});
-
-const goldDays = new Set();
-const goldThreshold = Number(currentTable?.gold_threshold);
-if (!Number.isFinite(goldThreshold)) return; // or skip gold logic
-
-/* Render cells */
-document.querySelectorAll("td[data-day]").forEach(cell => {
-const day = cell.dataset.day;
-const time = cell.dataset.time;
-const key = `${day}-${time}`;
-const entries = map[key] || [];
-
-if (entries.length >= goldThreshold) {
-cell.classList.add("gold-cell");
-goldDays.add(parseInt(day, 10));
-return;
+  await loadAvailability();
 }
 
-if (entries.length > 0) {
-const dotContainer = document.createElement("div");
-dotContainer.className = "dot-container";
+  
+  async function deleteBoard() {
+  if (!currentTable) return;
 
-entries.forEach(entry => {
-const dot = document.createElement("div");
-dot.className = "dot";
-dot.style.background = entry.color;
-dot.title = entry.name;
-dot.dataset.userId = entry.user_id;
-dot.dataset.name = entry.name;
+  if (!confirm("Are you sure you want to permanently delete this board?")) return;
 
-// Animate only the current user's dot
-if (user && entry.user_id === user.id) {
-dot.classList.add("pop-in");
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
+
+  await supabase
+    .from("tables")
+    .delete()
+    .eq("id", currentTable.id);
+
+  window.location.href = "/";
 }
 
-dotContainer.appendChild(dot);
-});
+  function saveIdentity() {
+  const input = document.getElementById("identity-name");
+  const colorInput = document.getElementById("identity-color");
 
-cell.appendChild(dotContainer);
-}
-});
+  const name = (input?.value || "").trim();
+  const color = (colorInput?.value || "").trim();
 
-// Gold header highlighting (after we've computed goldDays)
-const headerCells = table.querySelectorAll("th.day-header");
-headerCells.forEach(th => {
-const dayNum = parseInt(th.dataset.day, 10);
-if (goldDays.has(dayNum)) th.classList.add("gold-header");
-else th.classList.remove("gold-header");
-});
-}
+  if (!name) {
+    alert("Please enter your name");
+    return;
+  }
+  if (!color) {
+    alert("Please choose a dot colour");
+    return;
+  }
 
+  localStorage.setItem("globalUserName", name);
+  localStorage.setItem("globalUserColor", color);
+  getOrCreateUserId();
 
-async function resetBoard() {
-if (!currentTable) return;
-
-await supabase
-.from("availability_dev")
-.delete()
-.eq("table_id", currentTable.id);
-
-await loadAvailability();
-}
-
-
-async function deleteBoard() {
-if (!currentTable) return;
-
-if (!confirm("Are you sure you want to permanently delete this board?")) return;
-
-await supabase
-.from("availability_dev")
-.delete()
-.eq("table_id", currentTable.id);
-
-await supabase
-.from("tables")
-.delete()
-.eq("id", currentTable.id);
-
-window.location.href = "/";
+  // If we're on a board link, load it now (no full reload needed)
+  if (inviteToken || manageToken) {
+    loadTable();
+  } else {
+    location.reload();
+  }
 }
 
-function saveIdentity() {
-const input = document.getElementById("identity-name");
-const colorInput = document.getElementById("identity-color");
+  
+  function addRowInput(name = "") {
+  const container = document.getElementById("rows-container");
 
-const name = (input?.value || "").trim();
-const color = (colorInput?.value || "").trim();
+  if (!container) return; // Prevent crash
 
-if (!name) {
-alert("Please enter your name");
-return;
-}
-if (!color) {
-alert("Please choose a dot colour");
-return;
-}
+  if (container.children.length >= 4) {
+    alert("Free version allows up to 4 time blocks.");
+    return;
+  }
 
-localStorage.setItem("globalUserName", name);
-localStorage.setItem("globalUserColor", color);
-getOrCreateUserId();
+  const input = document.createElement("input");
+  input.placeholder = "Time block (e.g. Dinner)";
+  input.value = name;
 
-// Rebuild user from storage (now includes color)
-user = buildUserFromStorage();
-
-// If we're on a board link, load it now (no full reload needed)
-if (inviteToken || manageToken) {
-loadTable();
-} else {
-location.reload();
-}
-}
-
-
-function addRowInput(name = "") {
-const container = document.getElementById("rows-container");
-
-if (!container) return; // Prevent crash
-
-if (container.children.length >= 4) {
-alert("Free version allows up to 4 time blocks.");
-return;
-}
-
-const input = document.createElement("input");
-input.placeholder = "Time block (e.g. Dinner)";
-input.value = name;
-
-container.appendChild(input);
+  container.appendChild(input);
 }
 
 function showBoardSetup() {
-document.getElementById("start-create").style.display = "none";
-document.getElementById("board-setup").style.display = "block";
+  document.getElementById("start-create").style.display = "none";
+  document.getElementById("board-setup").style.display = "block";
 
-// Reset pages
-const nameStep = document.getElementById("name-step");
-const detailsStep = document.getElementById("details-step");
-const rowBuilder = document.getElementById("row-builder");
-const createActions = document.getElementById("create-actions");
-const goldSel = document.getElementById("gold-threshold");
+  // Reset pages
+  const nameStep = document.getElementById("name-step");
+  const detailsStep = document.getElementById("details-step");
+  const rowBuilder = document.getElementById("row-builder");
+  const createActions = document.getElementById("create-actions");
+  const goldSel = document.getElementById("gold-threshold");
+  
+  if (goldSel) goldSel.value = "";
 
-if (goldSel) goldSel.value = "";
+  if (nameStep) nameStep.style.display = "block";
+  if (detailsStep) detailsStep.style.display = "none";
+  if (rowBuilder) rowBuilder.style.display = "none";
+  if (createActions) createActions.style.display = "none";
 
-if (nameStep) nameStep.style.display = "block";
-if (detailsStep) detailsStep.style.display = "none";
-if (rowBuilder) rowBuilder.style.display = "none";
-if (createActions) createActions.style.display = "none";
+  // Hide the page-2 create button until a structure is clicked
+  const goBtn = document.getElementById("go-create");
+  if (goBtn) goBtn.style.display = "none";
 
-// Hide the page-2 create button until a structure is clicked
-const goBtn = document.getElementById("go-create");
-if (goBtn) goBtn.style.display = "none";
-
-// Clear structure selection highlight + require click
-selectedStructure = null;
-["dev-custom-card", "meals-card"].forEach(id => {
-const el = document.getElementById(id);
-if (el) el.classList.remove("active");
-});
+  // Clear structure selection highlight + require click
+  selectedStructure = null;
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
 }
 
 
 function proceedFromStructure() {
-const nameInput = document.getElementById("board-name");
-const name = nameInput?.value.trim();
+  const nameInput = document.getElementById("board-name");
+  const name = nameInput?.value.trim();
 
-if (!name) {
-alert("Please enter a calendar name");
-return;
-}
+  if (!name) {
+    alert("Please enter a calendar name");
+    return;
+  }
 
-if (!selectedStructure) {
-alert("Please choose a calendar structure");
-return;
-}
+  if (!selectedStructure) {
+    alert("Please choose a calendar structure");
+    return;
+  }
 
 // Go to "page 3" for BOTH custom + meals
 const nameStep = document.getElementById("name-step");
@@ -1435,58 +1682,58 @@ if (goldSel) goldSel.value = "";
 
 // If Custom → show row builder and ensure at least one row input exists
 if (selectedStructure === "custom") {
-if (rowBuilder) rowBuilder.style.display = "block";
-if (rowsContainer && rowsContainer.children.length === 0) addRowInput();
+  if (rowBuilder) rowBuilder.style.display = "block";
+  if (rowsContainer && rowsContainer.children.length === 0) addRowInput();
 } else {
-// Meals → hide row builder (rows are prebuilt)
-if (rowBuilder) rowBuilder.style.display = "none";
+  // Meals → hide row builder (rows are prebuilt)
+  if (rowBuilder) rowBuilder.style.display = "none";
 }
 
-if (createActions) createActions.style.display = "block";
+  if (createActions) createActions.style.display = "block";
 }
 
 
 function setActiveStructureCard(activeId) {
-["dev-custom-card", "meals-card"].forEach(id => {
-const el = document.getElementById(id);
-if (!el) return;
-el.classList.toggle("active", id === activeId);
-});
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("active", id === activeId);
+  });
 }
 
-
+  
 function showGoCreate() {
-const btn = document.getElementById("go-create");
-if (btn) btn.style.display = "inline-block";
+  const btn = document.getElementById("go-create");
+  if (btn) btn.style.display = "inline-block";
 }  
 
-
+  
 function getOrCreateUserId() {
-let id = localStorage.getItem("globalUserId");
-if (!id) {
-id = crypto.randomUUID();
-localStorage.setItem("globalUserId", id);
-}
-return id;
+  let id = localStorage.getItem("globalUserId");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("globalUserId", id);
+  }
+  return id;
 }
 
-
+  
 const PREBUILT_STRUCTURES = {
-meals: [
-{ label: "Breakfast" },
-{ label: "Lunch" },
-{ label: "Dinner" }
-],
-quick_meetup: [
-{ label: "Morning" },
-{ label: "Afternoon" },
-{ label: "Evening" }
-],
-dinner_plan: [
-{ label: "Early Dinner" },
-{ label: "Dinner" },
-{ label: "Late Dinner" }
-]
+  meals: [
+    { label: "Breakfast" },
+    { label: "Lunch" },
+    { label: "Dinner" }
+  ],
+  quick_meetup: [
+    { label: "Morning" },
+    { label: "Afternoon" },
+    { label: "Evening" }
+  ],
+  dinner_plan: [
+    { label: "Early Dinner" },
+    { label: "Dinner" },
+    { label: "Late Dinner" }
+  ]
 };
 
 
@@ -1495,110 +1742,128 @@ dinner_plan: [
 
 
 
-
-
-/* === Startup === */
+  
+  
+                                                                                                /* === Startup === */
 async function startApp() {
-console.log("App starting...");
+  try {
+    console.log("App starting...");
+  
+  populateHostTimezoneSelect();
+  
+  // TEMP: until you implement real Pro accounts
+  const isPro = false;
+  populateGoldThresholdSelect(isPro);
 
-populateHostTimezoneSelect();
 
-// TEMP: until you implement real Pro accounts
-const isPro = false;
-populateGoldThresholdSelect(isPro);
+  // Always attach identity button
+  const saveIdentityBtn = document.getElementById("save-identity");
+  if (saveIdentityBtn) {
+    saveIdentityBtn.addEventListener("click", saveIdentity);
+  }
 
+  // Always attach create flow buttons
+  const startCreateBtn = document.getElementById("start-create");
+  if (startCreateBtn) {
+    startCreateBtn.addEventListener("click", showBoardSetup);
+  }
 
-// Always attach identity button
-const saveIdentityBtn = document.getElementById("save-identity");
-if (saveIdentityBtn) {
-saveIdentityBtn.addEventListener("click", saveIdentity);
-}
+  const goCreateBtn = document.getElementById("go-create");
+    if (goCreateBtn) {
+      goCreateBtn.addEventListener("click", proceedFromStructure);
+    }
 
-// Always attach create flow buttons
-const startCreateBtn = document.getElementById("start-create");
-if (startCreateBtn) {
-startCreateBtn.addEventListener("click", showBoardSetup);
-}
+  const addRowBtn = document.getElementById("add-row");
+  if (addRowBtn) {
+    addRowBtn.addEventListener("click", () => addRowInput());
+  }
 
-const goCreateBtn = document.getElementById("go-create");
-if (goCreateBtn) {
-goCreateBtn.addEventListener("click", proceedFromStructure);
-}
+  const createBtn = document.getElementById("create-board-btn");
+  if (createBtn) {
+    createBtn.addEventListener("click", createBoard);
+  }
 
-const addRowBtn = document.getElementById("add-row");
-if (addRowBtn) {
-addRowBtn.addEventListener("click", () => addRowInput());
-}
-
-const createBtn = document.getElementById("create-board-btn");
-if (createBtn) {
-createBtn.addEventListener("click", createBoard);
-}
-
-// Structure selection (Dev Custom + Meals)
+      // Structure selection (Dev Custom + Meals)
 
 const devCard = document.getElementById("dev-custom-card");
 if (devCard) {
-devCard.addEventListener("click", () => {
-selectedStructure = "custom";
-setActiveStructureCard("dev-custom-card");
-showGoCreate();
-});
+  devCard.addEventListener("click", () => {
+    selectedStructure = "custom";
+    setActiveStructureCard("dev-custom-card");
+    showGoCreate();
+  });
 }
 
 const mealsCard = document.getElementById("meals-card");
 if (mealsCard) {
-mealsCard.addEventListener("click", () => {
-selectedStructure = "meals";
-setActiveStructureCard("meals-card");
-showGoCreate();
+  mealsCard.addEventListener("click", () => {
+    selectedStructure = "meals";
+    setActiveStructureCard("meals-card");
+    showGoCreate();
+  });
+}
+
+// Auth overlay events
+document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
+
+document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
+  authMode = (authMode === "signin") ? "signup" : "signin";
+  showAuthOverlay();
 });
-}
 
-// Identity logic
-user = buildUserFromStorage();
+document.getElementById("auth-forgot")?.addEventListener("click", async () => {
+  const email = (document.getElementById("auth-email")?.value || "").trim();
+  if (!email) {
+    showAuthOverlay("Enter your email first, then click Forgot password.");
+    return;
+  }
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  if (error) {
+    showAuthOverlay(error.message || "Failed to send reset email.");
+    return;
+  }
+  showAuthOverlay("Password reset email sent. Check your inbox.");
+});
 
-if (!user) {
-document.getElementById("identity-section").style.display = "block";
-} else {
-document.getElementById("identity-section").style.display = "none";
-}
 
 // If user is missing (new/incognito), prefill the colour picker from storage or random
 const colorEl = document.getElementById("identity-color");
 if (colorEl) {
-const stored = localStorage.getItem("globalUserColor");
-if (stored) {
-colorEl.value = stored;
-} else {
-// random nice-ish default
-colorEl.value = "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
+  const stored = localStorage.getItem("globalUserColor");
+  if (stored) {
+    colorEl.value = stored;
+  } else {
+    // random nice-ish default
+    colorEl.value = "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
+  }
 }
-}
-
+  
 const createSection = document.getElementById("create-board");
 // ⭐ If no token in URL, try to open last board
-if (!inviteToken && !manageToken) {
-const lastToken = localStorage.getItem("lastBoardToken");
+  if (!inviteToken && !manageToken) {
+    const lastToken = localStorage.getItem("lastBoardToken");
 
-if (lastToken && user) {
-window.location.href = `${window.location.pathname}?token=${lastToken}`;
-return;
-}
+    const au = await getAuthUser();
+      if (lastToken && au) {
+      window.location.href = `${window.location.pathname}?token=${lastToken}`;
+      return;
+    }
 
-// No recent board → show create screen
-createSection.style.display = "block";
-document.getElementById("calendar").style.display = "none";
-legendDiv.style.display = "none";
-} else {
-createSection.style.display = "none";
-}
+    // No recent board → show create screen
+    createSection.style.display = "block";
+    document.getElementById("calendar").style.display = "none";
+    legendDiv.style.display = "none";
+  } else {
+    createSection.style.display = "none";
+  }
 
-
-// Load table if token exists
-await loadTable();
-
-document.body.style.visibility = "visible";
+  // Load table if token exists
+  await loadTable();
+  } finally {
+    document.body.style.visibility = "visible";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", startApp);
@@ -1608,6 +1873,24 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
