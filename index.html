@@ -1364,6 +1364,8 @@ async function toggleCell(e) {
       .eq("time", time)
       .eq("user_id", user.id);
 
+  console.warn("Delete result:", delErr);
+
     if (delErr) {
       console.warn("Delete failed:", delErr);
       await loadAvailability();   // safety resync
@@ -1916,6 +1918,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
