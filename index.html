@@ -1448,10 +1448,24 @@ function buildCalendar() {
   });
 
   console.log("Building calendar...");
+  bindCalendarClickDelegation();
 }
 
 
+function bindCalendarClickDelegation() {
+  const table = document.getElementById("availabilityTable");
+  if (!table || table.dataset.bound === "1") return;
 
+  table.dataset.bound = "1";
+
+  table.addEventListener("click", (e) => {
+    const cell = e.target.closest("td[data-day][data-time]");
+    if (!cell) return;
+    toggleCell({ currentTarget: cell }); // reuse your existing toggleCell
+  });
+}
+
+  
 /* === Render dots + gold === */
 async function loadAvailability() {
   const { data: rows, error } = await supabase
@@ -1883,6 +1897,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
