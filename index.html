@@ -1325,13 +1325,14 @@ async function toggleCell(e) {
     color: user.color
   };
 
-  // 1) Try insert first (fast path)
+  // 🔹 Try INSERT first
   const { error: insErr } = await supabase
     .from("availability_dev")
     .insert(payload);
 
+  // ✅ INSERT SUCCESS → add dot immediately
   if (!insErr) {
-    // Insert succeeded → show dot immediately
+
     let dotContainer = cell.querySelector(".dot-container");
     if (!dotContainer) {
       dotContainer = document.createElement("div");
@@ -1339,9 +1340,8 @@ async function toggleCell(e) {
       cell.appendChild(dotContainer);
     }
 
-    // Prevent double-dot if something weird happens
-    const existingDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
-    if (!existingDot) {
+    // prevent duplicate DOM dot
+    if (!cell.querySelector(`.dot[data-user-id="${user.id}"]`)) {
       const dot = document.createElement("div");
       dot.className = "dot pop-in";
       dot.style.background = user.color;
@@ -1350,14 +1350,12 @@ async function toggleCell(e) {
       dotContainer.appendChild(dot);
     }
 
-    // Optional: if you’re doing gold logic per-cell, call it here:
-    // applyGoldStateForCell(cell, day);
-
     return;
   }
 
-  // 2) If duplicate, treat as “toggle off” → delete
+  // 🔹 DUPLICATE → this means the row already exists → DELETE it
   if (insErr.code === "23505") {
+
     const { error: delErr } = await supabase
       .from("availability_dev")
       .delete()
@@ -1368,24 +1366,21 @@ async function toggleCell(e) {
 
     if (delErr) {
       console.warn("Delete failed:", delErr);
-      await loadAvailability();
+      await loadAvailability();   // safety resync
       return;
     }
 
-    // Remove only THIS user's dot
+    // remove only THIS user's dot
     const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
     if (myDot) myDot.remove();
 
     const container = cell.querySelector(".dot-container");
     if (container && container.children.length === 0) container.remove();
 
-    // Optional gold update:
-    // applyGoldStateForCell(cell, day);
-
     return;
   }
 
-  // 3) Any other error: fall back to refresh
+  // 🔹 Any other error → resync UI
   console.warn("Insert failed:", insErr);
   await loadAvailability();
 }
@@ -1465,7 +1460,6 @@ function buildCalendar() {
       const cell = document.createElement("td");
       cell.dataset.day = String(dayNum);
       cell.dataset.time = timeObj.label;
-      cell.addEventListener("click", toggleCell);
       row.appendChild(cell);
     }
 
@@ -1922,6 +1916,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
