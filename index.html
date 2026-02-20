@@ -1249,7 +1249,7 @@ if (!isPro && goldThreshold >= 6) {
   return;
 }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("tables")
     .insert([{
       name,
@@ -1261,13 +1261,23 @@ if (!isPro && goldThreshold >= 6) {
       start_date: startDate,
       gold_threshold: goldThreshold
     }])
-    .select("id")
-    .single();
 
   if (error) {
     console.error("Error creating board:", error);
     return;
   }
+
+  const { data: created, error: fetchErr } = await supabase
+  .from("tables")
+  .select("id")
+  .eq("invite_token", inviteToken)
+  .single();
+
+if (fetchErr || !created) {
+  console.error("Board insert succeeded but could not fetch id. Check SELECT RLS on tables.", fetchErr);
+  return;
+}
+  
   if (!data) {
   console.error("Board created but no row returned (RLS SELECT likely blocking).");
   return;
@@ -1278,7 +1288,7 @@ if (!isPro && goldThreshold >= 6) {
   .upsert(
     {
       board_id: data.id,
-      user_id: user.id,
+      user_id: au.id,
       role: "owner"
     },
     { onConflict: "board_id,user_id" }
@@ -1878,6 +1888,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
