@@ -468,6 +468,7 @@ const manageToken = params.get("manage");
 let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
+let toggleInFlight = false;
 let fullRefreshTimer = null;
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
@@ -1309,82 +1310,87 @@ let user = null;
 async function toggleCell(e) {
   if (!user || !currentTable) return;
 
-  const cell = e.currentTarget;
-  if (!cell) return;
+  // ✅ 1) prevent double-trigger / double requests
+  if (toggleInFlight) return;
+  toggleInFlight = true;
 
-  const day = cell.dataset.day;
-  const time = cell.dataset.time;
-  if (!day || !time) return;
+  try {
+    const cell = e.currentTarget;
+    if (!cell) return;
 
-  const payload = {
-    table_id: currentTable.id,
-    day,
-    time,
-    user_id: user.id,
-    name: user.name,
-    color: user.color
-  };
+    const day = cell.dataset.day;
+    const time = cell.dataset.time;
+    if (!day || !time) return;
 
-  // 🔹 Try INSERT first
-  const { error: insErr } = await supabase
-    .from("availability_dev")
-    .insert(payload);
+    const payload = {
+      table_id: currentTable.id,
+      day,
+      time,
+      user_id: user.id,
+      name: user.name,
+      color: user.color
+    };
 
-  // ✅ INSERT SUCCESS → add dot immediately
-  if (!insErr) {
-
-    let dotContainer = cell.querySelector(".dot-container");
-    if (!dotContainer) {
-      dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
-      cell.appendChild(dotContainer);
-    }
-
-    // prevent duplicate DOM dot
-    if (!cell.querySelector(`.dot[data-user-id="${user.id}"]`)) {
-      const dot = document.createElement("div");
-      dot.className = "dot pop-in";
-      dot.style.background = user.color;
-      dot.dataset.userId = user.id;
-      dot.dataset.name = user.name;
-      dotContainer.appendChild(dot);
-    }
-
-    return;
-  }
-
-  // 🔹 DUPLICATE → this means the row already exists → DELETE it
-  if (insErr.code === "23505") {
-
-    const { error: delErr } = await supabase
+    const { error: insErr } = await supabase
       .from("availability_dev")
-      .delete()
-      .eq("table_id", currentTable.id)
-      .eq("day", day)
-      .eq("time", time)
-      .eq("user_id", user.id);
+      .insert(payload);
 
-  console.warn("Delete result:", delErr);
+    // ✅ 2) INSERT SUCCESS → add dot to DOM
+    if (!insErr) {
+      let dotContainer = cell.querySelector(".dot-container");
+      if (!dotContainer) {
+        dotContainer = document.createElement("div");
+        dotContainer.className = "dot-container";
+        cell.appendChild(dotContainer);
+      }
 
-    if (delErr) {
-      console.warn("Delete failed:", delErr);
-      await loadAvailability();   // safety resync
+      if (!cell.querySelector(`.dot[data-user-id="${user.id}"]`)) {
+        const dot = document.createElement("div");
+        dot.className = "dot pop-in";
+        dot.style.background = user.color;
+        dot.dataset.userId = user.id;
+        dot.dataset.name = user.name;
+        dotContainer.appendChild(dot);
+      }
       return;
     }
 
-    // remove only THIS user's dot
-    const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
-    if (myDot) myDot.remove();
+    // ✅ 3) DUPLICATE → delete (toggle off)
+    if (insErr.code === "23505") {
+      const { error: delErr } = await supabase
+        .from("availability_dev")
+        .delete()
+        .eq("table_id", currentTable.id)
+        .eq("day", day)
+        .eq("time", time)
+        .eq("user_id", user.id);
 
-    const container = cell.querySelector(".dot-container");
-    if (container && container.children.length === 0) container.remove();
+      console.log("Delete result:", delErr);
 
-    return;
+      if (!delErr) {
+        // remove only THIS user's dot
+        const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
+        if (myDot) myDot.remove();
+
+        const container = cell.querySelector(".dot-container");
+        if (container && container.children.length === 0) container.remove();
+
+        return;
+      }
+
+      // delete failed → resync
+      await loadAvailability();
+      return;
+    }
+
+    // ✅ 4) unexpected error
+    console.warn("Insert failed:", insErr);
+    await loadAvailability();
+
+  } finally {
+    // ✅ 5) always release lock
+    toggleInFlight = false;
   }
-
-  // 🔹 Any other error → resync UI
-  console.warn("Insert failed:", insErr);
-  await loadAvailability();
 }
 
   
@@ -1918,6 +1924,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
