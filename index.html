@@ -1310,7 +1310,6 @@ let user = null;
 async function toggleCell(e) {
   if (!user || !currentTable) return;
 
-  // ✅ 1) prevent double-trigger / double requests
   if (toggleInFlight) return;
   toggleInFlight = true;
 
@@ -1322,6 +1321,35 @@ async function toggleCell(e) {
     const time = cell.dataset.time;
     if (!day || !time) return;
 
+    // ✅ 1) DELETE FIRST (no SELECT, no 409 spam)
+    const { error: delErr, count: deletedCount } = await supabase
+      .from("availability_dev")
+      .delete({ count: "exact" })
+      .eq("table_id", currentTable.id)
+      .eq("day", day)
+      .eq("time", time)
+      .eq("user_id", user.id);
+
+    console.log("delete", { delErr, deletedCount });
+
+    if (delErr) {
+      console.warn("Delete failed:", delErr);
+      await loadAvailability();
+      return;
+    }
+
+    // ✅ If we deleted something, toggle OFF succeeded
+    if ((deletedCount || 0) > 0) {
+      const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
+      if (myDot) myDot.remove();
+
+      const container = cell.querySelector(".dot-container");
+      if (container && container.children.length === 0) container.remove();
+
+      return;
+    }
+
+    // ✅ 2) Nothing deleted → INSERT (toggle ON)
     const payload = {
       table_id: currentTable.id,
       day,
@@ -1335,60 +1363,30 @@ async function toggleCell(e) {
       .from("availability_dev")
       .insert(payload);
 
-    // ✅ 2) INSERT SUCCESS → add dot to DOM
-    if (!insErr) {
-      let dotContainer = cell.querySelector(".dot-container");
-      if (!dotContainer) {
-        dotContainer = document.createElement("div");
-        dotContainer.className = "dot-container";
-        cell.appendChild(dotContainer);
-      }
+    console.log("insert", { insErr });
 
-      if (!cell.querySelector(`.dot[data-user-id="${user.id}"]`)) {
-        const dot = document.createElement("div");
-        dot.className = "dot pop-in";
-        dot.style.background = user.color;
-        dot.dataset.userId = user.id;
-        dot.dataset.name = user.name;
-        dotContainer.appendChild(dot);
-      }
-      return;
-    }
-
-    // ✅ 3) DUPLICATE → delete (toggle off)
-    if (insErr.code === "23505") {
-      const { error: delErr } = await supabase
-        .from("availability_dev")
-        .delete()
-        .eq("table_id", currentTable.id)
-        .eq("day", day)
-        .eq("time", time)
-        .eq("user_id", user.id);
-
-      console.log("Delete result:", delErr);
-
-      if (!delErr) {
-        // remove only THIS user's dot
-        const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
-        if (myDot) myDot.remove();
-
-        const container = cell.querySelector(".dot-container");
-        if (container && container.children.length === 0) container.remove();
-
-        return;
-      }
-
-      // delete failed → resync
+    if (insErr) {
+      console.warn("Insert failed:", insErr);
       await loadAvailability();
       return;
     }
 
-    // ✅ 4) unexpected error
-    console.warn("Insert failed:", insErr);
-    await loadAvailability();
+    let dotContainer = cell.querySelector(".dot-container");
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
+      cell.appendChild(dotContainer);
+    }
 
+    if (!cell.querySelector(`.dot[data-user-id="${user.id}"]`)) {
+      const dot = document.createElement("div");
+      dot.className = "dot pop-in";
+      dot.style.background = user.color;
+      dot.dataset.userId = user.id;
+      dot.dataset.name = user.name;
+      dotContainer.appendChild(dot);
+    }
   } finally {
-    // ✅ 5) always release lock
     toggleInFlight = false;
   }
 }
@@ -1924,6 +1922,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
