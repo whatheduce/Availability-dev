@@ -1309,7 +1309,6 @@ let user = null;
 
 async function toggleCell(e) {
   if (!user || !currentTable) return;
-
   if (toggleInFlight) return;
   toggleInFlight = true;
 
@@ -1317,25 +1316,26 @@ async function toggleCell(e) {
     const cell = e.currentTarget;
     if (!cell) return;
 
-    const day = cell.dataset.day;
-    const time = cell.dataset.time;
-    if (!day || !time) return;
+    // ✅ normalize values to match DB types exactly
+    const dayNum = parseInt(cell.dataset.day, 10);
+    const timeKey = String(cell.dataset.time || "").trim();
+
+    if (!Number.isFinite(dayNum) || !timeKey) return;
 
     const au = await getAuthUser();
-console.log("ID CHECK", { authUid: au?.id, profileUserId: user?.id });
     if (!au) return;
-      const myUid = au.id;
-    
-    // ✅ 1) DELETE FIRST (no SELECT, no 409 spam)
+    const myUid = au.id;
+
+    // ✅ DELETE FIRST (toggle off)
     const { error: delErr, count: deletedCount } = await supabase
       .from("availability_dev")
       .delete({ count: "exact" })
       .eq("table_id", currentTable.id)
-      .eq("day", day)
-      .eq("time", time)
+      .eq("day", dayNum)
+      .eq("time", timeKey)
       .eq("user_id", myUid);
 
-    console.log("delete", { delErr, deletedCount });
+    console.log("delete", { delErr, deletedCount, dayNum, timeKey, myUid });
 
     if (delErr) {
       console.warn("Delete failed:", delErr);
@@ -1343,9 +1343,9 @@ console.log("ID CHECK", { authUid: au?.id, profileUserId: user?.id });
       return;
     }
 
-    // ✅ If we deleted something, toggle OFF succeeded
     if ((deletedCount || 0) > 0) {
-      const myDot = cell.querySelector(`.dot[data-user-id="${user.id}"]`);
+      // remove dot from DOM
+      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
       if (myDot) myDot.remove();
 
       const container = cell.querySelector(".dot-container");
@@ -1354,21 +1354,19 @@ console.log("ID CHECK", { authUid: au?.id, profileUserId: user?.id });
       return;
     }
 
-    // ✅ 2) Nothing deleted → INSERT (toggle ON)
-    const payload = {
-      table_id: currentTable.id,
-      day,
-      time,
-      user_id: myUid,
-      name: user.name,
-      color: user.color
-    };
-
+    // ✅ INSERT (toggle on)
     const { error: insErr } = await supabase
       .from("availability_dev")
-      .insert(payload);
+      .insert({
+        table_id: currentTable.id,
+        day: dayNum,
+        time: timeKey,
+        user_id: myUid,
+        name: user.name,
+        color: user.color
+      });
 
-    console.log("insert", { insErr });
+    console.log("insert", { insErr, dayNum, timeKey, myUid });
 
     if (insErr) {
       console.warn("Insert failed:", insErr);
@@ -1376,6 +1374,7 @@ console.log("ID CHECK", { authUid: au?.id, profileUserId: user?.id });
       return;
     }
 
+    // add dot to DOM
     let dotContainer = cell.querySelector(".dot-container");
     if (!dotContainer) {
       dotContainer = document.createElement("div");
@@ -1383,11 +1382,11 @@ console.log("ID CHECK", { authUid: au?.id, profileUserId: user?.id });
       cell.appendChild(dotContainer);
     }
 
-    if (!cell.querySelector(`.dot[data-user-id="${user.id}"]`)) {
+    if (!cell.querySelector(`.dot[data-user-id="${myUid}"]`)) {
       const dot = document.createElement("div");
       dot.className = "dot pop-in";
       dot.style.background = user.color;
-      dot.dataset.userId = user.id;
+      dot.dataset.userId = myUid;
       dot.dataset.name = user.name;
       dotContainer.appendChild(dot);
     }
@@ -1927,6 +1926,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
