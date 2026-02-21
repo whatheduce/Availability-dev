@@ -278,6 +278,33 @@ body {
 
   
 <body>
+
+<div id="dashboard" style="display:none; padding:20px; max-width:900px; margin:auto;">
+
+  <h2>Dashboard</h2>
+
+  <div class="card">
+    <h3>Your profile</h3>
+    <input id="profile-name" placeholder="Display name">
+    <input type="color" id="profile-color">
+    <button onclick="saveProfile()">Save profile</button>
+  </div>
+
+  <div class="card">
+    <h3>Your calendars</h3>
+    <div id="owned-boards"></div>
+
+    <h3>Joined calendars</h3>
+    <div id="joined-boards"></div>
+  </div>
+
+  <div style="margin-top:20px;">
+    <button onclick="showCreateBoard()">Create new calendar</button>
+    <button onclick="logout()">Log out</button>
+  </div>
+
+</div>  
+  
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px;">
   <h2>Choose Your Name & Colour</h2>
@@ -516,7 +543,90 @@ async function rollForwardIfNeeded(tableId) {
   return data || 0;
 }
 
+  
+  async function loadProfile() {
+  const au = await getAuthUser();
+  if (!au) return null;
 
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  user = {
+    id: au.id,
+    name: data.name,
+    color: data.color
+  };
+
+  document.getElementById("profile-name").value = data.name || "";
+  document.getElementById("profile-color").value = data.color || "#3b82f6";
+
+  return data;
+}
+
+async function saveProfile() {
+  const au = await getAuthUser();
+  if (!au) return;
+
+  const name = document.getElementById("profile-name").value.trim();
+  const color = document.getElementById("profile-color").value;
+
+  if (!name) return alert("Enter a display name");
+
+  const { error } = await supabase
+    .from("profiles")
+    .upsert({
+      user_id: au.id,
+      name,
+      color
+    });
+
+  if (error) return alert(error.message);
+
+  await loadProfile();
+  await loadBoards();
+}
+
+async function loadBoards() {
+  const au = await getAuthUser();
+
+  const { data, error } = await supabase
+    .from("board_members")
+    .select(`
+      role,
+      board_id,
+      tables (
+        id,
+        name,
+        invite_token
+      )
+    `)
+    .eq("user_id", au.id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const owned = data.filter(x => x.role === "owner");
+  const joined = data.filter(x => x.role !== "owner");
+
+  document.getElementById("owned-boards").innerHTML =
+    owned.map(b => `<div onclick="openBoard('${b.tables.invite_token}')">${b.tables.name}</div>`).join("");
+
+  document.getElementById("joined-boards").innerHTML =
+    joined.map(b => `<div onclick="openBoard('${b.tables.invite_token}')">${b.tables.name}</div>`).join("");
+}  
+  
 async function getAuthUser() {
   const { data, error } = await supabase.auth.getUser();
   if (error) return null;
@@ -1928,6 +2038,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
