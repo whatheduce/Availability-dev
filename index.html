@@ -1321,6 +1321,11 @@ async function toggleCell(e) {
     const time = cell.dataset.time;
     if (!day || !time) return;
 
+    const au = await getAuthUser();
+console.log("ID CHECK", { authUid: au?.id, profileUserId: user?.id });
+    if (!au) return;
+      const myUid = au.id;
+    
     // ✅ 1) DELETE FIRST (no SELECT, no 409 spam)
     const { error: delErr, count: deletedCount } = await supabase
       .from("availability_dev")
@@ -1328,7 +1333,7 @@ async function toggleCell(e) {
       .eq("table_id", currentTable.id)
       .eq("day", day)
       .eq("time", time)
-      .eq("user_id", user.id);
+      .eq("user_id", myUid);
 
     console.log("delete", { delErr, deletedCount });
 
@@ -1354,7 +1359,7 @@ async function toggleCell(e) {
       table_id: currentTable.id,
       day,
       time,
-      user_id: user.id,
+      user_id: myUid,
       name: user.name,
       color: user.color
     };
@@ -1922,6 +1927,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
