@@ -692,6 +692,17 @@ function showAuthOverlay(msg = "") {
   }
 }
 
+function showDashboard() {
+  document.getElementById("dashboard").style.display = "block";
+
+  // hide the create / board UI if it exists
+  const create = document.getElementById("create-board");
+  if (create) create.style.display = "none";
+
+  const grid = document.getElementById("board-view");
+  if (grid) grid.style.display = "none";
+} 
+
 function hideAuthOverlay() {
   const overlay = document.getElementById("auth-overlay");
   if (overlay) overlay.style.display = "none";
@@ -1911,6 +1922,26 @@ const PREBUILT_STRUCTURES = {
   
                                                                                                 /* === Startup === */
 async function startApp() {
+  // 🔐 Check session first
+const { data: { session } } = await supabase.auth.getSession();
+
+// If not logged in → show auth and stop here
+if (!session) {
+  showAuthOverlay();
+  return;
+}
+
+// If we are on the home page (no invite token in URL) → go to dashboard
+const params = new URLSearchParams(window.location.search);
+const inviteToken = params.get("t");
+
+if (!inviteToken) {
+  showDashboard();
+  await loadProfile();
+  await loadBoards();
+  return;
+}
+  
   try {
     console.log("App starting...");
   
@@ -2038,6 +2069,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
