@@ -669,6 +669,7 @@ async function getOrCreateProfile({ name, color }) {
 let authMode = "signin"; // "signin" or "signup"
 
 function showAuthOverlay(msg = "") {
+  document.body.style.visibility = "visible";
   const overlay = document.getElementById("auth-overlay");
   const message = document.getElementById("auth-msg");
   const toggle = document.getElementById("auth-toggle-mode");
@@ -697,16 +698,11 @@ function showAuthOverlay(msg = "") {
 }
 
 function showDashboard() {
-  const dash = document.getElementById("dashboard");
-  if (!dash) {
-    console.error("Dashboard element (#dashboard) not found. Did you add the HTML?");
-    // Fallback: show existing identity screen so you’re not stuck
-    const identity = document.getElementById("identity-screen");
-    if (identity) identity.style.display = "block";
-    return;
-  }
+  // 👇 THIS is the important fix
+  document.body.style.visibility = "visible";
 
-  dash.style.display = "block";
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "block";
 }
 
 function hideAuthOverlay() {
@@ -2075,6 +2071,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
