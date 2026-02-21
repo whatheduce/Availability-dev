@@ -278,7 +278,10 @@ body {
 
   
 <body>
-
+<div style="padding:16px;font:16px system-ui;">
+  ✅ Page HTML is loading
+</div>
+  
 <div id="dashboard" style="display:none; padding:20px; max-width:900px; margin:auto;">
 
   <h2>Dashboard</h2>
@@ -481,6 +484,7 @@ body {
 
   
 <script type="module">
+  console.log("✅ script loaded");
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* Supabase credentials (unchanged) */
@@ -2071,6 +2075,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
