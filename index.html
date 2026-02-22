@@ -702,6 +702,11 @@ await loadBoards();
 }  
 
   
+function openBoard(inviteToken) {
+  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
+}
+  
+  
 async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
     p_table_id: tableId
@@ -2229,6 +2234,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
