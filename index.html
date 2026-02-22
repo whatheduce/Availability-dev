@@ -328,6 +328,22 @@ body {
   margin-bottom: 10px;
 }
 
+.back-btn {
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.75;
+  padding: 8px 10px;
+  border-radius: 10px;
+}
+
+.back-btn:hover {
+  opacity: 1;
+  background: rgba(0,0,0,0.05);
+}
+    
 /* Horizontal list */
 .board-strip {
   display: flex;
@@ -570,10 +586,14 @@ body {
 </div>
 </div>
 
+<div id="calendar-topbar" style="display:none; max-width:980px; margin:14px auto 0; padding:0 18px; align-items:center; justify-content:space-between;">
+  <button id="back-to-dashboard" class="back-btn">← Dashboard</button>
+</div>
+
 <div id="calendar" style="display:none;">
   <table id="availabilityTable"></table>
 </div>
-
+  
 <!-- footer (outside the table) -->
 <div class="footer-text" style="display:none;">
   - Morning denotes availability starting quite early, assumedly before 10am. <br>
@@ -1329,6 +1349,8 @@ if (!data) {
   // No board exists for this token (e.g., DB wiped or invalid link)
   document.getElementById("create-board").style.display = "block";
   document.getElementById("calendar").style.display = "none";
+    const topbar = document.getElementById("calendar-topbar");
+      if (topbar) topbar.style.display = "none";
   legendDiv.style.display = "none";
 
   // optional: clear stale remembered board
@@ -1371,6 +1393,8 @@ if (!au) {
 
   // Show the calendar BEHIND the blur, but build it so there's something there
   document.getElementById("calendar").style.display = "block";
+  document.getElementById("calendar-topbar").style.display = "flex";
+  document.getElementById("dashboard").style.display = "none";
   document.getElementById("legend").style.display = "none";
   document.querySelector(".footer-text").style.display = "none";
   document.getElementById("presence").style.display = "none";
@@ -1395,6 +1419,8 @@ if (!hydrated) {
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
 document.getElementById("calendar").style.display = "block";
+document.getElementById("calendar-topbar").style.display = "flex";
+document.getElementById("dashboard").style.display = "none";
 document.getElementById("legend").style.display = "block";
 document.querySelector(".footer-text").style.display = "block";
 
@@ -2157,6 +2183,13 @@ if (!inviteToken) {
 
   const dashCreate = document.getElementById("dash-create");
     if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
+
+  const backToDashBtn = document.getElementById("back-to-dashboard");
+    if (backToDashBtn) {
+      backToDashBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+    }
     
   const goCreateBtn = document.getElementById("go-create");
     if (goCreateBtn) {
@@ -2254,6 +2287,8 @@ const createSection = document.getElementById("create-board");
     // No recent board → show create screen
     createSection.style.display = "block";
     document.getElementById("calendar").style.display = "none";
+      const topbar = document.getElementById("calendar-topbar");
+      if (topbar) topbar.style.display = "none";
     legendDiv.style.display = "none";
   } else {
     createSection.style.display = "none";
@@ -2273,6 +2308,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
