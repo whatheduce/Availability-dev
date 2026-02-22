@@ -309,7 +309,7 @@ body {
 </div>  
   
                                                                                        <!-- user selection -->
-<div id="identity-section" style="text-align:center; margin-top:20px;">
+<div id="identity-section" style="text-align:center; margin-top:20px; display:none;">
   <h2>Choose Your Name & Colour</h2>
 
   <input id="identity-name" placeholder="Your name" style="margin-bottom:12px;" />
@@ -1955,10 +1955,10 @@ if (!inviteToken) {
 
 
   // Always attach identity button
-  const saveIdentityBtn = document.getElementById("save-identity");
-  if (saveIdentityBtn) {
-    saveIdentityBtn.addEventListener("click", saveIdentity);
-  }
+ // const saveIdentityBtn = document.getElementById("save-identity");
+ // if (saveIdentityBtn) {
+ //   saveIdentityBtn.addEventListener("click", saveIdentity);
+ // }
 
   // Always attach create flow buttons
   const startCreateBtn = document.getElementById("start-create");
@@ -2071,6 +2071,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
