@@ -384,7 +384,15 @@ body {
 
   <!-- Body -->
   <div id="dash-body">
-
+    <div class="dash-section">
+      <div class="dash-section-title">Your profile</div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <input id="profile-name" placeholder="Display name" style="padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.12);">
+        <input type="color" id="profile-color" style="width:44px;height:44px;border:none;background:transparent;">
+        <button id="save-profile-btn" style="padding:10px 14px;border-radius:10px;border:none;font-weight:600;cursor:pointer;">Save</button>
+      </div>
+    </div>
+    
     <div class="dash-section">
       <div class="dash-section-title">Hosted Calendars</div>
       <div id="owned-boards" class="board-strip"></div>
@@ -2100,6 +2108,11 @@ if (!inviteToken) {
     createBtn.addEventListener("click", createBoard);
   }
 
+  const saveBtn = document.getElementById("save-profile-btn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", saveProfile);
+    }
+    
       // Structure selection (Dev Custom + Meals)
 
 const devCard = document.getElementById("dev-custom-card");
@@ -2190,6 +2203,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
