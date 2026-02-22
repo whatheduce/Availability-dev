@@ -364,9 +364,6 @@ body {
 
   
 <body>
-<div style="padding:16px;font:16px system-ui;">
-  ✅ Page HTML is loading
-</div>
 
 <div id="profile-setup" style="display:none; padding:20px; max-width:520px; margin:60px auto;">
   <h2>Set up your profile</h2>
@@ -403,15 +400,6 @@ body {
 
   <!-- Body -->
   <div id="dash-body">
-    <div class="dash-section">
-      <div class="dash-section-title">Your profile</div>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <input id="profile-name" placeholder="Display name" style="padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.12);">
-        <input type="color" id="profile-color" style="width:44px;height:44px;border:none;background:transparent;">
-        <button id="save-profile-btn" style="padding:10px 14px;border-radius:10px;border:none;font-weight:600;cursor:pointer;">Save</button>
-      </div>
-    </div>
-    
     <div class="dash-section">
       <div class="dash-section-title">Hosted Calendars</div>
       <div id="owned-boards" class="board-strip"></div>
@@ -699,8 +687,18 @@ async function saveProfileSetup() {
   user = { id: au.id, name, color };
 
   hideProfileSetup();
-  showDashboard();
-  await loadBoards();
+
+    const params = new URLSearchParams(window.location.search);
+    const inviteToken = params.get("t");
+    const manageToken = params.get("m"); // if you use this
+
+    if (inviteToken || manageToken) {
+      await loadTable();
+      return;
+    }
+
+showDashboard();
+await loadBoards();
 }  
 
   
@@ -744,29 +742,6 @@ async function loadProfile() {
   return data;
 }
   
-
-async function saveProfile() {
-  const au = await getAuthUser();
-  if (!au) return;
-
-  const name = document.getElementById("profile-name").value.trim();
-  const color = document.getElementById("profile-color").value;
-
-  if (!name) return alert("Enter a display name");
-
-  const { error } = await supabase
-    .from("profiles")
-    .upsert({
-      user_id: au.id,
-      name,
-      color
-    });
-
-  if (error) return alert(error.message);
-
-  await loadProfile();
-  await loadBoards();
-}
 
 async function loadBoards() {
   const au = await getAuthUser();
@@ -894,35 +869,14 @@ function hideAuthOverlay() {
   if (overlay) overlay.style.display = "none";
 }
 
+  
 async function hydrateUserFromAuth() {
-  const au = await getAuthUser();
-  if (!au) return null;
-
-  // If they don't have a profile yet, we will create it using whatever is in identity inputs
-  // (keeps your existing “name + colour” concept)
-  const nameInput = document.getElementById("identity-name");
-  const colorInput = document.getElementById("identity-color");
-  const name = (nameInput?.value || localStorage.getItem("globalUserName") || "").trim();
-  const color = (colorInput?.value || localStorage.getItem("globalUserColor") || "#2d7ff9").trim();
-
-  const profile = await getOrCreateProfile({ name: name || "User", color });
-
-  if (!profile) return null;
-
-  // Set your app-level user object
-  user = {
-    id: au.id,
-    name: profile.name,
-    color: profile.color
-  };
-
-  // Optional: keep for UI convenience (NOT identity anymore)
-  localStorage.setItem("globalUserName", user.name);
-  localStorage.setItem("globalUserColor", user.color);
-
-  return user;
+  const prof = await loadProfile(); // loadProfile already sets global `user`
+  if (!prof || !prof.name || !prof.color) return null;
+  return prof;
 }
 
+  
 async function handleAuthSubmit() {
   const emailEl = document.getElementById("auth-email");
   const passEl = document.getElementById("auth-password");
@@ -958,12 +912,21 @@ async function handleAuthSubmit() {
   }
 
   const hydrated = await hydrateUserFromAuth();
-  if (!hydrated) {
-    showAuthOverlay("Signed in, but failed to load your profile.");
-    return;
-  }
 
   hideAuthOverlay();
+
+    if (!hydrated) {
+      showProfileSetup();
+      return;
+    }
+
+    // Now proceed to board or create screen
+    if (inviteToken || manageToken) {
+      await loadTable();
+    } else {
+      showDashboard();
+      await loadBoards();
+    }
 
   // Now proceed to board or create screen
   if (inviteToken || manageToken) {
@@ -1396,11 +1359,9 @@ if (!au) {
   return;
 }
 
-
-// Signed in → hydrate user from profile
 const hydrated = await hydrateUserFromAuth();
 if (!hydrated) {
-  showAuthOverlay("Signed in, but profile could not be loaded.");
+  showProfileSetup();
   return;
 }
 
@@ -2174,11 +2135,6 @@ if (!inviteToken) {
   if (createBtn) {
     createBtn.addEventListener("click", createBoard);
   }
-
-  const saveBtn = document.getElementById("save-profile-btn");
-    if (saveBtn) {
-      saveBtn.addEventListener("click", saveProfile);
-    }
     
   const setupSaveBtn = document.getElementById("setup-save");
     if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);   
@@ -2273,6 +2229,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
