@@ -863,11 +863,6 @@ function showDashboard() {
   if (dash) dash.style.display = "block";
 }
 
-
-function openBoard(inviteToken) {
-  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
-}
-
   
 function hideAuthOverlay() {
   const overlay = document.getElementById("auth-overlay");
@@ -2234,6 +2229,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
