@@ -411,6 +411,16 @@ body {
     </div>
   </div>
 </div>
+
+<div id="route-error" style="display:none; padding:18px; max-width:720px; margin:60px auto; border:1px solid rgba(0,0,0,0.15); border-radius:14px;">
+  <div style="font-weight:700; font-size:18px; margin-bottom:8px;">Calendar not found</div>
+  <div style="opacity:0.75; margin-bottom:14px;">
+    That invite link doesn’t match any calendar. Check the link and try again.
+  </div>
+  <button id="route-error-back" style="padding:10px 14px; border-radius:10px; border:none; font-weight:700; cursor:pointer;">
+    Back to dashboard
+  </button>
+</div>
   
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px; display:none;">
@@ -703,6 +713,23 @@ async function saveProfileSetup() {
 showDashboard();
 await loadBoards();
 }  
+
+
+function showRouteError() {
+  document.body.style.visibility = "visible";
+
+  // Hide other screens
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+  const board = document.getElementById("board-view");
+  if (board) board.style.display = "none";
+
+  // Show error panel
+  const err = document.getElementById("route-error");
+  if (err) err.style.display = "block";
+}
   
   
 async function rollForwardIfNeeded(tableId) {
@@ -1307,7 +1334,7 @@ if (!data) {
   // optional: clear stale remembered board
   localStorage.removeItem("lastBoardToken");
 
-  alert("That calendar link is no longer valid (calendar not found). Please create a new calendar.");
+  showRouteError();
   return;
 }
 
@@ -2141,6 +2168,13 @@ if (!inviteToken) {
     addRowBtn.addEventListener("click", () => addRowInput());
   }
 
+  const backBtn = document.getElementById("route-error-back");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+  }
+    
   const createBtn = document.getElementById("create-board-btn");
   if (createBtn) {
     createBtn.addEventListener("click", createBoard);
@@ -2239,6 +2273,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
