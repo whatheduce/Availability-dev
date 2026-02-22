@@ -597,8 +597,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
   /* === Invite Token + Current Table === */
 const params = new URLSearchParams(window.location.search);
-const inviteToken = params.get("token");
-const manageToken = params.get("manage");
+const inviteToken = params.get("t");
+const manageToken = params.get("m");
 
 
 let currentTable = null;
@@ -2014,6 +2014,20 @@ if (selectedStructure === "custom") {
 }
 
 
+function showBoardView() {
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+
+  const board = document.getElementById("board-view"); // or whatever your board container id is
+  if (board) board.style.display = "block";
+
+  document.body.style.visibility = "visible";
+}
+  
+
 function setActiveStructureCard(activeId) {
   ["dev-custom-card", "meals-card"].forEach(id => {
     const el = document.getElementById(id);
@@ -2074,9 +2088,7 @@ const { data: { session } } = await supabase.auth.getSession();
     return;
   }
 
-// If we are on the home page (no invite token in URL) → go to dashboard
-const params = new URLSearchParams(window.location.search);
-const inviteToken = params.get("t");
+document.body.style.visibility = "visible";
 
 // ✅ If NO invite token, this is the homepage → dashboard flow
 if (!inviteToken) {
@@ -2227,6 +2239,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
