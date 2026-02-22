@@ -270,6 +270,92 @@ body {
       transform-origin: center;
     }
 
+    /* Dashboard */
+#dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 18px 10px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+#dash-settings {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+#dash-title {
+  text-align: center;
+  line-height: 1.1;
+}
+
+.dash-subtitle {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  opacity: 0.65;
+}
+
+.dash-main {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+#dash-create {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+#dash-body {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 10px 18px 22px;
+}
+
+.dash-section {
+  margin-top: 18px;
+}
+
+.dash-section-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Horizontal list */
+.board-strip {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.board-pill {
+  flex: 0 0 auto;
+  min-width: 160px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.12);
+  cursor: pointer;
+  background: rgba(255,255,255,0.9);
+}
+
+.board-pill-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.board-pill-meta {
+  font-size: 12px;
+  opacity: 0.65;
+}
+    
   </style>
 </head>
 
@@ -282,31 +368,34 @@ body {
   ✅ Page HTML is loading
 </div>
   
-<div id="dashboard" style="display:block; padding:20px; max-width:900px; margin:auto;">
+<div id="dashboard" style="display:none; height:100vh;">
 
-  <h2>Dashboard</h2>
+  <!-- Top Bar -->
+  <div id="dash-topbar">
+    <button id="dash-settings" title="Settings">⚙️</button>
 
-  <div class="card">
-    <h3>Your profile</h3>
-    <input id="profile-name" placeholder="Display name">
-    <input type="color" id="profile-color">
-    <button onclick="saveProfile()">Save profile</button>
+    <div id="dash-title">
+      <div class="dash-subtitle">USERS</div>
+      <div class="dash-main">Dashboard</div>
+    </div>
+
+    <button id="dash-create">Create New Calendar</button>
   </div>
 
-  <div class="card">
-    <h3>Your calendars</h3>
-    <div id="owned-boards"></div>
+  <!-- Body -->
+  <div id="dash-body">
 
-    <h3>Joined calendars</h3>
-    <div id="joined-boards"></div>
+    <div class="dash-section">
+      <div class="dash-section-title">Hosted Calendars</div>
+      <div id="owned-boards" class="board-strip"></div>
+    </div>
+
+    <div class="dash-section">
+      <div class="dash-section-title">Joined Calendars</div>
+      <div id="joined-boards" class="board-strip"></div>
+    </div>
   </div>
-
-  <div style="margin-top:20px;">
-    <button onclick="showCreateBoard()">Create new calendar</button>
-    <button onclick="logout()">Log out</button>
-  </div>
-
-</div>  
+</div>
   
                                                                                        <!-- user selection -->
 <div id="identity-section" style="text-align:center; margin-top:20px; display:none;">
@@ -2071,6 +2160,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
