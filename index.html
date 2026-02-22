@@ -367,6 +367,25 @@ body {
 <div style="padding:16px;font:16px system-ui;">
   ✅ Page HTML is loading
 </div>
+
+<div id="profile-setup" style="display:none; padding:20px; max-width:520px; margin:60px auto;">
+  <h2>Set up your profile</h2>
+  <p style="opacity:0.7; margin-top:-8px;">This name and colour will show on every calendar you join.</p>
+
+  <div style="margin-top:18px;">
+    <label style="display:block; font-weight:600; margin-bottom:6px;">Username</label>
+    <input id="setup-name" placeholder="e.g. Scott" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(0,0,0,0.15);">
+  </div>
+
+  <div style="margin-top:14px;">
+    <label style="display:block; font-weight:600; margin-bottom:6px;">Dot colour</label>
+    <input type="color" id="setup-color" value="#3b82f6" style="width:56px; height:44px; border:none; background:transparent;">
+  </div>
+
+  <button id="setup-save" style="margin-top:18px; padding:12px 16px; border-radius:10px; border:none; font-weight:700; cursor:pointer;">
+    Continue
+  </button>
+</div>
   
 <div id="dashboard" style="display:none; height:100vh;">
 
@@ -640,7 +659,50 @@ function showCreateBoard() {
   const create = document.getElementById("create-board");
   if (create) create.style.display = "block";
 }  
+
   
+function showProfileSetup() {
+  document.body.style.visibility = "visible";
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "block";
+}
+
+  
+function hideProfileSetup() {
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+}
+
+
+async function saveProfileSetup() {
+  const au = await getAuthUser();
+  if (!au) return;
+
+  const name = document.getElementById("setup-name")?.value?.trim();
+  const color = document.getElementById("setup-color")?.value;
+
+  if (!name) return alert("Please choose a username.");
+
+  const { error } = await supabase.from("profiles").upsert({
+    user_id: au.id,
+    name,
+    color
+  });
+
+  if (error) return alert(error.message);
+
+  // update in-memory user immediately
+  user = { id: au.id, name, color };
+
+  hideProfileSetup();
+  showDashboard();
+  await loadBoards();
+}  
+
   
 async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
@@ -656,7 +718,7 @@ async function rollForwardIfNeeded(tableId) {
 }
 
   
-  async function loadProfile() {
+async function loadProfile() {
   const au = await getAuthUser();
   if (!au) return null;
 
@@ -679,11 +741,9 @@ async function rollForwardIfNeeded(tableId) {
     color: data.color
   };
 
-  document.getElementById("profile-name").value = data.name || "";
-  document.getElementById("profile-color").value = data.color || "#3b82f6";
-
   return data;
 }
+  
 
 async function saveProfile() {
   const au = await getAuthUser();
@@ -2050,23 +2110,30 @@ const PREBUILT_STRUCTURES = {
 async function startApp() {
   // 🔐 Check session first
 const { data: { session } } = await supabase.auth.getSession();
-
-// If not logged in → show auth and stop here
-if (!session) {
-  showAuthOverlay();
-  return;
-}
+  if (!session) {
+    showAuthOverlay();
+    return;
+  }
 
 // If we are on the home page (no invite token in URL) → go to dashboard
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 
+// ✅ If NO invite token, this is the homepage → dashboard flow
 if (!inviteToken) {
+  const prof = await loadProfile();
+
+  if (!prof || !prof.name || !prof.color) {
+    showProfileSetup();
+    return;
+  }
+
   showDashboard();
-  await loadProfile();
   await loadBoards();
   return;
 }
+
+// ✅ If invite token exists, continue with your existing board flow below...
   
   try {
     console.log("App starting...");
@@ -2113,7 +2180,10 @@ if (!inviteToken) {
       saveBtn.addEventListener("click", saveProfile);
     }
     
-      // Structure selection (Dev Custom + Meals)
+  const setupSaveBtn = document.getElementById("setup-save");
+    if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);   
+     
+    // Structure selection (Dev Custom + Meals)
 
 const devCard = document.getElementById("dev-custom-card");
 if (devCard) {
@@ -2203,6 +2273,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
