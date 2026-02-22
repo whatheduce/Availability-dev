@@ -600,6 +600,7 @@ const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("token");
 const manageToken = params.get("manage");
 
+
 let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
@@ -614,10 +615,12 @@ function scheduleFullRefreshIdle(ms = 20000) {
   }, ms);
 }
 
-
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
-
+  
+window.openBoard = function (inviteToken) {
+  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
+};
   
 function renderPresence() {
   const wrap = document.getElementById("presence");
@@ -700,11 +703,6 @@ async function saveProfileSetup() {
 showDashboard();
 await loadBoards();
 }  
-
-  
-function openBoard(inviteToken) {
-  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
-}
   
   
 async function rollForwardIfNeeded(tableId) {
@@ -2229,6 +2227,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
