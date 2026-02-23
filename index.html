@@ -634,12 +634,6 @@ const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
 
-  // Debug logging toggle
-const DEBUG = false;
-const log = (...args) => { if (DEBUG) console.log(...args); };
-const warn = (...args) => { if (DEBUG) console.warn(...args); };
-
-
 let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
@@ -2317,6 +2311,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
