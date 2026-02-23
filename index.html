@@ -618,6 +618,10 @@ body {
 
   
 <script type="module">
+const DEBUG = false;
+function log(...args) { if (DEBUG) console.log(...args); }
+function warn(...args) { if (DEBUG) console.warn(...args); }
+  
   log("✅ script loaded");
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -2313,6 +2317,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
