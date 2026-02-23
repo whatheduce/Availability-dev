@@ -514,19 +514,34 @@ body {
   </div>
 </div>
 
+<div id="gold-threshold-wrap" style="margin-top:18px; text-align:left;">
+  <label for="gold-threshold" style="display:block; font-weight:600; margin-bottom:6px;">
+    Gold threshold
+   </label>
+
+   <select id="gold-threshold"
+    style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
+    <option value="" selected disabled>Select a number…</option>
+    <!-- options will be populated by JS so we can disable 6–30 cleanly -->
+  </select>
+
+  <div style="font-size:12px; color:#666; margin-top:6px;">
+     Cells turn gold when dots meet or exceed this number.
+  </div>
+</div>
+
   <div class="structure-row">
+    <!-- LEFT: Dev custom -->
+    <div class="structure-left">
+      <div id="dev-custom-card" class="structure-card">
+      <div class="structure-title">Dev Custom</div>
+      <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
+      </div>
 
-  <!-- LEFT: Dev custom -->
-  <div class="structure-left">
-    <div id="dev-custom-card" class="structure-card">
-    <div class="structure-title">Dev Custom</div>
-    <div class="structure-subtitle">Use custom time blocks (dev mode)</div>
-    </div>
-
-    <div id="meals-card" class="structure-card" style="margin-top:12px;">
-      <div class="structure-title">Meals</div>
-      <div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
-    </div>
+      <div id="meals-card" class="structure-card" style="margin-top:12px;">
+        <div class="structure-title">Meals</div>
+        <div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
+      </div>
   </div>
 
   <!-- RIGHT: Pro dropdown (disabled) -->
@@ -553,24 +568,10 @@ body {
 
   <div id="rows-container"></div>
 
-  <button id="add-row">Add Time Block</button>
+<!-- <button id="add-row">Add Time Block</button> --> keeping this here just in case we need the button id
 </div>
     
-<div id="gold-threshold-wrap" style="margin-top:18px; text-align:left;">
-  <label for="gold-threshold" style="display:block; font-weight:600; margin-bottom:6px;">
-    Gold threshold
-   </label>
 
-   <select id="gold-threshold"
-    style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12);">
-    <option value="" selected disabled>Select a number…</option>
-    <!-- options will be populated by JS so we can disable 6–30 cleanly -->
-  </select>
-
-  <div style="font-size:12px; color:#666; margin-top:6px;">
-     Cells turn gold when dots meet or exceed this number.
-  </div>
-</div>
     
 <div id="create-actions" style="display:none; margin-top:20px;">
   <button id="create-board-btn" class="primary-btn">
@@ -1642,8 +1643,7 @@ if (structureChoice === "custom") {
   // --- Gold threshold (required) ---
   const goldRaw = document.getElementById("gold-threshold")?.value || "";
     if (!goldRaw) {
-      alert("Please select a gold threshold.");
-      return;
+      const gold = parseInt(goldSelect.value, 10);
     }
     const goldThreshold = parseInt(goldRaw, 10);
 
@@ -2368,6 +2368,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
