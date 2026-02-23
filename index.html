@@ -2379,7 +2379,7 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
 }
   
 // Dashboard hosted card actions (+ menu) — stub only for now
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   // Toggle menu when clicking +
   const actionsBtn = e.target.closest(".board-actions-btn");
   if (actionsBtn) {
@@ -2417,9 +2417,32 @@ document.addEventListener("click", (e) => {
     const boardId = card.dataset.boardId;
 
     if (action === "delete") {
-      // Stub only: no Supabase changes yet
-      console.log("Delete clicked (stub). boardId:", boardId);
+      // Confirm (no alert UI yet — we can swap to a custom modal next)
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+      const ok = confirm(`Delete "${boardName}"? This cannot be undone.`);
+      if (!ok) return;
+
+      try {
+        // Disable the menu item to prevent double-clicks
+        item.disabled = true;
+        item.textContent = "Deleting…";
+
+        const { error } = await supabase.rpc("delete_calendar", { p_board_id: boardId });
+        if (error) throw error;
+
+        // Remove from dashboard immediately
+        card.remove();
+
+        // Optional: refresh lists in case you show counts etc.
+        if (typeof loadBoards === "function") await loadBoards();
+      } catch (err) {
+        console.error("Delete calendar failed:", err);
+        // Revert UI
+        item.disabled = false;
+        item.textContent = "Delete";
+      }
     }
+    
     return;
   }
 
@@ -2435,6 +2458,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
