@@ -312,7 +312,7 @@ body {
   cursor: pointer;
   font-weight: 600;
 }
-
+    
 #dash-body {
   max-width: 980px;
   margin: 0 auto;
@@ -407,7 +407,7 @@ body {
     <button id="dash-settings" title="Settings">⚙️</button>
 
     <div id="dash-title">
-      <div class="dash-subtitle">USERS</div>
+      <div class="dash-subtitle" id="dash-username"></div>
       <div class="dash-main">Dashboard</div>
     </div>
 
@@ -682,6 +682,19 @@ function showCreateBoard() {
   if (create) create.style.display = "block";
 }  
 
+
+function possessive(name) {
+  if (!name) return "";
+  const trimmed = name.trim();
+
+  // If the name already ends with "s" → James' Dashboard
+  if (trimmed.toLowerCase().endsWith("s")) {
+    return `${trimmed}'`;
+  }
+
+  return `${trimmed}'s`;
+}
+  
   
 function showProfileSetup() {
   document.body.style.visibility = "visible";
@@ -2146,6 +2159,10 @@ if (!inviteToken) {
   }
 
   showDashboard();
+    const dashUser = document.getElementById("dash-username");
+    if (dashUser && user?.name) {
+      dashUser.textContent = possessive(user.name).toUpperCase();
+    }
   await loadBoards();
   return;
 }
@@ -2299,6 +2316,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
