@@ -2426,7 +2426,7 @@ document.addEventListener("click", (e) => {
   // Click outside closes any open menus
   document.querySelectorAll(".board-actions-menu:not([hidden])")
     .forEach(m => m.hidden = true);
-});
+}, true);
   
 document.addEventListener("DOMContentLoaded", startApp);
 
@@ -2435,6 +2435,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
