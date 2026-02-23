@@ -2217,7 +2217,61 @@ const PREBUILT_STRUCTURES = {
 };
 
 
+let uiListenersBound = false;
 
+function bindUiListenersOnce() {
+  if (uiListenersBound) return;
+  uiListenersBound = true;
+
+  // Dashboard: Create New Calendar (your dashboard button)
+  const dashCreate = document.getElementById("dash-create");
+  if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
+
+  // Back to dashboard from board view
+  const backToDashBtn = document.getElementById("back-to-dashboard");
+  if (backToDashBtn) {
+    backToDashBtn.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+  }
+
+  // Create screen: Continue/Create after structure selection
+  const goCreateBtn = document.getElementById("go-create");
+  if (goCreateBtn) {
+    goCreateBtn.addEventListener("click", proceedFromStructure);
+  }
+
+  // Profile setup save
+  const setupSaveBtn = document.getElementById("setup-save");
+  if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);
+
+  // Structure selection (Dev Custom + Meals)
+  const devCard = document.getElementById("dev-custom-card");
+  if (devCard) {
+    devCard.addEventListener("click", () => {
+      selectedStructure = "custom";
+      setActiveStructureCard("dev-custom-card");
+      showGoCreate();
+    });
+  }
+
+  const mealsCard = document.getElementById("meals-card");
+  if (mealsCard) {
+    mealsCard.addEventListener("click", () => {
+      selectedStructure = "meals";
+      setActiveStructureCard("meals-card");
+      showGoCreate();
+    });
+  }
+
+  // Auth overlay events (safe even if not used)
+  document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
+
+  document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
+    authMode = (authMode === "signin") ? "signup" : "signin";
+    showAuthOverlay();
+  });
+}
 
 
 
@@ -2234,6 +2288,7 @@ const { data: { session } } = await supabase.auth.getSession();
   }
 
 document.body.style.visibility = "visible";
+bindUiListenersOnce();
 
 // ✅ If NO invite token, this is the homepage → dashboard flow
 if (!inviteToken) {
@@ -2396,6 +2451,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
