@@ -622,7 +622,6 @@ const DEBUG = false;
 function log(...args) { if (DEBUG) console.log(...args); }
 function warn(...args) { if (DEBUG) console.warn(...args); }
   
-  log("✅ script loaded");
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* Supabase credentials (unchanged) */
@@ -643,7 +642,6 @@ let fullRefreshTimer = null;
 function scheduleFullRefreshIdle(ms = 20000) {
   clearTimeout(fullRefreshTimer);
   fullRefreshTimer = setTimeout(() => {
-    log("Idle refresh running");
     if (currentTable) loadAvailability();
   }, ms);
 }
@@ -1267,7 +1265,6 @@ function subscribeRealtime() {
         filter: `table_id=eq.${currentTable.id}`
       },
       (payload) => {
-        log("AVAILABILITY EVENT:", payload.eventType, payload);
         handleAvailabilityChange(payload);
     }
 
@@ -1659,8 +1656,6 @@ await ensureMembership(currentTable.id);
       .eq("time", timeKey)
       .eq("user_id", myUid);
 
-    log("delete", { delErr, deletedCount, dayNum, timeKey, myUid });
-
     if (delErr) {
       console.warn("Delete failed:", delErr);
       await loadAvailability();
@@ -1689,8 +1684,6 @@ await ensureMembership(currentTable.id);
         name: user.name,
         color: user.color
       });
-
-    log("insert", { insErr, dayNum, timeKey, myUid });
 
     if (insErr) {
       console.warn("Insert failed:", insErr);
@@ -1747,8 +1740,6 @@ function formatHeaderLabel(ymd) {
 
   
 function buildCalendar() {
-  log("Times:", currentTable?.row_structure);
-
   const table = document.getElementById("availabilityTable");
   table.innerHTML = "";
 
@@ -1800,7 +1791,6 @@ function buildCalendar() {
     table.appendChild(row);
   });
 
-  log("Building calendar...");
   bindCalendarClickDelegation();
 }
 
@@ -2162,9 +2152,7 @@ if (!inviteToken) {
 
 // ✅ If invite token exists, continue with your existing board flow below...
   
-  try {
-    log("App starting...");
-  
+  try { 
   populateHostTimezoneSelect();
   
   // TEMP: until you implement real Pro accounts
@@ -2311,6 +2299,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
