@@ -353,15 +353,58 @@ body {
 }
 
 .board-pill {
-  flex: 0 0 auto;
-  min-width: 160px;
-  padding: 14px 14px;
-  border-radius: 14px;
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 160px;
+    padding: 14px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,0.12);
+    cursor: pointer;
+    background: rgba(255,255,255,0.9);
+  }
+
+.board-actions-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
   border: 1px solid rgba(0,0,0,0.12);
-  cursor: pointer;
   background: rgba(255,255,255,0.9);
+  cursor: pointer;
+  line-height: 1;
+  display: grid;
+  place-items: center;
 }
 
+.board-actions-menu {
+  position: absolute;
+  top: 42px;
+  right: 10px;
+  min-width: 140px;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.board-actions-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.board-actions-item:hover {
+  background: rgba(0,0,0,0.04);
+}
+    
 .board-pill-title {
   font-weight: 600;
   margin-bottom: 6px;
@@ -908,12 +951,24 @@ async function loadBoards() {
   const joined = data.filter(x => x.role !== "owner");
 
   document.getElementById("owned-boards").innerHTML =
-    owned.map(b => `
-      <div class="board-pill" onclick="openBoard('${b.tables.invite_token}')">
-        <div class="board-pill-title">${b.tables.name}</div>
-        <div class="board-pill-meta">Hosted</div>
+  owned.map(b => `
+    <div
+      class="board-pill"
+      data-kind="hosted"
+      data-board-id="${b.tables.id}"
+      data-invite-token="${b.tables.invite_token}"
+      onclick="openBoard('${b.tables.invite_token}')"
+    >
+      <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+
+      <div class="board-actions-menu" hidden>
+        <button class="board-actions-item" type="button" data-action="delete">Delete</button>
       </div>
-    `).join("");
+
+      <div class="board-pill-title">${b.tables.name}</div>
+      <div class="board-pill-meta">Hosted</div>
+    </div>
+  `).join("");
 
   document.getElementById("joined-boards").innerHTML =
     joined.map(b => `
@@ -2322,7 +2377,57 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     document.body.style.visibility = "visible";
   }
 }
+  
+// Dashboard hosted card actions (+ menu) — stub only for now
+document.addEventListener("click", (e) => {
+  // Toggle menu when clicking +
+  const actionsBtn = e.target.closest(".board-actions-btn");
+  if (actionsBtn) {
+    e.preventDefault();
+    e.stopPropagation();
 
+    const card = actionsBtn.closest(".board-pill[data-kind='hosted']");
+    if (!card) return;
+
+    // Close any other open menus
+    document.querySelectorAll(".board-actions-menu:not([hidden])")
+      .forEach(m => m.hidden = true);
+
+    const menu = card.querySelector(".board-actions-menu");
+    if (!menu) return;
+
+    menu.hidden = !menu.hidden;
+    return;
+  }
+
+  // Handle menu item click
+  const item = e.target.closest(".board-actions-item");
+  if (item) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = item.closest(".board-pill[data-kind='hosted']");
+    if (!card) return;
+
+    // Close menu
+    const menu = card.querySelector(".board-actions-menu");
+    if (menu) menu.hidden = true;
+
+    const action = item.dataset.action;
+    const boardId = card.dataset.boardId;
+
+    if (action === "delete") {
+      // Stub only: no Supabase changes yet
+      console.log("Delete clicked (stub). boardId:", boardId);
+    }
+    return;
+  }
+
+  // Click outside closes any open menus
+  document.querySelectorAll(".board-actions-menu:not([hidden])")
+    .forEach(m => m.hidden = true);
+});
+  
 document.addEventListener("DOMContentLoaded", startApp);
 
 
@@ -2330,6 +2435,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
