@@ -567,8 +567,6 @@ body {
   <h3>Define Time Blocks</h3>
 
   <div id="rows-container"></div>
-
-<!-- <button id="add-row">Add Time Block</button> --> keeping this here just in case we need the button id
 </div>
     
 
@@ -1595,6 +1593,14 @@ function populateHostTimezoneSelect() {
 
   
 async function createBoard() {
+    // Gold threshold (now selected on the Name Your Calendar screen)
+  const goldSelect =
+    document.getElementById("gold-threshold") ||
+    document.getElementById("gold-threshold-select") ||
+    document.getElementById("goldThreshold") ||
+    document.querySelector('select[data-gold-threshold]');
+
+  const goldThreshold = parseInt(goldSelect?.value || "", 10) || 2;
   const au = await getAuthUser();
     if (!au) {
       showAuthOverlay("Please sign in before creating a calendar.");
@@ -1645,7 +1651,6 @@ if (structureChoice === "custom") {
     if (!goldRaw) {
       const gold = parseInt(goldSelect.value, 10);
     }
-    const goldThreshold = parseInt(goldRaw, 10);
 
     // TEMP: until you implement real Pro accounts
     const isPro = false;
@@ -2122,43 +2127,7 @@ async function loadAvailability() {
 
 
 function proceedFromStructure() {
-  const nameInput = document.getElementById("board-name");
-  const name = nameInput?.value.trim();
-
-  if (!name) {
-    alert("Please enter a calendar name");
-    return;
-  }
-
-  if (!selectedStructure) {
-    alert("Please choose a calendar structure");
-    return;
-  }
-
-// Go to "page 3" for BOTH custom + meals
-const nameStep = document.getElementById("name-step");
-const detailsStep = document.getElementById("details-step");
-const rowBuilder = document.getElementById("row-builder");
-const createActions = document.getElementById("create-actions");
-const rowsContainer = document.getElementById("rows-container");
-const goldSel = document.getElementById("gold-threshold");
-
-if (nameStep) nameStep.style.display = "none";
-if (detailsStep) detailsStep.style.display = "block";
-
-// Reset gold threshold to blank each time you reach page 3
-if (goldSel) goldSel.value = "";
-
-// If Custom → show row builder and ensure at least one row input exists
-if (selectedStructure === "custom") {
-  if (rowBuilder) rowBuilder.style.display = "block";
-  if (rowsContainer && rowsContainer.children.length === 0) addRowInput();
-} else {
-  // Meals → hide row builder (rows are prebuilt)
-  if (rowBuilder) rowBuilder.style.display = "none";
-}
-
-  if (createActions) createActions.style.display = "block";
+  createBoard();
 }
 
 
@@ -2241,7 +2210,7 @@ function bindUiListenersOnce() {
   // Create screen: Continue/Create after structure selection
   const goCreateBtn = document.getElementById("go-create");
   if (goCreateBtn) {
-    goCreateBtn.addEventListener("click", proceedFromStructure);
+    goCreateBtn.addEventListener("click", createBoard);
   }
 
   // Profile setup save
@@ -2366,6 +2335,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
