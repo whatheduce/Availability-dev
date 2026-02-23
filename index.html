@@ -2089,6 +2089,9 @@ async function loadAvailability() {
       // Populate timezone dropdown when entering setup
       if (typeof populateHostTimezoneSelect === "function") {
         populateHostTimezoneSelect();
+          // TEMP: until you implement real Pro accounts
+        const isPro = false;
+        populateGoldThresholdSelect(isPro);
       }
 
   // Reset pages
@@ -2315,11 +2318,6 @@ if (!inviteToken) {
   
   try { 
   populateHostTimezoneSelect();
-  
-  // TEMP: until you implement real Pro accounts
-  const isPro = false;
-  populateGoldThresholdSelect(isPro);
-
 
   // Always attach identity button
  // const saveIdentityBtn = document.getElementById("save-identity");
@@ -2368,6 +2366,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
