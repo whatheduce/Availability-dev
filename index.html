@@ -2254,7 +2254,10 @@ function bindUiListenersOnce() {
       showGoCreate();
     });
   }
-
+  
+  const createBtn = document.getElementById("go-create");
+    if (createBtn) createBtn.addEventListener("click", createBoard);
+  
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
     mealsCard.addEventListener("click", () => {
@@ -2324,21 +2327,6 @@ if (!inviteToken) {
  //   saveIdentityBtn.addEventListener("click", saveIdentity);
  // }
 
-  const dashCreate = document.getElementById("dash-create");
-    if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
-
-  const backToDashBtn = document.getElementById("back-to-dashboard");
-    if (backToDashBtn) {
-      backToDashBtn.addEventListener("click", () => {
-        window.location.href = "/";
-      });
-    }
-    
-  const goCreateBtn = document.getElementById("go-create");
-    if (goCreateBtn) {
-      goCreateBtn.addEventListener("click", proceedFromStructure);
-    }
-
   const addRowBtn = document.getElementById("add-row");
   if (addRowBtn) {
     addRowBtn.addEventListener("click", () => addRowInput());
@@ -2350,42 +2338,6 @@ if (!inviteToken) {
         window.location.href = "/";
       });
   }
-    
-  const createBtn = document.getElementById("create-board-btn");
-  if (createBtn) {
-    createBtn.addEventListener("click", createBoard);
-  }
-    
-  const setupSaveBtn = document.getElementById("setup-save");
-    if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);   
-     
-    // Structure selection (Dev Custom + Meals)
-
-const devCard = document.getElementById("dev-custom-card");
-if (devCard) {
-  devCard.addEventListener("click", () => {
-    selectedStructure = "custom";
-    setActiveStructureCard("dev-custom-card");
-    showGoCreate();
-  });
-}
-
-const mealsCard = document.getElementById("meals-card");
-if (mealsCard) {
-  mealsCard.addEventListener("click", () => {
-    selectedStructure = "meals";
-    setActiveStructureCard("meals-card");
-    showGoCreate();
-  });
-}
-
-// Auth overlay events
-document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
-
-document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
-  authMode = (authMode === "signin") ? "signup" : "signin";
-  showAuthOverlay();
-});
 
 document.getElementById("auth-forgot")?.addEventListener("click", async () => {
   const email = (document.getElementById("auth-email")?.value || "").trim();
@@ -2402,42 +2354,7 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
   }
   showAuthOverlay("Password reset email sent. Check your inbox.");
 });
-
-
-// If user is missing (new/incognito), prefill the colour picker from storage or random
-const colorEl = document.getElementById("identity-color");
-if (colorEl) {
-  const stored = localStorage.getItem("globalUserColor");
-  if (stored) {
-    colorEl.value = stored;
-  } else {
-    // random nice-ish default
-    colorEl.value = "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
-  }
-}
   
-const createSection = document.getElementById("create-board");
-// ⭐ If no token in URL, try to open last board
-  if (!inviteToken && !manageToken) {
-    const lastToken = localStorage.getItem("lastBoardToken");
-
-    const au = await getAuthUser();
-      if (lastToken && au) {
-      window.location.href = `${window.location.pathname}?token=${lastToken}`;
-      return;
-    }
-
-    // No recent board → show create screen
-    createSection.style.display = "block";
-    document.getElementById("calendar").style.display = "none";
-      const topbar = document.getElementById("calendar-topbar");
-      if (topbar) topbar.style.display = "none";
-    legendDiv.style.display = "none";
-  } else {
-    createSection.style.display = "none";
-  }
-
-  // Load table if token exists
   await loadTable();
   } finally {
     document.body.style.visibility = "visible";
@@ -2451,6 +2368,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
