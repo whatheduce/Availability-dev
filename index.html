@@ -697,7 +697,12 @@ function showCreateBoard() {
 
   const create = document.getElementById("create-board");
   if (create) create.style.display = "block";
-}  
+
+  // Initialize the create flow (resets, hides/reveals buttons, timezones, etc.)
+  if (typeof showBoardSetup === "function") {
+    showBoardSetup();
+  }
+}
 
 
 function possessive(name) {
@@ -723,6 +728,61 @@ function showProfileSetup() {
   if (setup) setup.style.display = "block";
 }
 
+
+async function loadTimezonesIntoSelect(selectEl) {
+  if (!selectEl) return;
+
+  // Prevent double-load
+  if (selectEl.dataset.loaded === "1") return;
+  selectEl.dataset.loaded = "1";
+
+  // Show loading state
+  selectEl.innerHTML = `<option value="">Loading timezones…</option>`;
+  selectEl.disabled = true;
+
+  const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+
+  try {
+    let zones = [];
+
+    // Best option (fast, offline, modern browsers)
+    if (Intl.supportedValuesOf && typeof Intl.supportedValuesOf === "function") {
+      zones = Intl.supportedValuesOf("timeZone");
+    }
+
+    // Fallback: fetch a list
+    if (!zones || zones.length === 0) {
+      const res = await fetch("https://worldtimeapi.org/api/timezone");
+      if (!res.ok) throw new Error("Timezone fetch failed");
+      zones = await res.json();
+    }
+
+    // Build options
+    selectEl.innerHTML = `<option value="">Select timezone…</option>` +
+      zones.map(z => `<option value="${z}">${z}</option>`).join("");
+
+    // Auto-select user's timezone if present
+    if (localTz && zones.includes(localTz)) {
+      selectEl.value = localTz;
+    } else if (localTz) {
+      // If not in list, still set it (some APIs differ slightly)
+      selectEl.value = localTz;
+    }
+
+    selectEl.disabled = false;
+
+    // Let any "enable Create" logic react
+    selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+  } catch (err) {
+    console.error("Failed to load timezones:", err);
+    // Don’t strand the user
+    selectEl.innerHTML = `<option value="${localTz}">${localTz || "UTC"}</option>`;
+    selectEl.value = localTz || "UTC";
+    selectEl.disabled = false;
+    selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+  
   
 function hideProfileSetup() {
   const setup = document.getElementById("profile-setup");
@@ -2018,9 +2078,18 @@ async function loadAvailability() {
   container.appendChild(input);
 }
 
-function showBoardSetup() {
-  document.getElementById("start-create").style.display = "none";
-  document.getElementById("board-setup").style.display = "block";
+  
+  function showBoardSetup() {
+    const startBtn = document.getElementById("start-create");
+      if (startBtn) startBtn.style.display = "none";
+
+      const setup = document.getElementById("board-setup");
+      if (setup) setup.style.display = "block";
+
+      // Populate timezone dropdown when entering setup
+      if (typeof populateHostTimezoneSelect === "function") {
+        populateHostTimezoneSelect();
+      }
 
   // Reset pages
   const nameStep = document.getElementById("name-step");
@@ -2327,6 +2396,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
