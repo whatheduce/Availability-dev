@@ -618,7 +618,7 @@ body {
 
   
 <script type="module">
-  console.log("✅ script loaded");
+  log("✅ script loaded");
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /* Supabase credentials (unchanged) */
@@ -630,6 +630,11 @@ const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
 
+  // Debug logging toggle
+const DEBUG = false;
+const log = (...args) => { if (DEBUG) console.log(...args); };
+const warn = (...args) => { if (DEBUG) console.warn(...args); };
+
 
 let currentTable = null;
 let availabilityChannel = null;
@@ -640,7 +645,7 @@ let fullRefreshTimer = null;
 function scheduleFullRefreshIdle(ms = 20000) {
   clearTimeout(fullRefreshTimer);
   fullRefreshTimer = setTimeout(() => {
-    console.log("Idle refresh running");
+    log("Idle refresh running");
     if (currentTable) loadAvailability();
   }, ms);
 }
@@ -1008,7 +1013,7 @@ function subscribePresence() {
     })
     .subscribe(async (status) => {
       // helpful during dev
-      console.log("presence channel:", status);
+      log("presence channel:", status);
 
       if (status === "SUBSCRIBED") {
         await presenceChannel.track({
@@ -1264,13 +1269,13 @@ function subscribeRealtime() {
         filter: `table_id=eq.${currentTable.id}`
       },
       (payload) => {
-        console.log("AVAILABILITY EVENT:", payload.eventType, payload);
+        log("AVAILABILITY EVENT:", payload.eventType, payload);
         handleAvailabilityChange(payload);
     }
 
     )
     .subscribe((status) => {
-      console.log("availability channel:", status);
+      log("availability channel:", status);
     });
 
   // Board changes (start_date / row_structure updates)
@@ -1291,7 +1296,7 @@ function subscribeRealtime() {
       }
     )
     .subscribe((status) => {
-      console.log("table channel:", status);
+      log("table channel:", status);
     });
 }
 
@@ -1656,7 +1661,7 @@ await ensureMembership(currentTable.id);
       .eq("time", timeKey)
       .eq("user_id", myUid);
 
-    console.log("delete", { delErr, deletedCount, dayNum, timeKey, myUid });
+    log("delete", { delErr, deletedCount, dayNum, timeKey, myUid });
 
     if (delErr) {
       console.warn("Delete failed:", delErr);
@@ -1687,7 +1692,7 @@ await ensureMembership(currentTable.id);
         color: user.color
       });
 
-    console.log("insert", { insErr, dayNum, timeKey, myUid });
+    log("insert", { insErr, dayNum, timeKey, myUid });
 
     if (insErr) {
       console.warn("Insert failed:", insErr);
@@ -1744,7 +1749,7 @@ function formatHeaderLabel(ymd) {
 
   
 function buildCalendar() {
-  console.log("Times:", currentTable?.row_structure);
+  log("Times:", currentTable?.row_structure);
 
   const table = document.getElementById("availabilityTable");
   table.innerHTML = "";
@@ -1797,7 +1802,7 @@ function buildCalendar() {
     table.appendChild(row);
   });
 
-  console.log("Building calendar...");
+  log("Building calendar...");
   bindCalendarClickDelegation();
 }
 
@@ -2160,7 +2165,7 @@ if (!inviteToken) {
 // ✅ If invite token exists, continue with your existing board flow below...
   
   try {
-    console.log("App starting...");
+    log("App starting...");
   
   populateHostTimezoneSelect();
   
@@ -2308,6 +2313,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
