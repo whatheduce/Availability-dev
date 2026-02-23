@@ -379,7 +379,7 @@ body {
 
 
   
-<body>
+<body style="visibility:hidden;">
 
 <div id="profile-setup" style="display:none; padding:20px; max-width:520px; margin:60px auto;">
   <h2>Set up your profile</h2>
@@ -494,13 +494,9 @@ body {
 </div>
 
                                                                           
-<div id="create-board" class="centered-container">
+<div id="create-board" class="centered-container" style="display:none;">
 
-  <button id="start-create" class="primary-btn">
-    Create New Calendar
-  </button>
-
-  <div id="board-setup" style="display:none;">
+  <div id="board-setup" style="display:block;">
 
     <div id="name-step">
   <h2>Name Your Calendar</h2>
@@ -2183,12 +2179,6 @@ if (!inviteToken) {
  //   saveIdentityBtn.addEventListener("click", saveIdentity);
  // }
 
-  // Always attach create flow buttons
-  const startCreateBtn = document.getElementById("start-create");
-  if (startCreateBtn) {
-    startCreateBtn.addEventListener("click", showBoardSetup);
-  }
-
   const dashCreate = document.getElementById("dash-create");
     if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
 
@@ -2316,6 +2306,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
