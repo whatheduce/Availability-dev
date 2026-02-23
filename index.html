@@ -411,7 +411,7 @@ body {
       <div class="dash-main">Dashboard</div>
     </div>
 
-    <button id="dash-create">Create New Calendar</button>
+    <button id="create-board-btn">Create New Calendar</button>
   </div>
 
   <!-- Body -->
@@ -629,6 +629,26 @@ const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
 
+// Dashboard: Create New Calendar
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("#create-board-btn");
+  if (!btn) return;
+
+  e.preventDefault();
+
+  // Whatever your app uses to show the create screen:
+  // Prefer showCreateBoard() if it exists, otherwise fall back to showing the container directly.
+  if (typeof showCreateBoard === "function") {
+    showCreateBoard();
+    return;
+  }
+
+  const dash = document.getElementById("dashboard");
+  const create = document.getElementById("create-board");
+  if (dash) dash.style.display = "none";
+  if (create) create.style.display = "block";
+});
+
 let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
@@ -648,6 +668,7 @@ let presenceChannel = null;
 window.openBoard = function (inviteToken) {
   window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
 };
+
   
 function renderPresence() {
   const wrap = document.getElementById("presence");
@@ -2306,6 +2327,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
 </body>
 </html>
+
 
 
 
