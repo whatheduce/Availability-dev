@@ -328,6 +328,28 @@ body {
   margin-bottom: 10px;
 }
 
+.dashboard-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 18px 0 10px;
+}
+
+.dashboard-section-divider {
+  height: 1px;
+  width: 100%;
+  background: rgba(0,0,0,0.10);
+  margin: 6px 0 14px;
+}
+
+.empty-boards {
+  padding: 14px 12px;
+  border-radius: 14px;
+  border: 1px dashed rgba(0,0,0,0.18);
+  background: rgba(0,0,0,0.02);
+  font-size: 13px;
+  opacity: 0.75;
+}
+    
 .back-btn {
   border: none;
   background: transparent;
@@ -679,11 +701,13 @@ body {
   <div id="dash-body">
     <div class="dash-section">
       <div class="dash-section-title">Hosted Calendars</div>
+      <div class="dashboard-section-divider"></div>
       <div id="owned-boards" class="board-strip"></div>
     </div>
 
     <div class="dash-section">
       <div class="dash-section-title">Joined Calendars</div>
+      <div class="dashboard-section-divider"></div>
       <div id="joined-boards" class="board-strip"></div>
     </div>
   </div>
@@ -1169,37 +1193,49 @@ async function loadBoards() {
 
   const owned = data.filter(x => x.role === "owner");
   const joined = data.filter(x => x.role !== "owner");
+    const ownedEl = document.getElementById("owned-boards");
+    const joinedEl = document.getElementById("joined-boards");
 
-  document.getElementById("owned-boards").innerHTML =
-  owned.map(b => `
-    <div
-      class="board-pill board-pill--square"
-      data-kind="hosted"
-      data-board-id="${b.tables.id}"
-      data-invite-token="${b.tables.invite_token}"
-      onclick="openBoard('${b.tables.invite_token}')"
-    >
-      <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+      if (!owned || owned.length === 0) {
+      ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
+    } else {
+      ownedEl.innerHTML =
+        owned.map(b => `
+          <div
+            class="board-pill board-pill--square"
+            data-kind="hosted"
+            data-board-id="${b.tables.id}"
+            data-invite-token="${b.tables.invite_token}"
+            onclick="openBoard('${b.tables.invite_token}')"
+          >
+            <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
-      <div class="board-actions-menu" hidden>
-        <button class="board-actions-item" type="button" data-action="delete">Delete</button>
-      </div>
+            <div class="board-actions-menu" hidden>
+              <button class="board-actions-item" type="button" data-action="delete">Delete</button>
+            </div>
 
-      <div class="board-pill-title">${b.tables.name}</div>
-      <div class="board-preview" data-board-id="${b.tables.id}"></div>
-      <div class="board-pill-meta">Hosted</div>
-    </div>
-  `).join("");
+            <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
+            <div class="board-preview" data-board-id="${b.tables.id}"></div>
+            <div class="board-pill-meta">Hosted</div>
+          </div>
+        `).join("");
+
+      renderBoardPreviews(owned);
+}
 
   renderBoardPreviews(owned);
 
-  document.getElementById("joined-boards").innerHTML =
-    joined.map(b => `
-      <div class="board-pill" onclick="openBoard('${b.tables.invite_token}')">
-        <div class="board-pill-title">${b.tables.name}</div>
-        <div class="board-pill-meta">Joined</div>
-      </div>
-    `).join("");
+    if (!joined || joined.length === 0) {
+    joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
+  } else {
+    joinedEl.innerHTML =
+      joined.map(b => `
+        <div class="board-pill" onclick="openBoard('${b.tables.invite_token}')">
+          <div class="board-pill-title">${b.tables.name}</div>
+          <div class="board-pill-meta">Joined</div>
+        </div>
+      `).join("");
+  }
 }  
 
   
@@ -2930,6 +2966,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
