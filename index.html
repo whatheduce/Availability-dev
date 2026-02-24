@@ -1926,17 +1926,16 @@ function bindUiListenersOnce() {
   
                                                                                                 /* === Startup === */
 async function startApp() {
-  // 🔐 Check session first
-const { data: { session } } = await supabase.auth.getSession();
+  document.body.style.visibility = "visible";
+  bindUiListenersOnce(); // ✅ bind auth button handlers immediately
+
+  // 🔐 Check session
+  const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    // If this is an owner/manage link, hide signup and force sign-in
-    const lockSignin = !!manageToken; // manageToken is your ?m= token
+    const lockSignin = !!manageToken; // for your owner-link behaviour
     showAuthOverlay("", { lockSignin });
     return;
-    }
-
-document.body.style.visibility = "visible";
-bindUiListenersOnce();
+  }
 
 // ✅ If NO invite token, this is the homepage → dashboard flow
 if (!inviteToken) {
@@ -2348,6 +2347,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
