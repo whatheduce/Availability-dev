@@ -415,6 +415,40 @@ body {
   opacity: 0.65;
 }
 
+/* Square hosted cards */
+.board-pill--square {
+  width: 180px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Preview area inside card */
+.board-preview {
+  width: 100%;
+  flex: 1;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(0,0,0,0.02);
+  overflow: hidden;
+}
+
+.preview-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.preview-cell {
+  border-radius: 4px;
+  background: rgba(0,0,0,0.55);
+}
+    
 /* Modal (Apple-ish) */
 .modal-overlay[hidden] { display: none; }
 
@@ -996,7 +1030,8 @@ async function loadBoards() {
       tables (
         id,
         name,
-        invite_token
+        invite_token,
+        row_structure
       )
     `)
     .eq("user_id", au.id);
@@ -1012,7 +1047,7 @@ async function loadBoards() {
   document.getElementById("owned-boards").innerHTML =
   owned.map(b => `
     <div
-      class="board-pill"
+      class="board-pill board-pill--square"
       data-kind="hosted"
       data-board-id="${b.tables.id}"
       data-invite-token="${b.tables.invite_token}"
@@ -1024,10 +1059,13 @@ async function loadBoards() {
         <button class="board-actions-item" type="button" data-action="delete">Delete</button>
       </div>
 
+      <div class="board-preview" data-board-id="${b.tables.id}"></div>
       <div class="board-pill-title">${b.tables.name}</div>
       <div class="board-pill-meta">Hosted</div>
     </div>
   `).join("");
+
+  renderBoardPreviews(owned);
 
   document.getElementById("joined-boards").innerHTML =
     joined.map(b => `
@@ -2568,6 +2606,94 @@ function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "
     cancelBtn.focus();
   });
 }
+
+  
+async function renderBoardPreviews(owned) {
+  try {
+    if (!owned || owned.length === 0) return;
+
+    // Build a map of boardId -> row keys (time blocks)
+    const boardIds = [];
+    const rowsByBoard = new Map();
+
+    for (const b of owned) {
+      const t = b.tables;
+      if (!t?.id) continue;
+
+      boardIds.push(t.id);
+
+      // row_structure can be stored as array or JSON string depending on how it’s saved
+      let rows = t.row_structure;
+
+      if (typeof rows === "string") {
+        try { rows = JSON.parse(rows); } catch { /* ignore */ }
+      }
+
+      // If still not an array, fallback to empty
+      if (!Array.isArray(rows)) rows = [];
+
+      // Your app likely stores row objects OR strings; normalize to the “time key”
+      // If rows are strings: ["Breakfast", ...]
+      // If rows are objects: [{ key: "Breakfast" }, ...] or similar
+      const normalized = rows
+        .map(r => (typeof r === "string" ? r : (r?.key || r?.name || r?.label || "")))
+        .filter(Boolean);
+
+      rowsByBoard.set(String(t.id), normalized);
+    }
+
+    if (boardIds.length === 0) return;
+
+    // Fetch availability rows for the next 7 days (0..6)
+    const { data, error } = await supabase
+      .from("availability_dev")
+      .select("table_id, day, time")
+      .in("table_id", boardIds)
+      .gte("day", 0)
+      .lte("day", 6);
+
+    if (error) throw error;
+
+    // Count per (board, day, time)
+    const counts = new Map(); // key: `${tableId}|${day}|${time}` -> number
+    for (const row of (data || [])) {
+      const key = `${row.table_id}|${row.day}|${row.time}`;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+
+    // Render each preview
+    for (const boardId of boardIds) {
+      const previewEl = document.querySelector(`.board-preview[data-board-id="${boardId}"]`);
+      if (!previewEl) continue;
+
+      const rows = rowsByBoard.get(String(boardId)) || [];
+      const rowCount = Math.max(rows.length, 1);
+
+      // 7 days columns, all rows
+      const cells = [];
+      for (let r = 0; r < rowCount; r++) {
+        const timeKey = rows[r] || "__row__";
+        for (let d = 0; d < 7; d++) {
+          const c = counts.get(`${boardId}|${d}|${timeKey}`) || 0;
+
+          // Visual intensity based on count (kept subtle)
+          const alpha = Math.min(0.10 + c * 0.12, 0.85);
+
+          cells.push(`<div class="preview-cell" style="opacity:${alpha}" title="${c}"></div>`);
+        }
+      }
+
+      previewEl.innerHTML = `
+        <div class="preview-grid" style="grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(${rowCount},1fr);">
+          ${cells.join("")}
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error("Preview render failed:", err);
+  }
+}
+  
   
 document.addEventListener("DOMContentLoaded", startApp);
 
@@ -2589,6 +2715,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
