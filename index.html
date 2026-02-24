@@ -633,22 +633,32 @@ function showAuthOverlay(msg = "", opts = {}) {
   const message = document.getElementById("auth-msg");
   const toggle = document.getElementById("auth-toggle-mode");
   const subtitle = document.getElementById("auth-subtitle");
+  const titleEl = document.getElementById("auth-title");
+
   if (!overlay || !toggle || !subtitle) return;
-      const lockSignin = !!opts.lockSignin;
-      const titleEl = document.getElementById("auth-title");
 
-      if (lockSignin) {
-        authMode = "signin";
-        toggle.style.display = "none";
-        if (titleEl) titleEl.textContent = "Sign in as the calendar owner";
-        subtitle.textContent = "This link is owner-only. Sign in to continue.";
-      } else {
-        toggle.style.display = "";
-        if (titleEl) titleEl.textContent = "Sign in to access this calendar";
-      }
+  const lockSignin = !!opts.lockSignin;
 
+  // If locked, force signin
+  if (lockSignin) {
+    authMode = "signin";
+  }
+
+  // Always show overlay
   overlay.style.display = "block";
 
+  // Hide/show the toggle reliably
+  toggle.hidden = lockSignin;
+
+  // Title/subtitle for locked vs normal
+  if (lockSignin) {
+    if (titleEl) titleEl.textContent = "Sign in as the calendar owner";
+    subtitle.textContent = "This link is owner-only. Sign in to continue.";
+  } else {
+    if (titleEl) titleEl.textContent = "Sign in to access this calendar";
+  }
+
+  // Normal mode switching (only when NOT locked)
   if (!lockSignin) {
     if (authMode === "signin") {
       toggle.textContent = "Create account";
@@ -657,11 +667,9 @@ function showAuthOverlay(msg = "", opts = {}) {
       toggle.textContent = "I already have an account";
       subtitle.textContent = "Create your account (you must confirm your email).";
     }
-  } else {
-    // lockSignin always forces signin, and you already set subtitle above
-    toggle.textContent = "Create account"; // doesn’t matter since it's hidden
-    }
+  }
 
+  // Message block
   if (message) {
     if (msg) {
       message.style.display = "block";
@@ -2365,6 +2373,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
