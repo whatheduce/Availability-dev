@@ -2811,7 +2811,7 @@ async function renderBoardPreviews(owned) {
       .from("availability_dev")
       .select("table_id, day, time, user_id")
       .in("table_id", boardIds)
-      .gte("day", 0)
+      .gte("day", 1)
       .lte("day", 7);
 
     if (availErr) throw availErr;
@@ -3005,6 +3005,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
