@@ -297,7 +297,7 @@ let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
   
 window.openBoard = function (inviteToken) {
-  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
+  window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
 };
 
   
@@ -554,7 +554,7 @@ async function loadBoards() {
             data-kind="hosted"
             data-board-id="${b.tables.id}"
             data-invite-token="${b.tables.invite_token}"
-            onclick="openBoard('${b.tables.owner_token}')"
+            onclick="openManageBoard('${b.tables.owner_token}')"
           >
             <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
@@ -1949,7 +1949,7 @@ async function startApp() {
   }
 
 // ✅ If NO invite token, this is the homepage → dashboard flow
-if (!inviteToken) {
+if (!inviteToken && !manageToken) {
   const prof = await loadProfile();
 
   if (!prof || !prof.name || !prof.color) {
@@ -2358,6 +2358,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
