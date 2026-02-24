@@ -1119,7 +1119,7 @@ async function loadTable() {
 
 if (!data) {
   // No board exists for this token (e.g., DB wiped or invalid link)
-  document.getElementById("create-board").style.display = "block";
+  document.getElementById("create-board").style.display = "none";
   document.getElementById("calendar").style.display = "none";
     const topbar = document.getElementById("calendar-topbar");
       if (topbar) topbar.style.display = "none";
@@ -1392,7 +1392,7 @@ if (bmErr) {
 }
   
   localStorage.setItem("lastBoardToken", inviteToken);
-  window.location.href = `?token=${inviteToken}`;
+  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
 }
 
   
@@ -2358,6 +2358,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
