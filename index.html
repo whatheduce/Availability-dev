@@ -95,7 +95,7 @@
     box-shadow: 0 18px 50px rgba(0,0,0,0.18);
     text-align:left;
   ">
-    <div style="font-weight:800; font-size:18px; margin-bottom:6px;">
+    <div id="auth-title" style="font-weight:800; font-size:18px; margin-bottom:6px;">
       Sign in to access this calendar
     </div>
     <div id="auth-subtitle" style="font-size:13px; color:#666; margin-bottom:12px;">
@@ -629,7 +629,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   const subtitle = document.getElementById("auth-subtitle");
   if (!overlay || !toggle || !subtitle) return;
       const lockSignin = !!opts.lockSignin;
-      const titleEl = overlay.querySelector("div"); // first title div in overlay card
+      const titleEl = document.getElementById("auth-title");
 
       if (lockSignin) {
         authMode = "signin";
@@ -643,13 +643,18 @@ function showAuthOverlay(msg = "", opts = {}) {
 
   overlay.style.display = "block";
 
-  if (authMode === "signin") {
-    toggle.textContent = "Create account";
-    subtitle.textContent = "Sign in to continue.";
+  if (!lockSignin) {
+    if (authMode === "signin") {
+      toggle.textContent = "Create account";
+      subtitle.textContent = "Sign in to continue.";
+    } else {
+      toggle.textContent = "I already have an account";
+      subtitle.textContent = "Create your account (you must confirm your email).";
+    }
   } else {
-    toggle.textContent = "I already have an account";
-    subtitle.textContent = "Create your account (you must confirm your email).";
-  }
+    // lockSignin always forces signin, and you already set subtitle above
+    toggle.textContent = "Create account"; // doesn’t matter since it's hidden
+    }
 
   if (message) {
     if (msg) {
@@ -2347,6 +2352,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
