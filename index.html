@@ -621,13 +621,25 @@ async function getOrCreateProfile({ name, color }) {
 
 let authMode = "signin"; // "signin" or "signup"
 
-function showAuthOverlay(msg = "") {
+function showAuthOverlay(msg = "", opts = {}) {
   document.body.style.visibility = "visible";
   const overlay = document.getElementById("auth-overlay");
   const message = document.getElementById("auth-msg");
   const toggle = document.getElementById("auth-toggle-mode");
   const subtitle = document.getElementById("auth-subtitle");
   if (!overlay || !toggle || !subtitle) return;
+      const lockSignin = !!opts.lockSignin;
+      const titleEl = overlay.querySelector("div"); // first title div in overlay card
+
+      if (lockSignin) {
+        authMode = "signin";
+        toggle.style.display = "none";
+        if (titleEl) titleEl.textContent = "Sign in as the calendar owner";
+        subtitle.textContent = "This link is owner-only. Sign in to continue.";
+      } else {
+        toggle.style.display = "";
+        if (titleEl) titleEl.textContent = "Sign in to access this calendar";
+      }
 
   overlay.style.display = "block";
 
@@ -1898,9 +1910,13 @@ function bindUiListenersOnce() {
   document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
 
   document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
+    // If button is hidden (locked), do nothing
+    const btn = document.getElementById("auth-toggle-mode");
+    if (btn && btn.style.display === "none") return;
+
     authMode = (authMode === "signin") ? "signup" : "signin";
     showAuthOverlay();
-  });
+    });
 }
 
 
@@ -1913,9 +1929,11 @@ async function startApp() {
   // 🔐 Check session first
 const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
-    showAuthOverlay();
+    // If this is an owner/manage link, hide signup and force sign-in
+    const lockSignin = !!manageToken; // manageToken is your ?m= token
+    showAuthOverlay("", { lockSignin });
     return;
-  }
+    }
 
 document.body.style.visibility = "visible";
 bindUiListenersOnce();
@@ -2330,6 +2348,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
