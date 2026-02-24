@@ -526,6 +526,7 @@ async function loadBoards() {
         id,
         name,
         invite_token,
+        owner_token
         row_structure,
         start_date,
         host_tz
@@ -553,7 +554,7 @@ async function loadBoards() {
             data-kind="hosted"
             data-board-id="${b.tables.id}"
             data-invite-token="${b.tables.invite_token}"
-            onclick="openBoard('${b.tables.invite_token}')"
+            onclick="openBoard('${b.tables.owner_token}')"
           >
             <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
@@ -583,6 +584,11 @@ async function loadBoards() {
   }
 }  
 
+
+function openManageBoard(manageToken) {
+  window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
+}
+  
   
 async function getAuthUser() {
   const { data, error } = await supabase.auth.getUser();
@@ -2352,6 +2358,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
