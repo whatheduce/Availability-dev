@@ -659,15 +659,4 @@ body {
   display: block !important; /* respect your JS showAuthOverlay() */
 }
 
-#auth-overlay input,
-#auth-overlay button,
-#auth-overlay .primary-btn {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-#auth-overlay button {
-  cursor: pointer;
-}
+[hidden] { display: none !important; }
