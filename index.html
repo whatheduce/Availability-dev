@@ -1225,8 +1225,6 @@ async function loadBoards() {
       renderBoardPreviews(owned);
 }
 
-  renderBoardPreviews(owned);
-
     if (!joined || joined.length === 0) {
     joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
   } else {
@@ -2815,23 +2813,6 @@ async function renderBoardPreviews(owned) {
       .lte("day", 7);
 
     if (availErr) throw availErr;
-    // Detect if availability_dev.day is 0-based or 1-based per board
-      const dayOffsetByBoard = new Map(); // boardId -> 0 or 1
-      const minDayByBoard = new Map();    // boardId -> min day seen
-
-      for (const r of (avail || [])) {
-        const bid = String(r.table_id);
-        const d = Number(r.day);
-
-        const cur = minDayByBoard.get(bid);
-        if (cur === undefined || d < cur) minDayByBoard.set(bid, d);
-      }
-
-// If the minimum day we ever see is 1 (and we never see 0), treat it as 1-based
-for (const bid of boardIds.map(String)) {
-  const minD = minDayByBoard.get(bid);
-  dayOffsetByBoard.set(bid, minD === 1 ? 1 : 0);
-}
 
     // Collect user_ids to color dots
     const userIds = Array.from(new Set((avail || []).map(r => r.user_id).filter(Boolean)));
@@ -2864,7 +2845,6 @@ for (const bid of boardIds.map(String)) {
 
       const rows = rowsByBoard.get(boardId) || [];
       const days = 7;
-      const dayOffset = dayOffsetByBoard.get(boardId) || 0;
 
       // Day labels must match the board (day 0 = today, in the board's host_tz)
       const dayNames = getWeekdayLabels7(tzByBoard.get(boardId));
@@ -2880,7 +2860,7 @@ for (const bid of boardIds.map(String)) {
 
         const cells = [];
         for (let d = 0; d < days; d++) {
-          const dayValue = d + dayOffset; // match stored day indexing
+          const dayValue = d + 1; // ✅ your DB uses 1-based days (today = 1)
           const users = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
 
           // Build dot stack (cap visible dots to keep it clean)
@@ -2916,7 +2896,7 @@ for (const bid of boardIds.map(String)) {
       const legendUserIds = [];
       for (let d = 0; d < 7; d++) {
         for (const rowLabel of rows) {
-          const dayValue = d + dayOffset;
+          const dayValue = d + 1;
           const u = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
           for (const uid of u) {
             if (!legendUserIds.includes(uid)) legendUserIds.push(uid);
@@ -3005,6 +2985,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
