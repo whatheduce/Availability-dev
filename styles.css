@@ -649,3 +649,25 @@ body {
   background: rgba(255,235,235,0.9);
 }    
     
+/* --- AUTH OVERLAY OVERRIDES (ensure clickable + visible) --- */
+#auth-overlay {
+  display: none;            /* default hidden */
+  pointer-events: auto;     /* allow interaction */
+}
+
+#auth-overlay[style*="display: block"] {
+  display: block !important; /* respect your JS showAuthOverlay() */
+}
+
+#auth-overlay input,
+#auth-overlay button,
+#auth-overlay .primary-btn {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+#auth-overlay button {
+  cursor: pointer;
+}
