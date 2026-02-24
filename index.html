@@ -417,36 +417,113 @@ body {
 
 /* Square hosted cards */
 .board-pill--square {
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  gap: 8px;
 }
 
-/* Preview area inside card */
+/* Mini board preview container */
 .board-preview {
   width: 100%;
   flex: 1;
-  margin-bottom: 10px;
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.10);
-  background: rgba(0,0,0,0.02);
+  background: rgba(255,255,255,0.75);
   overflow: hidden;
+  position: relative;
 }
 
-.preview-grid {
+/* Make the mini board look like a tiny replica */
+.mini-board {
   width: 100%;
   height: 100%;
-  display: grid;
-  gap: 2px;
   padding: 6px;
   box-sizing: border-box;
+  transform-origin: top left;
+
+  /* Scale down to fit lots of rows */
+  transform: scale(0.78);
+  pointer-events: none; /* important: preview shouldn't steal clicks */
 }
 
-.preview-cell {
-  border-radius: 4px;
-  background: rgba(0,0,0,0.55);
+.mini-head {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.mini-corner {
+  height: 18px;
+}
+
+.mini-colhead {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.75;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.03);
+}
+
+.mini-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mini-row {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mini-rowhead {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.8;
+  padding: 2px 4px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.mini-cell {
+  border-radius: 6px;
+  background: rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.06);
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-dots {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.mini-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+}
+
+.mini-more {
+  font-size: 9px;
+  opacity: 0.6;
+  margin-left: 2px;
 }
     
 /* Modal (Apple-ish) */
@@ -1031,7 +1108,9 @@ async function loadBoards() {
         id,
         name,
         invite_token,
-        row_structure
+        row_structure,
+        start_date,
+        host_tz
       )
     `)
     .eq("user_id", au.id);
@@ -2612,86 +2691,139 @@ async function renderBoardPreviews(owned) {
   try {
     if (!owned || owned.length === 0) return;
 
-    // Build a map of boardId -> row keys (time blocks)
-    const boardIds = [];
-    const rowsByBoard = new Map();
+    // Board ids
+    const boards = owned
+      .map(b => b.tables)
+      .filter(t => t && t.id);
 
-    for (const b of owned) {
-      const t = b.tables;
-      if (!t?.id) continue;
+    const boardIds = boards.map(t => t.id);
+    if (boardIds.length === 0) return;
 
-      boardIds.push(t.id);
+    // Normalize row_structure into array of labels (strings)
+    const rowsByBoard = new Map(); // boardId -> [rowLabel...]
+    const startDateByBoard = new Map(); // boardId -> start_date
+    const tzByBoard = new Map(); // boardId -> host_tz
 
-      // row_structure can be stored as array or JSON string depending on how it’s saved
+    for (const t of boards) {
       let rows = t.row_structure;
 
       if (typeof rows === "string") {
         try { rows = JSON.parse(rows); } catch { /* ignore */ }
       }
-
-      // If still not an array, fallback to empty
       if (!Array.isArray(rows)) rows = [];
 
-      // Your app likely stores row objects OR strings; normalize to the “time key”
-      // If rows are strings: ["Breakfast", ...]
-      // If rows are objects: [{ key: "Breakfast" }, ...] or similar
       const normalized = rows
         .map(r => (typeof r === "string" ? r : (r?.key || r?.name || r?.label || "")))
         .filter(Boolean);
 
       rowsByBoard.set(String(t.id), normalized);
+      startDateByBoard.set(String(t.id), t.start_date || null);
+      tzByBoard.set(String(t.id), t.host_tz || null);
     }
 
-    if (boardIds.length === 0) return;
-
-    // Fetch availability rows for the next 7 days (0..6)
-    const { data, error } = await supabase
+    // Pull availability for 7 days (0..6) for all hosted boards
+    const { data: avail, error: availErr } = await supabase
       .from("availability_dev")
-      .select("table_id, day, time")
+      .select("table_id, day, time, user_id")
       .in("table_id", boardIds)
       .gte("day", 0)
       .lte("day", 6);
 
-    if (error) throw error;
+    if (availErr) throw availErr;
 
-    // Count per (board, day, time)
-    const counts = new Map(); // key: `${tableId}|${day}|${time}` -> number
-    for (const row of (data || [])) {
-      const key = `${row.table_id}|${row.day}|${row.time}`;
-      counts.set(key, (counts.get(key) || 0) + 1);
+    // Collect user_ids to color dots
+    const userIds = Array.from(new Set((avail || []).map(r => r.user_id).filter(Boolean)));
+
+    let profilesByUser = new Map(); // user_id -> {name,color}
+    if (userIds.length > 0) {
+      const { data: profs, error: profErr } = await supabase
+        .from("profiles")
+        .select("user_id, name, color")
+        .in("user_id", userIds);
+
+      if (profErr) throw profErr;
+
+      profilesByUser = new Map((profs || []).map(p => [String(p.user_id), p]));
+    }
+
+    // Build a map: (board|day|time) -> [user_id...]
+    const byCell = new Map();
+    for (const r of (avail || [])) {
+      const key = `${r.table_id}|${r.day}|${r.time}`;
+      if (!byCell.has(key)) byCell.set(key, []);
+      byCell.get(key).push(String(r.user_id));
     }
 
     // Render each preview
-    for (const boardId of boardIds) {
+    for (const t of boards) {
+      const boardId = String(t.id);
       const previewEl = document.querySelector(`.board-preview[data-board-id="${boardId}"]`);
       if (!previewEl) continue;
 
-      const rows = rowsByBoard.get(String(boardId)) || [];
-      const rowCount = Math.max(rows.length, 1);
+      const rows = rowsByBoard.get(boardId) || [];
+      const days = 7;
 
-      // 7 days columns, all rows
-      const cells = [];
-      for (let r = 0; r < rowCount; r++) {
-        const timeKey = rows[r] || "__row__";
-        for (let d = 0; d < 7; d++) {
-          const c = counts.get(`${boardId}|${d}|${timeKey}`) || 0;
+      // Day labels: keep it simple & stable (Sun..Sat) or Mon..Sun.
+      // If you already have a board header day naming function, we can swap later.
+      const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-          // Visual intensity based on count (kept subtle)
-          const alpha = Math.min(0.10 + c * 0.12, 0.85);
+      // Build header row
+      const headerCells = [`<div class="mini-corner"></div>`]
+        .concat(dayNames.slice(0, days).map(d => `<div class="mini-colhead">${d}</div>`))
+        .join("");
 
-          cells.push(`<div class="preview-cell" style="opacity:${alpha}" title="${c}"></div>`);
+      // Build body rows
+      const bodyRows = rows.map((rowLabel) => {
+        const rowHead = `<div class="mini-rowhead">${escapeHtml(rowLabel)}</div>`;
+
+        const cells = [];
+        for (let d = 0; d < days; d++) {
+          const users = byCell.get(`${boardId}|${d}|${rowLabel}`) || [];
+
+          // Build dot stack (cap visible dots to keep it clean)
+          const maxDots = 8;
+          const visible = users.slice(0, maxDots);
+          const extra = users.length - visible.length;
+
+          const dotsHtml = visible.map(uid => {
+            const p = profilesByUser.get(String(uid));
+            const col = p?.color || "rgba(0,0,0,0.35)";
+            const name = p?.name || "";
+            return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
+          }).join("");
+
+          const extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
+
+          cells.push(`
+            <div class="mini-cell">
+              <div class="mini-dots">${dotsHtml}${extraHtml}</div>
+            </div>
+          `);
         }
-      }
+
+        return `<div class="mini-row">${rowHead}${cells.join("")}</div>`;
+      }).join("");
 
       previewEl.innerHTML = `
-        <div class="preview-grid" style="grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(${rowCount},1fr);">
-          ${cells.join("")}
+        <div class="mini-board">
+          <div class="mini-head">${headerCells}</div>
+          <div class="mini-body">${bodyRows}</div>
         </div>
       `;
     }
   } catch (err) {
     console.error("Preview render failed:", err);
   }
+}
+
+// Tiny helper to avoid breaking the preview with special chars
+function escapeHtml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
   
   
@@ -2715,6 +2847,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
