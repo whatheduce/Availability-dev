@@ -549,13 +549,12 @@ async function loadBoards() {
     } else {
       ownedEl.innerHTML =
         owned.map(b => `
-          <div
-            class="board-pill board-pill--square"
+          <div> class="board-pill board-pill--square"
             data-kind="hosted"
             data-board-id="${b.tables.id}"
             data-invite-token="${b.tables.invite_token}"
             onclick="openManageBoard('${b.tables.owner_token}')"
-          >
+          
             <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
             <div class="board-actions-menu" hidden>
@@ -585,9 +584,9 @@ async function loadBoards() {
 }  
 
 
-function openManageBoard(manageToken) {
+window.openManageBoard = function (manageToken) {
   window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
-}
+};
   
   
 async function getAuthUser() {
@@ -1392,7 +1391,14 @@ if (bmErr) {
 }
   
   localStorage.setItem("lastBoardToken", inviteToken);
-  window.location.href = `/?t=${encodeURIComponent(inviteToken)}`;
+  // keep invite token for “share link” / last joined link if you want
+localStorage.setItem("lastBoardToken", inviteToken);
+
+// add this so “last opened as owner” is possible later
+localStorage.setItem("lastBoardManageToken", ownerToken);
+
+// ✅ open as owner after create
+window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
 }
 
   
@@ -2358,6 +2364,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
