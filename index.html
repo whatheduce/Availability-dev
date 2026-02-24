@@ -414,6 +414,66 @@ body {
   font-size: 12px;
   opacity: 0.65;
 }
+
+/* Modal (Apple-ish) */
+.modal-overlay[hidden] { display: none; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-card {
+  width: min(420px, 100%);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.10);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+  padding: 16px 16px 14px;
+  backdrop-filter: blur(12px);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.modal-message {
+  font-size: 14px;
+  line-height: 1.35;
+  opacity: 0.85;
+  margin-bottom: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.9);
+  cursor: pointer;
+}
+
+.modal-btn:hover { background: rgba(255,255,255,1); }
+
+.modal-btn-danger {
+  border-color: rgba(255,0,0,0.20);
+}
+
+.modal-btn-danger:hover {
+  background: rgba(255,235,235,0.9);
+}    
     
   </style>
 </head>
@@ -2419,7 +2479,12 @@ document.addEventListener("click", async (e) => {
     if (action === "delete") {
       // Confirm (no alert UI yet — we can swap to a custom modal next)
       const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
-      const ok = confirm(`Delete "${boardName}"? This cannot be undone.`);
+      const ok = await confirmModal({
+        title: "Delete calendar?",
+        message: `Delete "${boardName}"? This cannot be undone.`,
+        okText: "Delete",
+        cancelText: "Cancel"
+      });
       if (!ok) return;
 
       try {
@@ -2450,14 +2515,81 @@ document.addEventListener("click", async (e) => {
   document.querySelectorAll(".board-actions-menu:not([hidden])")
     .forEach(m => m.hidden = true);
 }, true);
+
+function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "OK", cancelText = "Cancel" } = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("confirm-modal");
+    const titleEl = document.getElementById("confirm-title");
+    const msgEl = document.getElementById("confirm-message");
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+
+    if (!overlay || !titleEl || !msgEl || !okBtn || !cancelBtn) {
+      // Fallback if modal is missing
+      resolve(window.confirm(message));
+      return;
+    }
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    okBtn.textContent = okText;
+    cancelBtn.textContent = cancelText;
+
+    const cleanup = () => {
+      overlay.hidden = true;
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.removeEventListener("click", onOverlayClick, true);
+      okBtn.removeEventListener("click", onOk, true);
+      cancelBtn.removeEventListener("click", onCancel, true);
+    };
+
+    const onOk = (e) => { e.preventDefault(); cleanup(); resolve(true); };
+    const onCancel = (e) => { e.preventDefault(); cleanup(); resolve(false); };
+
+    const onOverlayClick = (e) => {
+      // Clicking outside the card cancels
+      const card = e.target.closest(".modal-card");
+      if (!card) { cleanup(); resolve(false); }
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") { cleanup(); resolve(false); }
+      if (e.key === "Enter") { cleanup(); resolve(true); }
+    };
+
+    overlay.hidden = false;
+
+    document.addEventListener("keydown", onKeyDown, true);
+    overlay.addEventListener("click", onOverlayClick, true);
+    okBtn.addEventListener("click", onOk, true);
+    cancelBtn.addEventListener("click", onCancel, true);
+
+    // Focus the safe option
+    cancelBtn.focus();
+  });
+}
   
 document.addEventListener("DOMContentLoaded", startApp);
 
 
 </script>
 
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+    <div class="modal-title" id="confirm-title">Confirm</div>
+    <div class="modal-message" id="confirm-message">Are you sure?</div>
+
+    <div class="modal-actions">
+      <button id="confirm-cancel" class="modal-btn" type="button">Cancel</button>
+      <button id="confirm-ok" class="modal-btn modal-btn-danger" type="button">Delete</button>
+    </div>
+  </div>
+</div>
+  
 </body>
 </html>
+
 
 
 
