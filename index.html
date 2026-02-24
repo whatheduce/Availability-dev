@@ -2848,9 +2848,8 @@ async function renderBoardPreviews(owned) {
       const rows = rowsByBoard.get(boardId) || [];
       const days = 7;
 
-      // Day labels: keep it simple & stable (Sun..Sat) or Mon..Sun.
-      // If you already have a board header day naming function, we can swap later.
-      const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+      // Day labels must match the board (day 0 = today, in the board's host_tz)
+      const dayNames = getWeekdayLabels7(tzByBoard.get(boardId));
 
       // Build header row
       const headerCells = [`<div class="mini-corner"></div>`]
@@ -2937,6 +2936,24 @@ async function renderBoardPreviews(owned) {
   }
 }
 
+
+function getWeekdayLabels7(timeZone) {
+  const base = new Date(); // "now"
+  const fmt = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    timeZone: timeZone || undefined
+  });
+
+    const labels = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      labels.push(fmt.format(d));
+    }
+    return labels;
+}
+
+  
 // Tiny helper to avoid breaking the preview with special chars
 function escapeHtml(str) {
   return String(str || "")
@@ -2968,6 +2985,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
