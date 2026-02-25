@@ -863,19 +863,27 @@ async function ensureMembership(boardId) {
 async function rebuildDotsForCell(cell) {
   if (!currentTable) return;
 
-  const day = cell.dataset.day;
-  const time = cell.dataset.time;
+  // Always start clean (prevents duplicate dot containers)
+  cell.querySelector(".dot-container")?.remove();
 
-  const { data } = await supabase
+  const dayNum = parseInt(cell.dataset.day, 10);
+  const timeKey = String(cell.dataset.time || "").trim();
+
+  const { data, error } = await supabase
     .from("availability_dev")
     .select("*")
     .eq("table_id", currentTable.id)
-    .eq("day", day)
-    .eq("time", time);
+    .eq("day", dayNum)
+    .eq("time", timeKey);
+
+  if (error) {
+    console.warn("rebuildDotsForCell failed:", error);
+    return;
+  }
 
   if (!data || data.length === 0) return;
 
-  let dotContainer = document.createElement("div");
+  const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
 
   data.forEach(entry => {
@@ -895,30 +903,53 @@ async function rebuildDotsForCell(cell) {
   
 async function applyGoldStateForCell(cell, day) {
   const goldThreshold = Number(currentTable?.gold_threshold);
-    if (!Number.isFinite(goldThreshold)) return;
+  if (!Number.isFinite(goldThreshold)) return;
+
+  const wasGold = cell.classList.contains("gold-cell");
 
   let dotContainer = cell.querySelector(".dot-container");
-  const dotCount = dotContainer ? dotContainer.children.length : 0;
+  let dotCount = dotContainer ? dotContainer.children.length : null;
 
-  // 🟡 TURN GOLD ON
-  if (dotCount >= goldThreshold) {
-    cell.classList.add("gold-cell");
-    if (dotContainer) dotContainer.remove();
+  // If dots are hidden (gold state), DOM can't tell us the real count.
+  // In that specific case, ask the DB for the real count for this cell.
+  if (dotCount === null && wasGold) {
+    const dayNum = parseInt(cell.dataset.day, 10);
+    const timeKey = String(cell.dataset.time || "").trim();
+
+    const { count, error } = await supabase
+      .from("availability_dev")
+      .select("id", { count: "exact", head: true })
+      .eq("table_id", currentTable.id)
+      .eq("day", dayNum)
+      .eq("time", timeKey);
+
+    if (error) {
+      console.warn("gold count check failed:", error);
+      return;
+    }
+
+    dotCount = count || 0;
   }
 
-  // ⚪ TURN GOLD OFF
-  else {
-    const wasGold = cell.classList.contains("gold-cell");
+  // If still null, treat as 0
+  dotCount = dotCount ?? 0;
+
+  const shouldBeGold = dotCount >= goldThreshold;
+
+  if (shouldBeGold) {
+    cell.classList.add("gold-cell");
+    // hide dots while gold
+    cell.querySelector(".dot-container")?.remove();
+  } else {
     cell.classList.remove("gold-cell");
 
-    // ⭐ If we just transitioned FROM gold → normal
-    // we must rebuild the dots for this cell from DB
+    // If we just transitioned gold -> normal, rebuild visible dots from DB
     if (wasGold) {
       await rebuildDotsForCell(cell);
     }
   }
 
-  // Update day header
+  // Update day header gold state
   const dayNum = parseInt(day, 10);
   const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
   if (!th) return;
@@ -1050,16 +1081,15 @@ function subscribeRealtime() {
         table: "availability_dev",
         filter: `table_id=eq.${currentTable.id}`
       },
-      (payload) => {
-        handleAvailabilityChange(payload);
-    }
-
+      async (payload) => {
+        await handleAvailabilityChange(payload);
+      }
     )
     .subscribe((status) => {
       log("availability channel:", status);
     });
 
-  // Board changes (start_date / row_structure updates)
+  // Board changes (start_date / row_structure / gold_threshold updates)
   tableChannel = supabase
     .channel(`table:${currentTable.id}`)
     .on(
@@ -2558,6 +2588,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
