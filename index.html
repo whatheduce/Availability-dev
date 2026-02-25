@@ -215,6 +215,9 @@
 
 <div id="calendar-topbar" style="display:none; max-width:980px; margin:14px auto 0; padding:0 18px; align-items:center; justify-content:space-between;">
   <button id="back-to-dashboard" class="back-btn">← Dashboard</button>
+  <button id="add-users-btn" class="topbar-btn" type="button" style="display:none;">
+  Add users
+  </button>
 </div>
 
 <div id="calendar" style="display:none;">
@@ -2004,6 +2007,17 @@ if (!inviteToken && !manageToken) {
       });
   }
 
+const addUsersBtn = document.getElementById("add-users-btn");
+if (addUsersBtn) {
+  // Only show for owner links (?m=)
+  addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
+  addUsersBtn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // TODO: invite flow later
+  };
+}
+    
 document.getElementById("auth-forgot")?.addEventListener("click", async () => {
   const email = (document.getElementById("auth-email")?.value || "").trim();
   if (!email) {
@@ -2373,6 +2387,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
