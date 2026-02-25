@@ -300,7 +300,7 @@ let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
   
 window.openBoard = function (inviteToken) {
-  window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
+  window.location.href = `${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
 };
 
   
@@ -2219,10 +2219,11 @@ function openInviteModal({ inviteToken, boardName }) {
   const linkRow = document.getElementById("invite-link-row");
   const linkEl = document.getElementById("invite-link");
   const copyBtn = document.getElementById("invite-copy");
-  const emailBtn = document.getElementById("invite-email-btn");
+  const sendBtn = document.getElementById("invite-send");
+  const cancelBtn = document.getElementById("invite-cancel");
   const errEl = document.getElementById("invite-error");
 
-  if (!overlay || !emailEl || !linkRow || !linkEl || !copyBtn || !emailBtn || !errEl) return;
+  if (!overlay || !emailEl || !linkRow || !linkEl || !copyBtn || !sendBtn || !cancelBtn || !errEl) return;
 
   inviteContext = { inviteToken, boardName: boardName || "" };
 
@@ -2232,89 +2233,80 @@ function openInviteModal({ inviteToken, boardName }) {
   emailEl.value = "";
   linkRow.style.display = "none";
   linkEl.value = "";
-  emailBtn.setAttribute("href", "#");
 
   overlay.hidden = false;
 
-  // close on outside click
+  const close = () => {
+    overlay.hidden = true;
+    document.removeEventListener("keydown", onKeyDown, true);
+    overlay.removeEventListener("click", onOverlayClick, true);
+  };
+
   const onOverlayClick = (e) => {
     const card = e.target.closest(".modal-card");
-    if (!card) closeInviteModal();
+    if (!card) close();
   };
 
-  // close on esc
   const onKeyDown = (e) => {
-    if (e.key === "Escape") closeInviteModal();
+    if (e.key === "Escape") close();
   };
 
-  // generate mailto whenever email changes
-  const onEmailInput = () => {
+  const onSend = () => {
     const email = (emailEl.value || "").trim();
 
     if (!email) {
-      errEl.style.display = "none";
-      linkRow.style.display = "none";
-      emailBtn.setAttribute("href", "#");
+      errEl.style.display = "block";
+      errEl.textContent = "Please enter an email address.";
       return;
     }
 
     if (!isValidEmail(email)) {
       errEl.style.display = "block";
       errEl.textContent = "Please enter a valid email address.";
-      linkRow.style.display = "none";
-      emailBtn.setAttribute("href", "#");
       return;
     }
 
     errEl.style.display = "none";
+
     const link = buildInviteLink(inviteContext.inviteToken);
 
+    // Optional fallback UI (shows link + copy)
     linkRow.style.display = "flex";
     linkEl.value = link;
 
-    const subject = encodeURIComponent(`Calendar invite: ${inviteContext.boardName || "Availability Calendar"}`);
+    const subject = encodeURIComponent(
+      `Calendar invite: ${inviteContext.boardName || "Availability Calendar"}`
+    );
     const body = encodeURIComponent(
       `You’ve been invited to join this calendar.\n\nOpen this link:\n${link}\n\n(You’ll need to sign in or create an account.)`
     );
 
-    emailBtn.setAttribute("href", `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`);
+    window.location.href = `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`;
   };
 
-  // copy link
-  const onCopy = async () => {
+  // IMPORTANT: overwrite handlers so they don't stack
+  sendBtn.onclick = onSend;
+  cancelBtn.onclick = (e) => { e.preventDefault(); close(); };
+
+  copyBtn.onclick = async (e) => {
+    e.preventDefault();
     try {
       await navigator.clipboard.writeText(linkEl.value || "");
       copyBtn.textContent = "Copied!";
-      setTimeout(() => (copyBtn.textContent = "Copy"), 900);
-    } catch (e) {
-      copyBtn.textContent = "Copy failed";
-      setTimeout(() => (copyBtn.textContent = "Copy"), 900);
+      setTimeout(() => (copyBtn.textContent = "Copy"), 1000);
+    } catch {
+      // fallback if clipboard blocked
+      linkEl.select();
+      document.execCommand("copy");
     }
   };
 
-  function closeInviteModal() {
-    overlay.hidden = true;
-    document.removeEventListener("keydown", onKeyDown, true);
-    overlay.removeEventListener("click", onOverlayClick, true);
-    emailEl.removeEventListener("input", onEmailInput, true);
-    copyBtn.removeEventListener("click", onCopy, true);
-  }
-
-  // bind events
-  overlay.addEventListener("click", onOverlayClick, true);
   document.addEventListener("keydown", onKeyDown, true);
-  emailEl.addEventListener("input", onEmailInput, true);
-  copyBtn.addEventListener("click", onCopy, true);
+  overlay.addEventListener("click", onOverlayClick, true);
 
-  // Cancel button
-  document.getElementById("invite-cancel")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    closeInviteModal();
-  }, { once: true });
-
-  // focus
-  emailEl.focus();
-}  
+  // focus the email field
+  setTimeout(() => emailEl.focus(), 0);
+}
 
   
 async function renderBoardPreviews(owned) {
@@ -2549,7 +2541,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
     <div class="modal-actions">
       <button id="invite-cancel" class="modal-btn" type="button">Cancel</button>
-      <a id="invite-email-btn" class="modal-btn" href="#" target="_blank" rel="noopener">Open email</a>
+      <button id="invite-send" class="modal-btn modal-btn--primary" type="button">Send invite</button>
     </div>
 
     <div class="modal-hint">
@@ -2560,6 +2552,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
