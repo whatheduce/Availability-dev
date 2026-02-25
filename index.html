@@ -2018,6 +2018,24 @@ if (addUsersBtn) {
     // TODO: invite flow later
   };
 }
+
+  if (addUsersBtn) {
+    addUsersBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!manageToken) return;
+      if (!currentTable?.invite_token) {
+        console.error("Invite token missing on currentTable");
+        return;
+      }
+
+      openInviteModal({
+        inviteToken: currentTable.invite_token,
+        boardName: currentTable.name || "Availability Calendar"
+      });
+    });
+  }    
     
 document.getElementById("auth-forgot")?.addEventListener("click", async () => {
   const email = (document.getElementById("auth-email")?.value || "").trim();
@@ -2079,6 +2097,19 @@ document.addEventListener("click", async (e) => {
     const action = item.dataset.action;
     const boardId = card.dataset.boardId;
 
+    if (action === "add-user") {
+      const inviteTok = card.dataset.inviteToken;
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
+
+      if (!inviteTok) {
+        console.error("No invite token found on hosted board card.");
+        return;
+      }
+
+      openInviteModal({ inviteToken: inviteTok, boardName });
+      return;
+    }
+    
     if (action === "delete") {
       // Confirm (no alert UI yet — we can swap to a custom modal next)
       const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
@@ -2171,6 +2202,119 @@ function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "
     cancelBtn.focus();
   });
 }
+
+let inviteContext = { inviteToken: null, boardName: "" };
+
+function buildInviteLink(inviteToken) {
+  return `${window.location.origin}${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function openInviteModal({ inviteToken, boardName }) {
+  const overlay = document.getElementById("invite-modal");
+  const emailEl = document.getElementById("invite-email");
+  const linkRow = document.getElementById("invite-link-row");
+  const linkEl = document.getElementById("invite-link");
+  const copyBtn = document.getElementById("invite-copy");
+  const emailBtn = document.getElementById("invite-email-btn");
+  const errEl = document.getElementById("invite-error");
+
+  if (!overlay || !emailEl || !linkRow || !linkEl || !copyBtn || !emailBtn || !errEl) return;
+
+  inviteContext = { inviteToken, boardName: boardName || "" };
+
+  // reset UI
+  errEl.style.display = "none";
+  errEl.textContent = "";
+  emailEl.value = "";
+  linkRow.style.display = "none";
+  linkEl.value = "";
+  emailBtn.setAttribute("href", "#");
+
+  overlay.hidden = false;
+
+  // close on outside click
+  const onOverlayClick = (e) => {
+    const card = e.target.closest(".modal-card");
+    if (!card) closeInviteModal();
+  };
+
+  // close on esc
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") closeInviteModal();
+  };
+
+  // generate mailto whenever email changes
+  const onEmailInput = () => {
+    const email = (emailEl.value || "").trim();
+
+    if (!email) {
+      errEl.style.display = "none";
+      linkRow.style.display = "none";
+      emailBtn.setAttribute("href", "#");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      errEl.style.display = "block";
+      errEl.textContent = "Please enter a valid email address.";
+      linkRow.style.display = "none";
+      emailBtn.setAttribute("href", "#");
+      return;
+    }
+
+    errEl.style.display = "none";
+    const link = buildInviteLink(inviteContext.inviteToken);
+
+    linkRow.style.display = "flex";
+    linkEl.value = link;
+
+    const subject = encodeURIComponent(`Calendar invite: ${inviteContext.boardName || "Availability Calendar"}`);
+    const body = encodeURIComponent(
+      `You’ve been invited to join this calendar.\n\nOpen this link:\n${link}\n\n(You’ll need to sign in or create an account.)`
+    );
+
+    emailBtn.setAttribute("href", `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`);
+  };
+
+  // copy link
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(linkEl.value || "");
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => (copyBtn.textContent = "Copy"), 900);
+    } catch (e) {
+      copyBtn.textContent = "Copy failed";
+      setTimeout(() => (copyBtn.textContent = "Copy"), 900);
+    }
+  };
+
+  function closeInviteModal() {
+    overlay.hidden = true;
+    document.removeEventListener("keydown", onKeyDown, true);
+    overlay.removeEventListener("click", onOverlayClick, true);
+    emailEl.removeEventListener("input", onEmailInput, true);
+    copyBtn.removeEventListener("click", onCopy, true);
+  }
+
+  // bind events
+  overlay.addEventListener("click", onOverlayClick, true);
+  document.addEventListener("keydown", onKeyDown, true);
+  emailEl.addEventListener("input", onEmailInput, true);
+  copyBtn.addEventListener("click", onCopy, true);
+
+  // Cancel button
+  document.getElementById("invite-cancel")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeInviteModal();
+  }, { once: true });
+
+  // focus
+  emailEl.focus();
+}  
 
   
 async function renderBoardPreviews(owned) {
@@ -2385,9 +2529,38 @@ document.addEventListener("DOMContentLoaded", startApp);
     </div>
   </div>
 </div>
+<!-- Invite User Modal -->
+<div id="invite-modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="invite-title" aria-describedby="invite-message">
+    <div class="modal-title" id="invite-title">Add New Calendar Collaborator</div>
+    <div class="modal-message" id="invite-message">
+      Enter an email address and we’ll generate an invite link for this calendar.
+    </div>
+
+    <label class="modal-label" for="invite-email">Email</label>
+    <input id="invite-email" class="modal-input" type="email" placeholder="name@example.com" autocomplete="email" />
+
+    <div id="invite-link-row" class="invite-link-row" style="display:none;">
+      <input id="invite-link" class="modal-input" type="text" readonly />
+      <button id="invite-copy" class="modal-btn" type="button">Copy</button>
+    </div>
+
+    <div id="invite-error" class="modal-error" style="display:none;"></div>
+
+    <div class="modal-actions">
+      <button id="invite-cancel" class="modal-btn" type="button">Cancel</button>
+      <a id="invite-email-btn" class="modal-btn" href="#" target="_blank" rel="noopener">Open email</a>
+    </div>
+
+    <div class="modal-hint">
+      (For now this uses your device’s email app via a mailto link. Later we can replace it with real sending via a Supabase Edge Function.)
+    </div>
+  </div>
+</div>  
   
 </body>
 </html>
+
 
 
 
