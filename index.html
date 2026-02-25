@@ -962,6 +962,7 @@ async function applyGoldStateForCell(cell, day) {
   
   
 async function handleAvailabilityChange(payload) {
+  console.log("RT EVENT:", payload.eventType, payload);
   // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
   const entry =
   payload.eventType === "DELETE"
@@ -2588,6 +2589,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
