@@ -1444,31 +1444,63 @@ async function toggleCell(e) {
 
 await ensureMembership(currentTable.id);
     
-    // ✅ DELETE FIRST (toggle off)
-    const { error: delErr, count: deletedCount } = await supabase
-      .from("availability_dev")
-      .delete({ count: "exact" })
-      .eq("table_id", currentTable.id)
-      .eq("day", dayNum)
-      .eq("time", timeKey)
-      .eq("user_id", myUid);
+// ✅ DELETE FIRST (toggle off)
+const { error: delErr, count: deletedCount } = await supabase
+  .from("availability_dev")
+  .delete({ count: "exact" })
+  .eq("table_id", currentTable.id)
+  .eq("day", dayNum)
+  .eq("time", timeKey)
+  .eq("user_id", myUid);
 
-    if (delErr) {
-      console.warn("Delete failed:", delErr);
-      await loadAvailability();
-      return;
-    }
+if (delErr) {
+  console.warn("Delete failed:", delErr);
+  await loadAvailability();
+  return;
+}
 
-    if ((deletedCount || 0) > 0) {
-      // remove dot from DOM
-      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
-      if (myDot) myDot.remove();
+// If nothing deleted, try removing a legacy row for this user (user_id was NULL in older data)
+let legacyDeletedCount = 0;
+if ((deletedCount || 0) === 0) {
+  const { error: legacyErr, count: legacyCount } = await supabase
+    .from("availability_dev")
+    .delete({ count: "exact" })
+    .eq("table_id", currentTable.id)
+    .eq("day", dayNum)
+    .eq("time", timeKey)
+    .is("user_id", null)
+    .eq("name", user.name)
+    .eq("color", user.color);
 
-      const container = cell.querySelector(".dot-container");
-      if (container && container.children.length === 0) container.remove();
+  if (legacyErr) {
+    console.warn("Legacy delete failed:", legacyErr);
+    await loadAvailability();
+    return;
+  }
 
-      return;
-    }
+  legacyDeletedCount = legacyCount || 0;
+}
+
+if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
+  // If the cell is gold, dots are hidden, so DOM patching won't work reliably → refresh
+  if (cell.classList.contains("gold-cell")) {
+    await loadAvailability();
+    return;
+  }
+
+  // Otherwise we can patch DOM normally
+  const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+  if (myDot) myDot.remove();
+
+  // also remove any legacy dot (name+color match) if present
+  const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
+  if (legacyDot) legacyDot.remove();
+
+  const container = cell.querySelector(".dot-container");
+  if (container && container.children.length === 0) container.remove();
+
+  return;
+}
 
     // ✅ INSERT (toggle on)
     const { error: insErr } = await supabase
@@ -2524,6 +2556,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
