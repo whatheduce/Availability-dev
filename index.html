@@ -962,20 +962,35 @@ async function applyGoldStateForCell(cell, day) {
   
   
 async function handleAvailabilityChange(payload) {
-  console.log("RT EVENT:", payload.eventType, payload);
   // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
   const entry =
   payload.eventType === "DELETE"
     ? payload.old
     : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
 
-  if (!entry) return;
+   if (!entry) return;
+
+  // DELETE payloads can sometimes be missing fields we need to locate the cell.
+  // If we can't locate it reliably, fall back to a safe refresh.
+  if (payload.eventType === "DELETE") {
+    if (entry.day == null || entry.time == null) {
+      await loadAvailability();
+      return;
+    }
+  }
 
   // Find the specific cell
   const cell = table.querySelector(
     `td[data-day="${entry.day}"][data-time="${entry.time}"]`
   );
-  if (!cell) return;
+
+  // If we still can't find the cell on DELETE, refresh (keeps realtime correct)
+  if (!cell) {
+    if (payload.eventType === "DELETE") {
+      await loadAvailability();
+    }
+    return;
+  }
 
   // Ensure dot container exists for inserts
   let dotContainer = cell.querySelector(".dot-container");
@@ -2589,6 +2604,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
