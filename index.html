@@ -893,7 +893,7 @@ async function rebuildDotsForCell(cell) {
 }
 
   
-function applyGoldStateForCell(cell, day) {
+async function applyGoldStateForCell(cell, day) {
   const goldThreshold = Number(currentTable?.gold_threshold);
     if (!Number.isFinite(goldThreshold)) return;
 
@@ -913,7 +913,9 @@ function applyGoldStateForCell(cell, day) {
 
     // ⭐ If we just transitioned FROM gold → normal
     // we must rebuild the dots for this cell from DB
-    if (wasGold) rebuildDotsForCell(cell);
+    if (wasGold) {
+      await rebuildDotsForCell(cell);
+    }
   }
 
   // Update day header
@@ -928,7 +930,7 @@ function applyGoldStateForCell(cell, day) {
 
   
   
-function handleAvailabilityChange(payload) {
+async function handleAvailabilityChange(payload) {
   // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
   const entry =
   payload.eventType === "DELETE"
@@ -970,7 +972,7 @@ function handleAvailabilityChange(payload) {
   if (payload.eventType === "DELETE") {
     // Remove that user's dot
     removeDot(entry);
-    applyGoldStateForCell(cell, entry.day);
+    await applyGoldStateForCell(cell, entry.day);
     // Keep gold/legend correct with a later idle refresh
     scheduleFullRefreshIdle(20000);
     return;
@@ -1001,7 +1003,7 @@ function handleAvailabilityChange(payload) {
 
     // Always run these even if the dot already existed (this fixes the “clicking user” case)
     ensureLegendUser(entry);
-    applyGoldStateForCell(cell, entry.day);
+    await applyGoldStateForCell(cell, entry.day);
 
     // Keep gold/legend correct with a later idle refresh
     scheduleFullRefreshIdle(20000);
@@ -2556,6 +2558,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
