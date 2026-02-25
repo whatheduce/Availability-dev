@@ -1020,8 +1020,9 @@ async function handleAvailabilityChange(payload) {
     // Remove that user's dot
     removeDot(entry);
     await applyGoldStateForCell(cell, entry.day);
-    // Keep gold/legend correct with a later idle refresh
-    scheduleFullRefreshIdle(20000);
+    if (cell.classList.contains("gold-cell")) {
+      await loadAvailability();
+    }
     return;
   }
 
@@ -2604,6 +2605,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
