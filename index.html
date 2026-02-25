@@ -2216,14 +2216,11 @@ function isValidEmail(email) {
 function openInviteModal({ inviteToken, boardName }) {
   const overlay = document.getElementById("invite-modal");
   const emailEl = document.getElementById("invite-email");
-  const linkRow = document.getElementById("invite-link-row");
-  const linkEl = document.getElementById("invite-link");
-  const copyBtn = document.getElementById("invite-copy");
   const sendBtn = document.getElementById("invite-send");
   const cancelBtn = document.getElementById("invite-cancel");
   const errEl = document.getElementById("invite-error");
 
-  if (!overlay || !emailEl || !linkRow || !linkEl || !copyBtn || !sendBtn || !cancelBtn || !errEl) return;
+  if (!overlay || !emailEl || !sendBtn || !cancelBtn || !errEl) return;
 
   inviteContext = { inviteToken, boardName: boardName || "" };
 
@@ -2231,8 +2228,6 @@ function openInviteModal({ inviteToken, boardName }) {
   errEl.style.display = "none";
   errEl.textContent = "";
   emailEl.value = "";
-  linkRow.style.display = "none";
-  linkEl.value = "";
 
   overlay.hidden = false;
 
@@ -2269,11 +2264,6 @@ function openInviteModal({ inviteToken, boardName }) {
     errEl.style.display = "none";
 
     const link = buildInviteLink(inviteContext.inviteToken);
-
-    // Optional fallback UI (shows link + copy)
-    linkRow.style.display = "flex";
-    linkEl.value = link;
-
     const subject = encodeURIComponent(
       `Calendar invite: ${inviteContext.boardName || "Availability Calendar"}`
     );
@@ -2287,19 +2277,6 @@ function openInviteModal({ inviteToken, boardName }) {
   // IMPORTANT: overwrite handlers so they don't stack
   sendBtn.onclick = onSend;
   cancelBtn.onclick = (e) => { e.preventDefault(); close(); };
-
-  copyBtn.onclick = async (e) => {
-    e.preventDefault();
-    try {
-      await navigator.clipboard.writeText(linkEl.value || "");
-      copyBtn.textContent = "Copied!";
-      setTimeout(() => (copyBtn.textContent = "Copy"), 1000);
-    } catch {
-      // fallback if clipboard blocked
-      linkEl.select();
-      document.execCommand("copy");
-    }
-  };
 
   document.addEventListener("keydown", onKeyDown, true);
   overlay.addEventListener("click", onOverlayClick, true);
@@ -2532,11 +2509,6 @@ document.addEventListener("DOMContentLoaded", startApp);
     <label class="modal-label" for="invite-email">Email</label>
     <input id="invite-email" class="modal-input" type="email" placeholder="name@example.com" autocomplete="email" />
 
-    <div id="invite-link-row" class="invite-link-row" style="display:none;">
-      <input id="invite-link" class="modal-input" type="text" readonly />
-      <button id="invite-copy" class="modal-btn" type="button">Copy</button>
-    </div>
-
     <div id="invite-error" class="modal-error" style="display:none;"></div>
 
     <div class="modal-actions">
@@ -2552,6 +2524,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
