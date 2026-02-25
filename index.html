@@ -974,7 +974,7 @@ async function handleAvailabilityChange(payload) {
   // If we can't locate it reliably, fall back to a safe refresh.
   if (payload.eventType === "DELETE") {
     if (entry.day == null || entry.time == null) {
-      await loadAvailability();
+      scheduleFullRefreshIdle(1200);
       return;
     }
   }
@@ -987,7 +987,7 @@ async function handleAvailabilityChange(payload) {
   // If we still can't find the cell on DELETE, refresh (keeps realtime correct)
   if (!cell) {
     if (payload.eventType === "DELETE") {
-      await loadAvailability();
+      scheduleFullRefreshIdle(1200);
     }
     return;
   }
@@ -2603,6 +2603,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
