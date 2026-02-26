@@ -2618,26 +2618,47 @@ if (PREVIEW_SEED) {
 
 
       
-const legendHtml = legendUserIds.length
+const MAX_LEGEND = 9;
+const shown = legendUserIds.slice(0, MAX_LEGEND);
+const n = shown.length;
+
+// Layout presets (rows x cols)
+// 1–2 users: 1 row (2 cols)
+// 3–6 users: 2 rows (3 cols)
+// 7–9 users: 3 rows (3 cols)
+let rows = 1;
+let cols = 2;
+let font = 11;
+let dot = 7;
+let colMin = 0;
+
+if (n <= 2) {
+  rows = 1; cols = 2; font = 12; dot = 8;
+} else if (n <= 6) {
+  rows = 2; cols = 3; font = 10; dot = 7;
+} else {
+  rows = 3; cols = 3; font = 9; dot = 6;
+}
+
+const legendHtml = shown.length
   ? `
 <div class="mini-legend" style="
   width:100%;
   height:34px;
   overflow:hidden;
   margin-top:6px;
-  display:block;
-  padding:0 10px;
+  padding:0 6px;
   box-sizing:border-box;
 ">
-  <div class="mini-legend-inner" style="
+  <div class="mini-legend-grid" style="
     height:100%;
     display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(var(--legend-col-min, 40px), 1fr));
-    gap:4px 10px;
-    align-content:end;
-    justify-items:start;
+    grid-template-columns: repeat(${cols}, 1fr);
+    grid-template-rows: repeat(${rows}, 1fr);
+    gap:2px 6px;
+    align-items:center;
   ">
-    ${legendUserIds.map(uid => {
+    ${shown.map(uid => {
       const p = profilesByUser.get(String(uid));
       const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
@@ -2649,21 +2670,21 @@ const legendHtml = legendUserIds.length
           display:flex;
           align-items:center;
           gap:4px;
-          font-size:10px;
+          font-size:${font}px;
           line-height:1;
           min-width:0;
           overflow:hidden;
           white-space:nowrap;
           text-overflow:ellipsis;
         ">
-          <span class="mini-legend-dot" style="
-            width:6px;
-            height:6px;
+          <span style="
+            width:${dot}px;
+            height:${dot}px;
             border-radius:999px;
             background:${col};
             flex:0 0 auto;
           "></span>
-          <span class="mini-legend-name" style="
+          <span style="
             opacity:0.85;
             min-width:0;
             overflow:hidden;
@@ -2684,34 +2705,6 @@ const legendHtml = legendUserIds.length
         </div>
         ${legendHtml}
       `;
-
-const legendBox = previewEl.querySelector(".mini-legend");
-const legendInner = previewEl.querySelector(".mini-legend-inner");
-
-if (legendBox && legendInner) {
-  // Set responsive min column width BEFORE scaling
-  const w = legendBox.clientWidth;
-  let colMin = 58;
-
-  if (w < 210) colMin = 70;      // narrower -> fewer columns
-  else if (w < 260) colMin = 58; // default -> 3-ish columns
-  else colMin = 48;             // wider -> allow 4 columns
-
-  legendInner.style.setProperty("--legend-col-min", `${colMin}px`);
-
-  // Reset scale
-  legendInner.style.transformOrigin = "bottom left";
-  legendInner.style.transform = "scale(1)";
-
-  const maxH = legendBox.clientHeight;
-
-  // ✅ scaling loop starts here
-  let scale = 1;
-  while (legendInner.scrollHeight > maxH && scale > 0.35) {
-    scale = Math.round((scale - 0.05) * 100) / 100;
-    legendInner.style.transform = `scale(${scale})`;
-  }
-}
       
     }
   } catch (err) {
@@ -2791,6 +2784,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
