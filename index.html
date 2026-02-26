@@ -2619,8 +2619,18 @@ if (PREVIEW_SEED) {
 
       
 const MAX_LEGEND = 9;
-const shown = legendUserIds.slice(0, MAX_LEGEND);
-const n = shown.length;
+const totalUsers = legendUserIds.length;
+
+let shown = legendUserIds.slice(0, MAX_LEGEND);
+let overflow = 0;
+
+// If more than 9 users, reserve the 9th slot for "+N"
+if (totalUsers > MAX_LEGEND) {
+  shown = legendUserIds.slice(0, 8);
+  overflow = totalUsers - 8;
+}
+
+const n = shown.length + (overflow ? 1 : 0);
 
 // Presets (your requested behaviour)
 let legendRows = 1;
@@ -2670,42 +2680,58 @@ const legendHtml = shown.length
       justify-content:start;
       justify-items:start;
     ">
-      ${shown.map(uid => {
-        const p = profilesByUser.get(String(uid));
-        const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+      ${[
+  ...shown.map(uid => {
+    const p = profilesByUser.get(String(uid));
+    const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
-        const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-        const nm = (p?.name || f?.name || "").trim() || "User";
+    const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+    const nm = (p?.name || f?.name || "").trim() || "User";
 
-        return `
-          <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
-            display:flex;
-            align-items:center;
-            gap:4px;
-            font-size:${font}px;
-            line-height:1;
-            max-width:${itemMax}px;
-            min-width:0;
-            overflow:hidden;
-            white-space:nowrap;
-            text-overflow:ellipsis;
-          ">
-            <span style="
-              width:${dot}px;
-              height:${dot}px;
-              border-radius:999px;
-              background:${col};
-              flex:0 0 auto;
-            "></span>
-            <span style="
-              opacity:0.85;
-              min-width:0;
-              overflow:hidden;
-              text-overflow:ellipsis;
-            ">${escapeHtml(nm)}</span>
-          </div>
-        `;
-      }).join("")}
+    return `
+      <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
+        display:flex;
+        align-items:center;
+        gap:4px;
+        font-size:${font}px;
+        line-height:1;
+        max-width:${itemMax}px;
+        min-width:0;
+        overflow:hidden;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+      ">
+        <span style="
+          width:${dot}px;
+          height:${dot}px;
+          border-radius:999px;
+          background:${col};
+          flex:0 0 auto;
+        "></span>
+        <span style="
+          opacity:0.85;
+          min-width:0;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        ">${escapeHtml(nm)}</span>
+      </div>
+    `;
+  }),
+  ...(overflow ? [`
+    <div class="mini-legend-item" title="${overflow} more" style="
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:${font}px;
+      line-height:1;
+      opacity:0.8;
+      border:1px solid rgba(0,0,0,0.10);
+      border-radius:999px;
+      padding:2px 6px;
+      white-space:nowrap;
+    ">+${overflow}</div>
+  `] : [])
+].join("")}
     </div>
   </div>
 </div>
@@ -2798,6 +2824,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
