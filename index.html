@@ -2618,8 +2618,9 @@ if (PREVIEW_SEED) {
 
 
       
-      const legendHtml = legendUserIds.length
-  <div class="mini-legend" style="
+const legendHtml = legendUserIds.length
+  ? `
+<div class="mini-legend" style="
   width:100%;
   height:34px;
   overflow:hidden;
@@ -2628,50 +2629,52 @@ if (PREVIEW_SEED) {
   padding:0 10px;
   box-sizing:border-box;
 ">
+  <div class="mini-legend-inner" style="
+    height:100%;
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap:4px 10px;
+    align-content:end;
+    justify-items:start;
+  ">
+    ${legendUserIds.map(uid => {
+      const p = profilesByUser.get(String(uid));
+      const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
- <div class="mini-legend-inner" style="
-  height:100%;
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap:4px 10px;
-  align-content:end;
-  justify-items:start;
-">
-        ${legendUserIds.map(uid => {
-          const p = profilesByUser.get(String(uid));
-          const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+      const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+      const nm = (p?.name || f?.name || "").trim() || "User";
 
-          const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-          const nm = (p?.name || f?.name || "").trim() || "User";
-
-          return `
-  <div class="mini-legend-item" ... style="
-  display:flex;
-  align-items:center;
-  gap:5px;
-  font-size:12px;
-  line-height:1;
-  min-width:0;                 /* important for ellipsis inside grid */
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-">
-              <span class="mini-legend-dot" style="
-                   width:8px; height:8px; border-radius:999px;
-                   background:${col};
-                   flex:0 0 auto;
-                 "></span>
-              <span class="mini-legend-name" style="
-              opacity:0.85;
-              min-width:0;
-              overflow:hidden;
-              text-overflow:ellipsis;
-            ">
-            </div>
-          `;
-        }).join("")}
-      </div>
-    </div>`
+      return `
+        <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
+          display:flex;
+          align-items:center;
+          gap:5px;
+          font-size:12px;
+          line-height:1;
+          min-width:0;
+          overflow:hidden;
+          white-space:nowrap;
+          text-overflow:ellipsis;
+        ">
+          <span class="mini-legend-dot" style="
+            width:8px;
+            height:8px;
+            border-radius:999px;
+            background:${col};
+            flex:0 0 auto;
+          "></span>
+          <span class="mini-legend-name" style="
+            opacity:0.85;
+            min-width:0;
+            overflow:hidden;
+            text-overflow:ellipsis;
+          ">${escapeHtml(nm)}</span>
+        </div>
+      `;
+    }).join("")}
+  </div>
+</div>
+`
   : "";
       
       previewEl.innerHTML = `
@@ -2776,6 +2779,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
