@@ -615,18 +615,24 @@ async function loadBoards() {
     joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
   } else {
     joinedEl.innerHTML = joined.map(b => `
-      <div
-        class="board-pill board-pill--square"
-        data-kind="joined"
-        data-board-id="${b.tables.id}"
-        data-invite-token="${b.tables.invite_token}"
-        onclick="openBoard('${b.tables.invite_token}')"
-      >
-        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
-        <div class="board-preview" data-board-id="${b.tables.id}"></div>
-        <div class="board-pill-meta">Joined</div>
-      </div>
-    `).join("");
+        <div 
+    class="board-pill board-pill--square"
+    data-kind="joined"
+    data-board-id="${b.tables.id}"
+    data-invite-token="${b.tables.invite_token}"
+    onclick="openBoard('${b.tables.invite_token}')"
+  >
+    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+
+    <div class="board-actions-menu" hidden>
+      <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
+    </div>
+
+    <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
+    <div class="board-preview" data-board-id="${b.tables.id}"></div>
+    <div class="board-pill-meta">Joined</div>
+  </div>
+`).join("");
   }
 
   // Render previews for both hosted + joined
@@ -2191,7 +2197,7 @@ document.addEventListener("click", async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const card = actionsBtn.closest(".board-pill[data-kind='hosted']");
+    const card = actionsBtn.closest(".board-pill[data-kind]");
     if (!card) return;
 
     // Close any other open menus
@@ -2211,7 +2217,7 @@ document.addEventListener("click", async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const card = item.closest(".board-pill[data-kind='hosted']");
+    const card = item.closest(".board-pill[data-kind]");
     if (!card) return;
 
     // Close menu
@@ -2220,6 +2226,27 @@ document.addEventListener("click", async (e) => {
 
     const action = item.dataset.action;
     const boardId = card.dataset.boardId;
+
+    const kind = card.dataset.kind;
+
+// Joined: remove calendar (stub for now)
+if (kind === "joined" && action === "remove") {
+  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+
+  const ok = await confirmModal({
+    title: "Remove calendar?",
+    message: `Remove "${boardName}"? You and all your logged times will be removed from this calendar.`,
+    okText: "Remove",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  // Stub only for now (next step: actually delete membership + availability rows)
+  console.log("Remove calendar confirmed (stub):", { boardId });
+
+  return;
+}
 
     if (action === "add-user") {
       const inviteTok = card.dataset.inviteToken;
@@ -2804,6 +2831,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
