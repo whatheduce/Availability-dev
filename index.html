@@ -2576,26 +2576,11 @@ if (memberUserIds.length > 0) {
       const scale = Math.max(0.55, Math.min(1.05, 10 / (rowCount + 2)));
       previewEl.style.setProperty("--mini-scale", String(scale));
 
-      // Legend: pick up to 3 members.
-      // Priority: members who appear in preview week first, then fill with other members.
-      const membersForBoard = (members || [])
+      // Legend: show EVERY member on this board (not limited to first 7 days)
+      const legendUserIds = (members || [])
         .filter(m => String(m.board_id) === boardId)
         .map(m => String(m.user_id))
         .filter(Boolean);
-
-      const inPreviewWeek = [];
-      for (let d = 0; d < 7; d++) {
-        for (const rowLabel of rows) {
-          const dayValue = d + 1;
-          const u = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
-          for (const uid of u) {
-            if (!inPreviewWeek.includes(uid)) inPreviewWeek.push(uid);
-            if (inPreviewWeek.length >= 3) break;
-          }
-          if (inPreviewWeek.length >= 3) break;
-        }
-        if (inPreviewWeek.length >= 3) break;
-      }
 
 // Start with preview-week users, then fill from membership
 const legendUserIds = [];
@@ -2609,20 +2594,48 @@ for (const uid of membersForBoard) {
 }
 
       const legendHtml = legendUserIds.length
-        ? `<div class="mini-legend">
-            ${legendUserIds.map(uid => {
-              const p = profilesByUser.get(String(uid));
-              const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
-              const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-              const nm = (p?.name || f?.name || "").trim();
-              return `
-                <div class="mini-legend-item" title="${escapeHtml(nm)}">
-                  <span class="mini-legend-dot" style="background:${col}"></span>
-                  <span class="mini-legend-name">${escapeHtml(nm || "User")}</span>
-                </div>
-              `;
-            }).join("")}
-          </div>`
+      ? `<div class="mini-legend" style="
+            display:flex;
+            flex-wrap:wrap;
+            gap:6px 10px;
+            margin-top:8px;
+            align-items:center;
+            justify-content:flex-start;
+          ">
+          ${legendUserIds.map(uid => {
+            const p = profilesByUser.get(String(uid));
+            const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+
+            const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+            const nm = (p?.name || f?.name || "").trim();
+
+            return `
+              <div class="mini-legend-item" title="${escapeHtml(nm || "User")}" style="
+                   display:flex;
+                   align-items:center;
+                   gap:6px;
+                   font-size:11px;
+                   line-height:1;
+                   max-width:48%;
+                   overflow:hidden;
+                   white-space:nowrap;
+                   text-overflow:ellipsis;
+                 ">
+                <span class="mini-legend-dot" style="
+                     width:8px; height:8px; border-radius:999px;
+                      background:${col};
+                      flex:0 0 auto;
+                    "></span>
+                <span class="mini-legend-name" style="
+                      opacity:0.85;
+                      overflow:hidden;
+                      text-overflow:ellipsis;
+                    ">${escapeHtml(nm || "User")}</span>
+              </div>
+            `;
+          }).join("")}
+        </div>`
+      : "";
         : "";
       
       previewEl.innerHTML = `
@@ -2710,6 +2723,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
