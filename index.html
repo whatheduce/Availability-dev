@@ -2622,77 +2622,91 @@ const MAX_LEGEND = 9;
 const shown = legendUserIds.slice(0, MAX_LEGEND);
 const n = shown.length;
 
-// Layout presets (rows x cols)
-// 1–2 users: 1 row (2 cols)
-// 3–6 users: 2 rows (3 cols)
-// 7–9 users: 3 rows (3 cols)
+// Presets (your requested behaviour)
 let legendRows = 1;
 let legendCols = 2;
-let font = 11;
-let dot = 7;
-let colMin = 0;
+let font = 13;
+let dot = 9;
+
+// Keep HEIGHT fixed always
+const legendHeight = 34;
+
+// Control how wide each name can be before ellipsis (keeps legend from getting too wide)
+let itemMax = 120;
 
 if (n <= 2) {
-  legendRows = 1; legendCols = 2; font = 12; dot = 8;
+  legendRows = 1; legendCols = 2; font = 13; dot = 9; itemMax = 130;
+} else if (n <= 4) {
+  legendRows = 2; legendCols = 2; font = 11; dot = 8; itemMax = 110;
 } else if (n <= 6) {
-  legendRows = 2; legendCols = 3; font = 10; dot = 7;
+  legendRows = 2; legendCols = 3; font = 10; dot = 7; itemMax = 85;
 } else {
-  legendRows = 3; legendCols = 3; font = 9; dot = 6;
+  legendRows = 3; legendCols = 3; font = 9; dot = 6; itemMax = 75;
 }
 
 const legendHtml = shown.length
   ? `
 <div class="mini-legend" style="
-  width:100%;
-  height:34px;
+  height:${legendHeight}px;
   overflow:hidden;
   margin-top:6px;
   padding:0 6px;
   box-sizing:border-box;
 ">
-  <div class="mini-legend-grid" style="
-    height:100%;
-    display:grid;
-    grid-template-columns: repeat(${legendCols}, 1fr);
-    grid-template-rows: repeat(${legendRows}, 1fr);
-    gap:2px 6px;
-    align-items:center;
+  <!-- This wrapper SHRINKS to content width -->
+  <div class="mini-legend-wrap" style="
+    display:inline-block;
+    width:fit-content;
+    max-width:100%;
   ">
-    ${shown.map(uid => {
-      const p = profilesByUser.get(String(uid));
-      const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+    <div class="mini-legend-grid" style="
+      height:${legendHeight}px;
+      display:inline-grid;
+      grid-template-columns: repeat(${legendCols}, auto);
+      grid-template-rows: repeat(${legendRows}, auto);
+      column-gap:8px;
+      row-gap:3px;
+      align-content:end;
+      justify-content:start;
+      justify-items:start;
+    ">
+      ${shown.map(uid => {
+        const p = profilesByUser.get(String(uid));
+        const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
-      const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-      const nm = (p?.name || f?.name || "").trim() || "User";
+        const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+        const nm = (p?.name || f?.name || "").trim() || "User";
 
-      return `
-        <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
-          display:flex;
-          align-items:center;
-          gap:4px;
-          font-size:${font}px;
-          line-height:1;
-          min-width:0;
-          overflow:hidden;
-          white-space:nowrap;
-          text-overflow:ellipsis;
-        ">
-          <span style="
-            width:${dot}px;
-            height:${dot}px;
-            border-radius:999px;
-            background:${col};
-            flex:0 0 auto;
-          "></span>
-          <span style="
-            opacity:0.85;
+        return `
+          <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
+            display:flex;
+            align-items:center;
+            gap:4px;
+            font-size:${font}px;
+            line-height:1;
+            max-width:${itemMax}px;
             min-width:0;
             overflow:hidden;
+            white-space:nowrap;
             text-overflow:ellipsis;
-          ">${escapeHtml(nm)}</span>
-        </div>
-      `;
-    }).join("")}
+          ">
+            <span style="
+              width:${dot}px;
+              height:${dot}px;
+              border-radius:999px;
+              background:${col};
+              flex:0 0 auto;
+            "></span>
+            <span style="
+              opacity:0.85;
+              min-width:0;
+              overflow:hidden;
+              text-overflow:ellipsis;
+            ">${escapeHtml(nm)}</span>
+          </div>
+        `;
+      }).join("")}
+    </div>
   </div>
 </div>
 `
@@ -2784,6 +2798,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
