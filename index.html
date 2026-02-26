@@ -2437,13 +2437,27 @@ async function renderBoardPreviews(owned) {
     // Pull availability for 7 days (0..6) for all hosted boards
     const { data: avail, error: availErr } = await supabase
       .from("availability_dev")
-      .select("table_id, day, time, user_id")
+      .select("table_id, day, time, user_id, name, color")
       .in("table_id", boardIds)
       .gte("day", 1)
       .lte("day", 7);
 
     if (availErr) throw availErr;
 
+    // Fallback (important if profiles RLS blocks reading other users)
+    const fallbackByUser = new Map(); // user_id -> { name, color }
+    for (const r of (avail || [])) {
+      const uid = r.user_id ? String(r.user_id) : null;
+      if (!uid) continue;
+
+      if (!fallbackByUser.has(uid)) {
+        fallbackByUser.set(uid, {
+          name: (r.name || "").trim(),
+          color: r.color || ""
+        });
+      }
+    }
+    
     // Collect user_ids from membership (more reliable than "who has dots this week")
     const { data: members, error: memErr } = await supabase
       .from("board_members")
@@ -2472,11 +2486,13 @@ if (memberUserIds.length > 0) {
     const byCell = new Map();
     for (const r of (avail || [])) {
       const key = `${r.table_id}|${r.day}|${r.time}`;
-      if (!byCell.has(key)) byCell.set(key, []);
+        if (!byCell.has(key)) byCell.set(key, []);
         const arr = byCell.get(key);
+
+        if (!r.user_id) continue;               // ✅ guard
         const uid = String(r.user_id);
-          if (!arr.includes(uid)) arr.push(uid);
-    }
+        if (!arr.includes(uid)) arr.push(uid);
+        }
 
     // Render each preview
     for (const t of boards) {
@@ -2511,8 +2527,10 @@ if (memberUserIds.length > 0) {
 
           const dotsHtml = visible.map(uid => {
             const p = profilesByUser.get(String(uid));
-            const col = p?.color || "rgba(0,0,0,0.35)";
-            const name = p?.name || "";
+            const f = fallbackByUser.get(String(uid));
+
+          const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+          const name = (p?.name || f?.name || "").trim();
             return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
           }).join("");
 
@@ -2552,8 +2570,10 @@ if (memberUserIds.length > 0) {
         ? `<div class="mini-legend">
             ${legendUserIds.map(uid => {
               const p = profilesByUser.get(String(uid));
-              const col = p?.color || "rgba(0,0,0,0.35)";
-              const nm = (p?.name || "").trim();
+              const f = fallbackByUser.get(String(uid));
+
+              const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+              const nm = (p?.name || f?.name || "").trim();
               return `
                 <div class="mini-legend-item" title="${escapeHtml(nm)}">
                   <span class="mini-legend-dot" style="background:${col}"></span>
@@ -2649,6 +2669,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
