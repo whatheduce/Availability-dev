@@ -2620,46 +2620,55 @@ if (PREVIEW_SEED) {
       
       const legendHtml = legendUserIds.length
   ? `<div class="mini-legend" style="
-        height:42px;              /* ✅ fixed legend height */
-        overflow:hidden;          /* ✅ never grow the card */
-        margin-top:8px;
+        height:34px;
+        overflow:hidden;
+        margin-top:6px;
+        display:flex;
+        justify-content:center;
+        align-items:flex-end;
+        padding:0 10px;           /* keeps it off the edges */
+        box-sizing:border-box;
+      ">
+      <div class="mini-legend-inner" style="
         display:flex;
         flex-wrap:wrap;
         gap:4px 10px;
-        align-content:flex-start;
+        align-content:flex-end;
+        justify-content:center;
       ">
-      ${legendUserIds.map(uid => {
-        const p = profilesByUser.get(String(uid));
-        const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+        ${legendUserIds.map(uid => {
+          const p = profilesByUser.get(String(uid));
+          const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
-        const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-        const nm = (p?.name || f?.name || "").trim() || "User";
+          const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+          const nm = (p?.name || f?.name || "").trim() || "User";
 
-        return `
-          <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
-               display:flex;
-               align-items:center;
-               gap:5px;
-               font-size:11px;          /* base size (we'll scale down) */
-               line-height:1;
-               max-width:48%;
-               overflow:hidden;
-               white-space:nowrap;
-               text-overflow:ellipsis;
-             ">
-            <span class="mini-legend-dot" style="
-                 width:7px; height:7px; border-radius:999px;
-                 background:${col};
-                 flex:0 0 auto;
-               "></span>
-            <span class="mini-legend-name" style="
-                 opacity:0.85;
+          return `
+            <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
+                 display:flex;
+                 align-items:center;
+                 gap:5px;
+                 font-size:11px;
+                 line-height:1;
+                 max-width:48%;
                  overflow:hidden;
+                 white-space:nowrap;
                  text-overflow:ellipsis;
-               ">${escapeHtml(nm)}</span>
-          </div>
-        `;
-      }).join("")}
+               ">
+              <span class="mini-legend-dot" style="
+                   width:7px; height:7px; border-radius:999px;
+                   background:${col};
+                   flex:0 0 auto;
+                 "></span>
+              <span class="mini-legend-name" style="
+                   opacity:0.85;
+                   overflow:hidden;
+                   text-overflow:ellipsis;
+                 ">${escapeHtml(nm)}</span>
+            </div>
+          `;
+        }).join("")}
+      </div>
     </div>`
   : "";
       
@@ -2671,28 +2680,26 @@ if (PREVIEW_SEED) {
         ${legendHtml}
       `;
 
-      // --- Keep legend height fixed by scaling text down until it fits ---
-const legendEl = previewEl.querySelector(".mini-legend");
-if (legendEl) {
-  // Reset any previous scaling
-  legendEl.style.transformOrigin = "bottom left";
-  legendEl.style.transform = "scale(1)";
+const legendBox = previewEl.querySelector(".mini-legend");
+const legendInner = previewEl.querySelector(".mini-legend-inner");
 
-  // Try scaling down in steps until content fits the fixed height
-  const maxH = legendEl.clientHeight;
+if (legendBox && legendInner) {
+  legendInner.style.transformOrigin = "bottom center";
+  legendInner.style.transform = "scale(1)";
+
+  const maxH = legendBox.clientHeight;
+  const maxW = legendBox.clientWidth;
+
   let scale = 1;
 
-  // scrollHeight tells us how tall the wrapped content *wants* to be
-  while (legendEl.scrollHeight > maxH && scale > 0.45) {
+  // Scale down until it fits both height and width (prevents side overflow)
+  while (
+    (legendInner.scrollHeight > maxH || legendInner.scrollWidth > maxW) &&
+    scale > 0.35
+  ) {
     scale = Math.round((scale - 0.05) * 100) / 100;
-    legendEl.style.transform = `scale(${scale})`;
+    legendInner.style.transform = `scale(${scale})`;
   }
-
-  // Compensate width so scaled content still lays out nicely inside the box
-  legendEl.style.width = `${100 / scale}%`;
-
-  legendEl.style.display = "flex";
-  legendEl.style.alignItems = "flex-end";
 }
       
     }
@@ -2773,6 +2780,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
