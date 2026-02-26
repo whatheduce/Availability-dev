@@ -2444,27 +2444,38 @@ async function renderBoardPreviews(owned) {
 
     if (availErr) throw availErr;
 
-    // Collect user_ids to color dots
-    const userIds = Array.from(new Set((avail || []).map(r => r.user_id).filter(Boolean)));
+    // Collect user_ids from membership (more reliable than "who has dots this week")
+    const { data: members, error: memErr } = await supabase
+      .from("board_members")
+      .select("board_id, user_id")
+      .in("board_id", boardIds);
 
-    let profilesByUser = new Map(); // user_id -> {name,color}
-    if (userIds.length > 0) {
-      const { data: profs, error: profErr } = await supabase
-        .from("profiles")
-        .select("user_id, name, color")
-        .in("user_id", userIds);
+    if (memErr) throw memErr;
 
-      if (profErr) throw profErr;
+    const memberUserIds = Array.from(
+      new Set((members || []).map(m => m.user_id).filter(Boolean).map(String))
+    );
 
-      profilesByUser = new Map((profs || []).map(p => [String(p.user_id), p]));
-    }
+let profilesByUser = new Map(); // user_id -> {name,color}
+if (memberUserIds.length > 0) {
+  const { data: profs, error: profErr } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .in("user_id", memberUserIds);
+
+  if (profErr) throw profErr;
+
+  profilesByUser = new Map((profs || []).map(p => [String(p.user_id), p]));
+}
 
     // Build a map: (board|day|time) -> [user_id...]
     const byCell = new Map();
     for (const r of (avail || [])) {
       const key = `${r.table_id}|${r.day}|${r.time}`;
       if (!byCell.has(key)) byCell.set(key, []);
-      byCell.get(key).push(String(r.user_id));
+        const arr = byCell.get(key);
+        const uid = String(r.user_id);
+          if (!arr.includes(uid)) arr.push(uid);
     }
 
     // Render each preview
@@ -2638,6 +2649,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
