@@ -2242,8 +2242,37 @@ if (kind === "joined" && action === "remove") {
 
   if (!ok) return;
 
-  // Stub only for now (next step: actually delete membership + availability rows)
-  console.log("Remove calendar confirmed (stub):", { boardId });
+  // Actually remove current user from this board
+try {
+  const au = await getAuthUser();
+  if (!au?.id) throw new Error("Not signed in");
+
+  // 1) delete availability rows for this user on this board
+  const { error: availDelErr } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", boardId)
+    .eq("user_id", au.id);
+
+  if (availDelErr) throw availDelErr;
+
+  // 2) delete membership row
+  const { error: memDelErr } = await supabase
+    .from("board_members")
+    .delete()
+    .eq("board_id", boardId)
+    .eq("user_id", au.id);
+
+  if (memDelErr) throw memDelErr;
+
+  // 3) refresh dashboard lists + previews
+  await loadBoards();
+
+} catch (err) {
+  console.error("Remove calendar failed:", err);
+  alert("Could not remove you from this calendar. Please try again.");
+}
+return;
 
   return;
 }
@@ -2831,6 +2860,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
