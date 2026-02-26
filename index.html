@@ -555,6 +555,7 @@ async function loadProfile() {
 
 async function loadBoards() {
   const au = await getAuthUser();
+
   const { data, error } = await supabase
     .from("board_members")
     .select(`
@@ -577,61 +578,61 @@ async function loadBoards() {
     return;
   }
 
-  const owned = data.filter(x => x.role === "owner");
-  const joined = data.filter(x => x.role !== "owner");
-    const ownedEl = document.getElementById("owned-boards");
-    const joinedEl = document.getElementById("joined-boards");
+  const owned = (data || []).filter(x => x.role === "owner");
+  const joined = (data || []).filter(x => x.role !== "owner");
 
-      if (!owned || owned.length === 0) {
-      ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
-    } else {
-      ownedEl.innerHTML =
-        owned.map(b => `
-          <div 
-          class="board-pill board-pill--square"
-            data-kind="hosted"
-            data-board-id="${b.tables.id}"
-            data-invite-token="${b.tables.invite_token}"
-            onclick="openManageBoard('${b.tables.owner_token}')"
-          >
-            <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+  const ownedEl = document.getElementById("owned-boards");
+  const joinedEl = document.getElementById("joined-boards");
 
-            <div class="board-actions-menu" hidden>
-              <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
-              <button class="board-actions-item" type="button" data-action="delete">Delete</button>
-            </div>
+  // Hosted
+  if (!owned.length) {
+    ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
+  } else {
+    ownedEl.innerHTML = owned.map(b => `
+      <div
+        class="board-pill board-pill--square"
+        data-kind="hosted"
+        data-board-id="${b.tables.id}"
+        data-invite-token="${b.tables.invite_token}"
+        onclick="openManageBoard('${b.tables.owner_token}')"
+      >
+        <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
-            <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
-            <div class="board-preview" data-board-id="${b.tables.id}"></div>
-            <div class="board-pill-meta">Hosted</div>
-          </div>
-        `).join("");
+        <div class="board-actions-menu" hidden>
+          <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
+          <button class="board-actions-item" type="button" data-action="delete">Delete</button>
+        </div>
 
-}
+        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
+        <div class="board-preview" data-board-id="${b.tables.id}"></div>
+        <div class="board-pill-meta">Hosted</div>
+      </div>
+    `).join("");
+  }
 
-    if (!joined || joined.length === 0) {
+  // Joined (same look as hosted, no actions menu)
+  if (!joined.length) {
     joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
   } else {
-    joinedEl.innerHTML =
-      joined.map(b => `
-        <div 
-          class="board-pill board-pill--square"
-          data-kind="joined"
-          data-board-id="${b.tables.id}"
-          data-invite-token="${b.tables.invite_token}"
-          onclick="openBoard('${b.tables.invite_token}')"
-        >
-          <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
-          <div class="board-preview" data-board-id="${b.tables.id}"></div>
-          <div class="board-pill-meta">Joined</div>
-        </div>
-      `).join("");
-      }
-  
+    joinedEl.innerHTML = joined.map(b => `
+      <div
+        class="board-pill board-pill--square"
+        data-kind="joined"
+        data-board-id="${b.tables.id}"
+        data-invite-token="${b.tables.invite_token}"
+        onclick="openBoard('${b.tables.invite_token}')"
+      >
+        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
+        <div class="board-preview" data-board-id="${b.tables.id}"></div>
+        <div class="board-pill-meta">Joined</div>
+      </div>
+    `).join("");
+  }
+
   // Render previews for both hosted + joined
-const allBoards = [...(owned || []), ...(joined || [])];
-if (allBoards.length) renderBoardPreviews(allBoards);
-}  
+  const allBoards = [...owned, ...joined];
+  if (allBoards.length) renderBoardPreviews(allBoards);
+}
 
 window.openManageBoard = function (manageToken) {
   window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
@@ -2803,6 +2804,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
