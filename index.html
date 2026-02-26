@@ -2401,8 +2401,8 @@ function openInviteModal({ inviteToken, boardName }) {
 
   
 async function renderBoardPreviews(owned) {
-                                                                                    const PREVIEW_SEED = false; // set true temporarily to test legend wrapping + dot colors
   try {
+                                                                                    const PREVIEW_SEED = true; // 🔁 switch to false when finished testing
     if (!owned || owned.length === 0) return;
 
     // Board ids
@@ -2747,6 +2747,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
