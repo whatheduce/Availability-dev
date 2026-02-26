@@ -2641,7 +2641,7 @@ if (n <= 2) {
 } else if (n <= 6) {
   legendRows = 2; legendCols = 3; font = 10; dot = 7; itemMax = 85;
 } else {
-  legendRows = 3; legendCols = 3; font = 9; dot = 6; itemMax = 75;
+  legendRows = 3; legendCols = 3; font = 8; dot = 5; itemMax = 75;
 }
 
 const legendHtml = shown.length
@@ -2665,7 +2665,7 @@ const legendHtml = shown.length
       grid-template-columns: repeat(${legendCols}, auto);
       grid-template-rows: repeat(${legendRows}, auto);
       column-gap:8px;
-      row-gap:3px;
+      row-gap:2px;
       align-content:center;
       justify-content:start;
       justify-items:start;
@@ -2798,6 +2798,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
