@@ -2625,12 +2625,13 @@ if (PREVIEW_SEED) {
         overflow:hidden;
         margin-top:6px;
         display:flex;
-        justify-content:center;
+        justify-content:flex-start;
         align-items:flex-end;
         padding:0 10px;           /* keeps it off the edges */
         box-sizing:border-box;
       ">
       <div class="mini-legend-inner" style="
+        width: 100%;
         display:flex;
         flex-wrap:wrap;
         gap:4px 10px;
@@ -2687,23 +2688,14 @@ const legendBox = previewEl.querySelector(".mini-legend");
 const legendInner = previewEl.querySelector(".mini-legend-inner");
 
 if (legendBox && legendInner) {
-  // Reset
-  legendInner.style.transformOrigin = "bottom center";
+  legendInner.style.transformOrigin = "bottom left";
   legendInner.style.transform = "scale(1)";
 
   const maxH = legendBox.clientHeight;
 
-  // Height the content *wants* to be at scale=1
-  const naturalH = legendInner.scrollHeight || 1;
-
-  // Scale to fill the box height (allow scaling UP), but clamp to safe bounds
-  let scale = maxH / naturalH;
-  scale = Math.max(0.35, Math.min(1.6, scale)); // min/max scale
-
-  legendInner.style.transform = `scale(${scale})`;
-
-  // Safety: if scaling caused overflow (rare), step down until it fits
-  while (legendInner.scrollHeight * scale > maxH && scale > 0.35) {
+  // Only shrink if it overflows the fixed legend height
+  let scale = 1;
+  while (legendInner.scrollHeight > maxH && scale > 0.35) {
     scale = Math.round((scale - 0.05) * 100) / 100;
     legendInner.style.transform = `scale(${scale})`;
   }
@@ -2787,6 +2779,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
