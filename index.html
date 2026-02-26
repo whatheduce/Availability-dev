@@ -2621,21 +2621,27 @@ if (memberUserIds.length > 0) {
           const threshold = goldByBoard.get(boardId) || 2;
           const isGold = users.length >= threshold;
 
+        // If the cell is gold, we hide dots entirely (match main board behavior)
+        let dotsHtml = "";
+        let extraHtml = "";
+
+        if (!isGold) {
           // Build dot stack (cap visible dots to keep it clean)
           const maxDots = 8;
           const visible = users.slice(0, maxDots);
           const extra = users.length - visible.length;
 
-          const dotsHtml = visible.map(uid => {
+          dotsHtml = visible.map(uid => {
             const p = profilesByUser.get(String(uid));
             const f = fallbackByUser.get(String(uid));
 
-          const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-          const name = (p?.name || f?.name || "").trim();
+            const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+            const name = (p?.name || f?.name || "").trim();
             return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
           }).join("");
 
-          const extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
+          extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
+        }
 
           cells.push(`
             <div class="mini-cell ${isGold ? "mini-gold" : ""}">
@@ -2865,6 +2871,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
