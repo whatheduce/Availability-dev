@@ -568,7 +568,8 @@ async function loadBoards() {
         owner_token,
         row_structure,
         start_date,
-        host_tz
+        host_tz,
+        gold_threshold
       )
     `)
     .eq("user_id", au.id);
@@ -2482,6 +2483,7 @@ async function renderBoardPreviews(owned) {
     const rowsByBoard = new Map(); // boardId -> [rowLabel...]
     const startDateByBoard = new Map(); // boardId -> start_date
     const tzByBoard = new Map(); // boardId -> host_tz
+    const goldByBoard = new Map(); // boardId -> threshold number
 
     for (const t of boards) {
       let rows = t.row_structure;
@@ -2498,6 +2500,7 @@ async function renderBoardPreviews(owned) {
       rowsByBoard.set(String(t.id), normalized);
       startDateByBoard.set(String(t.id), t.start_date || null);
       tzByBoard.set(String(t.id), t.host_tz || null);
+      goldByBoard.set(String(t.id), Number(t.gold_threshold || 2));
     }
 
     // Pull availability for 7 days (0..6) for all hosted boards
@@ -2615,6 +2618,8 @@ if (memberUserIds.length > 0) {
         for (let d = 0; d < days; d++) {
           const dayValue = d + 1; // ✅ your DB uses 1-based days (today = 1)
           const users = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
+          const threshold = goldByBoard.get(boardId) || 2;
+          const isGold = users.length >= threshold;
 
           // Build dot stack (cap visible dots to keep it clean)
           const maxDots = 8;
@@ -2633,7 +2638,7 @@ if (memberUserIds.length > 0) {
           const extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
 
           cells.push(`
-            <div class="mini-cell">
+            <div class="mini-cell ${isGold ? "mini-gold" : ""}">
               <div class="mini-dots">${dotsHtml}${extraHtml}</div>
             </div>
           `);
@@ -2860,6 +2865,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
