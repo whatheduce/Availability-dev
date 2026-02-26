@@ -2620,26 +2620,27 @@ if (PREVIEW_SEED) {
       
       const legendHtml = legendUserIds.length
   ? `<div class="mini-legend" style="
+        height:34px;              /* ✅ fixed legend height */
+        overflow:hidden;          /* ✅ never grow the card */
+        margin-top:8px;
         display:flex;
         flex-wrap:wrap;
-        gap:6px 10px;
-        margin-top:8px;
-        align-items:center;
-        justify-content:flex-start;
+        gap:4px 10px;
+        align-content:flex-start;
       ">
       ${legendUserIds.map(uid => {
         const p = profilesByUser.get(String(uid));
         const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
         const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-        const nm = (p?.name || f?.name || "").trim();
+        const nm = (p?.name || f?.name || "").trim() || "User";
 
         return `
-          <div class="mini-legend-item" title="${escapeHtml(nm || "User")}" style="
+          <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
                display:flex;
                align-items:center;
-               gap:6px;
-               font-size:11px;
+               gap:5px;
+               font-size:11px;          /* base size (we'll scale down) */
                line-height:1;
                max-width:48%;
                overflow:hidden;
@@ -2647,7 +2648,7 @@ if (PREVIEW_SEED) {
                text-overflow:ellipsis;
              ">
             <span class="mini-legend-dot" style="
-                 width:8px; height:8px; border-radius:999px;
+                 width:7px; height:7px; border-radius:999px;
                  background:${col};
                  flex:0 0 auto;
                "></span>
@@ -2655,7 +2656,7 @@ if (PREVIEW_SEED) {
                  opacity:0.85;
                  overflow:hidden;
                  text-overflow:ellipsis;
-               ">${escapeHtml(nm || "User")}</span>
+               ">${escapeHtml(nm)}</span>
           </div>
         `;
       }).join("")}
@@ -2669,6 +2670,28 @@ if (PREVIEW_SEED) {
         </div>
         ${legendHtml}
       `;
+
+      // --- Keep legend height fixed by scaling text down until it fits ---
+const legendEl = previewEl.querySelector(".mini-legend");
+if (legendEl) {
+  // Reset any previous scaling
+  legendEl.style.transformOrigin = "top left";
+  legendEl.style.transform = "scale(1)";
+
+  // Try scaling down in steps until content fits the fixed height
+  const maxH = legendEl.clientHeight;
+  let scale = 1;
+
+  // scrollHeight tells us how tall the wrapped content *wants* to be
+  while (legendEl.scrollHeight > maxH && scale > 0.45) {
+    scale = Math.round((scale - 0.05) * 100) / 100;
+    legendEl.style.transform = `scale(${scale})`;
+  }
+
+  // Compensate width so scaled content still lays out nicely inside the box
+  legendEl.style.width = `${100 / scale}%`;
+}
+      
     }
   } catch (err) {
     console.error("Preview render failed:", err);
@@ -2747,6 +2770,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
