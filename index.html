@@ -2582,61 +2582,49 @@ if (memberUserIds.length > 0) {
         .map(m => String(m.user_id))
         .filter(Boolean);
 
-// Start with preview-week users, then fill from membership
-const legendUserIds = [];
-for (const uid of inPreviewWeek) {
-  if (!legendUserIds.includes(uid)) legendUserIds.push(uid);
-  if (legendUserIds.length >= 3) break;
-}
-for (const uid of membersForBoard) {
-  if (!legendUserIds.includes(uid)) legendUserIds.push(uid);
-  if (legendUserIds.length >= 3) break;
-}
-
       const legendHtml = legendUserIds.length
-      ? `<div class="mini-legend" style="
-            display:flex;
-            flex-wrap:wrap;
-            gap:6px 10px;
-            margin-top:8px;
-            align-items:center;
-            justify-content:flex-start;
-          ">
-          ${legendUserIds.map(uid => {
-            const p = profilesByUser.get(String(uid));
-            const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+  ? `<div class="mini-legend" style="
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px 10px;
+        margin-top:8px;
+        align-items:center;
+        justify-content:flex-start;
+      ">
+      ${legendUserIds.map(uid => {
+        const p = profilesByUser.get(String(uid));
+        const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
 
-            const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-            const nm = (p?.name || f?.name || "").trim();
+        const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+        const nm = (p?.name || f?.name || "").trim();
 
-            return `
-              <div class="mini-legend-item" title="${escapeHtml(nm || "User")}" style="
-                   display:flex;
-                   align-items:center;
-                   gap:6px;
-                   font-size:11px;
-                   line-height:1;
-                   max-width:48%;
-                   overflow:hidden;
-                   white-space:nowrap;
-                   text-overflow:ellipsis;
-                 ">
-                <span class="mini-legend-dot" style="
-                     width:8px; height:8px; border-radius:999px;
-                      background:${col};
-                      flex:0 0 auto;
-                    "></span>
-                <span class="mini-legend-name" style="
-                      opacity:0.85;
-                      overflow:hidden;
-                      text-overflow:ellipsis;
-                    ">${escapeHtml(nm || "User")}</span>
-              </div>
-            `;
-          }).join("")}
-        </div>`
-      : "";
-        : "";
+        return `
+          <div class="mini-legend-item" title="${escapeHtml(nm || "User")}" style="
+               display:flex;
+               align-items:center;
+               gap:6px;
+               font-size:11px;
+               line-height:1;
+               max-width:48%;
+               overflow:hidden;
+               white-space:nowrap;
+               text-overflow:ellipsis;
+             ">
+            <span class="mini-legend-dot" style="
+                 width:8px; height:8px; border-radius:999px;
+                 background:${col};
+                 flex:0 0 auto;
+               "></span>
+            <span class="mini-legend-name" style="
+                 opacity:0.85;
+                 overflow:hidden;
+                 text-overflow:ellipsis;
+               ">${escapeHtml(nm || "User")}</span>
+          </div>
+        `;
+      }).join("")}
+    </div>`
+  : "";
       
       previewEl.innerHTML = `
         <div class="mini-board">
@@ -2723,6 +2711,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
