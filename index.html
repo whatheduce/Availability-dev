@@ -2444,6 +2444,31 @@ async function renderBoardPreviews(owned) {
 
     if (availErr) throw availErr;
 
+    // Extra availability fallback for legend (not limited to first 7 days)
+    const { data: legendAvail, error: legendAvailErr } = await supabase
+      .from("availability_dev")
+      .select("table_id, user_id, name, color")
+      .in("table_id", boardIds)
+      .gte("day", 1)
+      .lte("day", 30); // match your board window
+
+    if (legendAvailErr) throw legendAvailErr;
+
+    // Fallback by board+user (so legend can show members even if not in first 7 days)
+    const fallbackByBoardUser = new Map(); // `${boardId}|${userId}` -> {name,color}
+
+    for (const r of (legendAvail || [])) {
+      if (!r.table_id || !r.user_id) continue;
+      const key = `${String(r.table_id)}|${String(r.user_id)}`;
+
+      if (!fallbackByBoardUser.has(key)) {
+        fallbackByBoardUser.set(key, {
+          name: (r.name || "").trim(),
+          color: r.color || ""
+        });
+      }
+    }
+
     // Fallback (important if profiles RLS blocks reading other users)
     const fallbackByUser = new Map(); // user_id -> { name, color }
     for (const r of (avail || [])) {
@@ -2551,27 +2576,43 @@ if (memberUserIds.length > 0) {
       const scale = Math.max(0.55, Math.min(1.05, 10 / (rowCount + 2)));
       previewEl.style.setProperty("--mini-scale", String(scale));
 
-      // Legend: show up to 3 users that appear in the preview week
-      const legendUserIds = [];
+      // Legend: pick up to 3 members.
+      // Priority: members who appear in preview week first, then fill with other members.
+      const membersForBoard = (members || [])
+        .filter(m => String(m.board_id) === boardId)
+        .map(m => String(m.user_id))
+        .filter(Boolean);
+
+      const inPreviewWeek = [];
       for (let d = 0; d < 7; d++) {
         for (const rowLabel of rows) {
           const dayValue = d + 1;
           const u = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
           for (const uid of u) {
-            if (!legendUserIds.includes(uid)) legendUserIds.push(uid);
-            if (legendUserIds.length >= 3) break;
+            if (!inPreviewWeek.includes(uid)) inPreviewWeek.push(uid);
+            if (inPreviewWeek.length >= 3) break;
           }
-          if (legendUserIds.length >= 3) break;
+          if (inPreviewWeek.length >= 3) break;
         }
-        if (legendUserIds.length >= 3) break;
+        if (inPreviewWeek.length >= 3) break;
       }
+
+// Start with preview-week users, then fill from membership
+const legendUserIds = [];
+for (const uid of inPreviewWeek) {
+  if (!legendUserIds.includes(uid)) legendUserIds.push(uid);
+  if (legendUserIds.length >= 3) break;
+}
+for (const uid of membersForBoard) {
+  if (!legendUserIds.includes(uid)) legendUserIds.push(uid);
+  if (legendUserIds.length >= 3) break;
+}
 
       const legendHtml = legendUserIds.length
         ? `<div class="mini-legend">
             ${legendUserIds.map(uid => {
               const p = profilesByUser.get(String(uid));
-              const f = fallbackByUser.get(String(uid));
-
+              const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
               const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
               const nm = (p?.name || f?.name || "").trim();
               return `
@@ -2669,6 +2710,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
