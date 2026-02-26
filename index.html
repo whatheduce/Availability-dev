@@ -2632,7 +2632,7 @@ const legendHtml = legendUserIds.length
   <div class="mini-legend-inner" style="
     height:100%;
     display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(var(--legend-col-min, 58px), 1fr));
     gap:4px 10px;
     align-content:end;
     justify-items:start;
@@ -2689,12 +2689,24 @@ const legendBox = previewEl.querySelector(".mini-legend");
 const legendInner = previewEl.querySelector(".mini-legend-inner");
 
 if (legendBox && legendInner) {
+  // Set responsive min column width BEFORE scaling
+  const w = legendBox.clientWidth;
+  let colMin = 58;
+
+  if (w < 210) colMin = 70;      // narrower -> fewer columns
+  else if (w < 260) colMin = 58; // default -> 3-ish columns
+  else colMin = 48;             // wider -> allow 4 columns
+
+  legendInner.style.setProperty("--legend-col-min", `${colMin}px`);
+
+  // Reset scale
   legendInner.style.transformOrigin = "bottom left";
   legendInner.style.transform = "scale(1)";
 
   const maxH = legendBox.clientHeight;
-  let scale = 1;
 
+  // ✅ scaling loop starts here
+  let scale = 1;
   while (legendInner.scrollHeight > maxH && scale > 0.35) {
     scale = Math.round((scale - 0.05) * 100) / 100;
     legendInner.style.transform = `scale(${scale})`;
@@ -2779,6 +2791,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
