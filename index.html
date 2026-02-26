@@ -607,7 +607,6 @@ async function loadBoards() {
           </div>
         `).join("");
 
-      renderBoardPreviews(owned);
 }
 
     if (!joined || joined.length === 0) {
@@ -615,14 +614,24 @@ async function loadBoards() {
   } else {
     joinedEl.innerHTML =
       joined.map(b => `
-        <div class="board-pill" onclick="openBoard('${b.tables.invite_token}')">
-          <div class="board-pill-title">${b.tables.name}</div>
+        <div 
+          class="board-pill board-pill--square"
+          data-kind="joined"
+          data-board-id="${b.tables.id}"
+          data-invite-token="${b.tables.invite_token}"
+          onclick="openBoard('${b.tables.invite_token}')"
+        >
+          <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
+          <div class="board-preview" data-board-id="${b.tables.id}"></div>
           <div class="board-pill-meta">Joined</div>
         </div>
       `).join("");
-  }
+      }
+  
+  // Render previews for both hosted + joined
+const allBoards = [...(owned || []), ...(joined || [])];
+if (allBoards.length) renderBoardPreviews(allBoards);
 }  
-
 
 window.openManageBoard = function (manageToken) {
   window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
@@ -2794,6 +2803,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
