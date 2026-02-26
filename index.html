@@ -2626,18 +2626,18 @@ const n = shown.length;
 // 1–2 users: 1 row (2 cols)
 // 3–6 users: 2 rows (3 cols)
 // 7–9 users: 3 rows (3 cols)
-let rows = 1;
-let cols = 2;
+let legendRows = 1;
+let legendCols = 2;
 let font = 11;
 let dot = 7;
 let colMin = 0;
 
 if (n <= 2) {
-  rows = 1; cols = 2; font = 12; dot = 8;
+  legendRows = 1; legendCols = 2; font = 12; dot = 8;
 } else if (n <= 6) {
-  rows = 2; cols = 3; font = 10; dot = 7;
+  legendRows = 2; legendCols = 3; font = 10; dot = 7;
 } else {
-  rows = 3; cols = 3; font = 9; dot = 6;
+  legendRows = 3; legendCols = 3; font = 9; dot = 6;
 }
 
 const legendHtml = shown.length
@@ -2653,8 +2653,8 @@ const legendHtml = shown.length
   <div class="mini-legend-grid" style="
     height:100%;
     display:grid;
-    grid-template-columns: repeat(${cols}, 1fr);
-    grid-template-rows: repeat(${rows}, 1fr);
+    grid-template-columns: repeat(${legendCols}, 1fr);
+    grid-template-rows: repeat(${legendRows}, 1fr);
     gap:2px 6px;
     align-items:center;
   ">
@@ -2784,6 +2784,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
