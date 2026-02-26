@@ -2620,7 +2620,7 @@ if (PREVIEW_SEED) {
       
       const legendHtml = legendUserIds.length
   ? `<div class="mini-legend" style="
-        height:34px;              /* ✅ fixed legend height */
+        height:42px;              /* ✅ fixed legend height */
         overflow:hidden;          /* ✅ never grow the card */
         margin-top:8px;
         display:flex;
@@ -2675,7 +2675,7 @@ if (PREVIEW_SEED) {
 const legendEl = previewEl.querySelector(".mini-legend");
 if (legendEl) {
   // Reset any previous scaling
-  legendEl.style.transformOrigin = "top left";
+  legendEl.style.transformOrigin = "bottom left";
   legendEl.style.transform = "scale(1)";
 
   // Try scaling down in steps until content fits the fixed height
@@ -2690,6 +2690,9 @@ if (legendEl) {
 
   // Compensate width so scaled content still lays out nicely inside the box
   legendEl.style.width = `${100 / scale}%`;
+
+  legendEl.style.display = "flex";
+  legendEl.style.alignItems = "flex-end";
 }
       
     }
@@ -2770,6 +2773,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
