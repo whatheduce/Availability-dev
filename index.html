@@ -362,7 +362,42 @@ function showProfileSetup() {
   if (setup) setup.style.display = "block";
 }
 
+  
+async function getBoardColorMap(boardId) {
+  // 1) Get member user_ids for this board
+  const { data: members, error: memErr } = await supabase
+    .from("board_members")
+    .select("user_id")
+    .eq("board_id", boardId);
 
+  if (memErr) {
+    console.error("getBoardColorMap members error:", memErr);
+    return {};
+  }
+
+  const userIds = (members || []).map(m => m.user_id).filter(Boolean);
+  if (userIds.length === 0) return {};
+
+  // 2) Fetch their profile colours
+  const { data: profiles, error: profErr } = await supabase
+    .from("profiles")
+    .select("user_id,color")
+    .in("user_id", userIds);
+
+  if (profErr) {
+    console.error("getBoardColorMap profiles error:", profErr);
+    return {};
+  }
+
+  // 3) Build map
+  const map = {};
+  (profiles || []).forEach(p => {
+    if (p?.user_id) map[p.user_id] = p.color || null;
+  });
+  return map;
+}
+  
+  
 async function loadTimezonesIntoSelect(selectEl) {
   if (!selectEl) return;
 
@@ -2603,6 +2638,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
