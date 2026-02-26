@@ -2401,6 +2401,7 @@ function openInviteModal({ inviteToken, boardName }) {
 
   
 async function renderBoardPreviews(owned) {
+                                                                                    const PREVIEW_SEED = false; // set true temporarily to test legend wrapping + dot colors
   try {
     if (!owned || owned.length === 0) return;
 
@@ -2588,6 +2589,35 @@ if (memberUserIds.length > 0) {
           .map(r => String(r.user_id))
       ));
 
+
+
+if (PREVIEW_SEED) {
+  // Add 8 fake users to the legend
+  for (let i = 1; i <= 8; i++) {
+    const fakeId = `fake-${i}`;
+    if (!legendUserIds.includes(fakeId)) legendUserIds.push(fakeId);
+
+    // Give them fake profile colors/names for legend/dots
+    profilesByUser.set(fakeId, {
+      user_id: fakeId,
+      name: `Test ${i}`,
+      color: `hsl(${i * 35}, 70%, 55%)`
+    });
+  }
+
+  // Force a few dots into the preview grid (day 1, first row)
+  const firstRow = rows[0];
+  if (firstRow) {
+    const key = `${boardId}|1|${firstRow}`;
+    const arr = byCell.get(key) || [];
+    for (let i = 1; i <= 8; i++) arr.push(`fake-${i}`);
+    byCell.set(key, arr);
+  }
+}
+
+
+
+      
       const legendHtml = legendUserIds.length
   ? `<div class="mini-legend" style="
         display:flex;
@@ -2717,6 +2747,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
