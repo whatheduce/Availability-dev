@@ -2635,7 +2635,8 @@ if (PREVIEW_SEED) {
         flex-wrap:wrap;
         gap:4px 10px;
         align-content:flex-end;
-        justify-content:center;
+        justify-content:flex-start;
+        align-items:flex-end;
       ">
         ${legendUserIds.map(uid => {
           const p = profilesByUser.get(String(uid));
@@ -2651,7 +2652,8 @@ if (PREVIEW_SEED) {
                  gap:5px;
                  font-size:12px;
                  line-height:1;
-                 max-width:48%;
+                 flex: 0 0 calc(50% - 10px);   /* 2 columns that actually fill the row */
+                 max-width: calc(50% - 10px);
                  overflow:hidden;
                  white-space:nowrap;
                  text-overflow:ellipsis;
@@ -2785,6 +2787,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
