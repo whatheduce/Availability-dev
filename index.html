@@ -2402,7 +2402,6 @@ function openInviteModal({ inviteToken, boardName }) {
   
 async function renderBoardPreviews(owned) {
   try {
-                                                                                    const PREVIEW_SEED = true; // 🔁 switch to false when finished testing
     if (!owned || owned.length === 0) return;
 
     // Board ids
@@ -2588,35 +2587,6 @@ if (memberUserIds.length > 0) {
           .filter(r => String(r.table_id) === boardId && r.user_id)
           .map(r => String(r.user_id))
       ));
-
-
-
-if (PREVIEW_SEED) {
-  // Add 8 fake users to the legend
-  for (let i = 1; i <= 8; i++) {
-    const fakeId = `fake-${i}`;
-    if (!legendUserIds.includes(fakeId)) legendUserIds.push(fakeId);
-
-    // Give them fake profile colors/names for legend/dots
-    profilesByUser.set(fakeId, {
-      user_id: fakeId,
-      name: `Test ${i}`,
-      color: `hsl(${i * 35}, 70%, 55%)`
-    });
-  }
-
-  // Force a few dots into the preview grid (day 1, first row)
-  const firstRow = rows[0];
-  if (firstRow) {
-    const key = `${boardId}|1|${firstRow}`;
-    const arr = byCell.get(key) || [];
-    for (let i = 1; i <= 8; i++) arr.push(`fake-${i}`);
-    byCell.set(key, arr);
-  }
-}
-
-
-
       
 const MAX_LEGEND = 9;
 const totalUsers = legendUserIds.length;
@@ -2824,6 +2794,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
