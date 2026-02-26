@@ -564,7 +564,9 @@ body {
 .mini-legend {
   position: absolute;
   left: 8px;
-  right: 8px;
+  right: auto;
+  width: fit-content;
+  max-width: calc(100% - 16px);
   bottom: 8px;
   display: flex;
   gap: 8px;
