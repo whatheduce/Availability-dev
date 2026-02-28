@@ -86,6 +86,24 @@
 
 </div>
 </aside>
+
+<!-- Sign Out Confirm Modal -->
+<div id="signout-modal" class="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <div class="modal-title">Sign out?</div>
+
+    <div class="modal-body">
+      You’ll need to sign in again to access your calendars.
+    </div>
+
+    <div class="modal-actions">
+      <button id="signout-cancel" class="modal-btn">Cancel</button>
+      <button id="signout-confirm" class="modal-btn modal-btn-danger">
+        Sign Out
+      </button>
+    </div>
+  </div>
+</div>
   
 <div id="route-error" style="display:none; padding:18px; max-width:720px; margin:60px auto; border:1px solid rgba(0,0,0,0.15); border-radius:14px;">
   <div style="font-weight:700; font-size:18px; margin-bottom:8px;">Calendar not found</div>
@@ -2118,19 +2136,28 @@ document.addEventListener("keydown", (e) => {
 });
 
 const signOutBtn = document.getElementById("drawer-signout");
-  if (signOutBtn) {
-    signOutBtn.addEventListener("click", async () => {
+const signOutModal = document.getElementById("signout-modal");
+const signOutCancel = document.getElementById("signout-cancel");
+const signOutConfirm = document.getElementById("signout-confirm");
 
-      const ok = confirm("Sign out of your account?");
-      if (!ok) return;
+if (signOutBtn && signOutModal) {
+  signOutBtn.addEventListener("click", () => {
+    signOutModal.style.display = "flex";
+  });
+}
 
-      try {
-        await supabase.auth.signOut();
+if (signOutCancel && signOutModal) {
+  signOutCancel.addEventListener("click", () => {
+    signOutModal.style.display = "none";
+  });
+}
 
-      // Optional: close the drawer so it doesn't flash during reload
+if (signOutConfirm) {
+  signOutConfirm.addEventListener("click", async () => {
+    try {
+      await supabase.auth.signOut();
+
       document.body.classList.remove("drawer-open");
-
-      // Let your normal auth boot logic show the login screen
       location.reload();
 
     } catch (err) {
@@ -2961,6 +2988,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
