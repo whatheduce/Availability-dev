@@ -794,6 +794,18 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.modal-card textarea,
+.modal-card input,
+.modal-card select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-card textarea {
+  margin-top: 10px;
+  resize: vertical;
+}
+
 .modal-title {
   font-size: 16px;
   font-weight: 600;
