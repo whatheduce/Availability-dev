@@ -58,6 +58,36 @@
       <div id="joined-boards" class="board-strip"></div>
     </div>
   </div>
+
+  <!-- Account Settings Right Panel (replaces dash-body when active) -->
+<div id="dash-account" style="display:none;">
+  <div class="dash-section">
+    <div class="dash-section-title">Account Settings</div>
+    <div class="dashboard-section-divider"></div>
+
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-label">Name</div>
+        <div class="settings-value" id="acct-name">—</div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">Email</div>
+        <div class="settings-value" id="acct-email">—</div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">User ID</div>
+        <div class="settings-value mono" id="acct-userid">—</div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <button id="acct-back-dashboard" class="settings-action">Back to Dashboard</button>
+      <button id="acct-signout" class="settings-action danger">Sign Out</button>
+    </div>
+  </div>
+</div>
 </div>
 
 <!-- Dashboard Settings Drawer (overlay) -->
@@ -73,9 +103,9 @@
 
   <!-- Primary section -->
   <div class="drawer-group">
-    <button class="drawer-item">Account Settings</button>
-    <button class="drawer-item">User Customisation</button>
-    <button class="drawer-item">Notifications</button>
+    <button id="drawer-account" class="drawer-item">Account Settings</button>
+    <button id="drawer-customise" class="drawer-item">User Customisation</button>
+    <button id="drawer-notifications" class="drawer-item">Notifications</button>
   </div>
 
   <!-- Secondary section (spaced lower) -->
@@ -2090,11 +2120,11 @@ function bindUiListenersOnce() {
   // Dashboard: Settings drawer
 const settingsBtn = document.getElementById("dash-settings");
 const drawer = document.getElementById("settings-drawer");
-const backdrop = document.getElementById("settings-backdrop");
+document.getElementById("drawer-backdrop")?.setAttribute("aria-hidden", "true");
 const closeBtn = document.getElementById("settings-close");
 
 function openDrawer() {
-  document.body.classList.add("drawer-open");
+  openDrawer?.();
   drawer?.setAttribute("aria-hidden", "false");
   backdrop?.setAttribute("aria-hidden", "false");
   closeBtn?.focus();
@@ -2102,6 +2132,11 @@ function openDrawer() {
 
 function closeDrawer() {
   document.body.classList.remove("drawer-open");
+  document.body.classList.remove("settings-split");
+
+  // Always restore dashboard content when closing settings
+  showDashboardPanel();
+
   drawer?.setAttribute("aria-hidden", "true");
   backdrop?.setAttribute("aria-hidden", "true");
   settingsBtn?.focus();
@@ -2117,6 +2152,31 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+function showAccountPanel() {
+  const dashBody = document.getElementById("dash-body");
+  const acct = document.getElementById("dash-account");
+  if (dashBody) dashBody.style.display = "none";
+  if (acct) acct.style.display = "block";
+}
+
+function showDashboardPanel() {
+  const dashBody = document.getElementById("dash-body");
+  const acct = document.getElementById("dash-account");
+  if (acct) acct.style.display = "none";
+  if (dashBody) dashBody.style.display = "block";
+}
+
+async function hydrateAccountPanel() {
+  try {
+    const au = await getAuthUser();
+    document.getElementById("acct-name").textContent = user?.name || "—";
+    document.getElementById("acct-email").textContent = au?.email || "—";
+    document.getElementById("acct-userid").textContent = au?.id || user?.id || "—";
+  } catch (e) {
+    console.error("hydrateAccountPanel failed", e);
+  }
+}
+  
 const signOutBtn = document.getElementById("drawer-signout");
 
 if (signOutBtn) {
@@ -2205,6 +2265,57 @@ try {
   feedbackSend.disabled = false;
 }
 });
+
+const accountBtn = document.getElementById("drawer-account");
+if (accountBtn) {
+  accountBtn.addEventListener("click", async () => {
+    // Keep drawer open, but make right side usable
+    document.body.classList.add("drawer-open");
+    document.body.classList.add("settings-split");
+
+    // Ensure overlay blur/backdrop isn't blocking interaction
+    backdrop?.setAttribute("aria-hidden", "true");
+
+    showAccountPanel();
+    await hydrateAccountPanel();
+  });
+}
+
+const acctBack = document.getElementById("acct-back-dashboard");
+if (acctBack) {
+  acctBack.addEventListener("click", () => {
+    showDashboardPanel();
+    // keep drawer open + docked if you like, or remove dock:
+    // document.body.classList.remove("settings-split");
+  });
+}  
+
+const acctSignOut = document.getElementById("acct-signout");
+if (acctSignOut) {
+  acctSignOut.addEventListener("click", async () => {
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+    okBtn?.classList.add("modal-btn-danger");
+    cancelBtn?.classList.remove("modal-btn-danger");
+
+    document.body.classList.remove("drawer-open");
+    document.body.classList.remove("settings-split");
+    showDashboardPanel();
+    
+    const ok = await confirmModal({
+      title: "Sign out?",
+      message: "You’ll need to sign in again to access your calendars.",
+      okText: "Sign Out",
+      cancelText: "Cancel"
+    });
+
+    okBtn?.classList.remove("modal-btn-danger");
+    if (!ok) return;
+
+    await supabase.auth.signOut();
+    location.reload();
+  });
+}  
   
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
@@ -3096,6 +3207,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
