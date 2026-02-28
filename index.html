@@ -2264,20 +2264,28 @@ try {
 }
 });
 
-const accountBtn = document.getElementById("drawer-account");
-if (accountBtn) {
-  accountBtn.addEventListener("click", async () => {
+// Drawer item routing (delegated so it works even if drawer DOM is rebuilt)
+drawer?.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+
+  if (btn.id === "drawer-account") {
     // Keep drawer open, but make right side usable
     document.body.classList.add("drawer-open");
     document.body.classList.add("settings-split");
 
-    // Ensure overlay blur/backdrop isn't blocking interaction
+    // On wide screens, CSS kills pointer-events; aria-hidden alone doesn't
     backdrop?.setAttribute("aria-hidden", "true");
 
     showAccountPanel();
     await hydrateAccountPanel();
-  });
-}
+    return;
+  }
+
+  // (optional later) handle other drawer buttons here:
+  // if (btn.id === "drawer-customise") ...
+  // if (btn.id === "drawer-notifications") ...
+});
 
 const acctBack = document.getElementById("acct-back-dashboard");
 if (acctBack) {
@@ -3205,6 +3213,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
