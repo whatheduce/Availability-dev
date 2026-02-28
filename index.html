@@ -2318,9 +2318,10 @@ if (addUsersBtn) {
       }
 
       openInviteModal({
+        boardId: currentTable.id,
         inviteToken: currentTable.invite_token,
         boardName: currentTable.name || "Availability Calendar"
-      });
+});
     });
   }    
     
@@ -2606,29 +2607,22 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
 
     errEl.style.display = "none";
 
-    const link = buildInviteLink(inviteContext.inviteToken);
-
 try {
   sendBtn.disabled = true;
 
-  const { error } = await supabase.functions.invoke("send-invite", {
-    body: {
-      toEmail: email,
-      const boardId = inviteContext?.boardId;
-        if (!boardId) {
-          alert("Could not determine which calendar to invite to. Please refresh and try again.");
-          return;
-}
+  const boardId = inviteContext?.boardId;
+  if (!boardId) {
+    alert("Could not determine which calendar to invite to. Please refresh and try again.");
+    return;
+  }
 
-const { error } = await supabase.functions.invoke("send-invite", {
-  body: { toEmail: email, boardId }
-});
-    }
+  const { error } = await supabase.functions.invoke("send-invite", {
+    body: { toEmail: email, boardId }
   });
 
   if (error) throw error;
 
-  close(); // close the modal
+  close();
 
   await confirmModal({
     title: "Invite sent",
@@ -3098,6 +3092,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
