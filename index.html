@@ -81,7 +81,7 @@
   <!-- Secondary section (spaced lower) -->
   <div class="drawer-group drawer-group--secondary">
     <button class="drawer-item">Developer Feedback</button>
-    <button class="drawer-item drawer-item--danger">Sign Out</button>
+    <button id="drawer-signout" class="drawer-item drawer-item--danger">Sign Out</button>
   </div>
 
 </div>
@@ -2116,6 +2116,29 @@ document.addEventListener("keydown", (e) => {
     closeDrawer();
   }
 });
+
+const signOutBtn = document.getElementById("drawer-signout");
+  if (signOutBtn) {
+    signOutBtn.addEventListener("click", async () => {
+
+      const ok = confirm("Sign out of your account?");
+      if (!ok) return;
+
+      try {
+        await supabase.auth.signOut();
+
+      // Optional: close the drawer so it doesn't flash during reload
+      document.body.classList.remove("drawer-open");
+
+      // Let your normal auth boot logic show the login screen
+      location.reload();
+
+    } catch (err) {
+      console.error("Sign out failed", err);
+      alert("Could not sign out. Please try again.");
+    }
+  });
+}
   
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
@@ -2938,6 +2961,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
