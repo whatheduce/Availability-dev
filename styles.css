@@ -781,4 +781,80 @@ body {
   display: block !important; /* respect your JS showAuthOverlay() */
 }
 
+/* =========================
+   AUTH OVERLAY POLISH
+   ========================= */
+
+#auth-overlay input {
+  transition: box-shadow 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+#auth-overlay input:focus,
+#auth-overlay input:focus-visible {
+  outline: none;
+  border-color: rgba(0, 122, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.22);
+  background: rgba(255,255,255,1);
+}
+
+/* Make buttons in auth overlay feel clickable without changing global buttons */
+#auth-overlay .primary-btn {
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(0,0,0,0.92);
+  color: #fff;
+
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease,
+    opacity 120ms ease;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#auth-overlay .primary-btn:hover {
+  background: rgba(0,0,0,1);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+}
+
+#auth-overlay .primary-btn:active {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+#auth-overlay .primary-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(0, 122, 255, 0.28),
+    0 8px 22px rgba(0,0,0,0.18);
+}
+
+#auth-overlay .primary-btn:disabled,
+#auth-overlay .primary-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* The two grey buttons (Create account / Forgot password) currently set inline bg.
+   This keeps their text readable + gives them the same interactions. */
+#auth-overlay #auth-toggle-mode.primary-btn,
+#auth-overlay #auth-forgot.primary-btn {
+  color: rgba(0,0,0,0.86);
+  border-color: rgba(0,0,0,0.10);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+#auth-overlay #auth-toggle-mode.primary-btn:hover,
+#auth-overlay #auth-forgot.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+
 [hidden] { display: none !important; }
