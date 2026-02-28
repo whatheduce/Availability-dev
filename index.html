@@ -2571,7 +2571,6 @@ function openInviteModal({ inviteToken, boardName, boardId }) {
   if (!overlay || !emailEl || !sendBtn || !cancelBtn || !errEl) return;
 
 inviteContext = { boardId, inviteToken, boardName: boardName || "" };
-  console.log("inviteContext set:", inviteContext);
 
   // reset UI
   errEl.style.display = "none";
@@ -3097,6 +3096,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
