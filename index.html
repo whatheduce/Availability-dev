@@ -60,6 +60,23 @@
   </div>
 </div>
 
+<!-- Dashboard Settings Drawer (overlay) -->
+<div id="settings-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
+  
+<aside id="settings-drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-header">
+    <div class="drawer-title">Settings</div>
+    <button id="settings-close" class="drawer-close" aria-label="Close settings">✕</button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="drawer-section-title">Coming soon</div>
+    <div class="drawer-muted">
+      This panel will hold dashboard settings (profile, calendar defaults, etc).
+    </div>
+  </div>
+</aside>
+  
 <div id="route-error" style="display:none; padding:18px; max-width:720px; margin:60px auto; border:1px solid rgba(0,0,0,0.15); border-radius:14px;">
   <div style="font-weight:700; font-size:18px; margin-bottom:8px;">Calendar not found</div>
   <div style="opacity:0.75; margin-bottom:14px;">
@@ -2059,6 +2076,36 @@ function bindUiListenersOnce() {
   
   const createBtn = document.getElementById("go-create");
     if (createBtn) createBtn.addEventListener("click", createBoard);
+
+  // Dashboard: Settings drawer
+const settingsBtn = document.getElementById("dash-settings");
+const drawer = document.getElementById("settings-drawer");
+const backdrop = document.getElementById("settings-backdrop");
+const closeBtn = document.getElementById("settings-close");
+
+function openDrawer() {
+  document.body.classList.add("drawer-open");
+  drawer?.setAttribute("aria-hidden", "false");
+  backdrop?.setAttribute("aria-hidden", "false");
+  closeBtn?.focus();
+}
+
+function closeDrawer() {
+  document.body.classList.remove("drawer-open");
+  drawer?.setAttribute("aria-hidden", "true");
+  backdrop?.setAttribute("aria-hidden", "true");
+  settingsBtn?.focus();
+}
+
+if (settingsBtn) settingsBtn.addEventListener("click", openDrawer);
+if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+if (backdrop) backdrop.addEventListener("click", closeDrawer);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
+    closeDrawer();
+  }
+});
   
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
@@ -2881,6 +2928,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
