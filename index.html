@@ -2565,7 +2565,7 @@ function openInviteModal({ inviteToken, boardName }) {
 
   if (!overlay || !emailEl || !sendBtn || !cancelBtn || !errEl) return;
 
-  inviteContext = { inviteToken, boardName: boardName || "" };
+inviteContext = { boardId, inviteToken, boardName: boardName || "" };
 
   // reset UI
   errEl.style.display = "none";
@@ -2607,14 +2607,34 @@ function openInviteModal({ inviteToken, boardName }) {
     errEl.style.display = "none";
 
     const link = buildInviteLink(inviteContext.inviteToken);
-    const subject = encodeURIComponent(
-      `Calendar invite: ${inviteContext.boardName || "Availability Calendar"}`
-    );
-    const body = encodeURIComponent(
-      `You’ve been invited to join this calendar.\n\nOpen this link:\n${link}\n\n(You’ll need to sign in or create an account.)`
-    );
 
-    window.location.href = `mailto:${encodeURIComponent(email)}?subject=${subject}&body=${body}`;
+try {
+  sendBtn.disabled = true;
+
+  const { error } = await supabase.functions.invoke("send-invite", {
+    body: {
+      toEmail: email,
+      boardId: inviteContext.boardId   // 👈 important
+    }
+  });
+
+  if (error) throw error;
+
+  close(); // close the modal
+
+  await confirmModal({
+    title: "Invite sent",
+    message: `Invite email sent to ${email}.`,
+    okText: "Close",
+    cancelText: ""
+  });
+
+} catch (err) {
+  console.error("Invite send failed:", err);
+  alert("Could not send invite. Please try again.");
+} finally {
+  sendBtn.disabled = false;
+}
   };
 
   // IMPORTANT: overwrite handlers so they don't stack
@@ -3070,6 +3090,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
