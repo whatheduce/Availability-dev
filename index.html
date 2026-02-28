@@ -2556,7 +2556,7 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
 }
 
-function openInviteModal({ inviteToken, boardName }) {
+function openInviteModal({ inviteToken, boardName, boardId }) {
   const overlay = document.getElementById("invite-modal");
   const emailEl = document.getElementById("invite-email");
   const sendBtn = document.getElementById("invite-send");
@@ -3090,6 +3090,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
