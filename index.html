@@ -2179,11 +2179,18 @@ feedbackSend?.addEventListener("click", async () => {
     return;
   }
 
-  // TEMP: simulate sending
-  console.log("Feedback submitted:", {
-    message: text,
-    user
+ try {
+  // optional: prevent double clicks
+  feedbackSend.disabled = true;
+
+  const { error } = await supabase.functions.invoke("send-feedback", {
+    body: {
+      message: text,
+      page: window.location.href
+    }
   });
+
+  if (error) throw error;
 
   feedbackModal.hidden = true;
 
@@ -2193,6 +2200,13 @@ feedbackSend?.addEventListener("click", async () => {
     okText: "Close",
     cancelText: ""
   });
+
+} catch (err) {
+  console.error("Feedback send failed:", err);
+  alert("Could not send feedback. Please try again.");
+} finally {
+  feedbackSend.disabled = false;
+}
 });
   
   const mealsCard = document.getElementById("meals-card");
@@ -3059,6 +3073,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
