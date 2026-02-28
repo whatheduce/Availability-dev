@@ -448,6 +448,62 @@ body {
   transform: translateX(0);
 }
 
+/* Drawer item groups */
+.drawer-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drawer-group--secondary {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Individual clickable items */
+.drawer-item {
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+
+  transition:
+    background 120ms ease,
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+}
+
+.drawer-item:hover {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.08);
+  transform: translateX(2px);
+}
+
+.drawer-item:active {
+  transform: translateX(0) scale(0.98);
+}
+
+.drawer-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.22);
+}
+
+/* Danger item (sign out) */
+.drawer-item--danger {
+  color: #d11a2a;
+}
+
+.drawer-item--danger:hover {
+  background: rgba(255, 59, 48, 0.10);
+  border-color: rgba(255, 59, 48, 0.18);
+}
+
 .empty-boards {
   padding: 14px 12px;
   border-radius: 14px;
