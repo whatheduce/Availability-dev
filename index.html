@@ -2117,14 +2117,14 @@ function bindUiListenersOnce() {
   const createBtn = document.getElementById("go-create");
     if (createBtn) createBtn.addEventListener("click", createBoard);
 
-  // Dashboard: Settings drawer
+// Dashboard: Settings drawer
 const settingsBtn = document.getElementById("dash-settings");
 const drawer = document.getElementById("settings-drawer");
-document.getElementById("drawer-backdrop")?.setAttribute("aria-hidden", "true");
+const backdrop = document.getElementById("settings-backdrop");
 const closeBtn = document.getElementById("settings-close");
 
 function openDrawer() {
-  openDrawer?.();
+  document.body.classList.add("drawer-open");
   drawer?.setAttribute("aria-hidden", "false");
   backdrop?.setAttribute("aria-hidden", "false");
   closeBtn?.focus();
@@ -2142,9 +2142,9 @@ function closeDrawer() {
   settingsBtn?.focus();
 }
 
-if (settingsBtn) settingsBtn.addEventListener("click", openDrawer);
-if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
-if (backdrop) backdrop.addEventListener("click", closeDrawer);
+settingsBtn?.addEventListener("click", openDrawer);
+closeBtn?.addEventListener("click", closeDrawer);
+backdrop?.addEventListener("click", closeDrawer);
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
@@ -3207,6 +3207,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
