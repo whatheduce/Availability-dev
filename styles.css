@@ -603,6 +603,21 @@ body {
   color: #d11a2a;
 }
 
+.colour-dot{
+  display:inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  margin-right: 8px;
+  vertical-align: -1px;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+.settings-action.primary{
+  border-color: rgba(0,0,0,0.14);
+  font-weight: 800;
+}
+
 .empty-boards {
   padding: 14px 12px;
   border-radius: 14px;
