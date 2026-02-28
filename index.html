@@ -2589,7 +2589,7 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
     if (e.key === "Escape") close();
   };
 
-  const onSend = () => {
+  const onSend = async (e) => {
     const email = (emailEl.value || "").trim();
 
     if (!email) {
@@ -3090,6 +3090,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
