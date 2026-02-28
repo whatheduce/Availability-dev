@@ -70,11 +70,21 @@
   </div>
 
   <div class="drawer-body">
-    <div class="drawer-section-title">Coming soon</div>
-    <div class="drawer-muted">
-      This panel will hold dashboard settings (profile, calendar defaults, etc).
-    </div>
+
+  <!-- Primary section -->
+  <div class="drawer-group">
+    <button class="drawer-item">Account Settings</button>
+    <button class="drawer-item">User Customisation</button>
+    <button class="drawer-item">Notifications</button>
   </div>
+
+  <!-- Secondary section (spaced lower) -->
+  <div class="drawer-group drawer-group--secondary">
+    <button class="drawer-item">Developer Feedback</button>
+    <button class="drawer-item drawer-item--danger">Sign Out</button>
+  </div>
+
+</div>
 </aside>
   
 <div id="route-error" style="display:none; padding:18px; max-width:720px; margin:60px auto; border:1px solid rgba(0,0,0,0.15); border-radius:14px;">
@@ -2928,6 +2938,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
