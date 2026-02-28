@@ -327,6 +327,13 @@ body {
   padding: 10px 68px 22px;
 }
 
+#dash-account {
+  max-width: 980px;
+  margin: 0;
+  margin-right: auto;
+  padding: 10px 68px 22px;
+}
+
 .dash-section {
   margin-top: 18px;
 }
@@ -372,7 +379,7 @@ body {
   width: 320px;
   max-width: calc(100vw - 48px);
   background: rgba(255,255,255,0.75);
-  backdrop-filter: blue(10px);
+  backdrop-filter: blur(10px);
   border-right: 1px solid rgba(0,0,0,0.12);
   box-shadow: 18px 0 50px rgba(0,0,0,0.18);
 
