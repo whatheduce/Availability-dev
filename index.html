@@ -2179,18 +2179,24 @@ feedbackSend?.addEventListener("click", async () => {
     return;
   }
 
- try {
-  // optional: prevent double clicks
+try {
   feedbackSend.disabled = true;
 
-  const { error } = await supabase.functions.invoke("send-feedback", {
+  const { data: sessData } = await supabase.auth.getSession();
+  const token = sessData?.session?.access_token;
+
+  const res = await supabase.functions.invoke("send-feedback", {
     body: {
       message: text,
       page: window.location.href
-    }
+    },
+    // Force the JWT header (even though invoke often does it automatically)
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
   });
 
-  if (error) throw error;
+  console.log("send-feedback result:", res);
+
+  if (res.error) throw res.error;
 
   feedbackModal.hidden = true;
 
@@ -2203,7 +2209,14 @@ feedbackSend?.addEventListener("click", async () => {
 
 } catch (err) {
   console.error("Feedback send failed:", err);
-  alert("Could not send feedback. Please try again.");
+
+  // Show something meaningful even if err is weird shaped
+  const msg =
+    err?.message ||
+    err?.context?.message ||
+    (typeof err === "string" ? err : JSON.stringify(err));
+
+  alert("Could not send feedback:\n\n" + msg);
 } finally {
   feedbackSend.disabled = false;
 }
@@ -3073,6 +3086,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
