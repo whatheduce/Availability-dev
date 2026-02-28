@@ -66,25 +66,44 @@
     <div class="dashboard-section-divider"></div>
 
     <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-label">Name</div>
-        <div class="settings-value" id="acct-name">—</div>
-      </div>
-
+      <!-- Email at top (read-only) -->
       <div class="settings-row">
         <div class="settings-label">Email</div>
         <div class="settings-value" id="acct-email">—</div>
       </div>
 
+      <!-- Name + change -->
       <div class="settings-row">
-        <div class="settings-label">User ID</div>
-        <div class="settings-value mono" id="acct-userid">—</div>
+        <div class="settings-label">Name</div>
+        <div class="settings-value" id="acct-name">—</div>
       </div>
+
+      <button id="acct-change-name" class="settings-action">
+        Change name
+      </button>
+
+      <!-- Colour + change -->
+      <div class="settings-row">
+        <div class="settings-label">Colour</div>
+        <div class="settings-value">
+          <span id="acct-colour-dot" class="colour-dot" aria-hidden="true"></span>
+          <span id="acct-colour-text">—</span>
+        </div>
+      </div>
+
+      <button id="acct-change-colour" class="settings-action">
+        Change colour
+      </button>
     </div>
 
     <div class="settings-card">
-      <button id="acct-back-dashboard" class="settings-action">Back to Dashboard</button>
-      <button id="acct-signout" class="settings-action danger">Sign Out</button>
+      <button id="acct-upgrade-pro" class="settings-action primary">
+        Upgrade to Pro
+      </button>
+
+      <button id="acct-back-dashboard" class="settings-action">
+        Back to Dashboard
+      </button>
     </div>
   </div>
 </div>
@@ -2167,9 +2186,19 @@ function showDashboardPanel() {
 async function hydrateAccountPanel() {
   try {
     const au = await getAuthUser();
-    document.getElementById("acct-name").textContent = user?.name || "—";
+
+    // Email (read-only)
     document.getElementById("acct-email").textContent = au?.email || "—";
-    document.getElementById("acct-userid").textContent = au?.id || user?.id || "—";
+
+    // Name
+    document.getElementById("acct-name").textContent = user?.name || "—";
+
+    // Colour
+    const colour = user?.color || "";
+    const dot = document.getElementById("acct-colour-dot");
+    const txt = document.getElementById("acct-colour-text");
+    if (dot) dot.style.background = colour || "transparent";
+    if (txt) txt.textContent = colour ? colour.toUpperCase() : "—";
   } catch (e) {
     console.error("hydrateAccountPanel failed", e);
   }
@@ -2296,6 +2325,36 @@ if (acctBack) {
   });
 }  
 
+const changeNameBtn = document.getElementById("acct-change-name");
+changeNameBtn?.addEventListener("click", async () => {
+  await confirmModal({
+    title: "Coming soon",
+    message: "Name changing will live here (we’ll wire it to your profiles table).",
+    okText: "Close",
+    cancelText: ""
+  });
+});
+
+const changeColourBtn = document.getElementById("acct-change-colour");
+changeColourBtn?.addEventListener("click", async () => {
+  await confirmModal({
+    title: "Coming soon",
+    message: "Colour changing will live here (we’ll wire it to your profiles table).",
+    okText: "Close",
+    cancelText: ""
+  });
+});
+
+const upgradeBtn = document.getElementById("acct-upgrade-pro");
+upgradeBtn?.addEventListener("click", async () => {
+  await confirmModal({
+    title: "Pro (later)",
+    message: "This will eventually show pricing and upgrade options.",
+    okText: "Close",
+    cancelText: ""
+  });
+});
+  
 const acctSignOut = document.getElementById("acct-signout");
 if (acctSignOut) {
   acctSignOut.addEventListener("click", async () => {
@@ -3213,6 +3272,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
