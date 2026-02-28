@@ -102,15 +102,17 @@
       Create an account or sign in to continue.
     </div>
 
-    <input id="auth-email" placeholder="Email" type="email"
-      style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
+    <form id="auth-form">
+      <input id="auth-email" placeholder="Email" type="email"
+        style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
 
-    <input id="auth-password" placeholder="Password" type="password"
-      style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+      <input id="auth-password" placeholder="Password" type="password"
+        style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
 
-    <button id="auth-submit" class="primary-btn" style="width:100%;">
-      Continue
-    </button>
+      <button id="auth-submit" class="primary-btn" style="width:100%;" type="submit">
+        Continue
+      </button>
+    </form>
 
     <div style="display:flex; justify-content:space-between; margin-top:10px; gap:10px;">
       <button id="auth-toggle-mode" class="primary-btn" style="flex:1; background:#f3f4f6;">
@@ -2067,6 +2069,14 @@ function bindUiListenersOnce() {
     });
   }
 
+  const authForm = document.getElementById("auth-form");
+    if (authForm) {
+      authForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        document.getElementById("auth-submit")?.click();
+      });
+    }
+  
   // Auth overlay events (safe even if not used)
   document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
 
@@ -2871,6 +2881,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
