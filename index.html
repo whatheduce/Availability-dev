@@ -2444,7 +2444,11 @@ return;
         return;
       }
 
-      openInviteModal({ inviteToken: inviteTok, boardName });
+      openInviteModal({
+        boardId: card.dataset.boardId,
+        inviteToken: inviteTok,
+        boardName
+      });
       return;
     }
     
@@ -3093,6 +3097,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
