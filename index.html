@@ -2614,7 +2614,15 @@ try {
   const { error } = await supabase.functions.invoke("send-invite", {
     body: {
       toEmail: email,
-      boardId: inviteContext.boardId   // 👈 important
+      const boardId = inviteContext?.boardId;
+        if (!boardId) {
+          alert("Could not determine which calendar to invite to. Please refresh and try again.");
+          return;
+}
+
+const { error } = await supabase.functions.invoke("send-invite", {
+  body: { toEmail: email, boardId }
+});
     }
   });
 
@@ -3090,6 +3098,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
