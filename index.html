@@ -80,7 +80,7 @@
 
   <!-- Secondary section (spaced lower) -->
   <div class="drawer-group drawer-group--secondary">
-    <button class="drawer-item">Developer Feedback</button>
+    <button id="drawer-feedback" class="drawer-item">Developer Feedback</button>
     <button id="drawer-signout" class="drawer-item drawer-item--danger">Sign Out</button>
   </div>
 
@@ -2151,6 +2151,48 @@ if (signOutBtn) {
     }
   });
 }
+
+const feedbackBtn = document.getElementById("drawer-feedback");
+const feedbackModal = document.getElementById("feedback-modal");
+const feedbackCancel = document.getElementById("feedback-cancel");
+const feedbackSend = document.getElementById("feedback-send");
+const feedbackText = document.getElementById("feedback-text");
+
+if (feedbackBtn && feedbackModal) {
+  feedbackBtn.addEventListener("click", () => {
+    document.body.classList.remove("drawer-open");
+    feedbackText.value = "";
+    feedbackModal.hidden = false;
+    feedbackText.focus();
+  });
+}
+
+feedbackCancel?.addEventListener("click", () => {
+  feedbackModal.hidden = true;
+});
+
+feedbackSend?.addEventListener("click", async () => {
+  const text = feedbackText.value.trim();
+
+  if (!text) {
+    feedbackText.focus();
+    return;
+  }
+
+  // TEMP: simulate sending
+  console.log("Feedback submitted:", {
+    message: text,
+    user
+  });
+
+  feedbackModal.hidden = true;
+
+  await confirmModal({
+    title: "Thank you!",
+    message: "Your feedback has been sent.",
+    okText: "Close"
+  });
+});
   
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
@@ -2947,6 +2989,43 @@ document.addEventListener("DOMContentLoaded", startApp);
     </div>
   </div>
 </div>
+
+<!-- Feedback User Modal -->  
+<div id="feedback-modal" class="modal-overlay" hidden>
+  <div class="modal-card" style="max-width:520px;">
+
+    <div class="modal-title">Developer Feedback</div>
+
+    <div class="modal-body">
+      We love to hear your thoughts on what exists here and what you'd like to exist (or be fixed!).  
+      Let us know your thoughts below.
+    </div>
+
+    <textarea
+      id="feedback-text"
+      placeholder="Type your feedback here…"
+      style="
+        width:100%;
+        min-height:120px;
+        margin-top:10px;
+        padding:10px;
+        border-radius:12px;
+        border:1px solid rgba(0,0,0,0.15);
+        resize:vertical;
+        font-family:inherit;
+      "
+    ></textarea>
+
+    <div class="modal-actions">
+      <button id="feedback-cancel" class="modal-btn">Cancel</button>
+      <button id="feedback-send" class="modal-btn modal-btn-primary">
+        Send feedback
+      </button>
+    </div>
+
+  </div>
+</div>
+  
 <!-- Invite User Modal -->
 <div id="invite-modal" class="modal-overlay" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="invite-title" aria-describedby="invite-message">
@@ -2973,6 +3052,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
