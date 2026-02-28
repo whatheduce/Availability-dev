@@ -504,6 +504,98 @@ body {
   border-color: rgba(255, 59, 48, 0.18);
 }
 
+/* =========================
+   SETTINGS SPLIT MODE
+   (drawer stays open, right side usable)
+   ========================= */
+
+/* Only dock on wider screens; mobile keeps overlay behavior */
+@media (min-width: 900px) {
+  .settings-split .drawer-backdrop {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .settings-split .drawer {
+    transform: translateX(0) !important;
+  }
+
+  /* Push dashboard content right so it isn't blocked by the drawer */
+  .settings-split #dashboard {
+    margin-left: 320px;
+  }
+
+  /* Keep the dash layout consistent when shifted */
+  .settings-split #dash-topbar,
+  .settings-split #dash-body,
+  .settings-split #dash-account {
+    max-width: 980px;
+    margin-right: auto;
+    margin-left: 0;
+  }
+}
+
+/* Simple card styles for account panel */
+.settings-card{
+  background: rgba(255,255,255,0.90);
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 16px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.settings-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+.settings-row:first-child{ border-top:none; }
+
+.settings-label{
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.settings-value{
+  font-weight: 600;
+  font-size: 13px;
+  opacity: 0.9;
+  text-align: right;
+}
+
+.settings-value.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.settings-action{
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.85);
+  cursor: pointer;
+  font-weight: 650;
+  margin-top: 10px;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+.settings-action:hover{
+  background: rgba(255,255,255,1);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+.settings-action:active{ transform: translateY(0px) scale(0.99); }
+.settings-action.danger{
+  border-color: rgba(255, 59, 48, 0.20);
+  color: #d11a2a;
+}
+
 .empty-boards {
   padding: 14px 12px;
   border-radius: 14px;
