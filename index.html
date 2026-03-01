@@ -2182,11 +2182,13 @@ async function hydrateAccountPanel() {
   try {
     const au = await getAuthUser();
 
-    // Email (read-only)
-    document.getElementById("acct-email").textContent = au?.email || "—";
+    // Email
+    const emailEl = document.getElementById("acct-email");
+    if (emailEl) emailEl.textContent = au?.email || "—";
 
     // Name
-    document.getElementById("acct-name").textContent = user?.name || "—";
+    const nameEl = document.getElementById("acct-name");
+    if (nameEl) nameEl.textContent = user?.name || "—";
 
     // Colour
     const colour = user?.color || "";
@@ -3267,6 +3269,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
