@@ -2210,7 +2210,6 @@ if (signOutBtn) {
 
     // Make OK button look dangerous for this one modal instance
     const okBtn = document.getElementById("confirm-ok");
-    const cancelBtn = document.getElementById("confirm-cancel");
     okBtn?.classList.add("modal-btn-danger");
     cancelBtn?.classList.remove("modal-btn-danger");
 
@@ -2301,6 +2300,7 @@ drawer?.addEventListener("click", async (e) => {
     document.body.classList.add("settings-split");
 
     // On wide screens, CSS kills pointer-events; aria-hidden alone doesn't
+    drawer?.setAttribute("aria-hidden", "false");
     backdrop?.setAttribute("aria-hidden", "true");
 
     showAccountPanel();
@@ -2313,37 +2313,29 @@ drawer?.addEventListener("click", async (e) => {
   // if (btn.id === "drawer-notifications") ...
 });
 
-const acctBack = document.getElementById("acct-back-dashboard");
-if (acctBack) {
-  acctBack.addEventListener("click", () => {
-    showDashboardPanel();
-    // keep drawer open + docked if you like, or remove dock:
-    // document.body.classList.remove("settings-split");
-  });
-}  
+document.getElementById("acct-back-dashboard")?.addEventListener("click", () => {
+  showDashboardPanel();
+});
 
-const changeNameBtn = document.getElementById("acct-change-name");
-changeNameBtn?.addEventListener("click", async () => {
+document.getElementById("acct-change-name")?.addEventListener("click", async () => {
   await confirmModal({
     title: "Coming soon",
-    message: "Name changing will live here (we’ll wire it to your profiles table).",
+    message: "This will let you change your profile name.",
     okText: "Close",
     cancelText: ""
   });
 });
 
-const changeColourBtn = document.getElementById("acct-change-colour");
-changeColourBtn?.addEventListener("click", async () => {
+document.getElementById("acct-change-colour")?.addEventListener("click", async () => {
   await confirmModal({
     title: "Coming soon",
-    message: "Colour changing will live here (we’ll wire it to your profiles table).",
+    message: "This will let you change your profile colour.",
     okText: "Close",
     cancelText: ""
   });
 });
 
-const upgradeBtn = document.getElementById("acct-upgrade-pro");
-upgradeBtn?.addEventListener("click", async () => {
+document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
   await confirmModal({
     title: "Pro (later)",
     message: "This will eventually show pricing and upgrade options.",
@@ -2351,33 +2343,6 @@ upgradeBtn?.addEventListener("click", async () => {
     cancelText: ""
   });
 });
-  
-const acctSignOut = document.getElementById("acct-signout");
-if (acctSignOut) {
-  acctSignOut.addEventListener("click", async () => {
-    const okBtn = document.getElementById("confirm-ok");
-    const cancelBtn = document.getElementById("confirm-cancel");
-    okBtn?.classList.add("modal-btn-danger");
-    cancelBtn?.classList.remove("modal-btn-danger");
-
-    document.body.classList.remove("drawer-open");
-    document.body.classList.remove("settings-split");
-    showDashboardPanel();
-    
-    const ok = await confirmModal({
-      title: "Sign out?",
-      message: "You’ll need to sign in again to access your calendars.",
-      okText: "Sign Out",
-      cancelText: "Cancel"
-    });
-
-    okBtn?.classList.remove("modal-btn-danger");
-    if (!ok) return;
-
-    await supabase.auth.signOut();
-    location.reload();
-  });
-}  
   
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
@@ -3269,6 +3234,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
