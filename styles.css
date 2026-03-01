@@ -557,7 +557,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 28px;
+  gap: 64px;
 }
 
 /* Override the default full-width button */
@@ -655,11 +655,26 @@ body {
   grid-template-columns: 140px 1fr auto;
   align-items: center;
   column-gap: 14px;
+   /* consistent row height + vertical centering */
+  min-height: 48px;
+  padding: 10px 2px;  /* matches your old spacing */
+  border-top: 1px solid rgba(0,0,0,0.08);
 }
 
+/* push the value column to the far right (right aligned) */
 .settings-row-3 .settings-value{
+  justify-self: end;   /* key: aligns value to the right edge */
   text-align: right;
-  justify-self: end;
+  white-space: nowrap; /* keeps email from wrapping weirdly */
+}
+
+.settings-row-3:first-child{
+  border-top: none;
+}
+
+/* if there's no button (Email row), remove the "phantom" space */
+.settings-row-3 > :last-child:empty{
+  display: none;
 }
 
 /* Colour value should stay together */
@@ -667,6 +682,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.settings-row-3 .settings-colour{
+  justify-self: end;
 }
 
 /* Mini inline action button (“Change”) */
