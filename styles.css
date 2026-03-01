@@ -553,11 +553,17 @@ body {
 }
 
 .settings-cta-row{
-  margin-top: 18px;
+  margin-top: 22px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 980px;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+/* Override the default full-width button */
+.settings-cta-row .settings-action{
+  width: auto;
+  display: inline-flex;
 }
 
 /* Centered card content (for Upgrade to Pro) */
@@ -597,6 +603,7 @@ body {
   font-size: 13px;
   opacity: 0.9;
   text-align: right;
+  margin-right:16px;
 }
 
 .settings-value.mono{
@@ -706,6 +713,11 @@ body {
 .settings-action.danger:hover{
   background: rgba(255, 59, 48, 0.18);
   box-shadow: 0 8px 18px rgba(255, 59, 48, 0.18);
+}
+
+#acct-upgrade-pro{
+  font-weight: 800;
+  padding: 12px 18px;
 }
 
 .colour-dot{
