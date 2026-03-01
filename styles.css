@@ -603,6 +603,78 @@ body {
   color: #d11a2a;
 }
 
+/* Account settings layout tweaks */
+#dash-account{
+  /* Shift the whole panel left a bit */
+  padding: 10px 52px 22px;
+}
+
+/* 3-column rows: label | value | action */
+.settings-row-3{
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  column-gap: 14px;
+}
+
+/* In this view, values should not be pushed to the far right */
+.settings-row-3 .settings-value{
+  text-align: left;
+}
+
+/* Colour value should stay together */
+.settings-colour{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mini inline action button (“Change”) */
+.settings-mini-btn{
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.85);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.settings-mini-btn:hover{
+  background: rgba(255,255,255,1);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+.settings-mini-btn:active{
+  transform: translateY(0px) scale(0.99);
+}
+
+/* Row of compact action buttons */
+.settings-actions-row{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.settings-action.compact{
+  width: auto;          /* override the 100% width */
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Make Upgrade stand out as filled red (like a danger button) */
+.settings-action.danger{
+  background: rgba(255, 59, 48, 0.12);
+  border-color: rgba(255, 59, 48, 0.28);
+  color: #d11a2a;
+}
+
+.settings-action.danger:hover{
+  background: rgba(255, 59, 48, 0.18);
+  box-shadow: 0 8px 18px rgba(255, 59, 48, 0.18);
+}
+
 .colour-dot{
   display:inline-block;
   width: 12px;
