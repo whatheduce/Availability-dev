@@ -339,7 +339,7 @@ body.account-view #dash-topbar {
 }
 
 body.account-view #dash-account {
-  margin-top: -10px;
+  padding-top: 0;
 }
 
 .dash-section {
