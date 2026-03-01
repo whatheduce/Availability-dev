@@ -2164,15 +2164,21 @@ function bindUiListenersOnce() {
   });
 
 function showAccountPanel() {
+  document.body.classList.add("account-view");   // 👈 add this
+
   const dashBody = document.getElementById("dash-body");
   const acct = document.getElementById("dash-account");
+
   if (dashBody) dashBody.style.display = "none";
   if (acct) acct.style.display = "block";
 }
 
 function showDashboardPanel() {
+  document.body.classList.remove("account-view");  // 👈 add this
+
   const dashBody = document.getElementById("dash-body");
   const acct = document.getElementById("dash-account");
+
   if (acct) acct.style.display = "none";
   if (dashBody) dashBody.style.display = "block";
 }
@@ -3233,6 +3239,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
