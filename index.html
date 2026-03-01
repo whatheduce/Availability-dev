@@ -59,54 +59,49 @@
     </div>
   </div>
 
-  <!-- Account Settings Right Panel (replaces dash-body when active) -->
 <div id="dash-account" style="display:none;">
   <div class="dash-section">
     <div class="dash-section-title">Account Settings</div>
     <div class="dashboard-section-divider"></div>
 
     <div class="settings-card">
-      <!-- Email at top (read-only) -->
-      <div class="settings-row">
+      <!-- Email (top, no action) -->
+      <div class="settings-row settings-row-3">
         <div class="settings-label">Email</div>
         <div class="settings-value" id="acct-email">—</div>
+        <div></div>
       </div>
 
-      <!-- Name + change -->
-      <div class="settings-row">
+      <!-- Name + change button in same row -->
+      <div class="settings-row settings-row-3">
         <div class="settings-label">Name</div>
         <div class="settings-value" id="acct-name">—</div>
+        <button id="acct-change-name" class="settings-mini-btn" type="button">Change</button>
       </div>
 
-      <button id="acct-change-name" class="settings-action">
-        Change name
-      </button>
-
-      <!-- Colour + change -->
-      <div class="settings-row">
+      <!-- Colour + change button in same row -->
+      <div class="settings-row settings-row-3">
         <div class="settings-label">Colour</div>
-        <div class="settings-value">
+        <div class="settings-value settings-colour">
           <span id="acct-colour-dot" class="colour-dot" aria-hidden="true"></span>
           <span id="acct-colour-text">—</span>
         </div>
+        <button id="acct-change-colour" class="settings-mini-btn" type="button">Change</button>
       </div>
-
-      <button id="acct-change-colour" class="settings-action">
-        Change colour
-      </button>
     </div>
 
     <div class="settings-card">
-      <button id="acct-upgrade-pro" class="settings-action primary">
-        Upgrade to Pro
-      </button>
+      <div class="settings-actions-row">
+        <button id="acct-upgrade-pro" class="settings-action danger compact" type="button">
+          Upgrade to Pro
+        </button>
 
-      <button id="acct-back-dashboard" class="settings-action">
-        Back to Dashboard
-      </button>
+        <button id="acct-back-dashboard" class="settings-action compact" type="button">
+          Back to Dashboard
+        </button>
+      </div>
     </div>
   </div>
-</div>
 </div>
 
 <!-- Dashboard Settings Drawer (overlay) -->
@@ -3272,6 +3267,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
