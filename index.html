@@ -72,6 +72,15 @@
         <div></div>
       </div>
 
+      <!-- Password -->
+      <div class="settings-row settings-row-3">
+        <div class="settings-label">Password</div>
+        <div class="settings-value">********</div>
+        <button id="acct-change-password"
+                class="settings-mini-btn"
+                type="button">Change</button>
+      </div>
+      
       <!-- Name + change button in same row -->
       <div class="settings-row settings-row-3">
         <div class="settings-label">Name</div>
@@ -2340,6 +2349,15 @@ document.getElementById("acct-change-colour")?.addEventListener("click", async (
   });
 });
 
+document.getElementById("acct-change-password")?.addEventListener("click", async () => {
+  await confirmModal({
+    title: "Coming soon",
+    message: "Password changing will live here.",
+    okText: "Close",
+    cancelText: ""
+  });
+});
+  
 document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
   await confirmModal({
     title: "Pro (later)",
@@ -3239,6 +3257,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
