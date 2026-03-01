@@ -22,6 +22,10 @@ body {
   visibility: hidden;
 }
 
+body.account-view #dash-topbar {
+  display: none !important;
+}
+
     #calendar {
       margin: 40px auto;
       overflow-x: auto;
@@ -332,6 +336,10 @@ body {
   margin: 0;
   margin-right: auto;
   padding: 10px 68px 22px;
+}
+
+body.account-view #dash-account {
+  margin-top: -10px;
 }
 
 .dash-section {
