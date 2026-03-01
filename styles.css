@@ -552,12 +552,18 @@ body {
   margin-top: 14px;
 }
 
+.settings-cta-row{
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 980px;
+}
+
 /* Centered card content (for Upgrade to Pro) */
 .settings-card-center{
-  display:flex;
   align-items:center;
   justify-content:center;
-  padding: 22px;
 }
 
 /* Extra breathing room for the Back card */
@@ -644,9 +650,9 @@ body {
   column-gap: 14px;
 }
 
-/* In this view, values should not be pushed to the far right */
 .settings-row-3 .settings-value{
-  text-align: left;
+  text-align: right;
+  justify-self: end;
 }
 
 /* Colour value should stay together */
