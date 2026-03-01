@@ -552,6 +552,24 @@ body {
   margin-top: 14px;
 }
 
+/* Centered card content (for Upgrade to Pro) */
+.settings-card-center{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 22px;
+}
+
+/* Extra breathing room for the Back card */
+.settings-card-spaced{
+  margin-top: 18px;
+}
+
+/* Make compact buttons sit nicely when alone */
+.settings-card .settings-action.compact{
+  margin: 0;
+}
+
 .settings-row{
   display:flex;
   align-items:center;
@@ -560,6 +578,7 @@ body {
   padding: 10px 2px;
   border-top: 1px solid rgba(0,0,0,0.08);
 }
+
 .settings-row:first-child{ border-top:none; }
 
 .settings-label{
@@ -598,9 +617,17 @@ body {
   transform: translateY(-1px);
 }
 .settings-action:active{ transform: translateY(0px) scale(0.99); }
+
 .settings-action.danger{
-  border-color: rgba(255, 59, 48, 0.20);
+  background: rgba(255,59,48,0.12);
+  border-color: rgba(255,59,48,0.28);
   color: #d11a2a;
+  font-weight: 800;
+}
+
+.settings-action.danger:hover{
+  background: rgba(255,59,48,0.18);
+  box-shadow: 0 8px 18px rgba(255,59,48,0.18);
 }
 
 /* Account settings layout tweaks */
