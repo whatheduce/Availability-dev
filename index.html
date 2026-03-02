@@ -2589,12 +2589,6 @@ colourSave?.addEventListener("click", async () => {
       .eq("user_id", au.id);
 
     if (error) throw error;
-      const { error: snapErr } = await supabase
-        .from("availability_dev")
-        .update({ color: newColor })
-        .eq("user_id", au.id);
-
-      if (snapErr) console.warn("availability_dev snapshot color update failed:", snapErr);
     
     // Update in-memory + cache (important for realtime)
     if (user) user.color = v;
@@ -3867,6 +3861,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
