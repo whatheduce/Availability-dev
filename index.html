@@ -2427,12 +2427,17 @@ nameSave?.addEventListener("click", async () => {
     }
 
     closeNameModal();
+
     await confirmModal({
       title: "Name updated",
       message: "Your display name has been changed successfully.",
       okText: "Close",
       cancelText: ""
     });
+
+    // 🔄 refresh dashboard so previews show new name
+    await loadDashboard();
+    
   } catch (err) {
     console.error("Change name failed:", err);
     setNameError("Could not update your name. Please try again.");
@@ -3414,6 +3419,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
