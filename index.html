@@ -420,6 +420,14 @@ function showCreateBoard() {
 }
 
 
+function setDashboardSubtitle() {
+  const dashUser = document.getElementById("dash-username");
+  if (dashUser && user?.name) {
+    dashUser.textContent = possessive(user.name).toUpperCase();
+  }
+}  
+
+  
 function possessive(name) {
   if (!name) return "";
   const trimmed = name.trim();
@@ -845,7 +853,6 @@ async function handleAuthSubmit() {
   const emailEl = document.getElementById("auth-email");
   const passEl = document.getElementById("auth-password");
   const msgEl = document.getElementById("auth-msg");
-
   const email = (emailEl?.value || "").trim();
   const password = (passEl?.value || "").trim();
 
@@ -876,7 +883,7 @@ async function handleAuthSubmit() {
   }
 
   const hydrated = await hydrateUserFromAuth();
-
+  setDashboardSubtitle();
   hideAuthOverlay();
 
     if (!hydrated) {
@@ -2159,7 +2166,6 @@ const PREBUILT_STRUCTURES = {
   ]
 };
 
-
 let uiListenersBound = false;
 
 function bindUiListenersOnce() {
@@ -2583,7 +2589,13 @@ colourSave?.addEventListener("click", async () => {
       .eq("user_id", au.id);
 
     if (error) throw error;
+      const { error: snapErr } = await supabase
+        .from("availability_dev")
+        .update({ color: newColor })
+        .eq("user_id", au.id);
 
+      if (snapErr) console.warn("availability_dev snapshot color update failed:", snapErr);
+    
     // Update in-memory + cache (important for realtime)
     if (user) user.color = v;
     profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
@@ -2773,6 +2785,14 @@ nameSave?.addEventListener("click", async () => {
       .eq("user_id", au.id);
 
     if (error) throw error;
+      // Keep legacy snapshot columns in sync so other users (who may not be allowed to read profiles)
+      // still see the updated name in legends / previews.
+      const { error: snapErr } = await supabase
+        .from("availability_dev")
+        .update({ name: newName })
+        .eq("user_id", au.id);
+
+      if (snapErr) console.warn("availability_dev snapshot name update failed:", snapErr);
 
     const { error: availErr } = await supabase
       .from("availability_dev")
@@ -2912,10 +2932,7 @@ if (!inviteToken && !manageToken) {
   }
 
   showDashboard();
-    const dashUser = document.getElementById("dash-username");
-    if (dashUser && user?.name) {
-      dashUser.textContent = possessive(user.name).toUpperCase();
-    }
+  setDashboardSubtitle();
   await loadBoards();
   return;
 }
@@ -3850,6 +3867,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
