@@ -2618,6 +2618,115 @@ colourSave?.addEventListener("click", async () => {
     if (colourSave) colourSave.disabled = false;
   }
 });
+
+// Change Password modal wiring
+const pwModal = document.getElementById("password-modal");
+const pwCurrent = document.getElementById("pw-current");
+const pwNew = document.getElementById("pw-new");
+const pwConfirm = document.getElementById("pw-confirm");
+const pwErr = document.getElementById("pw-error");
+const pwCancel = document.getElementById("pw-cancel");
+const pwSave = document.getElementById("pw-save");
+
+function setPwError(msg) {
+  if (!pwErr) return;
+  pwErr.textContent = msg || "";
+  pwErr.style.display = msg ? "block" : "none";
+}
+
+function openPwModal() {
+  if (!pwModal) return;
+
+  setPwError("");
+  if (pwCurrent) pwCurrent.value = "";
+  if (pwNew) pwNew.value = "";
+  if (pwConfirm) pwConfirm.value = "";
+
+  pwModal.hidden = false;
+  pwCurrent?.focus();
+}
+
+function closePwModal() {
+  if (!pwModal) return;
+  pwModal.hidden = true;
+}
+
+document.getElementById("acct-change-password")?.addEventListener("click", () => {
+  openPwModal();
+});
+
+pwCancel?.addEventListener("click", closePwModal);
+
+// click outside card closes
+pwModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closePwModal();
+});
+
+// Esc closes, Enter submits (from any field)
+[pwCurrent, pwNew, pwConfirm].forEach(el => {
+  el?.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closePwModal();
+    if (e.key === "Enter") pwSave?.click();
+  });
+});
+
+pwSave?.addEventListener("click", async () => {
+  try {
+    const au = await getAuthUser();
+    if (!au?.email) {
+      setPwError("You’re not signed in.");
+      return;
+    }
+
+    const current = (pwCurrent?.value || "").trim();
+    const next = (pwNew?.value || "").trim();
+    const confirm = (pwConfirm?.value || "").trim();
+
+    // validation
+    if (!current) return setPwError("Please enter your current password.");
+    if (!next) return setPwError("Please enter a new password.");
+    if (next.length < 8) return setPwError("New password must be at least 8 characters.");
+    if (next !== confirm) return setPwError("New passwords do not match.");
+    if (next === current) return setPwError("New password must be different from the current password.");
+
+    pwSave.disabled = true;
+    setPwError("");
+
+    // 1) Re-authenticate (security step)
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: au.email,
+      password: current
+    });
+    if (signInErr) {
+      setPwError("Current password is incorrect.");
+      return;
+    }
+
+    // 2) Update password
+    const { error: updErr } = await supabase.auth.updateUser({ password: next });
+    if (updErr) {
+      console.error("updateUser password failed:", updErr);
+      setPwError("Could not update password. Please try again.");
+      return;
+    }
+
+    closePwModal();
+
+    await confirmModal({
+      title: "Password updated",
+      message: "Your password has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+  } catch (err) {
+    console.error("Change password failed:", err);
+    setPwError("Could not update password. Please try again.");
+  } finally {
+    if (pwSave) pwSave.disabled = false;
+  }
+});
   
 // close on clicking outside the card
 nameModal?.addEventListener("click", (e) => {
@@ -3648,6 +3757,45 @@ document.addEventListener("DOMContentLoaded", startApp);
     </div>
   </div>
 </div>  
+
+<!-- Change Password Modal -->
+<div id="password-modal" class="modal-overlay" hidden>
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-title">Change password</div>
+
+    <div class="modal-body">
+      For security, please enter your current password and a new password.
+    </div>
+
+    <div style="margin-top:10px;">
+      <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">Current password</label>
+      <input id="pw-current" type="password" autocomplete="current-password"
+             style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); font-family:inherit;" />
+    </div>
+
+    <div style="margin-top:12px;">
+      <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">New password</label>
+      <input id="pw-new" type="password" autocomplete="new-password"
+             style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); font-family:inherit;" />
+      <div style="margin-top:6px; font-size:12px; opacity:0.6;">
+        Use 8+ characters (letters + numbers recommended)
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">Confirm new password</label>
+      <input id="pw-confirm" type="password" autocomplete="new-password"
+             style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); font-family:inherit;" />
+    </div>
+
+    <div id="pw-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
+
+    <div class="modal-actions">
+      <button id="pw-cancel" class="modal-btn">Cancel</button>
+      <button id="pw-save" class="modal-btn modal-btn-primary">Update</button>
+    </div>
+  </div>
+</div>
   
 <!-- Feedback User Modal -->  
 <div id="feedback-modal" class="modal-overlay" hidden>
@@ -3711,6 +3859,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
