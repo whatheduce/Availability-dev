@@ -1018,6 +1018,7 @@ async function rebuildDotsForCell(cell) {
 
   // ✅ Fetch profiles ONCE
   const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
+  profilesCache = { ...profilesCache, ...profilesMap };
 
   const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
@@ -1181,16 +1182,21 @@ async function handleAvailabilityChange(payload) {
     if (!alreadyHasDot) {
       const dot = document.createElement("div");
       dot.className = "dot";
-      dot.style.background = entry.color;
-      dot.title = entry.name;
-      dot.dataset.userId = entry.user_id;
-      dot.dataset.name = entry.name;
+      // Prefer latest profile name/color (so legend/dots reflect changes instantly)
+      const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
+      const displayName = prof?.name || entry.name || "—";
+      const displayColor = prof?.color || entry.color || "#999";
+
+      dot.style.background = displayColor;
+      dot.title = displayName;
+
+      if (entry.user_id) dot.dataset.userId = entry.user_id;
+      dot.dataset.name = displayName;
 
       dotContainer.appendChild(dot);
-    }
 
-    // Always run these even if the dot already existed (this fixes the “clicking user” case)
-    ensureLegendUser(entry);
+      // Use the same display values for the legend entry
+      ensureLegendUser({ ...entry, name: displayName, color: displayColor });
     await applyGoldStateForCell(cell, entry.day);
 
     // Keep gold/legend correct with a later idle refresh
@@ -1210,9 +1216,17 @@ async function handleAvailabilityChange(payload) {
 
     const dot = document.createElement("div");
     dot.className = "dot";
-    dot.style.background = entry.color;
-    dot.title = entry.name;
-    dot.dataset.userId = entry.user_id;
+    const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
+    const displayName = prof?.name || entry.name || "—";
+    const displayColor = prof?.color || entry.color || "#999";
+
+    dot.style.background = displayColor;
+    dot.title = displayName;
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
+      dot.dataset.name = displayName;
+
+    ensureLegendUser({ ...entry, name: displayName, color: displayColor });
+    
     dotContainer.appendChild(dot);
 
     scheduleFullRefreshIdle(20000);
@@ -1845,7 +1859,18 @@ async function fetchProfilesMap(userIds) {
   (data || []).forEach(p => { map[p.user_id] = p; });
   return map;
 }
-  
+
+// Cache current profile info so realtime inserts/updates can display the latest name/color
+let profilesCache = {};
+
+async function getProfileCached(userId) {
+  if (!userId) return null;
+  if (profilesCache[userId]) return profilesCache[userId];
+
+  const map = await fetchProfilesMap([userId]);
+  profilesCache = { ...profilesCache, ...map };
+  return profilesCache[userId] || null;
+}  
   
 /* === Render dots + gold === */
 async function loadAvailability() {
@@ -1867,6 +1892,7 @@ async function loadAvailability() {
 
   if (!rows) return;
   const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
+  profilesCache = { ...profilesCache, ...profilesMap };
 
   /* Legend */
     const users = {};
@@ -3478,6 +3504,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
