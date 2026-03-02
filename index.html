@@ -818,6 +818,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   }
 }
 
+  
 function showDashboard() {
   // 👇 THIS is the important fix
   document.body.style.visibility = "visible";
@@ -990,7 +991,6 @@ async function ensureMembership(boardId) {
   }
   return true;
 }
-
   
   
 async function rebuildDotsForCell(cell) {
@@ -1026,6 +1026,8 @@ async function rebuildDotsForCell(cell) {
     dot.title = entry.name;
     dot.dataset.userId = entry.user_id;
     dot.dataset.name = entry.name;
+
+    const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
 
     dotContainer.appendChild(dot);
   });
@@ -1818,6 +1820,26 @@ function bindCalendarClickDelegation() {
 }
 
   
+async function fetchProfilesMap(userIds) {
+  const ids = Array.from(new Set((userIds || []).filter(Boolean)));
+  if (ids.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .in("user_id", ids);
+
+  if (error) {
+    console.warn("fetchProfilesMap failed:", error);
+    return {};
+  }
+
+  const map = {};
+  (data || []).forEach(p => { map[p.user_id] = p; });
+  return map;
+}
+  
+  
 /* === Render dots + gold === */
 async function loadAvailability() {
   const { data: rows, error } = await supabase
@@ -1837,30 +1859,32 @@ async function loadAvailability() {
   });
 
   if (!rows) return;
+  const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
 
   /* Legend */
-  const users = {};
-  rows.forEach(r => {
-    const key = r.user_id || r.name; // fallback for old rows
-    if (!users[key]) users[key] = { name: r.name, color: r.color };
-  });
+    const users = {};
+    rows.forEach(r => {
+      const prof = r.user_id ? profilesMap[r.user_id] : null;
 
-  legendList.innerHTML = "";
+      const displayName = prof?.name || r.name || "—";
+      const displayColor = prof?.color || r.color || "#999";
+
+      const key = r.user_id || displayName; // fallback for old rows without user_id
+      if (!users[key]) users[key] = { name: displayName, color: displayColor };
+    });
+
+    legendList.innerHTML = "";
 
     Object.entries(users).forEach(([key, { name, color }]) => {
       const div = document.createElement("div");
       div.className = "legend-item";
 
-      // If key looks like a UUID → treat as user_id
-      if (key.includes("-")) {
-        div.dataset.userId = key;
-      } else {
-        div.dataset.name = name;
-      }
+      if (key.includes("-")) div.dataset.userId = key;
+      else div.dataset.name = name;
 
-  div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
-  legendList.appendChild(div);
-});
+      div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
+      legendList.appendChild(div);
+    });
 
   /* Group by cell */
   const map = {};
@@ -1894,10 +1918,15 @@ async function loadAvailability() {
       entries.forEach(entry => {
         const dot = document.createElement("div");
         dot.className = "dot";
-        dot.style.background = entry.color;
-        dot.title = entry.name;
         dot.dataset.userId = entry.user_id;
-        dot.dataset.name = entry.name;
+        const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+        const displayName = prof?.name || entry.name || "—";
+        const displayColor = prof?.color || entry.color || "#999";
+
+          dot.style.background = displayColor;
+          dot.title = displayName;
+          dot.dataset.name = displayName;
+        
 
         // Animate only the current user's dot
         if (user && entry.user_id === user.id) {
@@ -3442,6 +3471,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
