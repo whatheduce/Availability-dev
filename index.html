@@ -2402,7 +2402,7 @@ nameSave?.addEventListener("click", async () => {
     nameSave.disabled = true;
     setNameError("");
 
-    // Update DB (RLS should allow: user_id = auth.uid())
+    // Update DB
     const au = await getAuthUser();
     if (!au) {
       setNameError("You’re not signed in.");
@@ -2419,7 +2419,8 @@ nameSave?.addEventListener("click", async () => {
     // Update in-memory + UI
     if (user) user.name = newName;
 
-    document.getElementById("acct-name") && (document.getElementById("acct-name").textContent = newName);
+    const acctNameEl = document.getElementById("acct-name");
+    if (acctNameEl) acctNameEl.textContent = newName;
 
     const dashUser = document.getElementById("dash-username");
     if (dashUser && user?.name) {
@@ -2428,9 +2429,6 @@ nameSave?.addEventListener("click", async () => {
 
     closeNameModal();
 
-    user.name = newName;           // update in-memory user
-    document.getElementById("acct-name").textContent = newName;
-    
     await confirmModal({
       title: "Username updated",
       message: "Your display name has been changed successfully.",
@@ -2438,8 +2436,9 @@ nameSave?.addEventListener("click", async () => {
       cancelText: ""
     });
 
-    await loadDashboard();
-    
+    // Refresh dashboard previews/legend with fresh profile data
+    await loadBoards(true);
+
   } catch (err) {
     console.error("Change name failed:", err);
     setNameError("Could not update your name. Please try again.");
@@ -3421,6 +3420,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
