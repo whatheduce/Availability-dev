@@ -2844,15 +2844,6 @@ function updateNameCount() {
     nameCount.style.fontWeight = "";
   }
 };
-
-document.getElementById("acct-change-password")?.addEventListener("click", async () => {
-  await confirmModal({
-    title: "Coming soon",
-    message: "Password changing will live here.",
-    okText: "Close",
-    cancelText: ""
-  });
-});
   
 document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
   await confirmModal({
@@ -3859,6 +3850,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
