@@ -343,6 +343,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
+const pendingAdds = new Set(); // keys like `${tableId}|${day}|${time}|${userId}`
 
 // Dashboard: Create New Calendar
 document.addEventListener("click", (e) => {
@@ -404,6 +405,41 @@ function renderPresence() {
 }
 
 
+function addKey(tableId, day, time, userId) {
+  return `${tableId}|${day}|${time}|${userId}`;
+}
+  
+
+function ensureDotContainer(cell) {
+  let dc = cell.querySelector(".dot-container");
+  if (!dc) {
+    dc = document.createElement("div");
+    dc.className = "dot-container";
+    cell.appendChild(dc);
+  }
+  return dc;
+}
+
+function addOptimisticDot(cell, userId, name, color) {
+  const dc = ensureDotContainer(cell);
+
+  // already there?
+  if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
+
+  const dot = document.createElement("div");
+  dot.className = "dot";
+  dot.dataset.userId = userId;
+  dot.dataset.name = name || "—";
+  dot.title = name || "—";
+  dot.style.background = color || "#999";
+
+  // mark as pending so we can remove if DB fails
+  dot.dataset.pending = "1";
+
+  dc.appendChild(dot);
+}  
+
+  
 function showCreateBoard() {
   document.body.style.visibility = "visible";
 
@@ -3858,6 +3894,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
