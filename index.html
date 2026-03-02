@@ -2432,6 +2432,193 @@ document.getElementById("acct-change-name")?.addEventListener("click", () => {
 
 nameCancel?.addEventListener("click", closeNameModal);
 
+// Change Colour modal wiring
+const colourModal = document.getElementById("colour-modal");
+const colourGrid = document.getElementById("colour-grid");
+const colourInput = document.getElementById("colour-input");
+const colourErr = document.getElementById("colour-error");
+const colourCancel = document.getElementById("colour-cancel");
+const colourSave = document.getElementById("colour-save");
+
+let selectedColour = null;
+
+// A nice default palette (edit anytime)
+const COLOUR_PRESETS = [
+  "#F446ED", "#FF3B30", "#FF9500", "#FFCC00",
+  "#34C759", "#00C7BE", "#007AFF", "#5856D6",
+  "#AF52DE", "#FF2D55", "#8E8E93", "#1C1C1E",
+  "#A2845E", "#2D7D46", "#0A84FF", "#FFD60A"
+];
+
+function setColourError(msg){
+  if (!colourErr) return;
+  colourErr.textContent = msg || "";
+  colourErr.style.display = msg ? "block" : "none";
+}
+
+function normaliseHex(input){
+  if (!input) return "";
+  let v = input.trim().toUpperCase();
+  if (v && !v.startsWith("#")) v = "#" + v;
+  return v;
+}
+
+function isValidHex(v){
+  return /^#[0-9A-F]{6}$/.test(v);
+}
+
+function renderColourGrid(current){
+  if (!colourGrid) return;
+  colourGrid.innerHTML = "";
+
+  COLOUR_PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "colour-swatch";
+    b.style.background = hex;
+    b.setAttribute("aria-label", hex);
+    b.dataset.hex = hex;
+
+    if (current && hex === current) b.classList.add("selected");
+
+    b.addEventListener("click", () => {
+      // select swatch
+      selectedColour = hex;
+      if (colourInput) colourInput.value = hex;
+
+      // update UI selected state
+      [...colourGrid.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+
+      setColourError("");
+    });
+
+    colourGrid.appendChild(b);
+  });
+}
+
+function openColourModal(){
+  if (!colourModal) return;
+
+  setColourError("");
+  selectedColour = normaliseHex(user?.color || "");
+
+  if (colourInput) colourInput.value = selectedColour || "";
+  renderColourGrid(selectedColour);
+
+  colourModal.hidden = false;
+  colourInput?.focus();
+  colourInput?.select();
+}
+
+function closeColourModal(){
+  if (!colourModal) return;
+  colourModal.hidden = true;
+}
+
+document.getElementById("acct-change-colour")?.addEventListener("click", () => {
+  openColourModal();
+});
+
+colourCancel?.addEventListener("click", closeColourModal);
+
+// click outside card closes
+colourModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closeColourModal();
+});
+
+// live validate input + keep swatch selection in sync when typing
+colourInput?.addEventListener("input", () => {
+  const v = normaliseHex(colourInput.value);
+  colourInput.value = v;
+  selectedColour = v;
+
+  // update swatch highlight if matches a preset
+  if (colourGrid){
+    [...colourGrid.querySelectorAll(".colour-swatch")].forEach(x => {
+      x.classList.toggle("selected", x.dataset.hex === v);
+    });
+  }
+
+  if (!v) setColourError("");
+  else if (!isValidHex(v)) setColourError("Enter a valid hex colour like #F446ED");
+  else setColourError("");
+});
+
+// Enter = save, Esc = close
+colourInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeColourModal();
+  if (e.key === "Enter") colourSave?.click();
+});
+
+colourSave?.addEventListener("click", async () => {
+  try {
+    if (!colourInput) return;
+
+    const v = normaliseHex(colourInput.value);
+
+    if (!v) return setColourError("Please choose a colour.");
+    if (!isValidHex(v)) return setColourError("Enter a valid hex colour like #F446ED");
+
+    // no change
+    if (user?.color && v === user.color.toUpperCase()) {
+      closeColourModal();
+      return;
+    }
+
+    colourSave.disabled = true;
+    setColourError("");
+
+    const au = await getAuthUser();
+    if (!au) {
+      setColourError("You’re not signed in.");
+      return;
+    }
+
+    // Update profile colour
+    const { error } = await supabase
+      .from("profiles")
+      .update({ color: v })
+      .eq("user_id", au.id);
+
+    if (error) throw error;
+
+    // Update in-memory + cache (important for realtime)
+    if (user) user.color = v;
+    profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
+
+    // Update account panel immediately
+    const dot = document.getElementById("acct-colour-dot");
+    const txt = document.getElementById("acct-colour-text");
+    if (dot) dot.style.background = v;
+    if (txt) txt.textContent = v;
+
+    closeColourModal();
+
+    await confirmModal({
+      title: "Colour updated",
+      message: "Your colour has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+    // Refresh dashboard previews (legend/dots)
+    await loadBoards();
+
+    // Refresh open calendar (legend/dots)
+    if (currentTable) {
+      await loadAvailability();
+    }
+
+  } catch (err) {
+    console.error("Change colour failed:", err);
+    setColourError("Could not update your colour. Please try again.");
+  } finally {
+    if (colourSave) colourSave.disabled = false;
+  }
+});
+  
 // close on clicking outside the card
 nameModal?.addEventListener("click", (e) => {
   const card = e.target.closest(".modal-card");
@@ -2548,14 +2735,6 @@ function updateNameCount() {
     nameCount.style.fontWeight = "";
   }
 }  
-
-document.getElementById("acct-change-colour")?.addEventListener("click", async () => {
-  await confirmModal({
-    title: "Coming soon",
-    message: "This will let you change your profile colour.",
-    okText: "Close",
-    cancelText: ""
-  });
 });
 
 document.getElementById("acct-change-password")?.addEventListener("click", async () => {
@@ -3441,6 +3620,35 @@ document.addEventListener("DOMContentLoaded", startApp);
     </div>
   </div>
 </div>
+
+<!-- Change Colour Modal -->
+<div id="colour-modal" class="modal-overlay" hidden>
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-title">Change colour</div>
+
+    <div class="modal-body">
+      Pick a colour for your dots and legend.
+    </div>
+
+    <div id="colour-grid" class="colour-grid" role="listbox" aria-label="Choose a colour"></div>
+
+    <div style="margin-top:12px;">
+      <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">Or enter a hex colour</label>
+      <input id="colour-input"
+             type="text"
+             inputmode="text"
+             maxlength="7"
+             placeholder="#F446ED"
+             style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); font-family:inherit;" />
+      <div id="colour-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="colour-cancel" class="modal-btn">Cancel</button>
+      <button id="colour-save" class="modal-btn modal-btn-primary">Save</button>
+    </div>
+  </div>
+</div>  
   
 <!-- Feedback User Modal -->  
 <div id="feedback-modal" class="modal-overlay" hidden>
@@ -3504,6 +3712,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
