@@ -2415,6 +2415,14 @@ nameSave?.addEventListener("click", async () => {
       .eq("user_id", au.id);
 
     if (error) throw error;
+
+    const { error: availErr } = await supabase
+      .from("availability_dev")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+
+    if (availErr) throw availErr;
+    
      await supabase
       .from("availability_dev")
       .update({ name: newName })
@@ -2448,13 +2456,10 @@ nameSave?.addEventListener("click", async () => {
     });
 
     // Refresh dashboard previews/legend with fresh profile data
-    await loadBoards(true);
-
+    await loadBoards();
       if (currentTable) {
-        await fetchBoardMembers(currentTable);  // 👈 THIS is the missing piece
-        renderLegend();                         // or whatever builds the legend
-        rerenderAvailability();                 // redraw dots using new member map
-}
+          await loadAvailability();
+      }
 
   } catch (err) {
     console.error("Change name failed:", err);
@@ -3437,6 +3442,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
