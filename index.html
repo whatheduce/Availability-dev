@@ -2428,14 +2428,16 @@ nameSave?.addEventListener("click", async () => {
 
     closeNameModal();
 
+    user.name = newName;           // update in-memory user
+    document.getElementById("acct-name").textContent = newName;
+    
     await confirmModal({
-      title: "Name updated",
+      title: "Username updated",
       message: "Your display name has been changed successfully.",
       okText: "Close",
       cancelText: ""
     });
 
-    // 🔄 refresh dashboard so previews show new name
     await loadDashboard();
     
   } catch (err) {
@@ -3419,6 +3421,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
