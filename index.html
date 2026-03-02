@@ -2415,10 +2415,21 @@ nameSave?.addEventListener("click", async () => {
       .eq("user_id", au.id);
 
     if (error) throw error;
-
+     await supabase
+      .from("availability_dev")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+    
     // Update in-memory + UI
     if (user) user.name = newName;
 
+    // refresh UI
+    await loadBoards(true);
+
+    if (currentTable) {
+      await loadAvailability();
+    }
+    
     const acctNameEl = document.getElementById("acct-name");
     if (acctNameEl) acctNameEl.textContent = newName;
 
@@ -3426,6 +3437,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
