@@ -1197,6 +1197,30 @@ body.account-view #dash-account {
   line-height:1.35;
 }
 
+.colour-grid{
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+}
+
+.colour-swatch{
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  cursor: pointer;
+  position: relative;
+}
+
+.colour-swatch.selected{
+  outline: 2px solid rgba(0,0,0,0.65);
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px){
+  .colour-grid{ grid-template-columns: repeat(6, 1fr); }
+}
 
 /* --- AUTH OVERLAY OVERRIDES (ensure clickable + visible) --- */
 #auth-overlay {
