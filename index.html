@@ -2344,12 +2344,15 @@ function openNameModal() {
   nameErr.style.display = "none";
   nameErr.textContent = "";
   nameInput.value = (user?.name || "").trim();
+  updateNameCount();
 
   nameModal.hidden = false;
   nameInput.focus();
   nameInput.select();
 }
-
+  
+nameInput?.addEventListener("input", updateNameCount);
+  
 function closeNameModal() {
   if (!nameModal) return;
   nameModal.hidden = true;
@@ -2437,6 +2440,24 @@ nameSave?.addEventListener("click", async () => {
     if (nameSave) nameSave.disabled = false;
   }
 });
+
+const nameCount = document.getElementById("name-count");
+
+function updateNameCount() {
+  if (!nameInput || !nameCount) return;
+
+  const len = nameInput.value.length;
+  nameCount.textContent = `${len} / 15`;
+
+  // turn red at the limit
+  if (len >= 15) {
+    nameCount.style.color = "#d11a2a";
+    nameCount.style.fontWeight = "700";
+  } else {
+    nameCount.style.color = "";
+    nameCount.style.fontWeight = "";
+  }
+}  
 
 document.getElementById("acct-change-colour")?.addEventListener("click", async () => {
   await confirmModal({
@@ -3317,8 +3338,9 @@ document.addEventListener("DOMContentLoaded", startApp);
   "
 />
 
-<div style="margin-top:6px; font-size:12px; opacity:0.6;">
-  Max 15 characters
+<div style="margin-top:6px; display:flex; justify-content:space-between; font-size:12px; opacity:0.7;">
+  <span>Max 15 characters</span>
+  <span id="name-count">0 / 15</span>
 </div>
 
     <div id="name-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
@@ -3392,6 +3414,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
