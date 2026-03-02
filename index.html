@@ -2438,9 +2438,12 @@ nameSave?.addEventListener("click", async () => {
 
     // Refresh dashboard previews/legend with fresh profile data
     await loadBoards(true);
-    if (currentTable) {
-      await loadTable(currentTable);
-    }
+
+      if (currentTable) {
+        await fetchBoardMembers(currentTable);  // 👈 THIS is the missing piece
+        renderLegend();                         // or whatever builds the legend
+        rerenderAvailability();                 // redraw dots using new member map
+}
 
   } catch (err) {
     console.error("Change name failed:", err);
@@ -3423,6 +3426,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
