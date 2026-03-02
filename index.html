@@ -1016,18 +1016,25 @@ async function rebuildDotsForCell(cell) {
 
   if (!data || data.length === 0) return;
 
+  // ✅ Fetch profiles ONCE
+  const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
+
   const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
 
   data.forEach(entry => {
+    const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+    const displayName = prof?.name || entry.name || "—";
+    const displayColor = prof?.color || entry.color || "#999";
+
     const dot = document.createElement("div");
     dot.className = "dot";
-    dot.style.background = entry.color;
-    dot.title = entry.name;
-    dot.dataset.userId = entry.user_id;
-    dot.dataset.name = entry.name;
 
-    const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
+    dot.style.background = displayColor;
+    dot.title = displayName;
+
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
+    dot.dataset.name = displayName;
 
     dotContainer.appendChild(dot);
   });
@@ -3471,6 +3478,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
