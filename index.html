@@ -2388,7 +2388,7 @@ nameSave?.addEventListener("click", async () => {
     // Basic validation
     if (!newName) return setNameError("Please enter a name.");
     if (newName.length < 2) return setNameError("Name must be at least 2 characters.");
-    if (newName.length > 32) return setNameError("Name must be 32 characters or fewer.");
+    if (newName.length > 15) return setNameError("Name must be 15 characters or fewer.");
 
     // No change
     if (user?.name && newName === user.name) {
@@ -2424,6 +2424,12 @@ nameSave?.addEventListener("click", async () => {
     }
 
     closeNameModal();
+    await confirmModal({
+      title: "Name updated",
+      message: "Your display name has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
   } catch (err) {
     console.error("Change name failed:", err);
     setNameError("Could not update your name. Please try again.");
@@ -3296,20 +3302,24 @@ document.addEventListener("DOMContentLoaded", startApp);
       This updates the name shown across your dashboards and calendars.
     </div>
 
-    <input
-      id="name-input"
-      type="text"
-      maxlength="32"
-      placeholder="Enter a new name…"
-      style="
-        width:100%;
-        margin-top:10px;
-        padding:10px;
-        border-radius:12px;
-        border:1px solid rgba(0,0,0,0.15);
-        font-family:inherit;
-      "
-    />
+<input
+  id="name-input"
+  type="text"
+  maxlength="15"
+  placeholder="Enter a new name…"
+  style="
+    width:100%;
+    margin-top:10px;
+    padding:10px;
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,0.15);
+    font-family:inherit;
+  "
+/>
+
+<div style="margin-top:6px; font-size:12px; opacity:0.6;">
+  Max 15 characters
+</div>
 
     <div id="name-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
 
@@ -3382,6 +3392,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
