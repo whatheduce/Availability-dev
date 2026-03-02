@@ -1101,7 +1101,6 @@ async function applyGoldStateForCell(cell, day) {
   if (anyGoldInDay) th.classList.add("gold-header");
   else th.classList.remove("gold-header");
 }
-
   
   
 async function handleAvailabilityChange(payload) {
@@ -1231,6 +1230,7 @@ async function handleAvailabilityChange(payload) {
 
     scheduleFullRefreshIdle(20000);
   }
+}
 }
   
   
@@ -3504,6 +3504,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
