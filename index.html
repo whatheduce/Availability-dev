@@ -83,7 +83,7 @@
       
       <!-- Name + change button in same row -->
       <div class="settings-row settings-row-3">
-        <div class="settings-label">Name</div>
+        <div class="settings-label">Username</div>
         <div class="settings-value" id="acct-name">—</div>
         <button id="acct-change-name" class="settings-mini-btn" type="button">Change</button>
       </div>
@@ -2331,13 +2331,105 @@ document.getElementById("acct-back-dashboard")?.addEventListener("click", () => 
   showDashboardPanel();
 });
 
-document.getElementById("acct-change-name")?.addEventListener("click", async () => {
-  await confirmModal({
-    title: "Coming soon",
-    message: "This will let you change your profile name.",
-    okText: "Close",
-    cancelText: ""
-  });
+// Change Name modal wiring
+const nameModal = document.getElementById("name-modal");
+const nameInput = document.getElementById("name-input");
+const nameErr = document.getElementById("name-error");
+const nameCancel = document.getElementById("name-cancel");
+const nameSave = document.getElementById("name-save");
+
+function openNameModal() {
+  if (!nameModal || !nameInput || !nameErr) return;
+
+  nameErr.style.display = "none";
+  nameErr.textContent = "";
+  nameInput.value = (user?.name || "").trim();
+
+  nameModal.hidden = false;
+  nameInput.focus();
+  nameInput.select();
+}
+
+function closeNameModal() {
+  if (!nameModal) return;
+  nameModal.hidden = true;
+}
+
+function setNameError(msg) {
+  if (!nameErr) return;
+  nameErr.textContent = msg;
+  nameErr.style.display = msg ? "block" : "none";
+}
+
+document.getElementById("acct-change-name")?.addEventListener("click", () => {
+  openNameModal();
+});
+
+nameCancel?.addEventListener("click", closeNameModal);
+
+// close on clicking outside the card
+nameModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closeNameModal();
+});
+
+// Enter = save, Esc = close
+nameInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeNameModal();
+  if (e.key === "Enter") nameSave?.click();
+});
+
+nameSave?.addEventListener("click", async () => {
+  try {
+    if (!nameInput) return;
+
+    const newName = nameInput.value.trim();
+
+    // Basic validation
+    if (!newName) return setNameError("Please enter a name.");
+    if (newName.length < 2) return setNameError("Name must be at least 2 characters.");
+    if (newName.length > 32) return setNameError("Name must be 32 characters or fewer.");
+
+    // No change
+    if (user?.name && newName === user.name) {
+      closeNameModal();
+      return;
+    }
+
+    nameSave.disabled = true;
+    setNameError("");
+
+    // Update DB (RLS should allow: user_id = auth.uid())
+    const au = await getAuthUser();
+    if (!au) {
+      setNameError("You’re not signed in.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+
+    if (error) throw error;
+
+    // Update in-memory + UI
+    if (user) user.name = newName;
+
+    document.getElementById("acct-name") && (document.getElementById("acct-name").textContent = newName);
+
+    const dashUser = document.getElementById("dash-username");
+    if (dashUser && user?.name) {
+      dashUser.textContent = possessive(user.name).toUpperCase();
+    }
+
+    closeNameModal();
+  } catch (err) {
+    console.error("Change name failed:", err);
+    setNameError("Could not update your name. Please try again.");
+  } finally {
+    if (nameSave) nameSave.disabled = false;
+  }
 });
 
 document.getElementById("acct-change-colour")?.addEventListener("click", async () => {
@@ -3195,6 +3287,39 @@ document.addEventListener("DOMContentLoaded", startApp);
   </div>
 </div>
 
+<!-- Change Name Modal -->
+<div id="name-modal" class="modal-overlay" hidden>
+  <div class="modal-card" style="max-width:520px;">
+    <div class="modal-title">Change name</div>
+
+    <div class="modal-body">
+      This updates the name shown across your dashboards and calendars.
+    </div>
+
+    <input
+      id="name-input"
+      type="text"
+      maxlength="32"
+      placeholder="Enter a new name…"
+      style="
+        width:100%;
+        margin-top:10px;
+        padding:10px;
+        border-radius:12px;
+        border:1px solid rgba(0,0,0,0.15);
+        font-family:inherit;
+      "
+    />
+
+    <div id="name-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
+
+    <div class="modal-actions">
+      <button id="name-cancel" class="modal-btn">Cancel</button>
+      <button id="name-save" class="modal-btn modal-btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+  
 <!-- Feedback User Modal -->  
 <div id="feedback-modal" class="modal-overlay" hidden>
   <div class="modal-card" style="max-width:520px;">
@@ -3257,6 +3382,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
