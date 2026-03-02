@@ -343,8 +343,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
-const pendingAdds = new Set(); // keys like `${tableId}|${day}|${time}|${userId}`
-
+const pendingAdds = new Set();   // prevent spam insert per user+cell
+const inFlightCells = new Set(); // per-cell lock (replaces toggleInFlight)
+  
 // Dashboard: Create New Calendar
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("#create-board-btn");
@@ -368,7 +369,6 @@ document.addEventListener("click", (e) => {
 let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
-let toggleInFlight = false;
 let fullRefreshTimer = null;
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
@@ -1671,84 +1671,90 @@ let user = null;
 
 async function toggleCell(e) {
   if (!user || !currentTable) return;
-  if (toggleInFlight) return;
-  toggleInFlight = true;
+
+  let k; // ✅ so finally can always see it
 
   try {
     const cell = e.currentTarget;
     if (!cell) return;
 
-    // ✅ normalize values to match DB types exactly
+    // normalize values
     const dayNum = parseInt(cell.dataset.day, 10);
     const timeKey = String(cell.dataset.time || "").trim();
-
     if (!Number.isFinite(dayNum) || !timeKey) return;
 
     const au = await getAuthUser();
     if (!au) return;
     const myUid = au.id;
 
-await ensureMembership(currentTable.id);
-    
-// ✅ DELETE FIRST (toggle off)
-const { error: delErr, count: deletedCount } = await supabase
-  .from("availability_dev")
-  .delete({ count: "exact" })
-  .eq("table_id", currentTable.id)
-  .eq("day", dayNum)
-  .eq("time", timeKey)
-  .eq("user_id", myUid);
+    k = addKey(currentTable.id, dayNum, timeKey, myUid);
+    if (inFlightCells.has(k)) return;
+    inFlightCells.add(k);
 
-if (delErr) {
-  console.warn("Delete failed:", delErr);
-  await loadAvailability();
-  return;
-}
+    await ensureMembership(currentTable.id);
 
-// If nothing deleted, try removing a legacy row for this user (user_id was NULL in older data)
-let legacyDeletedCount = 0;
-if ((deletedCount || 0) === 0) {
-  const { error: legacyErr, count: legacyCount } = await supabase
-    .from("availability_dev")
-    .delete({ count: "exact" })
-    .eq("table_id", currentTable.id)
-    .eq("day", dayNum)
-    .eq("time", timeKey)
-    .is("user_id", null)
-    .eq("name", user.name)
-    .eq("color", user.color);
+    // DELETE FIRST (toggle off)
+    const { error: delErr, count: deletedCount } = await supabase
+      .from("availability_dev")
+      .delete({ count: "exact" })
+      .eq("table_id", currentTable.id)
+      .eq("day", dayNum)
+      .eq("time", timeKey)
+      .eq("user_id", myUid);
 
-  if (legacyErr) {
-    console.warn("Legacy delete failed:", legacyErr);
-    await loadAvailability();
-    return;
-  }
+    if (delErr) {
+      console.warn("Delete failed:", delErr);
+      await loadAvailability();
+      return;
+    }
 
-  legacyDeletedCount = legacyCount || 0;
-}
+    // legacy delete if needed
+    let legacyDeletedCount = 0;
+    if ((deletedCount || 0) === 0) {
+      const { error: legacyErr, count: legacyCount } = await supabase
+        .from("availability_dev")
+        .delete({ count: "exact" })
+        .eq("table_id", currentTable.id)
+        .eq("day", dayNum)
+        .eq("time", timeKey)
+        .is("user_id", null)
+        .eq("name", user.name)
+        .eq("color", user.color);
 
-if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
-  // If the cell is gold, dots are hidden, so DOM patching won't work reliably → refresh
-  if (cell.classList.contains("gold-cell")) {
-    await loadAvailability();
-    return;
-  }
+      if (legacyErr) {
+        console.warn("Legacy delete failed:", legacyErr);
+        await loadAvailability();
+        return;
+      }
 
-  // Otherwise we can patch DOM normally
-  const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
-  if (myDot) myDot.remove();
+      legacyDeletedCount = legacyCount || 0;
+    }
 
-  // also remove any legacy dot (name+color match) if present
-  const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
-  if (legacyDot) legacyDot.remove();
+    if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
+      if (cell.classList.contains("gold-cell")) {
+        await loadAvailability();
+        return;
+      }
 
-  const container = cell.querySelector(".dot-container");
-  if (container && container.children.length === 0) container.remove();
+      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+      if (myDot) myDot.remove();
 
-  return;
-}
+      const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
+      if (legacyDot) legacyDot.remove();
 
-    // ✅ INSERT (toggle on)
+      const container = cell.querySelector(".dot-container");
+      if (container && container.children.length === 0) container.remove();
+
+      return;
+    }
+
+    // INSERT (toggle on) — optimistic first
+    const key = addKey(currentTable.id, dayNum, timeKey, myUid);
+    if (pendingAdds.has(key)) return;
+    pendingAdds.add(key);
+
+    addOptimisticDot(cell, myUid, user.name, user.color);
+
     const { error: insErr } = await supabase
       .from("availability_dev")
       .insert({
@@ -1762,28 +1768,25 @@ if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
 
     if (insErr) {
       console.warn("Insert failed:", insErr);
+
+      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+
+      const dc = cell.querySelector(".dot-container");
+      if (dc && dc.children.length === 0) dc.remove();
+
+      pendingAdds.delete(key);
       await loadAvailability();
       return;
     }
 
-    // add dot to DOM
-    let dotContainer = cell.querySelector(".dot-container");
-    if (!dotContainer) {
-      dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
-      cell.appendChild(dotContainer);
-    }
+    // success: mark pending dot as real
+    cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
+      ?.removeAttribute("data-pending");
 
-    if (!cell.querySelector(`.dot[data-user-id="${myUid}"]`)) {
-      const dot = document.createElement("div");
-      dot.className = "dot pop-in";
-      dot.style.background = user.color;
-      dot.dataset.userId = myUid;
-      dot.dataset.name = user.name;
-      dotContainer.appendChild(dot);
-    }
+    pendingAdds.delete(key);
+
   } finally {
-    toggleInFlight = false;
+    if (k) inFlightCells.delete(k);
   }
 }
 
@@ -3894,6 +3897,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
