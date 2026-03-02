@@ -1166,16 +1166,14 @@ async function applyGoldStateForCell(cell, day) {
   
   
 async function handleAvailabilityChange(payload) {
-  // For INSERT/UPDATE, payload.new exists. For DELETE, payload.old exists.
   const entry =
-  payload.eventType === "DELETE"
-    ? payload.old
-    : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
+    payload.eventType === "DELETE"
+      ? payload.old
+      : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
 
-   if (!entry) return;
+  if (!entry) return;
 
-  // DELETE payloads can sometimes be missing fields we need to locate the cell.
-  // If we can't locate it reliably, fall back to a safe refresh.
+  // If DELETE is missing fields we need, safest refresh
   if (payload.eventType === "DELETE") {
     if (entry.day == null || entry.time == null) {
       await loadAvailability();
@@ -1183,26 +1181,18 @@ async function handleAvailabilityChange(payload) {
     }
   }
 
-  // Find the specific cell
   const cell = table.querySelector(
     `td[data-day="${entry.day}"][data-time="${entry.time}"]`
   );
 
-  // If we still can't find the cell on DELETE, refresh (keeps realtime correct)
   if (!cell) {
-    if (payload.eventType === "DELETE") {
-      await loadAvailability();
-    }
+    if (payload.eventType === "DELETE") await loadAvailability();
     return;
   }
 
-  // Ensure dot container exists for inserts
-  let dotContainer = cell.querySelector(".dot-container");
-
-  // Helper to remove a user's dot from this cell
+  // Helper: remove a dot for this entry
   function removeDot(entryObj) {
-  // Prefer user_id (best), fall back to name (works for legacy rows / missing user_id on delete payload)
-  let selector = null;
+    let selector = null;
 
     if (entryObj.user_id) {
       selector = `.dot[data-user-id="${entryObj.user_id}"]`;
@@ -1212,87 +1202,82 @@ async function handleAvailabilityChange(payload) {
       return;
     }
 
-  const dot = cell.querySelector(selector);
-  if (dot) dot.remove();
+    const dot = cell.querySelector(selector);
+    if (dot) dot.remove();
 
-  // Re-check container after removal
-  dotContainer = cell.querySelector(".dot-container");
-  if (dotContainer && dotContainer.children.length === 0) dotContainer.remove();
-}
+    const dc = cell.querySelector(".dot-container");
+    if (dc && dc.children.length === 0) dc.remove();
+  }
 
+  // DELETE: remove dot then re-evaluate gold state
   if (payload.eventType === "DELETE") {
-    // Remove that user's dot
     removeDot(entry);
     await applyGoldStateForCell(cell, entry.day);
     scheduleFullRefreshIdle(20000);
     return;
   }
 
-  if (payload.eventType === "INSERT") {
-    if (!dotContainer) {
-      dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
-      cell.appendChild(dotContainer);
-    }
-
-    // Avoid duplicate DOT creation, but DO NOT return early (we still need gold/legend updates)
-    const alreadyHasDot =
-      (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) ||
-      (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`));
-
-    if (!alreadyHasDot) {
-      const dot = document.createElement("div");
-      dot.className = "dot";
-      // Prefer latest profile name/color (so legend/dots reflect changes instantly)
-      const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
-      const displayName = prof?.name || entry.name || "—";
-      const displayColor = prof?.color || entry.color || "#999";
-
-      dot.style.background = displayColor;
-      dot.title = displayName;
-
-      if (entry.user_id) dot.dataset.userId = entry.user_id;
-      dot.dataset.name = displayName;
-
-      dotContainer.appendChild(dot);
-
-      // Use the same display values for the legend entry
-      ensureLegendUser({ ...entry, name: displayName, color: displayColor });
+  // INSERT/UPDATE should never override gold visuals by adding dots
+  // If it IS gold, dots are intentionally hidden.
+  if (cell.classList.contains("gold-cell")) {
+    // Still keep legend/gold state correct in case thresholds changed
     await applyGoldStateForCell(cell, entry.day);
-
-    // Keep gold/legend correct with a later idle refresh
     scheduleFullRefreshIdle(20000);
     return;
   }
 
+  // Ensure dot container exists (only for non-gold cells)
+  let dotContainer = cell.querySelector(".dot-container");
+  if (!dotContainer) {
+    dotContainer = document.createElement("div");
+    dotContainer.className = "dot-container";
+    cell.appendChild(dotContainer);
+  }
+
+  // For UPDATE: easiest is remove then add back (rare)
   if (payload.eventType === "UPDATE") {
-    // If updates ever happen, safest is: remove old user dot and add new (rare)
     removeDot(entry);
+  }
 
-    if (!dotContainer) {
-      dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
-      cell.appendChild(dotContainer);
-    }
+  // If dot already exists (often from optimistic UI), do NOT add another.
+  const alreadyHasDot =
+    (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) ||
+    (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`));
 
+  // Prefer latest profile name/color
+  const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
+  const displayName = prof?.name || entry.name || "—";
+  const displayColor = prof?.color || entry.color || "#999";
+
+  if (!alreadyHasDot) {
     const dot = document.createElement("div");
     dot.className = "dot";
-    const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
-    const displayName = prof?.name || entry.name || "—";
-    const displayColor = prof?.color || entry.color || "#999";
-
     dot.style.background = displayColor;
     dot.title = displayName;
+
     if (entry.user_id) dot.dataset.userId = entry.user_id;
-      dot.dataset.name = displayName;
+    dot.dataset.name = displayName;
 
-    ensureLegendUser({ ...entry, name: displayName, color: displayColor });
-    
     dotContainer.appendChild(dot);
+  } else {
+    // If it exists (optimistic), update its displayed values just in case
+    const existing = entry.user_id
+      ? cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)
+      : (entry.name ? cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`) : null);
 
-    scheduleFullRefreshIdle(20000);
+    if (existing) {
+      existing.style.background = displayColor;
+      existing.title = displayName;
+      existing.dataset.name = displayName;
+    }
   }
-}
+
+  ensureLegendUser({ ...entry, name: displayName, color: displayColor });
+
+  // Now that dot is present, see if we should flip to gold (this will remove dots container if needed)
+  await applyGoldStateForCell(cell, entry.day);
+
+  scheduleFullRefreshIdle(20000);
 }
   
   
@@ -3918,6 +3903,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
