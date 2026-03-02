@@ -370,6 +370,9 @@ let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
 let fullRefreshTimer = null;
+let loadAvailabilityRunning = false;
+let loadAvailabilityQueued = false;
+  
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
   clearTimeout(fullRefreshTimer);
@@ -1923,30 +1926,43 @@ async function getProfileCached(userId) {
   profilesCache = { ...profilesCache, ...map };
   return profilesCache[userId] || null;
 }  
+
   
 /* === Render dots + gold === */
 async function loadAvailability() {
-  const { data: rows, error } = await supabase
-    .from("availability_dev")
-    .select("*")
-    .eq("table_id", currentTable.id);
-      if (error) {
+  // ✅ prevent overlapping renders that duplicate rows/cells
+  if (loadAvailabilityRunning) {
+    loadAvailabilityQueued = true;
+    return;
+  }
+
+  loadAvailabilityRunning = true;
+
+  try {
+    const { data: rows, error } = await supabase
+      .from("availability_dev")
+      .select("*")
+      .eq("table_id", currentTable.id);
+
+    if (error) {
       console.error("loadAvailability failed:", error);
       return;
     }
 
-  const cells = table.querySelectorAll("td[data-day]");
+    // Clear existing cells
+    const cells = table.querySelectorAll('td[data-day]');
+    cells.forEach(cell => {
+      cell.innerHTML = "";
+      cell.classList.remove("gold-cell");
+    });
 
-  cells.forEach(cell => {
-    cell.innerHTML = "";
-    cell.classList.remove("gold-cell");
-  });
+    if (!rows) return;
 
-  if (!rows) return;
-  const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
-  profilesCache = { ...profilesCache, ...profilesMap };
+    // Profiles map for latest name/color
+    const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
+    profilesCache = { ...profilesCache, ...profilesMap };
 
-  /* Legend */
+    /* Legend */
     const users = {};
     rows.forEach(r => {
       const prof = r.user_id ? profilesMap[r.user_id] : null;
@@ -1959,7 +1975,6 @@ async function loadAvailability() {
     });
 
     legendList.innerHTML = "";
-
     Object.entries(users).forEach(([key, { name, color }]) => {
       const div = document.createElement("div");
       div.className = "legend-item";
@@ -1971,71 +1986,81 @@ async function loadAvailability() {
       legendList.appendChild(div);
     });
 
-  /* Group by cell */
-  const map = {};
-  rows.forEach(entry => {
-    const key = `${entry.day}-${entry.time}`;
-    if (!map[key]) map[key] = [];
-    map[key].push(entry);
-  });
+    /* Group by cell */
+    const map = {};
+    rows.forEach(entry => {
+      const key = `${entry.day}-${entry.time}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(entry);
+    });
 
-  const goldDays = new Set();
-  const goldThreshold = Number(currentTable?.gold_threshold);
-  const enableGold = Number.isFinite(goldThreshold);
+    const goldDays = new Set();
+    const goldThreshold = Number(currentTable?.gold_threshold);
+    const enableGold = Number.isFinite(goldThreshold);
 
-  /* Render cells */
-  document.querySelectorAll("td[data-day]").forEach(cell => {
-    const day = cell.dataset.day;
-    const time = cell.dataset.time;
-    const key = `${day}-${time}`;
-    const entries = map[key] || [];
+    /* Render cells */
+    table.querySelectorAll('td[data-day]').forEach(cell => {
+      const day = cell.dataset.day;
+      const time = cell.dataset.time;
+      const key = `${day}-${time}`;
+      const entries = map[key] || [];
 
-    if (enableGold && entries.length >= goldThreshold) {
-      cell.classList.add("gold-cell");
-      goldDays.add(parseInt(day, 10));
-      return;
-    }
+      if (enableGold && entries.length >= goldThreshold) {
+        cell.classList.add("gold-cell");
+        goldDays.add(parseInt(day, 10));
+        return;
+      }
 
-    if (entries.length > 0) {
-      const dotContainer = document.createElement("div");
-      dotContainer.className = "dot-container";
+      if (entries.length > 0) {
+        const dotContainer = document.createElement("div");
+        dotContainer.className = "dot-container";
 
-      entries.forEach(entry => {
-        const dot = document.createElement("div");
-        dot.className = "dot";
-        dot.dataset.userId = entry.user_id;
-        const prof = entry.user_id ? profilesMap[entry.user_id] : null;
-        const displayName = prof?.name || entry.name || "—";
-        const displayColor = prof?.color || entry.color || "#999";
+        entries.forEach(entry => {
+          const dot = document.createElement("div");
+          dot.className = "dot";
+
+          if (entry.user_id) dot.dataset.userId = entry.user_id;
+
+          const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+          const displayName = prof?.name || entry.name || "—";
+          const displayColor = prof?.color || entry.color || "#999";
 
           dot.style.background = displayColor;
           dot.title = displayName;
           dot.dataset.name = displayName;
-        
 
-        // Animate only the current user's dot
-        if (user && entry.user_id === user.id) {
-          dot.classList.add("pop-in");
-        }
+          // Animate only the current user's dot
+          if (user && entry.user_id === user.id) {
+            dot.classList.add("pop-in");
+          }
 
-        dotContainer.appendChild(dot);
-      });
+          dotContainer.appendChild(dot);
+        });
 
-      cell.appendChild(dotContainer);
+        cell.appendChild(dotContainer);
+      }
+    });
+
+    // Gold header highlighting
+    const headerCells = table.querySelectorAll("th.day-header");
+    headerCells.forEach(th => {
+      const dayNum = parseInt(th.dataset.day, 10);
+      if (goldDays.has(dayNum)) th.classList.add("gold-header");
+      else th.classList.remove("gold-header");
+    });
+
+  } finally {
+    loadAvailabilityRunning = false;
+
+    if (loadAvailabilityQueued) {
+      loadAvailabilityQueued = false;
+      loadAvailability(); // run once more
     }
-  });
-
-  // Gold header highlighting (after we've computed goldDays)
-  const headerCells = table.querySelectorAll("th.day-header");
-  headerCells.forEach(th => {
-    const dayNum = parseInt(th.dataset.day, 10);
-    if (goldDays.has(dayNum)) th.classList.add("gold-header");
-    else th.classList.remove("gold-header");
-  });
+  }
 }
 
-  
-  async function resetBoard() {
+
+async function resetBoard() {
   if (!currentTable) return;
 
   await supabase
@@ -2045,7 +2070,7 @@ async function loadAvailability() {
 
   await loadAvailability();
 }
-
+  
   
   async function deleteBoard() {
   if (!currentTable) return;
@@ -3903,6 +3928,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
