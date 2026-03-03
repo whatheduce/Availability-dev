@@ -1379,6 +1379,7 @@ body.account-view #dash-account {
 .calendar-topbar-right{
   flex: 1;
   display: flex;
+  width: 50%;
   justify-content: flex-end;
   margin-right: 8%;
 }
