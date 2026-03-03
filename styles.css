@@ -1384,12 +1384,12 @@ body.account-view #dash-account {
 
 #calendar-side{
   width: 100%;
-  margin: 14px 0 0;       /* <-- no auto-centering */
+  margin: 14px 0 0; 
   padding-left: 40px;
   padding-right: 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;  /* <-- makes note start ~halfway */
-  gap: 24px;
+  gap: 33%;
   align-items: start;
 }
 
@@ -1418,7 +1418,7 @@ body.account-view #dash-account {
 
 .presence-side{
   width: 280px;
-  text-align: left;
+  text-align: center;
   color: #555;
   font-size: 14px;
 }
