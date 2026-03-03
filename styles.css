@@ -1606,4 +1606,14 @@ body.account-view #dash-account {
   box-shadow: 0 8px 22px rgba(0,0,0,0.12);
 }
 
+.auth-privacy-note {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(0,0,0,0.55);
+  text-align: center;
+}
+
 [hidden] { display: none !important; }
