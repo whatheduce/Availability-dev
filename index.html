@@ -318,36 +318,38 @@
 </div>
 
 <div id="calendar-side" style="display:none;">
-  <div id="presence" class="presence-side">
-    Viewing now: <span id="presence-count">1</span>
-  </div>
-
-  <div id="legend" class="side-card">
-    <h3>Legend</h3>
-    <div id="legendList"></div>
-  </div>
-
-  <div id="board-footer" class="side-card footer-note" style="display:none;">
-    <div class="footer-note__header">
-      <div class="footer-note__title">Calendar note</div>
-
-      <button id="footer-edit-btn" class="settings-mini-btn" type="button" style="display:none;">
-        Edit
-      </button>
+  <div id="calendar-side-left">
+    <div id="presence" class="presence-side">
+      Viewing now: <span id="presence-count">1</span>
     </div>
 
-    <!-- single textbox for view + edit -->
-    <textarea
-      id="footer-note-input"
-      class="footer-note__textarea"
-      rows="6"
-      readonly
-      placeholder="No note yet."
-    ></textarea>
+    <div id="legend" class="side-card">
+      <h3>Legend</h3>
+      <div id="legendList"></div>
+    </div>
+  </div>
 
-    <div id="footer-note-actions" class="footer-note__actions" style="display:none;">
-      <button id="footer-note-save" class="topbar-btn" type="button">Save</button>
-      <button id="footer-note-cancel" class="back-btn" type="button">Cancel</button>
+  <div id="calendar-side-right">
+    <div id="board-footer" class="side-card footer-note" style="display:none;">
+      <div class="footer-note__header">
+        <div class="footer-note__title">Calendar note</div>
+        <button id="footer-edit-btn" class="settings-mini-btn" type="button" style="display:none;">
+          Edit
+        </button>
+      </div>
+
+      <textarea
+        id="footer-note-input"
+        class="footer-note__textarea"
+        rows="6"
+        readonly
+        placeholder="No note yet."
+      ></textarea>
+
+      <div id="footer-note-actions" class="footer-note__actions" style="display:none;">
+        <button id="footer-note-save" class="topbar-btn" type="button">Save</button>
+        <button id="footer-note-cancel" class="back-btn" type="button">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
@@ -4068,6 +4070,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
