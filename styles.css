@@ -61,7 +61,7 @@ body.account-view #dash-topbar {
 
     table {
       border-collapse: separate;
-      margin: 20px;
+      margin: 0;
       display: table;
     }
 
@@ -1385,7 +1385,8 @@ body.account-view #dash-account {
 #calendar-side{
   width: 100%;
   margin: 14px 0 0;       /* <-- no auto-centering */
-  padding: 0 20px;        /* matches #calendar padding */
+  padding-left: 40px;
+  padding-right: 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;  /* <-- makes note start ~halfway */
   gap: 24px;
@@ -1408,7 +1409,11 @@ body.account-view #dash-account {
 
 #calendar-side-right{
   display: flex;
-  justify-content: flex-end;
+  justify-content: stretch;
+}
+
+#calendar-side-right > *{
+  width: 100%;
 }
 
 .presence-side{
@@ -1421,11 +1426,12 @@ body.account-view #dash-account {
 #board-footer.side-card{
   width: 100%;
   max-width: none;
+  min-width: 520px;   /* helps prevent it collapsing */
 }
 
 .footer-note__textarea{
-  min-height: 200px;
-  max-height: 420px;
+  min-height: 260px;
+  max-height: 520px;
 }
 
 /* Note box tweaks */
