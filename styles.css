@@ -1389,6 +1389,82 @@ body.account-view #dash-account {
   .calendar-topbar { padding: 0 16px; }
 }
 
+/* Right-side stack under calendar (legend + note) */
+#calendar-side{
+  max-width: 980px;
+  margin: 14px auto 0;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* right align the stack */
+  gap: 12px;
+}
+
+.side-card{
+  width: 280px;          /* match your legend width */
+  background: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* "Viewing now" centered above the legend box */
+.presence-side{
+  width: 280px;
+  text-align: center;
+  color: #555;
+  font-size: 14px;
+}
+
+/* Note box tweaks */
+.footer-note__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.footer-note__title{
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.footer-note__textarea{
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.92);
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.footer-note__textarea[readonly]{
+  background: rgba(255,255,255,0.70);
+}
+
+/* Actions row */
+.footer-note__actions{
+  display:flex;
+  gap: 10px;
+  margin-top: 10px;
+  align-items:center;
+}
+
+/* Mobile: stack becomes full-width */
+@media (max-width: 720px){
+  #calendar-side{
+    align-items: stretch;
+  }
+  .side-card, .presence-side{
+    width: 100%;
+  }
+}
 
 /* ===========================
    CREATE SCREEN TOP BAR
