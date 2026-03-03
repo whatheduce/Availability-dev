@@ -207,7 +207,13 @@
 </div>
 
                                                                           
-<div id="create-board" class="centered-container" style="display:none;">
+<div id="create-board" class="centered-container">
+
+  <div id="create-topbar">
+    <button id="return-dashboard-btn" class="ghost-btn">
+      ← Return to Dashboard
+    </button>
+  </div>
 
   <div id="board-setup" style="display:block;">
 
@@ -2260,6 +2266,12 @@ function bindUiListenersOnce() {
     goCreateBtn.addEventListener("click", createBoard);
   }
 
+  // Create page → Return to Dashboard
+  const returnBtn = document.getElementById("return-dashboard-btn");
+  if (returnBtn) {
+    returnBtn.addEventListener("click", showDashboard);
+  }
+  
   // Profile setup save
   const setupSaveBtn = document.getElementById("setup-save");
   if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);
@@ -3925,6 +3937,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
