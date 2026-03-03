@@ -100,13 +100,19 @@
     </div>
 
     <div class="settings-cta-row">
-      <button id="acct-upgrade-pro" class="settings-action danger compact">
-        Upgrade to Pro
-      </button>
+    <div class="settings-cta-left">
+    <button id="acct-upgrade-pro" class="settings-action danger compact">
+      Upgrade to Pro
+    </button>
 
-      <button id="acct-back-dashboard" class="settings-action compact">
-        Back to Dashboard
-      </button>
+    <button id="acct-delete-account" class="settings-action danger compact">
+      Delete Account
+    </button>
+    </div>
+
+    <button id="acct-back-dashboard" class="settings-action compact">
+      Back to Dashboard
+    </button>
     </div>
     </div>
   </div>
@@ -209,7 +215,42 @@
   </div>
 </div>
 
-                                                                          
+<div id="delete-account-overlay" style="
+  position:fixed; inset:0; display:none; z-index:9999;
+  background:rgba(255,255,255,0.35); backdrop-filter: blur(8px);
+">
+  <div style="
+    max-width:460px; margin:80px auto; background:rgba(255,255,255,0.92);
+    border:1px solid rgba(0,0,0,0.12); border-radius:16px; padding:18px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+    text-align:left;
+  ">
+    <div style="font-weight:900; font-size:18px; margin-bottom:6px;">Delete your Hearth account</div>
+    <div style="font-size:13px; color:#666; margin-bottom:12px;">
+      This permanently deletes your account, profile, all your dots, and any calendars you host.
+    </div>
+
+    <label style="display:block; font-weight:700; font-size:12px; margin-bottom:6px;">Password</label>
+    <input id="delete-account-password" type="password" placeholder="Enter your password"
+      style="box-sizing:border-box; width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+
+    <label style="display:block; font-weight:700; font-size:12px; margin-bottom:6px;">Type DELETE to confirm</label>
+    <input id="delete-account-confirm" type="text" placeholder="DELETE"
+      style="box-sizing:border-box; width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+
+    <div id="delete-account-msg" style="margin-top:6px; font-size:13px; color:#b00020; display:none;"></div>
+
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button id="delete-account-cancel" class="primary-btn" style="flex:1; background:#f3f4f6;">
+        Cancel
+      </button>
+      <button id="delete-account-confirm-btn" class="primary-btn" style="flex:1; background:#ff3b30;">
+        Delete account
+      </button>
+    </div>
+  </div>
+</div>
+  
 <div id="create-board" class="centered-container" style="display:none;">
 
   <div id="create-topbar">
@@ -2008,6 +2049,100 @@ function buildCalendar() {
   bindCalendarClickDelegation();
 }
 
+
+function showDeleteAccountOverlay(msg = "") {
+  const ov = document.getElementById("delete-account-overlay");
+  const m = document.getElementById("delete-account-msg");
+  if (!ov) return;
+
+  ov.style.display = "block";
+
+  if (m) {
+    if (msg) { m.style.display = "block"; m.textContent = msg; }
+    else { m.style.display = "none"; m.textContent = ""; }
+  }
+}
+
+function hideDeleteAccountOverlay() {
+  const ov = document.getElementById("delete-account-overlay");
+  if (ov) ov.style.display = "none";
+}
+
+async function deleteAccountFlow() {
+  const au = await getAuthUser();
+  if (!au) {
+    showDeleteAccountOverlay("You must be signed in.");
+    return;
+  }
+
+  const email = (document.getElementById("acct-email")?.textContent || "").trim();
+  const pass = (document.getElementById("delete-account-password")?.value || "").trim();
+  const conf = (document.getElementById("delete-account-confirm")?.value || "").trim();
+
+  if (!pass) return showDeleteAccountOverlay("Please enter your password.");
+  if (conf !== "DELETE") return showDeleteAccountOverlay('Type DELETE to confirm.');
+
+  // 1) Re-authenticate (proves password)
+  const { error: reauthErr } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (reauthErr) return showDeleteAccountOverlay(reauthErr.message || "Password incorrect.");
+
+  // 2) Call Edge Function that performs deletions + auth user delete (service role)
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) return showDeleteAccountOverlay("Session error. Please sign in again.");
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ confirm: "DELETE" })
+    });
+
+    const out = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      return showDeleteAccountOverlay(out?.error || "Delete failed.");
+    }
+
+    // 3) Sign out + reset UI
+    await supabase.auth.signOut();
+    hideDeleteAccountOverlay();
+
+    // clear your local remembered stuff
+    localStorage.removeItem("lastBoardToken");
+    localStorage.removeItem("lastBoardManageToken");
+    localStorage.removeItem("globalUserId");
+    localStorage.removeItem("globalUserName");
+    localStorage.removeItem("globalUserColor");
+
+    window.location.href = window.location.pathname; // fresh state
+  } catch (err) {
+    console.error(err);
+    showDeleteAccountOverlay("Network error while deleting account.");
+  }
+}
+
+// Bind buttons
+document.getElementById("acct-delete-account")?.addEventListener("click", () => {
+  // clear old values
+  const p = document.getElementById("delete-account-password");
+  const c = document.getElementById("delete-account-confirm");
+  if (p) p.value = "";
+  if (c) c.value = "";
+  showDeleteAccountOverlay("");
+});
+
+document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
+  hideDeleteAccountOverlay();
+});
+
+document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
+  await deleteAccountFlow();
+});
+  
 
 function bindCalendarClickDelegation() {
   const table = document.getElementById("availabilityTable");
@@ -4039,6 +4174,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
