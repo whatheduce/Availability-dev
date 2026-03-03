@@ -1380,6 +1380,7 @@ body.account-view #dash-account {
   flex: 1;
   display: flex;
   justify-content: flex-end;
+  margin-right: 8%;
 }
 
 /* Optional: tighten spacing on small screens */
