@@ -191,7 +191,7 @@ body.account-view #dash-topbar {
 .footer-note--top{
   margin: 0;               /* override old footer margins */
   margin-left: 0;
-  width: min(420px, 100%);
+  width: 50%;
   max-height: clamp(120px, 22vh, 260px);
   overflow: auto;
 }
@@ -1379,7 +1379,6 @@ body.account-view #dash-account {
 .calendar-topbar-right{
   flex: 1;
   display: flex;
-  width: 50%;
   justify-content: flex-end;
   margin-right: 8%;
 }
