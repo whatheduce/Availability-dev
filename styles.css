@@ -1426,12 +1426,12 @@ body.account-view #dash-account {
 #board-footer.side-card{
   width: 100%;
   max-width: none;
-  min-width: 520px;   /* helps prevent it collapsing */
+  min-width: 720px;   /* helps prevent it collapsing */
 }
 
 .footer-note__textarea{
-  min-height: 260px;
-  max-height: 520px;
+  min-height: 180px;
+  max-height: 420px;
 }
 
 /* Note box tweaks */
