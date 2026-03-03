@@ -422,19 +422,20 @@ async function refreshBoardOwnerFlag() {
   const au = await getAuthUser();
   if (!au || !currentTable?.id) return;
 
-  const { data, error } = await supabase
-    .from("board_members")
-    .select("role")
-    .eq("board_id", currentTable.id)
-    .eq("user_id", au.id)
-    .maybeSingle();
+  // Primary: owner_id on tables row
+  if (currentTable.owner_id && currentTable.owner_id === au.id) {
+    isBoardOwner = true;
+  } else {
+    // Fallback: board_members role
+    const { data, error } = await supabase
+      .from("board_members")
+      .select("role")
+      .eq("board_id", currentTable.id)
+      .eq("user_id", au.id)
+      .maybeSingle();
 
-  if (error) {
-    console.warn("refreshBoardOwnerFlag failed:", error);
-    return;
+    if (!error) isBoardOwner = data?.role === "owner";
   }
-
-  isBoardOwner = data?.role === "owner";
 
   const editBtn = document.getElementById("footer-edit-btn");
   if (editBtn) editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
@@ -1580,6 +1581,10 @@ subscribePresence();
 
 buildCalendar();
 await loadAvailability();
+
+await refreshBoardOwnerFlag();
+renderCalendarNote();
+setCalendarNoteEditing(false);
 }
   
   function generateToken() {
@@ -4057,6 +4062,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
