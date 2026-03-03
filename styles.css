@@ -131,13 +131,61 @@ body.account-view #dash-topbar {
       border: 1px solid #ccc;
     }
 
-    .footer-text {
-      text-align: left;
-      margin-left: 20px;
-      margin-top: 8px;
-      margin-bottom: 30px;
-      display: none;
-    }
+    .footer-note{
+  max-width: 980px;
+  margin: 8px 0 30px;
+  margin-left: 20px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(10px);
+}
+
+.footer-note__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.footer-note__title{
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.footer-note__display{
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.9;
+  white-space: pre-wrap; /* keeps newlines */
+}
+
+.footer-note__placeholder{
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.footer-note__editor textarea{
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.9);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.footer-note__actions{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  margin-top: 10px;
+}
 
     td {
       transition: box-shadow 0.3s ease, background 0.3s ease;
