@@ -27,7 +27,7 @@ body.account-view #dash-topbar {
 }
 
     #calendar {
-      margin: 40px auto;
+      margin: 18px 0 40px;
       overflow-x: auto;
       display: block;
       min-height: 200px;
@@ -1280,6 +1280,33 @@ body.account-view #dash-account {
   outline: none;
   box-shadow: 0 0 0 3px rgba(0,122,255,0.22), 0 10px 22px rgba(0,0,0,0.10);
 }
+
+
+/* ===========================
+   CALENDAR TOP BAR POLISH
+=========================== */
+
+.calendar-topbar {
+  width: 100%;
+  margin-top: 14px;
+  padding: 0 20px;           /* match calendar padding */
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.calendar-topbar-left {
+  display: flex;
+  flex-direction: column;    /* stack on the left */
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* Optional: tighten spacing on small screens */
+@media (max-width: 520px) {
+  .calendar-topbar { padding: 0 16px; }
+}
+
 
 /* ===========================
    CREATE SCREEN TOP BAR
