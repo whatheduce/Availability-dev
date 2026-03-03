@@ -107,17 +107,12 @@ body.account-view #dash-topbar {
       z-index: 4;
     }
 
-    #legend {
-      margin-top: 20px;
-      margin-left: 30px;
-      text-align: left;
-      width: 280px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      display: none;
-    }
+#legend{
+  margin: 0;
+  text-align: left;
+  width: 280px;
+  display: block;
+}
     
     .legend-item {
       display: flex;
@@ -1389,31 +1384,40 @@ body.account-view #dash-account {
   .calendar-topbar { padding: 0 16px; }
 }
 
-/* Right-side stack under calendar (legend + note) */
+/* Bottom-right area: presence + legend + note */
 #calendar-side{
   max-width: 980px;
-  margin: 14px auto 0;
+  margin: 14px auto 24px;
   padding: 0 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end; /* right align the stack */
+  align-items: flex-end;  /* right align the stack */
   gap: 12px;
 }
 
+/* Shared card styling for legend/note */
 .side-card{
-  width: 280px;          /* match your legend width */
   background: #fff;
   padding: 10px;
   border-radius: 6px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* "Viewing now" centered above the legend box */
 .presence-side{
-  width: 280px;
-  text-align: center;
+  width: 280px;        /* same as legend */
+  text-align: left;    /* <-- left, not centered */
   color: #555;
   font-size: 14px;
+}
+
+/* Make note wider and a bit taller (bottom-right) */
+#board-footer.side-card{
+  width: min(840px, 100%);              /* ~3× wider than 280px */
+}
+
+.footer-note__textarea{
+  min-height: 140px;                    /* ~30% taller feel */
+  max-height: 320px;                    /* prevents taking over page */
 }
 
 /* Note box tweaks */
