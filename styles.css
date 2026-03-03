@@ -109,6 +109,7 @@ body.account-view #dash-topbar {
 
     #legend {
       margin-top: 20px;
+      margin-left: 30px;
       text-align: left;
       width: 280px;
       background: #fff;
