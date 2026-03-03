@@ -804,6 +804,7 @@ body.account-view #dash-account {
     border: 1px solid rgba(0,0,0,0.12);
     cursor: pointer;
     background: rgba(255,255,255,0.9);
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
   }
 
 .board-actions-btn {
@@ -871,6 +872,21 @@ body.account-view #dash-account {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.board-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.10);
+  border-color: rgba(0,0,0,0.18);
+}
+
+.board-actions-btn:hover {
+  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
+.board-actions-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Mini board preview container */
@@ -1221,6 +1237,52 @@ body.account-view #dash-account {
 @media (max-width: 520px){
   .colour-grid{ grid-template-columns: repeat(6, 1fr); }
 }
+
+@media (max-width: 720px) {
+  #dash-topbar,
+  #dash-body,
+  #dash-account {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .dash-main { font-size: 18px; }
+  .dash-subtitle { font-size: 11px; }
+
+  #create-board-btn {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+#create-board-btn {
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.90);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+#create-board-btn:hover {
+  background: rgba(255,255,255,1);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+
+#create-board-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+#create-board-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.22), 0 10px 22px rgba(0,0,0,0.10);
+}
+
+
+
 
 /* --- AUTH OVERLAY OVERRIDES (ensure clickable + visible) --- */
 #auth-overlay {
