@@ -308,35 +308,36 @@
       Add users
     </button>
   </div>
+
+  <div class="calendar-topbar-right">
+    <div id="board-footer" class="footer-note footer-note--top" style="display:none;">
+      <div class="footer-note__header">
+        <div class="footer-note__title">Calendar note</div>
+        <button id="footer-edit-btn" class="settings-mini-btn" type="button" style="display:none;">
+          Edit
+        </button>
+      </div>
+
+      <div id="footer-note-display" class="footer-note__display"></div>
+
+      <div id="footer-note-editor" class="footer-note__editor" style="display:none;">
+        <textarea
+          id="footer-note-input"
+          rows="4"
+          placeholder="Add a note for your group…"
+        ></textarea>
+
+        <div class="footer-note__actions">
+          <button id="footer-note-save" class="topbar-btn" type="button">Save</button>
+          <button id="footer-note-cancel" class="back-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="calendar" style="display:none;">
   <table id="availabilityTable"></table>
-</div>
-  
-<!-- Footer note (outside the table) -->
-<div id="board-footer" class="footer-note" style="display:none;">
-  <div class="footer-note__header">
-    <div class="footer-note__title">Calendar note</div>
-    <button id="footer-edit-btn" class="settings-mini-btn" type="button" style="display:none;">
-      Edit
-    </button>
-  </div>
-
-  <div id="footer-note-display" class="footer-note__display"></div>
-
-  <div id="footer-note-editor" class="footer-note__editor" style="display:none;">
-    <textarea
-      id="footer-note-input"
-      rows="4"
-      placeholder="Add a note for your group…"
-    ></textarea>
-
-    <div class="footer-note__actions">
-      <button id="footer-note-save" class="topbar-btn" type="button">Save</button>
-      <button id="footer-note-cancel" class="back-btn" type="button">Cancel</button>
-    </div>
-  </div>
 </div>
 
 <div id="presence" style="display:none; text-align:center; margin-top:14px; color:#555; font-size:14px;">
@@ -4062,6 +4063,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
