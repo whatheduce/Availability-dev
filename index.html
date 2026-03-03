@@ -207,7 +207,7 @@
 </div>
 
                                                                           
-<div id="create-board" class="centered-container">
+<div id="create-board" class="centered-container" style="display:none;">
 
   <div id="create-topbar">
     <button id="return-dashboard-btn" class="ghost-btn">
@@ -895,9 +895,7 @@ function showAuthOverlay(msg = "", opts = {}) {
 
   
 function showDashboard() {
-  // 👇 THIS is the important fix
   document.body.style.visibility = "visible";
-
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "block";
 }
@@ -3940,6 +3938,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
