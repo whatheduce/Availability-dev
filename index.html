@@ -1540,7 +1540,8 @@ if (!au) {
   document.getElementById("calendar-topbar").style.display = "flex";
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("legend").style.display = "none";
-  document.querySelector("board-footer").style.display = "none";
+  const footer = document.getElementById("board-footer");
+    if (footer) footer.style.display = "none";
   document.getElementById("presence").style.display = "none";
 
   await refreshBoardOwnerFlag();
@@ -1570,7 +1571,8 @@ document.getElementById("calendar").style.display = "block";
 document.getElementById("calendar-topbar").style.display = "flex";
 document.getElementById("dashboard").style.display = "none";
 document.getElementById("legend").style.display = "block";
-document.querySelector("board-footer").style.display = "block";
+const footer = document.getElementById("board-footer");
+  if (footer) footer.style.display = "block";
 
 // Now that UI is visible, start realtime + render
 subscribeRealtime();
@@ -4055,6 +4057,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
