@@ -187,6 +187,30 @@ body.account-view #dash-topbar {
   margin-top: 10px;
 }
 
+/* Note box when used in the topbar */
+.footer-note--top{
+  margin: 0;               /* override old footer margins */
+  margin-left: 0;
+  width: min(420px, 100%);
+  max-height: clamp(120px, 22vh, 260px);
+  overflow: auto;
+}
+
+@media (max-width: 720px){
+  .calendar-topbar{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-topbar-right{
+    justify-content: flex-start;
+  }
+
+  .footer-note--top{
+    width: 100%;
+  }
+}
+
     td {
       transition: box-shadow 0.3s ease, background 0.3s ease;
       border-radius: 8px;
@@ -1334,13 +1358,14 @@ body.account-view #dash-account {
    CALENDAR TOP BAR POLISH
 =========================== */
 
-.calendar-topbar {
+.calendar-topbar{
   width: 100%;
   margin-top: 14px;
-  padding: 0 20px;           /* match calendar padding */
+  padding: 0 20px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: flex-start;
+  gap: 16px;
 }
 
 .calendar-topbar-left {
@@ -1348,6 +1373,13 @@ body.account-view #dash-account {
   flex-direction: column;    /* stack on the left */
   align-items: flex-start;
   gap: 10px;
+  margin-left: 20px;
+}
+
+.calendar-topbar-right{
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Optional: tighten spacing on small screens */
