@@ -309,30 +309,7 @@
     </button>
   </div>
 
-  <div class="calendar-topbar-right">
-    <div id="board-footer" class="footer-note footer-note--top" style="display:none;">
-      <div class="footer-note__header">
-        <div class="footer-note__title">Calendar note</div>
-        <button id="footer-edit-btn" class="settings-mini-btn" type="button" style="display:none;">
-          Edit
-        </button>
-      </div>
-
-      <div id="footer-note-display" class="footer-note__display"></div>
-
-      <div id="footer-note-editor" class="footer-note__editor" style="display:none;">
-        <textarea
-          id="footer-note-input"
-          rows="4"
-          placeholder="Add a note for your group…"
-        ></textarea>
-
-        <div class="footer-note__actions">
-          <button id="footer-note-save" class="topbar-btn" type="button">Save</button>
-          <button id="footer-note-cancel" class="back-btn" type="button">Cancel</button>
-        </div>
-      </div>
-    </div>
+  <div class="calendar-topbar-right">    
   </div>
 </div>
 
@@ -340,13 +317,40 @@
   <table id="availabilityTable"></table>
 </div>
 
-<div id="presence" style="display:none; text-align:center; margin-top:14px; color:#555; font-size:14px;">
-  Viewing now: <span id="presence-count">1</span>
-</div>  
-  
-<div id="legend" style="display:none;">
-  <h3>Legend</h3>
-  <div id="legendList"></div>
+<div id="calendar-side" style="display:none;">
+  <div id="presence" class="presence-side">
+    Viewing now: <span id="presence-count">1</span>
+  </div>
+
+  <div id="legend" class="side-card">
+    <h3>Legend</h3>
+    <div id="legendList"></div>
+  </div>
+
+  <div id="board-footer" class="side-card footer-note" style="display:none;">
+    <div class="footer-note__header">
+      <div class="footer-note__title">Calendar note</div>
+
+      <button id="footer-edit-btn" class="settings-mini-btn" type="button" style="display:none;">
+        Edit
+      </button>
+    </div>
+
+    <!-- single textbox for view + edit -->
+    <textarea
+      id="footer-note-input"
+      class="footer-note__textarea"
+      rows="4"
+      readonly
+      placeholder="No note yet."
+    ></textarea>
+
+    <div id="footer-note-actions" class="footer-note__actions" style="display:none;">
+      <button id="footer-note-save" class="topbar-btn" type="button">Save</button>
+      <button id="footer-note-cancel" class="back-btn" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
 </div>
 
 
@@ -398,6 +402,8 @@ let tableChannel = null;
 let fullRefreshTimer = null;
 let loadAvailabilityRunning = false;
 let loadAvailabilityQueued = false;
+
+let noteDraftBeforeEdit = "";
   
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
@@ -443,44 +449,44 @@ async function refreshBoardOwnerFlag() {
 }
 
 function renderCalendarNote() {
-  const display = document.getElementById("footer-note-display");
-  if (!display) return;
+  const ta = document.getElementById("footer-note-input");
+  if (!ta) return;
 
-  const raw = String(currentTable?.calendar_note || "");
-  const text = raw.trim();
-
-  if (!text) {
-    display.innerHTML = `<span class="footer-note__placeholder">No note yet.</span>`;
-    return;
-  }
-
-  // Safe display as text (preserve newlines)
-  display.textContent = raw;
+  ta.value = String(currentTable?.calendar_note || "");
 }
 
 function setCalendarNoteEditing(on) {
-  const editor = document.getElementById("footer-note-editor");
+  const ta = document.getElementById("footer-note-input");
+  const actions = document.getElementById("footer-note-actions");
   const editBtn = document.getElementById("footer-edit-btn");
-  const input = document.getElementById("footer-note-input");
 
-  if (!editor || !editBtn || !input) return;
+  if (!ta || !actions || !editBtn) return;
+
+  if (!isBoardOwner) {
+    ta.readOnly = true;
+    actions.style.display = "none";
+    editBtn.style.display = "none";
+    return;
+  }
 
   if (on) {
-    input.value = String(currentTable?.calendar_note || "");
-    editor.style.display = "block";
+    noteDraftBeforeEdit = ta.value;
+    ta.readOnly = false;
+    actions.style.display = "flex";
     editBtn.style.display = "none";
-    input.focus();
+    ta.focus();
   } else {
-    editor.style.display = "none";
-    editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
+    ta.readOnly = true;
+    actions.style.display = "none";
+    editBtn.style.display = "inline-flex";
   }
 }
 
 async function saveCalendarNote() {
   if (!isBoardOwner || !currentTable?.id) return;
 
-  const input = document.getElementById("footer-note-input");
-  const newVal = String(input?.value || "");
+  const ta = document.getElementById("footer-note-input");
+  const newVal = String(ta?.value || "");
 
   const { error } = await supabase
     .from("tables")
@@ -492,7 +498,6 @@ async function saveCalendarNote() {
     return;
   }
 
-  // Update local copy immediately (realtime will also come through)
   currentTable = { ...currentTable, calendar_note: newVal };
   renderCalendarNote();
   setCalendarNoteEditing(false);
@@ -1541,10 +1546,10 @@ if (!au) {
   document.getElementById("calendar").style.display = "block";
   document.getElementById("calendar-topbar").style.display = "flex";
   document.getElementById("dashboard").style.display = "none";
-  document.getElementById("legend").style.display = "none";
+  const side = document.getElementById("calendar-side");
+    if (side) side.style.display = "none";
   const footer = document.getElementById("board-footer");
     if (footer) footer.style.display = "none";
-  document.getElementById("presence").style.display = "none";
 
   await refreshBoardOwnerFlag();
     renderCalendarNote();
@@ -1572,7 +1577,8 @@ document.getElementById("identity-section").style.display = "none";
 document.getElementById("calendar").style.display = "block";
 document.getElementById("calendar-topbar").style.display = "flex";
 document.getElementById("dashboard").style.display = "none";
-document.getElementById("legend").style.display = "block";
+const side = document.getElementById("calendar-side");
+  if (side) side.style.display = "flex";
 const footer = document.getElementById("board-footer");
   if (footer) footer.style.display = "block";
 
@@ -3058,6 +3064,8 @@ document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
 });
 
 document.getElementById("footer-note-cancel")?.addEventListener("click", () => {
+  const ta = document.getElementById("footer-note-input");
+  if (ta) ta.value = noteDraftBeforeEdit;
   setCalendarNoteEditing(false);
 });
 
@@ -4063,6 +4071,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
