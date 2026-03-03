@@ -2642,19 +2642,27 @@ nameCancel?.addEventListener("click", closeNameModal);
 // Change Colour modal wiring
 const colourModal = document.getElementById("colour-modal");
 const colourGrid = document.getElementById("colour-grid");
-const colourInput = document.getElementById("colour-input");
 const colourErr = document.getElementById("colour-error");
 const colourCancel = document.getElementById("colour-cancel");
 const colourSave = document.getElementById("colour-save");
 
 let selectedColour = null;
 
-// A nice default palette (edit anytime)
 const COLOUR_PRESETS = [
-  "#F446ED", "#FF3B30", "#FF9500", "#FFCC00",
-  "#34C759", "#00C7BE", "#007AFF", "#5856D6",
-  "#AF52DE", "#FF2D55", "#8E8E93", "#1C1C1E",
-  "#A2845E", "#2D7D46", "#0A84FF", "#FFD60A"
+  // Reds / Pinks
+  "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7",
+  // Purples / Blues
+  "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
+  "#06B6D4", "#00C7BE",
+  // Greens
+  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
+  // Yellows / Oranges
+  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
+  // Neutrals / Earthy
+  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
+  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
+  // Extra tasteful accents
+  "#14B8A6", "#84CC16"
 ];
 
 function setColourError(msg){
@@ -2689,9 +2697,7 @@ function renderColourGrid(current){
     if (current && hex === current) b.classList.add("selected");
 
     b.addEventListener("click", () => {
-      // select swatch
       selectedColour = hex;
-      if (colourInput) colourInput.value = hex;
 
       // update UI selected state
       [...colourGrid.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
@@ -2710,12 +2716,8 @@ function openColourModal(){
   setColourError("");
   selectedColour = normaliseHex(user?.color || "");
 
-  if (colourInput) colourInput.value = selectedColour || "";
   renderColourGrid(selectedColour);
-
   colourModal.hidden = false;
-  colourInput?.focus();
-  colourInput?.select();
 }
 
 function closeColourModal(){
@@ -2735,38 +2737,11 @@ colourModal?.addEventListener("click", (e) => {
   if (!card) closeColourModal();
 });
 
-// live validate input + keep swatch selection in sync when typing
-colourInput?.addEventListener("input", () => {
-  const v = normaliseHex(colourInput.value);
-  colourInput.value = v;
-  selectedColour = v;
-
-  // update swatch highlight if matches a preset
-  if (colourGrid){
-    [...colourGrid.querySelectorAll(".colour-swatch")].forEach(x => {
-      x.classList.toggle("selected", x.dataset.hex === v);
-    });
-  }
-
-  if (!v) setColourError("");
-  else if (!isValidHex(v)) setColourError("Enter a valid hex colour like #F446ED");
-  else setColourError("");
-});
-
-// Enter = save, Esc = close
-colourInput?.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeColourModal();
-  if (e.key === "Enter") colourSave?.click();
-});
-
 colourSave?.addEventListener("click", async () => {
   try {
-    if (!colourInput) return;
-
-    const v = normaliseHex(colourInput.value);
-
-    if (!v) return setColourError("Please choose a colour.");
-    if (!isValidHex(v)) return setColourError("Enter a valid hex colour like #F446ED");
+   const v = selectedColour;
+      if (!v) return setColourError("Please choose a colour.");
+      if (!COLOUR_PRESETS.includes(v)) return setColourError("Please choose a colour from the list.");
 
     // no change
     if (user?.color && v === user.color.toUpperCase()) {
@@ -3958,16 +3933,7 @@ document.addEventListener("DOMContentLoaded", startApp);
 
     <div id="colour-grid" class="colour-grid" role="listbox" aria-label="Choose a colour"></div>
 
-    <div style="margin-top:12px;">
-      <label style="display:block; font-size:12px; opacity:0.7; margin-bottom:6px;">Or enter a hex colour</label>
-      <input id="colour-input"
-             type="text"
-             inputmode="text"
-             maxlength="7"
-             placeholder="#F446ED"
-             style="width:100%; padding:10px; border-radius:12px; border:1px solid rgba(0,0,0,0.15); font-family:inherit;" />
-      <div id="colour-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
-    </div>
+    <div id="colour-error" style="margin-top:10px; color:#d11a2a; font-weight:600; display:none;"></div>
 
     <div class="modal-actions">
       <button id="colour-cancel" class="modal-btn">Cancel</button>
@@ -4073,6 +4039,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
