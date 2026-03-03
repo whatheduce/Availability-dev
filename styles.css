@@ -1281,6 +1281,37 @@ body.account-view #dash-account {
   box-shadow: 0 0 0 3px rgba(0,122,255,0.22), 0 10px 22px rgba(0,0,0,0.10);
 }
 
+/* ===========================
+   CREATE SCREEN TOP BAR
+=========================== */
+
+#create-topbar {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.ghost-btn {
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  color: rgba(0,0,0,0.65);
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.ghost-btn:hover {
+  color: rgba(0,0,0,0.9);
+}
+
+.ghost-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,122,255,0.25);
+  border-radius: 8px;
+}
 
 
 
