@@ -28,6 +28,18 @@ body {
   background-attachment: fixed;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    rgba(255,255,255,0.45),
+    rgba(255,255,255,0.25)
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
 body.account-view #dash-topbar {
   display: none !important;
 }
