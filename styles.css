@@ -1636,4 +1636,9 @@ body.account-view #dash-account {
   text-align: center;
 }
 
+#auth-modal{
+  position: relative;
+  z-index: 10000; /* above overlay backdrop */
+}
+
 [hidden] { display: none !important; }
