@@ -783,6 +783,19 @@ body.account-view #dash-account {
   transform: translateY(0px) scale(0.99);
 }
 
+/* Destructive mini button (Delete Account) */
+.settings-mini-btn.danger{
+  background: rgba(255,59,48,0.12);
+  border-color: rgba(255,59,48,0.28);
+  color: #d11a2a;
+  font-weight: 800;
+}
+
+.settings-mini-btn.danger:hover{
+  background: rgba(255,59,48,0.18);
+  box-shadow: 0 8px 18px rgba(255,59,48,0.16);
+}
+
 /* Row of compact action buttons */
 .settings-actions-row{
   display: flex;
