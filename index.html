@@ -65,12 +65,15 @@
     <div class="dashboard-section-divider"></div>
 
     <div class="settings-card">
-      <!-- Email (top, no action) -->
+      <!-- Email -->
       <div class="settings-row settings-row-3">
         <div class="settings-label">Email</div>
         <div class="settings-value" id="acct-email">—</div>
-        <div></div>
-      </div>
+
+        <button id="acct-delete-account"
+          class="settings-mini-btn danger"
+          type="button">Delete Account</button>
+    </div>
 
       <!-- Password -->
       <div class="settings-row settings-row-3">
@@ -104,11 +107,6 @@
     <button id="acct-upgrade-pro" class="settings-action danger compact">
       Upgrade to Pro
     </button>
-
-    <button id="acct-delete-account" class="settings-action danger compact">
-      Delete Account
-    </button>
-    </div>
 
     <button id="acct-back-dashboard" class="settings-action compact">
       Back to Dashboard
@@ -4174,6 +4172,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
