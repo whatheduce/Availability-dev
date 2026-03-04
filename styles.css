@@ -810,6 +810,7 @@ body.account-view #dash-account {
   width: auto;          /* override the 100% width */
   display: inline-flex;
   align-items: center;
+  margin-top: 480px;
 }
 
 /* Make Upgrade stand out as filled red (like a danger button) */
