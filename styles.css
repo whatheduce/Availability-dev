@@ -812,6 +812,10 @@ body.account-view #dash-account {
   align-items: center;
 }
 
+#acct-back-dashboard{
+ margin-top: 360px;
+}
+
 /* Make Upgrade stand out as filled red (like a danger button) */
 .settings-action.danger{
   background: rgba(255, 59, 48, 0.12);
