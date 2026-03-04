@@ -789,6 +789,8 @@ body.account-view #dash-account {
   border-color: rgba(255,59,48,0.28);
   color: #d11a2a;
   font-weight: 800;
+ font-size: 8px;
+ padding: 12px 6px;
 }
 
 .settings-mini-btn.danger:hover{
