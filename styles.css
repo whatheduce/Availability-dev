@@ -20,6 +20,12 @@ body {
     linear-gradient(180deg, #f9fafb, #eef1f5);
   min-height: 100vh;
   visibility: hidden;
+
+  background-image: url("HearthImage1.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 body.account-view #dash-topbar {
