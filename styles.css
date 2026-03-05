@@ -945,6 +945,22 @@ body.account-view #dash-account {
   background:#e5e7eb;
 }
 
+#confirm-message{
+  min-height: 20px;
+  white-space: pre-wrap;
+}
+
+#confirm-overlay{
+  z-index: 20000;
+  position: fixed;
+  inset: 0;
+  display: none;         
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+}
+}
+
 /* Horizontal list */
 .board-strip {
   display: flex;
