@@ -2512,8 +2512,53 @@ const PREBUILT_STRUCTURES = {
   ]
 };
 
-let uiListenersBound = false;
 
+const COLOUR_PRESETS = [
+  // Reds / Pinks
+  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
+  // Purples / Blues
+  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
+  "#06B6D4", "#0891B2", "#00C7BE",
+  // Greens
+  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
+  // Yellows / Oranges
+  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
+  // Neutrals / Earthy
+  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
+  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
+  // Extra tasteful accents
+  "#14B8A6", "#84CC16"
+];
+
+function renderSwatchGrid(containerEl, currentHex, onPick){
+  if (!containerEl) return;
+
+  containerEl.innerHTML = "";
+
+  COLOUR_PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "colour-swatch";
+    b.style.background = hex;
+    b.setAttribute("aria-label", hex);
+    b.dataset.hex = hex;
+
+    if (currentHex && hex === currentHex) b.classList.add("selected");
+
+    b.addEventListener("click", () => {
+      // update selected state in this grid
+      [...containerEl.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+      onPick(hex);
+    });
+
+    containerEl.appendChild(b);
+  });
+}
+
+  
+let uiListenersBound = false;
+  
 function bindUiListenersOnce() {
   if (uiListenersBound) return;
   uiListenersBound = true;
@@ -2806,48 +2851,6 @@ const colourSave = document.getElementById("colour-save");
 
 let selectedColour = null;
 
-const COLOUR_PRESETS = [
-  // Reds / Pinks
-  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
-  // Purples / Blues
-  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
-  "#06B6D4", "#0891B2", "#00C7BE",
-  // Greens
-  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
-  // Yellows / Oranges
-  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
-  // Neutrals / Earthy
-  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
-  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
-  // Extra tasteful accents
-  "#14B8A6", "#84CC16"
-];
-
-function renderSwatchGrid(containerEl, currentHex, onPick){
-  if (!containerEl) return;
-
-  containerEl.innerHTML = "";
-
-  COLOUR_PRESETS.forEach(hex => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "colour-swatch";
-    b.style.background = hex;
-    b.setAttribute("aria-label", hex);
-    b.dataset.hex = hex;
-
-    if (currentHex && hex === currentHex) b.classList.add("selected");
-
-    b.addEventListener("click", () => {
-      // update selected state in this grid
-      [...containerEl.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
-      b.classList.add("selected");
-      onPick(hex);
-    });
-
-    containerEl.appendChild(b);
-  });
-}
   
 function setColourError(msg){
   if (!colourErr) return;
@@ -4223,6 +4226,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
