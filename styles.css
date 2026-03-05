@@ -1782,4 +1782,15 @@ body.account-view #dash-account {
   z-index: 10000; /* above overlay backdrop */
 }
 
+#auth-overlay .primary-btn.secondary-btn{
+  background: rgba(255,255,255,0.72);
+  color:#111827;
+  border:1px solid rgba(0,0,0,0.08);
+}
+
+#auth-overlay .primary-btn.secondary-btn:hover{
+  background: rgba(255,255,255,0.9);
+}
+
+
 [hidden] { display: none !important; }
