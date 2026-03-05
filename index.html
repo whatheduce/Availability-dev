@@ -3645,11 +3645,27 @@ try {
     return;
   }
 
-  const { error } = await supabase.functions.invoke("send-invite", {
-    body: { toEmail: email, boardId }
-  });
+  const inviteToken = inviteContext?.inviteToken;
+    if (!inviteToken) {
+      errEl.style.display = "block";
+      errEl.textContent = "Invite token is missing for this calendar. Please refresh and try again.";
+      return;
+    }
 
-  if (error) throw error;
+    const inviteLink = buildInviteLink(inviteToken);
+    const boardName = inviteContext?.boardName || "Availability Calendar";
+
+    const { data, error } = await supabase.functions.invoke("send-invite", {
+      body: { 
+      toEmail: email,
+      boardId,
+      boardName,
+      inviteToken,
+      inviteLink
+      }
+    });
+
+if (error) throw error;
 
   close();
 
@@ -3662,7 +3678,13 @@ try {
 
 } catch (err) {
   console.error("Invite send failed:", err);
-  alert("Could not send invite. Please try again.");
+
+  // Try to show meaningful message in the modal
+  errEl.style.display = "block";
+  errEl.textContent =
+    (err && (err.message || err.error_description)) ||
+    "Invite failed (unknown error).";
+
 } finally {
   sendBtn.disabled = false;
 }
@@ -4214,6 +4236,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
