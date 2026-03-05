@@ -508,23 +508,19 @@ async function refreshBoardOwnerFlag() {
 
 
 function showConfirmPopup(message, { title = "Notice", onOk } = {}) {
-  // pick the currently visible confirm overlay if there are duplicates
-  const overlays = [...document.querySelectorAll("#confirm-overlay")];
-  const overlay = overlays.find(o => getComputedStyle(o).display !== "none") || overlays[0];
+  const overlay = document.getElementById("notice-overlay");
+  const msgEl = document.getElementById("notice-message");
+  const titleEl = document.getElementById("notice-title");
+  const okBtn = document.getElementById("notice-ok");
 
-  if (!overlay) return;
-
-  const msgEl = overlay.querySelector("#confirm-message");
-  const titleEl = overlay.querySelector("#confirm-title");
-  const okBtn = overlay.querySelector("#confirm-ok");
-
-  if (!msgEl || !titleEl || !okBtn) return;
+  if (!overlay || !msgEl || !titleEl || !okBtn) return;
 
   titleEl.textContent = title;
   msgEl.textContent = message;
 
   overlay.style.display = "flex";
 
+  okBtn.onclick = null;
   okBtn.onclick = () => {
     overlay.style.display = "none";
     if (typeof onOk === "function") onOk();
@@ -4457,19 +4453,20 @@ document.addEventListener("DOMContentLoaded", startApp);
 </div>  
 
 <!-- Generic confirmation popup -->
-<div id="confirm-overlay" class="modal-overlay" style="display:none;">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-    <h2 id="confirm-title" style="margin:0 0 8px;">Notice</h2>
-    <div id="confirm-message"></div>
+<div id="notice-overlay" class="modal-overlay" style="display:none;">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="notice-title" aria-describedby="notice-message">
+    <h2 id="notice-title" style="margin:0 0 8px;">Notice</h2>
+    <div id="notice-message"></div>
 
     <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button id="confirm-ok" class="primary-btn">OK</button>
+      <button id="notice-ok" class="primary-btn">OK</button>
     </div>
   </div>
 </div>
   
 </body>
 </html>
+
 
 
 
