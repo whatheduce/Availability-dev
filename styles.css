@@ -945,11 +945,6 @@ body.account-view #dash-account {
   background:#e5e7eb;
 }
 
-.primary-btn secondary-btn{
-  background: #f3f4f6;
-  color: rgba(0, 0, 0, 0.86);
-}
-
 /* =========================
    NOTICE POPUP (centered modal)
    ========================= */
