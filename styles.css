@@ -111,6 +111,10 @@ body.logged-in #landing-bg::after{
       cursor: pointer;
     }
 
+    .primary-btn secondary-btn{
+      background: #f3f4f6;
+      color: rgba(0, 0, 0, 0.86);
+    }
     #rows-container input {
       margin-top: 10px;
     }
