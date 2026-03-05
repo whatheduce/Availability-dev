@@ -687,7 +687,16 @@ body.account-view #dash-account {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 264px;
+}
+
+.settings-cta-left{
+  display: flex;
+  flex-direction: column;
+  min-height: 260px; /* tweak if you want */
+}
+
+#acct-back-dashboard{
+  margin-top: auto;  /* pushes it to the bottom */
 }
 
 /* Override the default full-width button */
@@ -866,10 +875,6 @@ body.account-view #dash-account {
   width: auto;          /* override the 100% width */
   display: inline-flex;
   align-items: center;
-}
-
-#acct-back-dashboard{
- margin-top: 240px;
 }
 
 /* Make Upgrade stand out as filled red (like a danger button) */
