@@ -999,7 +999,7 @@ body.account-view #dash-account {
   border-top-color: rgba(184, 134, 11, 0.85);
 
   position: relative;
-  top: -1px; 
+  top: -2px; 
 }
 
 @keyframes notice-spin{
