@@ -979,7 +979,7 @@ body.account-view #dash-account {
 
 #notice-message{
   font-size: 14px;
-  line-height: 1.2;
+  line-height: 1;
   color: rgba(0,0,0,0.75);
   margin-bottom: 14px;
   white-space: pre-wrap;
@@ -997,6 +997,9 @@ body.account-view #dash-account {
   animation: notice-spin 0.7s linear infinite;
   flex-shrink: 0;
   border-top-color: rgba(184, 134, 11, 0.85);
+
+  position: relative;
+  top: -1px; 
 }
 
 @keyframes notice-spin{
