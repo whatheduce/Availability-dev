@@ -3362,6 +3362,7 @@ async function startApp() {
   const hash = window.location.hash || "";
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code"); // PKCE flow (if enabled)
+  const type = url.searchParams.get("type") || "";
 
   // If Supabase uses PKCE recovery links, exchange code for session
   if (code) {
@@ -3375,11 +3376,13 @@ async function startApp() {
     window.history.replaceState({}, document.title, url.toString());
   }
 
-  // If using hash tokens, look for type=recovery
-  if (hash.includes("type=recovery")) {
-    showAuthOverlay("");      // show modal
-    setAuthMode("recovery");  // switch UI
-    return;                   // stop normal app boot until password is set
+   // If using hash tokens OR query param, look for recovery
+  const isRecovery = hash.includes("type=recovery") || type === "recovery";
+
+  if (isRecovery) {
+    showAuthOverlay("");
+    setAuthMode("recovery");
+    return;
   }
   
   const { data: { session } } = await supabase.auth.getSession();
@@ -3464,7 +3467,7 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     return;
   }
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin
+    redirectTo: window.location.origin + window.location.pathname
   });
   if (error) {
     showAuthOverlay(error.message || "Failed to send reset email.");
@@ -4344,6 +4347,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
