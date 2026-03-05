@@ -945,30 +945,56 @@ body.account-view #dash-account {
   background:#e5e7eb;
 }
 
-#confirm-message{
-  min-height: 22px;
-  white-space: pre-wrap;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #374151;
-}
-
-#confirm-overlay{
-  z-index: 20000;
+#notice-overlay{
+  /* Override .modal-overlay defaults */
+  background: transparent;            /* no dark screen */
+  display: none;                      /* JS sets to flex */
+  place-items: initial;               /* cancels grid centering */
   position: fixed;
   inset: 0;
-  display: none;         
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.35);
+  z-index: 20000;
+  padding: 24px;
+
+  /* position bottom-left */
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  /* IMPORTANT: don't block the app except the popup itself */
+  pointer-events: none;
 }
 
-#confirm-overlay .modal-card{
-  width: min(520px, calc(100vw - 40px));
-  background: #fff;
-  border-radius: 16px;
-  padding: 18px 18px 16px;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.25);
+#notice-overlay .modal-card{
+  width: min(520px, calc(100vw - 48px));
+  border-radius: 18px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.10);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+  padding: 16px 16px 14px;
+  backdrop-filter: blur(12px);
+
+  /* allow clicking inside the popup */
+  pointer-events: auto;
+}
+
+#notice-title{
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+#notice-message{
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(0,0,0,0.75);
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+  min-height: 18px;
+}
+
+/* Make OK button match your modal buttons (optional) */
+#notice-ok.primary-btn{
+  padding: 10px 14px;
+  border-radius: 12px;
 }
 
 /* Horizontal list */
@@ -1737,32 +1763,6 @@ body.account-view #dash-account {
 #auth-modal{
   position: relative;
   z-index: 10000; /* above overlay backdrop */
-}
-
-/* --- Force confirm popup message to render above any glass/overlay layers --- */
-#confirm-overlay { z-index: 20000 !important; }
-
-#confirm-overlay .modal-card{
-  position: relative !important;
-  background: #fff !important;
-  overflow: visible !important;
-}
-
-#confirm-message{
-  position: relative !important;
-  z-index: 2 !important;          /* sits above any ::before overlay */
-  opacity: 1 !important;          /* don't allow dimming */
-  color: #111827 !important;
-  font-size: 16px !important;
-  line-height: 1.45 !important;
-  min-height: 28px !important;
-  white-space: pre-wrap !important;
-}
-
-/* If your modal-card uses a decorative overlay layer, push it behind content */
-#confirm-overlay .modal-card::before,
-#confirm-overlay .modal-card::after{
-  z-index: 0 !important;
 }
 
 [hidden] { display: none !important; }
