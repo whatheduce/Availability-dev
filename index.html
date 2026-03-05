@@ -507,16 +507,23 @@ async function refreshBoardOwnerFlag() {
 }
 
 
-function showConfirmPopup(message, { title = "Notice", onOk } = {}) {
+function showConfirmPopup(message, { title = "Notice", onOk, showOk = true } = {}) {
   const overlay = document.getElementById("notice-overlay");
   const msgEl = document.getElementById("notice-message");
   const titleEl = document.getElementById("notice-title");
   const okBtn = document.getElementById("notice-ok");
+  const spinner = document.getElementById("notice-spinner");
 
-  if (!overlay || !msgEl || !titleEl || !okBtn) return;
+  if (!overlay || !msgEl || !titleEl || !okBtn || !spinner) return;
 
   titleEl.textContent = title;
   msgEl.textContent = message;
+
+  // Show spinner only while processing
+  spinner.style.display = showOk ? "none" : "block";
+
+  // Show OK only when finished
+  okBtn.style.display = showOk ? "inline-flex" : "none";
 
   overlay.style.display = "flex";
 
@@ -3359,7 +3366,10 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
     setBtn.textContent = "Updating...";
   }
 
-  showConfirmPopup("Updating your password...", { title: "Reset password" });
+  showConfirmPopup("Updating your password...", {
+  title: "Reset password",
+  showOk: false
+});
 
   try {
     const { error } = await supabase.auth.updateUser({ password: p1 });
@@ -3440,7 +3450,10 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
   }
 
   // show immediate feedback modal
-  showConfirmPopup("Sending password reset email...", { title: "Forgot password" });
+  showConfirmPopup("Sending password reset email...", {
+  title: "Forgot password",
+  showOk: false
+});
 
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -3458,8 +3471,6 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
       title: "Forgot password",
       onOk: () => {
         resetAuthToFreshSignin();
-        // If you truly want a hard refresh instead:
-        // window.location.reload();
       },
     });
   } finally {
@@ -4456,16 +4467,21 @@ document.addEventListener("DOMContentLoaded", startApp);
 <div id="notice-overlay" class="modal-overlay notice-overlay" style="display:none;">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="notice-title" aria-describedby="notice-message">
     <h2 id="notice-title" style="margin:0 0 8px;">Notice</h2>
-    <div id="notice-message"></div>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+      <div id="notice-spinner" class="notice-spinner" style="display:none;"></div>
+      <div id="notice-message"></div>
+    </div>
 
     <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button id="notice-ok" class="modal-btn modal-btn--primary" type="button">OK</button>
+      <button id="notice-ok" class="primary-btn">OK</button>
     </div>
   </div>
 </div>
   
 </body>
 </html>
+
 
 
 
