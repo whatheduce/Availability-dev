@@ -938,6 +938,7 @@ body.account-view #dash-account {
   background:#f3f4f6;
   color:#111827;
   border:1px solid rgba(0,0,0,0.08);
+  border-radius:12px;
 }
 
 .secondary-btn:hover{
