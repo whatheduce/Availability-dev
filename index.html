@@ -3345,6 +3345,31 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
     authMode = (authMode === "signin") ? "signup" : "signin";
     showAuthOverlay();
     });
+
+  // Forgot password
+document.getElementById("auth-forgot")?.addEventListener("click", async () => {
+  const email = (document.getElementById("auth-email")?.value || "").trim();
+
+  if (!email) {
+    showAuthOverlay("Enter your email first, then click Forgot password.");
+    setAuthMode("signin");
+    return;
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    // safer than origin-only if you ever host under a path
+    redirectTo: window.location.origin + window.location.pathname,
+  });
+
+  if (error) {
+    showAuthOverlay(error.message || "Failed to send reset email.");
+    setAuthMode("signin");
+    return;
+  }
+
+  showAuthOverlay("Password reset email sent. Check your inbox.");
+  setAuthMode("signin");
+});
 }
 
 
@@ -3459,23 +3484,6 @@ if (addUsersBtn) {
 });
     });
   }    
-    
-document.getElementById("auth-forgot")?.addEventListener("click", async () => {
-  const email = (document.getElementById("auth-email")?.value || "").trim();
-  if (!email) {
-    showAuthOverlay("Enter your email first, then click Forgot password.");
-    return;
-  }
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + window.location.pathname
-  });
-  if (error) {
-    showAuthOverlay(error.message || "Failed to send reset email.");
-    return;
-  }
-  showAuthOverlay("Password reset email sent. Check your inbox.");
-  setAuthMode("signin");
-});
   
   await loadTable();
   } finally {
@@ -4347,6 +4355,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
