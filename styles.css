@@ -38,7 +38,7 @@ body.account-view #dash-topbar {
   z-index: 0;
 
   transition: opacity 1s ease 0.3s;
-
+  filter: blur(8px);
   pointer-events: none;
 }
 
@@ -66,6 +66,10 @@ body.account-view #dash-topbar {
 body.logged-in #landing-bg{
  opacity:0;
  animation: none;
+}
+
+body.logged-in #landing-bg::after{
+  opacity: 0;
 }
 
     #calendar {
