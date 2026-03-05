@@ -42,6 +42,15 @@ body.account-view #dash-topbar {
   pointer-events: none;
 }
 
+#landing-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(255,255,255,0.28);  /* tweak 0.20–0.40 */
+  transition: opacity 1s ease 0.3s;     /* match the bg fade timing */
+  opacity: 1;
+}
+
 #profile-setup,
 #dashboard,
 #route-error,
@@ -1575,7 +1584,7 @@ body.account-view #dash-account {
 
 /* --- AUTH OVERLAY OVERRIDES (ensure clickable + visible) --- */
 #auth-overlay {
-  display: none;            /* default hidden */
+  display: none;            
   pointer-events: auto;     /* allow interaction */
 }
 
