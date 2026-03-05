@@ -20,24 +20,6 @@ body {
     linear-gradient(180deg, #f9fafb, #eef1f5);
   min-height: 100vh;
   visibility: hidden;
-
-  background-image: url("HearthImage1.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(
-    rgba(255,255,255,0.45),
-    rgba(255,255,255,0.25)
-  );
-  pointer-events: none;
-  z-index: -1;
 }
 
 body.account-view #dash-topbar {
@@ -48,14 +30,42 @@ body.account-view #dash-topbar {
   position: fixed;
   inset: 0;
 
-  background-image: url("/hearth-bg.jpg");
+  /* ✅ use the image you actually have */
+  background-image: url("HearthImage1.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
-  z-index: -2;
+  /* ✅ sit behind UI (not behind the body itself) */
+  z-index: 0;
+
   transition: opacity 1s ease 0.3s;
   animation: hearthZoom 30s ease-in-out infinite alternate;
+
+  pointer-events: none;
+}
+
+/* white wash overlay */
+#landing-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(
+    rgba(255,255,255,0.45),
+    rgba(255,255,255,0.25)
+  );
+}
+
+#profile-setup,
+#dashboard,
+#route-error,
+#identity-section,
+#create-board,
+#calendar-topbar,
+#calendar,
+#calendar-side{
+  position: relative;
+  z-index: 1;
 }
 
 /* white wash overlay */
@@ -67,7 +77,8 @@ body.account-view #dash-topbar {
 }
 
 body.logged-in #landing-bg{
-  opacity:0;
+ opacity:0;
+ animation: none;
 }
 
 @keyframes hearthZoom{
