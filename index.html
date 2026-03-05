@@ -507,27 +507,29 @@ async function refreshBoardOwnerFlag() {
 }
 
 
- function showConfirmPopup(message, { title = "Notice", onOk } = {}) {
-  const overlay = document.getElementById("confirm-overlay");
-  const msgEl = document.getElementById("confirm-message");
-  const titleEl = document.getElementById("confirm-title");
-  const okBtn = document.getElementById("confirm-ok");
+function showConfirmPopup(message, { title = "Notice", onOk } = {}) {
+  // pick the currently visible confirm overlay if there are duplicates
+  const overlays = [...document.querySelectorAll("#confirm-overlay")];
+  const overlay = overlays.find(o => getComputedStyle(o).display !== "none") || overlays[0];
 
-  if (!overlay || !msgEl || !titleEl || !okBtn) return;
+  if (!overlay) return;
+
+  const msgEl = overlay.querySelector("#confirm-message");
+  const titleEl = overlay.querySelector("#confirm-title");
+  const okBtn = overlay.querySelector("#confirm-ok");
+
+  if (!msgEl || !titleEl || !okBtn) return;
 
   titleEl.textContent = title;
   msgEl.textContent = message;
 
   overlay.style.display = "flex";
 
-  // Remove any previous handlers
-  okBtn.onclick = null;
-
   okBtn.onclick = () => {
     overlay.style.display = "none";
     if (typeof onOk === "function") onOk();
   };
-} 
+}
 
 
 function resetAuthToFreshSignin() {
@@ -4468,6 +4470,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
