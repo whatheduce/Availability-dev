@@ -991,6 +991,7 @@ body.account-view #dash-account {
 .notice-spinner{
   width: 14px;
   height: 14px;
+  padding-top: 2px;
   border-radius: 50%;
   border: 2px solid rgba(0,0,0,0.15);
   border-top-color: rgba(0,0,0,0.65);
