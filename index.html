@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body style="visibility:hidden;">
+<body>
 
 <div id="landing-bg"></div>
 
@@ -428,26 +428,6 @@ const inviteToken = params.get("t");
 const manageToken = params.get("m");
 const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock (replaces toggleInFlight)
-  
-// Dashboard: Create New Calendar
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest("#create-board-btn");
-  if (!btn) return;
-
-  e.preventDefault();
-
-  // Whatever your app uses to show the create screen:
-  // Prefer showCreateBoard() if it exists, otherwise fall back to showing the container directly.
-  if (typeof showCreateBoard === "function") {
-    showCreateBoard();
-    return;
-  }
-
-  const dash = document.getElementById("dashboard");
-  const create = document.getElementById("create-board");
-  if (dash) dash.style.display = "none";
-  if (create) create.style.display = "block";
-});
 
 let currentTable = null;
 let availabilityChannel = null;
@@ -2633,6 +2613,7 @@ function bindUiListenersOnce() {
   function closeDrawer() {
     document.body.classList.remove("drawer-open");
     document.body.classList.remove("settings-split");
+    document.body.classList.remove("account-view");
     showDashboardPanel();
 
     drawer?.setAttribute("aria-hidden", "true");
@@ -4233,6 +4214,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
