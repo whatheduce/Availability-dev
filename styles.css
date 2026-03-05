@@ -1739,4 +1739,30 @@ body.account-view #dash-account {
   z-index: 10000; /* above overlay backdrop */
 }
 
+/* --- Force confirm popup message to render above any glass/overlay layers --- */
+#confirm-overlay { z-index: 20000 !important; }
+
+#confirm-overlay .modal-card{
+  position: relative !important;
+  background: #fff !important;
+  overflow: visible !important;
+}
+
+#confirm-message{
+  position: relative !important;
+  z-index: 2 !important;          /* sits above any ::before overlay */
+  opacity: 1 !important;          /* don't allow dimming */
+  color: #111827 !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  min-height: 28px !important;
+  white-space: pre-wrap !important;
+}
+
+/* If your modal-card uses a decorative overlay layer, push it behind content */
+#confirm-overlay .modal-card::before,
+#confirm-overlay .modal-card::after{
+  z-index: 0 !important;
+}
+
 [hidden] { display: none !important; }
