@@ -30,30 +30,17 @@ body.account-view #dash-topbar {
   position: fixed;
   inset: 0;
 
-  /* ✅ use the image you actually have */
-  background-image: url("HearthImage1.png");
+  background-image: url("HearthImage1.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
-  /* ✅ sit behind UI (not behind the body itself) */
   z-index: 0;
 
   transition: opacity 1s ease 0.3s;
   animation: hearthZoom 30s ease-in-out infinite alternate;
 
   pointer-events: none;
-}
-
-/* white wash overlay */
-#landing-bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: linear-gradient(
-    rgba(255,255,255,0.45),
-    rgba(255,255,255,0.25)
-  );
 }
 
 #profile-setup,
