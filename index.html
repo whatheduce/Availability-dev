@@ -1020,6 +1020,7 @@ function showAuthOverlay(msg = "", opts = {}) {
 
   // Always show overlay
   overlay.style.display = "block";
+  document.body.classList.add("show-landing-bg");
 
   // Hide/show the toggle reliably
   toggle.hidden = lockSignin;
@@ -4226,6 +4227,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
