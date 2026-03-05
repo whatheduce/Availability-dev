@@ -3337,59 +3337,64 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
   }
 
   // Password recovery submit
-  document.getElementById("auth-set-password")?.addEventListener("click", async () => {
-    const p1 = (document.getElementById("auth-new-password")?.value || "").trim();
-    const p2 = (document.getElementById("auth-new-password-confirm")?.value || "").trim();
+document.getElementById("auth-set-password")?.addEventListener("click", async () => {
+  const setBtn = document.getElementById("auth-set-password");
 
-    if (!p1 || p1.length < 8) {
-      showAuthOverlay("Password must be at least 8 characters.");
-      setAuthMode("recovery");
-      return;
-    }
-    if (p1 !== p2) {
-      showAuthOverlay("Passwords do not match.");
-      setAuthMode("recovery");
-      return;
-    }
+  const p1 = (document.getElementById("auth-new-password")?.value || "").trim();
+  const p2 = (document.getElementById("auth-new-password-confirm")?.value || "").trim();
 
+  if (!p1 || p1.length < 8) {
+    showConfirmPopup("Password must be at least 8 characters.", { title: "Reset password" });
+    setAuthMode("recovery");
+    return;
+  }
+  if (p1 !== p2) {
+    showConfirmPopup("Passwords do not match.", { title: "Reset password" });
+    setAuthMode("recovery");
+    return;
+  }
+
+  // ✅ Tiny UX polish: disable button + show immediate feedback
+  if (setBtn) {
+    setBtn.disabled = true;
+    setBtn.dataset.originalText = setBtn.textContent;
+    setBtn.textContent = "Updating...";
+  }
+
+  showConfirmPopup("Updating your password...", { title: "Reset password" });
+
+  try {
     const { error } = await supabase.auth.updateUser({ password: p1 });
     if (error) {
-      showAuthOverlay(error.message || "Failed to update password.");
-      setAuthMode("recovery");
+      showConfirmPopup(error.message || "Failed to update password.", {
+        title: "Reset password",
+        onOk: () => setAuthMode("recovery"),
+      });
       return;
     }
 
-    // Clean hash so we don't re-enter recovery mode on refresh
+    // ✅ Clean URL/hash so refresh doesn't re-trigger recovery mode
     window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
 
-    // Optional: sign out after reset and force normal sign-in
+    // Optional: if you want to force them to sign in again (your current approach)
     await supabase.auth.signOut();
 
-    showConfirmPopup("Updating your password...", { title: "Reset password" });
+    showConfirmPopup("Password updated. Please sign in with your new password.", {
+      title: "Reset password",
+      onOk: () => {
+        resetAuthToFreshSignin();
+      },
+    });
 
-const { error } = await supabase.auth.updateUser({ password: p1 });
-if (error) {
-  showConfirmPopup(error.message || "Failed to update password.", {
-    title: "Reset password",
-    onOk: () => setAuthMode("recovery"),
-  });
-  return;
-}
-
-// Clean URL/hash so refresh doesn't re-trigger recovery mode
-window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-
-// Optional: keep or remove signOut. If you keep it, user must sign in again.
-await supabase.auth.signOut();
-
-showConfirmPopup("Password updated. Please sign in with your new password.", {
-  title: "Reset password",
-  onOk: () => {
-    resetAuthToFreshSignin();
-  },
-});
     setAuthMode("signin");
-  });
+  } finally {
+    // ✅ re-enable button
+    if (setBtn) {
+      setBtn.disabled = false;
+      setBtn.textContent = setBtn.dataset.originalText || "Update password";
+    }
+  }
+});
 
   // Back to sign-in from recovery UI
   document.getElementById("auth-recovery-cancel")?.addEventListener("click", async () => {
@@ -3420,27 +3425,26 @@ showConfirmPopup("Password updated. Please sign in with your new password.", {
 
   // Forgot password
 document.getElementById("auth-forgot")?.addEventListener("click", async () => {
+  const forgotBtn = document.getElementById("auth-forgot");
   const email = (document.getElementById("auth-email")?.value || "").trim();
 
   if (!email) {
-    showAuthOverlay("Enter your email first, then click Forgot password.");
-    setAuthMode("signin");
+    showConfirmPopup("Enter your email first, then click Forgot password.", {
+      title: "Forgot password",
+    });
     return;
   }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    // safer than origin-only if you ever host under a path
-    redirectTo: window.location.origin + window.location.pathname,
-  });
-
-  if (error) {
-    showAuthOverlay(error.message || "Failed to send reset email.");
-    setAuthMode("signin");
-    return;
+  if (forgotBtn) {
+    forgotBtn.disabled = true;
+    forgotBtn.dataset.originalText = forgotBtn.textContent;
+    forgotBtn.textContent = "Sending...";
   }
 
+  // show immediate feedback modal
   showConfirmPopup("Sending password reset email...", { title: "Forgot password" });
 
+  try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + window.location.pathname,
     });
@@ -3448,7 +3452,6 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     if (error) {
       showConfirmPopup(error.message || "Failed to send reset email.", {
         title: "Forgot password",
-        onOk: () => {},
       });
       return;
     }
@@ -3457,9 +3460,16 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
       title: "Forgot password",
       onOk: () => {
         resetAuthToFreshSignin();
-  },
-});
-  setAuthMode("signin");
+        // If you truly want a hard refresh instead:
+        // window.location.reload();
+      },
+    });
+  } finally {
+    if (forgotBtn) {
+      forgotBtn.disabled = false;
+      forgotBtn.textContent = forgotBtn.dataset.originalText || "Forgot password";
+    }
+  }
 });
 }
 
@@ -4458,6 +4468,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
