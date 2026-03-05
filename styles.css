@@ -963,12 +963,12 @@ body.account-view #dash-account {
 }
 
 #notice-overlay.notice-overlay .modal-card{
-  width: min(560px, calc(100vw - 40px));
+  width: min(460px, calc(100vw - 40px));
   border-radius: 18px;
   background: rgba(255,255,255,0.95);
   border: 1px solid rgba(0,0,0,0.10);
   box-shadow: 0 24px 70px rgba(0,0,0,0.28);
-  padding: 18px 18px 16px;
+  padding: 16px 16px 14px;
 }
 
 #notice-title{
@@ -979,16 +979,18 @@ body.account-view #dash-account {
 
 #notice-message{
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.2;
   color: rgba(0,0,0,0.75);
   margin-bottom: 14px;
   white-space: pre-wrap;
   min-height: 18px;
+  display: flex;
+  align-items:center;
 }
 
 .notice-spinner{
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   border: 2px solid rgba(0,0,0,0.15);
   border-top-color: rgba(0,0,0,0.65);
@@ -999,6 +1001,13 @@ body.account-view #dash-account {
 
 @keyframes notice-spin{
   to { transform: rotate(360deg); }
+}
+
+#notice-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
 
 /* Horizontal list */
