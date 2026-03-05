@@ -38,7 +38,6 @@ body.account-view #dash-topbar {
   z-index: 0;
 
   transition: opacity 1s ease 0.3s;
-  animation: hearthZoom 30s ease-in-out infinite alternate;
 
   pointer-events: none;
 }
@@ -53,14 +52,6 @@ body.account-view #dash-topbar {
 #calendar-side{
   position: relative;
   z-index: 1;
-}
-
-/* white wash overlay */
-#landing-bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: rgba(255,255,255,0.35);
 }
 
 body.logged-in #landing-bg{
