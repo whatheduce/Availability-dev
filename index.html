@@ -10,6 +10,8 @@
 
 <body style="visibility:hidden;">
 
+<div id="landing-bg"></div>
+
 <div id="profile-setup" style="display:none; padding:20px; max-width:520px; margin:60px auto;">
   <h2>Set up your profile</h2>
   <p style="opacity:0.7; margin-top:-8px;">This name and colour will show on every calendar you join.</p>
@@ -1102,6 +1104,8 @@ async function handleAuthSubmit() {
       showProfileSetup();
       return;
     }
+
+  document.body.classList.add("logged-in");
 
     // Now proceed to board or create screen
     if (inviteToken || manageToken) {
@@ -4172,6 +4176,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
