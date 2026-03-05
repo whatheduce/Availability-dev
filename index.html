@@ -23,7 +23,11 @@
 
   <div style="margin-top:14px;">
     <label style="display:block; font-weight:600; margin-bottom:6px;">Dot colour</label>
-    <input type="color" id="setup-color" value="#3b82f6" style="width:56px; height:44px; border:none; background:transparent;">
+
+    <div id="setup-colour-grid"
+     class="colour-grid"
+     role="listbox"
+     aria-label="Choose a dot colour"></div>
   </div>
 
   <button id="setup-save" style="margin-top:18px; padding:12px 16px; border-radius:10px; border:none; font-weight:700; cursor:pointer;">
@@ -131,7 +135,6 @@
   <!-- Primary section -->
   <div class="drawer-group">
     <button id="drawer-account" class="drawer-item">Account Settings</button>
-    <button id="drawer-customise" class="drawer-item">User Customisation</button>
     <button id="drawer-notifications" class="drawer-item">Notifications</button>
   </div>
 
@@ -163,7 +166,14 @@
 
   <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px;">
     <label for="identity-color" style="font-weight:600;">Dot colour</label>
-    <input id="identity-color" type="color" value="#2d7ff9" style="width:46px; height:34px; border:none; background:transparent; padding:0;" />
+    <div style="margin-top:14px;">
+      <label style="display:block; font-weight:600; margin-bottom:6px;">Dot colour</label>
+
+      <div id="identity-colour-grid"
+       class="colour-grid"
+       role="listbox"
+       aria-label="Choose a dot colour"></div>
+    </div>
   </div>
 
   <button id="save-identity">Continue</button>
@@ -447,6 +457,9 @@ let loadAvailabilityRunning = false;
 let loadAvailabilityQueued = false;
 
 let noteDraftBeforeEdit = "";
+
+let setupSelectedColour = "#3b82f6";
+let identitySelectedColour = "#2d7ff9";  
   
 // Full refresh only after the board has been idle for a while
 function scheduleFullRefreshIdle(ms = 20000) {
@@ -769,7 +782,7 @@ async function saveProfileSetup() {
   if (!au) return;
 
   const name = document.getElementById("setup-name")?.value?.trim();
-  const color = document.getElementById("setup-color")?.value;
+  const color = setupSelectedColour;
 
   if (!name) return alert("Please choose a username.");
 
@@ -2356,10 +2369,9 @@ async function resetBoard() {
 
   function saveIdentity() {
   const input = document.getElementById("identity-name");
-  const colorInput = document.getElementById("identity-color");
 
   const name = (input?.value || "").trim();
-  const color = (colorInput?.value || "").trim();
+  const color = (identitySelectedColour || "").trim();
 
   if (!name) {
     alert("Please enter your name");
@@ -2529,6 +2541,16 @@ function bindUiListenersOnce() {
   if (returnBtn) {
     returnBtn.addEventListener("click", showDashboard);
   }
+
+  const setupGrid = document.getElementById("setup-colour-grid");
+  renderSwatchGrid(setupGrid, setupSelectedColour, (hex) => {
+    setupSelectedColour = hex;
+  });
+
+  const identityGrid = document.getElementById("identity-colour-grid");
+  renderSwatchGrid(identityGrid, identitySelectedColour, (hex) => {
+    identitySelectedColour = hex;
+  });
   
   // Profile setup save
   const setupSaveBtn = document.getElementById("setup-save");
@@ -2729,7 +2751,6 @@ drawer?.addEventListener("click", async (e) => {
   }
 
   // (optional later) handle other drawer buttons here:
-  // if (btn.id === "drawer-customise") ...
   // if (btn.id === "drawer-notifications") ...
 });
 
@@ -2802,6 +2823,32 @@ const COLOUR_PRESETS = [
   "#14B8A6", "#84CC16"
 ];
 
+function renderSwatchGrid(containerEl, currentHex, onPick){
+  if (!containerEl) return;
+
+  containerEl.innerHTML = "";
+
+  COLOUR_PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "colour-swatch";
+    b.style.background = hex;
+    b.setAttribute("aria-label", hex);
+    b.dataset.hex = hex;
+
+    if (currentHex && hex === currentHex) b.classList.add("selected");
+
+    b.addEventListener("click", () => {
+      // update selected state in this grid
+      [...containerEl.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+      onPick(hex);
+    });
+
+    containerEl.appendChild(b);
+  });
+}
+  
 function setColourError(msg){
   if (!colourErr) return;
   colourErr.textContent = msg || "";
@@ -4176,6 +4223,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
