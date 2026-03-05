@@ -211,10 +211,6 @@
 
     <!-- PASSWORD RECOVERY (shown only when user comes from reset email link) -->
     <div id="auth-recovery" style="display:none;">
-      <div style="font-weight:700; margin:6px 0 10px;">
-        Set a new password
-      </div>
-
       <input id="auth-new-password" placeholder="New password" type="password"
         style="box-sizing:border-box; width:100%; padding:10px; padding-left:14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
 
@@ -3341,6 +3337,14 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
     });
   }
 
+  // Press Enter in confirm password field -> trigger update password
+document.getElementById("auth-new-password-confirm")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("auth-set-password")?.click();
+  }
+});
+  
   // Password recovery submit
 document.getElementById("auth-set-password")?.addEventListener("click", async () => {
   const setBtn = document.getElementById("auth-set-password");
@@ -4481,6 +4485,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
