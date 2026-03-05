@@ -30,6 +30,11 @@ body.account-view #dash-topbar {
   position: fixed;
   inset: 0;
 
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+  animation: none;
+ 
   background-image: url("HearthImage1.jpg");
   background-size: cover;
   background-position: center;
@@ -40,6 +45,11 @@ body.account-view #dash-topbar {
   transition: opacity 1s ease;
   filter: blur(8px);
   pointer-events: none;
+}
+
+body.show-landing-bg #landing-bg{
+  opacity: 1;
+  animation: hearthZoom 30s ease-in-out infinite alternate;
 }
 
 #landing-bg::after{
