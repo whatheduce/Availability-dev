@@ -2806,7 +2806,7 @@ drawer?.addEventListener("click", async (e) => {
 });
 
 document.getElementById("acct-back-dashboard")?.addEventListener("click", () => {
-  showDashboardPanel();
+  closeDrawer(); // ✅ same behavior as clicking the ✕
 });
 
 // Change Name modal wiring
@@ -4233,6 +4233,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
