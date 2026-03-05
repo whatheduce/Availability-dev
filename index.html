@@ -1059,6 +1059,8 @@ function showAuthOverlay(msg = "", opts = {}) {
   
 function showDashboard() {
   document.body.style.visibility = "visible";
+  document.body.classList.remove("show-landing-bg");
+  
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "block";
 }
@@ -1067,6 +1069,9 @@ function showDashboard() {
 function hideAuthOverlay() {
   const overlay = document.getElementById("auth-overlay");
   if (overlay) overlay.style.display = "none";
+
+  // ✅ Landing BG should only exist on the auth screen
+  document.body.classList.remove("show-landing-bg");
 }
 
   
@@ -3284,6 +3289,7 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
   
                                                                                                 /* === Startup === */
 async function startApp() {
+  document.body.classList.remove("show-landing-bg");
   document.body.style.visibility = "visible";
   bindUiListenersOnce(); // ✅ bind auth button handlers immediately
 
@@ -4227,6 +4233,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
