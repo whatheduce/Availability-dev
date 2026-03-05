@@ -1739,34 +1739,4 @@ body.account-view #dash-account {
   z-index: 10000; /* above overlay backdrop */
 }
 
-/* --- Confirm popup: force readable layout --- */
-#confirm-overlay{
-  position: fixed;
-  inset: 0;
-  display: none;            /* JS switches to flex */
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.35);
-  z-index: 20000;
-}
-
-#confirm-overlay .modal-card{
-  width: min(720px, calc(100vw - 40px));
-  background: #fff;
-  border-radius: 18px;
-  padding: 22px 22px 18px;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.25);
-  overflow: visible;        /* important */
-}
-
-#confirm-message{
-  display: block;
-  min-height: 28px;         /* prevents “blank” area */
-  margin: 10px 0 18px;
-  white-space: pre-wrap;
-  color: #111827 !important; /* override anything odd */
-  font-size: 16px;
-  line-height: 1.45;
-}
-
 [hidden] { display: none !important; }
