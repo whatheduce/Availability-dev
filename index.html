@@ -209,6 +209,28 @@
       </button>
     </form>
 
+    <!-- PASSWORD RECOVERY (shown only when user comes from reset email link) -->
+    <div id="auth-recovery" style="display:none;">
+      <div style="font-weight:700; margin:6px 0 10px;">
+        Set a new password
+      </div>
+
+      <input id="auth-new-password" placeholder="New password" type="password"
+        style="box-sizing:border-box; width:100%; padding:10px; padding-left:14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
+
+      <input id="auth-new-password-confirm" placeholder="Confirm new password" type="password"
+        style="box-sizing:border-box; width:100%; padding:10px; padding-left:14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+
+      <button id="auth-set-password" class="primary-btn" style="width:100%;" type="button">
+        Update password
+      </button>
+
+      <button id="auth-recovery-cancel" class="primary-btn"
+        style="width:100%; margin-top:10px; background:#f3f4f6;" type="button">
+        Back to sign in
+      </button>
+    </div>
+    
     <div style="display:flex; justify-content:space-between; margin-top:10px; gap:10px;">
       <button id="auth-toggle-mode" class="primary-btn" style="flex:1; background:#f3f4f6;">
         Create account
@@ -1036,6 +1058,28 @@ function showAuthOverlay(msg = "", opts = {}) {
   }
 }
 
+
+function setAuthMode(mode /* "signin" | "recovery" */) {
+  const form = document.getElementById("auth-form");
+  const toggleRow = document.getElementById("auth-toggle-mode")?.parentElement; // the flex row
+  const recovery = document.getElementById("auth-recovery");
+  const title = document.getElementById("auth-title");
+  const subtitle = document.getElementById("auth-subtitle");
+
+  if (!form || !recovery) return;
+
+  const isRecovery = mode === "recovery";
+
+  form.style.display = isRecovery ? "none" : "block";
+  if (toggleRow) toggleRow.style.display = isRecovery ? "none" : "flex";
+  recovery.style.display = isRecovery ? "block" : "none";
+
+  if (title) title.textContent = isRecovery ? "Reset your password" : "Sign in to access your Hearth Account";
+  if (subtitle) subtitle.textContent = isRecovery
+    ? "Enter a new password to finish resetting your account."
+    : "Create an account or sign in to continue.";
+}
+  
   
 function showDashboard() {
   document.body.style.visibility = "visible";
@@ -3242,6 +3286,46 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
     });
   }
 
+  // Password recovery submit
+  document.getElementById("auth-set-password")?.addEventListener("click", async () => {
+    const p1 = (document.getElementById("auth-new-password")?.value || "").trim();
+    const p2 = (document.getElementById("auth-new-password-confirm")?.value || "").trim();
+
+    if (!p1 || p1.length < 8) {
+      showAuthOverlay("Password must be at least 8 characters.");
+      setAuthMode("recovery");
+      return;
+    }
+    if (p1 !== p2) {
+      showAuthOverlay("Passwords do not match.");
+      setAuthMode("recovery");
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: p1 });
+    if (error) {
+      showAuthOverlay(error.message || "Failed to update password.");
+      setAuthMode("recovery");
+      return;
+    }
+
+    // Clean hash so we don't re-enter recovery mode on refresh
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+
+    // Optional: sign out after reset and force normal sign-in
+    await supabase.auth.signOut();
+
+    showAuthOverlay("Password updated. Please sign in with your new password.");
+    setAuthMode("signin");
+  });
+
+  // Back to sign-in from recovery UI
+  document.getElementById("auth-recovery-cancel")?.addEventListener("click", async () => {
+    // Clean hash just in case
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    setAuthMode("signin");
+  });
+  
   const authForm = document.getElementById("auth-form");
     if (authForm) {
       authForm.addEventListener("submit", (e) => {
@@ -3274,7 +3358,30 @@ async function startApp() {
   document.body.style.visibility = "visible";
   bindUiListenersOnce(); // ✅ bind auth button handlers immediately
 
-  // 🔐 Check session
+  // 🔁 Password recovery link handling (from Supabase reset email)
+  const hash = window.location.hash || "";
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code"); // PKCE flow (if enabled)
+
+  // If Supabase uses PKCE recovery links, exchange code for session
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
+      return;
+    }
+    // Clean URL after exchanging
+    url.searchParams.delete("code");
+    window.history.replaceState({}, document.title, url.toString());
+  }
+
+  // If using hash tokens, look for type=recovery
+  if (hash.includes("type=recovery")) {
+    showAuthOverlay("");      // show modal
+    setAuthMode("recovery");  // switch UI
+    return;                   // stop normal app boot until password is set
+  }
+  
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
     const lockSignin = !!manageToken; // for your owner-link behaviour
@@ -3364,6 +3471,7 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     return;
   }
   showAuthOverlay("Password reset email sent. Check your inbox.");
+  setAuthMode("signin");
 });
   
   await loadTable();
@@ -4236,6 +4344,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
