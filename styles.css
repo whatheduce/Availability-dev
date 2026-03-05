@@ -44,6 +44,40 @@ body.account-view #dash-topbar {
   display: none !important;
 }
 
+#landing-bg{
+  position: fixed;
+  inset: 0;
+
+  background-image: url("/hearth-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  z-index: -2;
+  transition: opacity 1s ease 0.3s;
+  animation: hearthZoom 30s ease-in-out infinite alternate;
+}
+
+/* white wash overlay */
+#landing-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(255,255,255,0.35);
+}
+
+body.logged-in #landing-bg{
+  opacity:0;
+}
+
+@keyframes hearthZoom{
+  0%{
+    transform: scale(1);
+  }
+  100%{
+    transform: scale(1.08);
+  }
+}
     #calendar {
       margin: 18px 0 40px;
       overflow-x: auto;
