@@ -3894,8 +3894,4 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
   
-  
 document.addEventListener("DOMContentLoaded", startApp);
-
-
-</script>
