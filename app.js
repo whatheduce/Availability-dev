@@ -1,0 +1,3901 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const DEBUG = false;
+function log(...args) { if (DEBUG) console.log(...args); }
+function warn(...args) { if (DEBUG) console.warn(...args); }
+
+/* Supabase credentials (unchanged) */
+const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  /* === Invite Token + Current Table === */
+const params = new URLSearchParams(window.location.search);
+const inviteToken = params.get("t");
+const manageToken = params.get("m");
+const pendingAdds = new Set();   // prevent spam insert per user+cell
+const inFlightCells = new Set(); // per-cell lock (replaces toggleInFlight)
+
+let currentTable = null;
+let availabilityChannel = null;
+let tableChannel = null;  
+let fullRefreshTimer = null;
+let loadAvailabilityRunning = false;
+let loadAvailabilityQueued = false;
+
+let noteDraftBeforeEdit = "";
+
+let setupSelectedColour = "#3b82f6";
+let identitySelectedColour = "#2d7ff9";  
+  
+// Full refresh only after the board has been idle for a while
+function scheduleFullRefreshIdle(ms = 20000) {
+  clearTimeout(fullRefreshTimer);
+  fullRefreshTimer = setTimeout(() => {
+    if (currentTable) loadAvailability();
+  }, ms);
+}
+
+let selectedStructure = "custom"; // dev-only selectable for now
+let presenceChannel = null;
+  
+window.openBoard = function (inviteToken) {
+  window.location.href = `${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
+};
+
+
+let isBoardOwner = false;
+
+async function refreshBoardOwnerFlag() {
+  isBoardOwner = false;
+
+  const au = await getAuthUser();
+  if (!au || !currentTable?.id) return;
+
+  // Primary: owner_id on tables row
+  if (currentTable.owner_id && currentTable.owner_id === au.id) {
+    isBoardOwner = true;
+  } else {
+    // Fallback: board_members role
+    const { data, error } = await supabase
+      .from("board_members")
+      .select("role")
+      .eq("board_id", currentTable.id)
+      .eq("user_id", au.id)
+      .maybeSingle();
+
+    if (!error) isBoardOwner = data?.role === "owner";
+  }
+
+  const editBtn = document.getElementById("footer-edit-btn");
+  if (editBtn) editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
+}
+
+
+function showConfirmPopup(message, { title = "Notice", onOk, showOk = true } = {}) {
+  const overlay = document.getElementById("notice-overlay");
+  const msgEl = document.getElementById("notice-message");
+  const titleEl = document.getElementById("notice-title");
+  const okBtn = document.getElementById("notice-ok");
+  const spinner = document.getElementById("notice-spinner");
+
+  if (!overlay || !msgEl || !titleEl || !okBtn || !spinner) return;
+
+  titleEl.textContent = title;
+  msgEl.textContent = message;
+
+  // Show spinner only while processing
+  spinner.style.display = showOk ? "none" : "block";
+
+  // Show OK only when finished
+  okBtn.style.display = showOk ? "inline-flex" : "none";
+
+  overlay.style.display = "flex";
+
+  okBtn.onclick = null;
+  okBtn.onclick = () => {
+    overlay.style.display = "none";
+    if (typeof onOk === "function") onOk();
+  };
+}
+
+
+function resetAuthToFreshSignin() {
+  // Clear fields
+  const emailEl = document.getElementById("auth-email");
+  const pwEl = document.getElementById("auth-password");
+  if (emailEl) emailEl.value = "";
+  if (pwEl) pwEl.value = "";
+
+  // Clear recovery fields if present
+  const p1 = document.getElementById("auth-new-password");
+  const p2 = document.getElementById("auth-new-password-confirm");
+  if (p1) p1.value = "";
+  if (p2) p2.value = "";
+
+  // Clear any inline message (if you still have it)
+  const msg = document.getElementById("auth-msg");
+  if (msg) {
+    msg.textContent = "";
+    msg.style.display = "none";
+  }
+
+  // Ensure sign-in mode
+  if (typeof setAuthMode === "function") setAuthMode("signin");
+}  
+
+  
+function renderCalendarNote() {
+  const ta = document.getElementById("footer-note-input");
+  if (!ta) return;
+
+  ta.value = String(currentTable?.calendar_note || "");
+}
+
+  
+function setCalendarNoteEditing(on) {
+  const ta = document.getElementById("footer-note-input");
+  const actions = document.getElementById("footer-note-actions");
+  const editBtn = document.getElementById("footer-edit-btn");
+
+  if (!ta || !actions || !editBtn) return;
+
+  if (!isBoardOwner) {
+    ta.readOnly = true;
+    actions.style.display = "none";
+    editBtn.style.display = "none";
+    return;
+  }
+
+  if (on) {
+    noteDraftBeforeEdit = ta.value;
+    ta.readOnly = false;
+    actions.style.display = "flex";
+    editBtn.style.display = "none";
+    ta.focus();
+  } else {
+    ta.readOnly = true;
+    actions.style.display = "none";
+    editBtn.style.display = "inline-flex";
+  }
+}
+
+async function saveCalendarNote() {
+  if (!isBoardOwner || !currentTable?.id) return;
+
+  const ta = document.getElementById("footer-note-input");
+  const newVal = String(ta?.value || "");
+
+  const { error } = await supabase
+    .from("tables")
+    .update({ calendar_note: newVal })
+    .eq("id", currentTable.id);
+
+  if (error) {
+    alert(error.message || "Failed to save note.");
+    return;
+  }
+
+  currentTable = { ...currentTable, calendar_note: newVal };
+  renderCalendarNote();
+  setCalendarNoteEditing(false);
+}
+  
+  
+function renderPresence() {
+  const wrap = document.getElementById("presence");
+  const countEl = document.getElementById("presence-count");
+  if (!wrap || !countEl || !presenceChannel) return;
+
+  const state = presenceChannel.presenceState(); // { key: [metas...] }
+  const metas = Object.values(state).flat();
+  const uniqueUsers = new Map();
+
+  metas.forEach(m => {
+    // de-dupe by user_id (a user can have multiple metas if multiple tabs)
+    if (m.user_id) uniqueUsers.set(m.user_id, m);
+  });
+
+  wrap.style.display = "block";
+  countEl.textContent = String(uniqueUsers.size || 0);
+}
+
+
+function addKey(tableId, day, time, userId) {
+  return `${tableId}|${day}|${time}|${userId}`;
+}
+  
+
+function ensureDotContainer(cell) {
+  let dc = cell.querySelector(".dot-container");
+  if (!dc) {
+    dc = document.createElement("div");
+    dc.className = "dot-container";
+    cell.appendChild(dc);
+  }
+  return dc;
+}
+
+function addOptimisticDot(cell, userId, name, color) {
+  const dc = ensureDotContainer(cell);
+
+  // already there?
+  if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
+
+  const dot = document.createElement("div");
+  dot.className = "dot";
+  dot.dataset.userId = userId;
+  dot.dataset.name = name || "—";
+  dot.title = name || "—";
+  dot.style.background = color || "#999";
+
+  // mark as pending so we can remove if DB fails
+  dot.dataset.pending = "1";
+
+  dc.appendChild(dot);
+}  
+
+
+function maybeApplyGoldForCell(cell) {
+  const th = Number(currentTable?.gold_threshold || 0);
+  if (!th || th <= 0) return;
+
+  // If already gold, nothing to do
+  if (cell.classList.contains("gold-cell")) return;
+
+  const dc = cell.querySelector(".dot-container");
+  const count = dc ? dc.querySelectorAll(".dot").length : 0;
+
+  if (count >= th) {
+    cell.classList.add("gold-cell");
+
+    // Gold cells hide dots in your UI
+    dc?.remove();
+  }
+}  
+  
+  
+function showCreateBoard() {
+  document.body.style.visibility = "visible";
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const create = document.getElementById("create-board");
+  if (create) create.style.display = "block";
+
+  // Initialize the create flow (resets, hides/reveals buttons, timezones, etc.)
+  if (typeof showBoardSetup === "function") {
+    showBoardSetup();
+  }
+}
+
+
+function setDashboardSubtitle() {
+  const dashUser = document.getElementById("dash-username");
+  if (dashUser && user?.name) {
+    dashUser.textContent = possessive(user.name).toUpperCase();
+  }
+}  
+
+  
+function possessive(name) {
+  if (!name) return "";
+  const trimmed = name.trim();
+
+  // If the name already ends with "s" → James' Dashboard
+  if (trimmed.toLowerCase().endsWith("s")) {
+    return `${trimmed}'`;
+  }
+
+  return `${trimmed}'s`;
+}
+  
+  
+function showProfileSetup() {
+  document.body.style.visibility = "visible";
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "block";
+}
+
+  
+async function getBoardColorMap(boardId) {
+  // 1) Get member user_ids for this board
+  const { data: members, error: memErr } = await supabase
+    .from("board_members")
+    .select("user_id")
+    .eq("board_id", boardId);
+
+  if (memErr) {
+    console.error("getBoardColorMap members error:", memErr);
+    return {};
+  }
+
+  const userIds = (members || []).map(m => m.user_id).filter(Boolean);
+  if (userIds.length === 0) return {};
+
+  // 2) Fetch their profile colours
+  const { data: profiles, error: profErr } = await supabase
+    .from("profiles")
+    .select("user_id,color")
+    .in("user_id", userIds);
+
+  if (profErr) {
+    console.error("getBoardColorMap profiles error:", profErr);
+    return {};
+  }
+
+  // 3) Build map
+  const map = {};
+  (profiles || []).forEach(p => {
+    if (p?.user_id) map[p.user_id] = p.color || null;
+  });
+  return map;
+}
+  
+  
+async function loadTimezonesIntoSelect(selectEl) {
+  if (!selectEl) return;
+
+  // Prevent double-load
+  if (selectEl.dataset.loaded === "1") return;
+  selectEl.dataset.loaded = "1";
+
+  // Show loading state
+  selectEl.innerHTML = `<option value="">Loading timezones…</option>`;
+  selectEl.disabled = true;
+
+  const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+
+  try {
+    let zones = [];
+
+    // Best option (fast, offline, modern browsers)
+    if (Intl.supportedValuesOf && typeof Intl.supportedValuesOf === "function") {
+      zones = Intl.supportedValuesOf("timeZone");
+    }
+
+    // Fallback: fetch a list
+    if (!zones || zones.length === 0) {
+      const res = await fetch("https://worldtimeapi.org/api/timezone");
+      if (!res.ok) throw new Error("Timezone fetch failed");
+      zones = await res.json();
+    }
+
+    // Build options
+    selectEl.innerHTML = `<option value="">Select timezone…</option>` +
+      zones.map(z => `<option value="${z}">${z}</option>`).join("");
+
+    // Auto-select user's timezone if present
+    if (localTz && zones.includes(localTz)) {
+      selectEl.value = localTz;
+    } else if (localTz) {
+      // If not in list, still set it (some APIs differ slightly)
+      selectEl.value = localTz;
+    }
+
+    selectEl.disabled = false;
+
+    // Let any "enable Create" logic react
+    selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+  } catch (err) {
+    console.error("Failed to load timezones:", err);
+    // Don’t strand the user
+    selectEl.innerHTML = `<option value="${localTz}">${localTz || "UTC"}</option>`;
+    selectEl.value = localTz || "UTC";
+    selectEl.disabled = false;
+    selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+  
+  
+function hideProfileSetup() {
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+}
+
+
+async function saveProfileSetup() {
+  const au = await getAuthUser();
+  if (!au) return;
+
+  const name = document.getElementById("setup-name")?.value?.trim();
+  const color = setupSelectedColour;
+
+  if (!name) return alert("Please choose a username.");
+
+  const { error } = await supabase.from("profiles").upsert({
+    user_id: au.id,
+    name,
+    color
+  });
+
+  if (error) return alert(error.message);
+
+  // update in-memory user immediately
+  user = { id: au.id, name, color };
+
+  hideProfileSetup();
+
+    const params = new URLSearchParams(window.location.search);
+    const inviteToken = params.get("t");
+    const manageToken = params.get("m"); // if you use this
+
+    if (inviteToken || manageToken) {
+      await loadTable();
+      return;
+    }
+
+showDashboard();
+await loadBoards();
+}  
+
+
+function showRouteError() {
+  document.body.style.visibility = "visible";
+
+  // Hide other screens
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+  const board = document.getElementById("board-view");
+  if (board) board.style.display = "none";
+
+  // Show error panel
+  const err = document.getElementById("route-error");
+  if (err) err.style.display = "block";
+}
+  
+  
+async function rollForwardIfNeeded(tableId) {
+  const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
+    p_table_id: tableId
+  });
+
+  if (error) {
+    console.error("roll_board_if_needed failed:", error);
+    return 0;
+  }
+
+  return data || 0;
+}
+
+  
+async function loadProfile() {
+  const au = await getAuthUser();
+  if (!au) return null;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  user = {
+    id: au.id,
+    name: data.name,
+    color: data.color
+  };
+
+  return data;
+}
+  
+
+async function loadBoards() {
+  const au = await getAuthUser();
+
+  const { data, error } = await supabase
+    .from("board_members")
+    .select(`
+      role,
+      board_id,
+      tables (
+        id,
+        name,
+        invite_token,
+        owner_token,
+        row_structure,
+        start_date,
+        host_tz,
+        gold_threshold
+      )
+    `)
+    .eq("user_id", au.id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const owned = (data || []).filter(x => x.role === "owner");
+  const joined = (data || []).filter(x => x.role !== "owner");
+
+  const ownedEl = document.getElementById("owned-boards");
+  const joinedEl = document.getElementById("joined-boards");
+
+  // Hosted
+  if (!owned.length) {
+    ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
+  } else {
+    ownedEl.innerHTML = owned.map(b => `
+      <div
+        class="board-pill board-pill--square"
+        data-kind="hosted"
+        data-board-id="${b.tables.id}"
+        data-invite-token="${b.tables.invite_token}"
+        onclick="openManageBoard('${b.tables.owner_token}')"
+      >
+        <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+
+        <div class="board-actions-menu" hidden>
+          <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
+          <button class="board-actions-item" type="button" data-action="delete">Delete</button>
+        </div>
+
+        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
+        <div class="board-preview" data-board-id="${b.tables.id}"></div>
+        <div class="board-pill-meta">Hosted</div>
+      </div>
+    `).join("");
+  }
+
+  // Joined (same look as hosted, no actions menu)
+  if (!joined.length) {
+    joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
+  } else {
+    joinedEl.innerHTML = joined.map(b => `
+        <div 
+    class="board-pill board-pill--square"
+    data-kind="joined"
+    data-board-id="${b.tables.id}"
+    data-invite-token="${b.tables.invite_token}"
+    onclick="openBoard('${b.tables.invite_token}')"
+  >
+    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+
+    <div class="board-actions-menu" hidden>
+      <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
+    </div>
+
+    <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
+    <div class="board-preview" data-board-id="${b.tables.id}"></div>
+    <div class="board-pill-meta">Joined</div>
+  </div>
+`).join("");
+  }
+
+  // Render previews for both hosted + joined
+  const allBoards = [...owned, ...joined];
+  if (allBoards.length) renderBoardPreviews(allBoards);
+}
+
+window.openManageBoard = function (manageToken) {
+  window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
+};
+  
+  
+async function getAuthUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) return null;
+  return data.user || null;
+}
+
+  
+async function getOrCreateProfile({ name, color }) {
+  const user = await getAuthUser();
+  if (!user) return null;
+
+  // try fetch
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  // create
+  const { data: created, error } = await supabase
+    .from("profiles")
+    .insert({ user_id: user.id, name, color })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Profile create failed:", error);
+    return null;
+  }
+  return created;
+}
+
+
+let authMode = "signin"; // "signin" or "signup"
+
+function showAuthOverlay(msg = "", opts = {}) {
+  document.body.style.visibility = "visible";
+  const overlay = document.getElementById("auth-overlay");
+  const message = document.getElementById("auth-msg");
+  const toggle = document.getElementById("auth-toggle-mode");
+  const subtitle = document.getElementById("auth-subtitle");
+  const titleEl = document.getElementById("auth-title");
+
+  if (!overlay || !toggle || !subtitle) return;
+
+  const lockSignin = !!opts.lockSignin;
+
+  // If locked, force signin
+  if (lockSignin) {
+    authMode = "signin";
+  }
+
+  // Always show overlay
+  overlay.style.display = "block";
+  document.body.classList.add("show-landing-bg");
+
+  // Hide/show the toggle reliably
+  toggle.hidden = lockSignin;
+
+  // Title/subtitle for locked vs normal
+  if (lockSignin) {
+    if (titleEl) titleEl.textContent = "Sign in as the calendar owner";
+    subtitle.textContent = "This link is owner-only. Sign in to continue.";
+  } else {
+    if (titleEl) titleEl.textContent = "Sign in to access your Hearth Account";
+  }
+
+  // Normal mode switching (only when NOT locked)
+  if (!lockSignin) {
+    if (authMode === "signin") {
+      toggle.textContent = "Create account";
+      subtitle.textContent = "Sign in to continue.";
+    } else {
+      toggle.textContent = "I already have an account";
+      subtitle.textContent = "Create your account (you must confirm your email).";
+    }
+  }
+
+  // Message block
+  if (message) {
+    if (msg) {
+      message.style.display = "block";
+      message.textContent = msg;
+    } else {
+      message.style.display = "none";
+      message.textContent = "";
+    }
+  }
+}
+
+
+function setAuthMode(mode /* "signin" | "recovery" */) {
+  const form = document.getElementById("auth-form");
+  const toggleRow = document.getElementById("auth-toggle-mode")?.parentElement; // the flex row
+  const recovery = document.getElementById("auth-recovery");
+  const title = document.getElementById("auth-title");
+  const subtitle = document.getElementById("auth-subtitle");
+
+  if (!form || !recovery) return;
+
+  const isRecovery = mode === "recovery";
+
+  form.style.display = isRecovery ? "none" : "block";
+  if (toggleRow) toggleRow.style.display = isRecovery ? "none" : "flex";
+  recovery.style.display = isRecovery ? "block" : "none";
+
+  if (title) title.textContent = isRecovery ? "Reset your password" : "Sign in to access your Hearth Account";
+  if (subtitle) subtitle.textContent = isRecovery
+    ? "Enter a new password to finish resetting your account."
+    : "Create an account or sign in to continue.";
+}
+  
+  
+function showDashboard() {
+  document.body.style.visibility = "visible";
+  document.body.classList.remove("show-landing-bg");
+  
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "block";
+}
+
+  
+function hideAuthOverlay() {
+  const overlay = document.getElementById("auth-overlay");
+  if (overlay) overlay.style.display = "none";
+
+  // ✅ Landing BG should only exist on the auth screen
+  document.body.classList.remove("show-landing-bg");
+}
+
+  
+async function hydrateUserFromAuth() {
+  const prof = await loadProfile(); // loadProfile already sets global `user`
+  if (!prof || !prof.name || !prof.color) return null;
+  return prof;
+}
+
+  
+async function handleAuthSubmit() {
+  const emailEl = document.getElementById("auth-email");
+  const passEl = document.getElementById("auth-password");
+  const msgEl = document.getElementById("auth-msg");
+  const email = (emailEl?.value || "").trim();
+  const password = (passEl?.value || "").trim();
+
+  if (!email || !password) {
+    showAuthOverlay("Please enter email and password.");
+    return;
+  }
+
+  if (msgEl) { msgEl.style.display = "none"; msgEl.textContent = ""; }
+
+  if (authMode === "signup") {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      showAuthOverlay(error.message || "Sign up failed.");
+      return;
+    }
+    // Confirm email is ON: user must confirm before sign-in session works reliably
+    showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
+    authMode = "signin";
+    return;
+  }
+
+  // signin
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    showAuthOverlay(error.message || "Sign in failed.");
+    return;
+  }
+
+  const hydrated = await hydrateUserFromAuth();
+  setDashboardSubtitle();
+  hideAuthOverlay();
+
+    if (!hydrated) {
+      showProfileSetup();
+      return;
+    }
+
+  document.body.classList.add("logged-in");
+
+    // Now proceed to board or create screen
+    if (inviteToken || manageToken) {
+      await loadTable();
+    } else {
+      showDashboard();
+      await loadBoards();
+    }
+
+  // Now proceed to board or create screen
+  if (inviteToken || manageToken) {
+    await loadTable(); // will now have user set
+  }
+}
+  
+
+function subscribePresence() {
+  if (!currentTable) return;
+
+  // Clean up if re-subscribing
+  if (presenceChannel) supabase.removeChannel(presenceChannel);
+
+  // Ensure we have some identity to track
+  const safeUserId = user?.id;
+  if (!safeUserId) return; // no auth user yet, don’t track presence
+  if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
+
+  const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
+
+  presenceChannel = supabase
+    .channel(`presence:${currentTable.id}`, {
+      config: { presence: { key: safeUserId } }
+    })
+    .on("presence", { event: "sync" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "join" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "leave" }, () => {
+      renderPresence();
+    })
+    .subscribe(async (status) => {
+      // helpful during dev
+      log("presence channel:", status);
+
+      if (status === "SUBSCRIBED") {
+        await presenceChannel.track({
+          user_id: safeUserId,
+          name: safeName,
+          at: new Date().toISOString()
+        });
+      }
+    });
+}
+
+  
+function ensureLegendUser(entry) {
+  if (!entry) return;
+  const key = entry.user_id || entry.name;
+  if (!key) return;
+
+  // already present?
+  const existing = legendList.querySelector(
+    entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
+                  : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
+  );
+  if (existing) return;
+
+  const div = document.createElement("div");
+  div.className = "legend-item";
+  if (entry.user_id) div.dataset.userId = entry.user_id;
+  if (entry.name) div.dataset.name = entry.name;
+
+  div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
+  legendList.appendChild(div);
+}
+
+
+async function ensureMembership(boardId) {
+  const au = await getAuthUser();
+  if (!au) return false;
+
+  // if membership already exists, do nothing
+  const { data: existing, error: selErr } = await supabase
+    .from("board_members")
+    .select("role")
+    .eq("board_id", boardId)
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (selErr) {
+    console.warn("ensureMembership select failed:", selErr);
+    // still try insert as a fallback
+  }
+
+  if (existing) return true;
+
+  const { error } = await supabase
+    .from("board_members")
+    .insert({ board_id: boardId, user_id: au.id, role: "member" });
+
+  if (error) {
+    console.warn("ensureMembership insert failed:", error);
+    return false;
+  }
+  return true;
+}
+  
+  
+async function rebuildDotsForCell(cell) {
+  if (!currentTable) return;
+
+  // Always start clean (prevents duplicate dot containers)
+  cell.querySelector(".dot-container")?.remove();
+
+  const dayNum = parseInt(cell.dataset.day, 10);
+  const timeKey = String(cell.dataset.time || "").trim();
+
+  const { data, error } = await supabase
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id)
+    .eq("day", dayNum)
+    .eq("time", timeKey);
+
+  if (error) {
+    console.warn("rebuildDotsForCell failed:", error);
+    return;
+  }
+
+  if (!data || data.length === 0) return;
+
+  // ✅ Fetch profiles ONCE
+  const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
+  profilesCache = { ...profilesCache, ...profilesMap };
+
+  const dotContainer = document.createElement("div");
+  dotContainer.className = "dot-container";
+
+  data.forEach(entry => {
+    const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+    const displayName = prof?.name || entry.name || "—";
+    const displayColor = prof?.color || entry.color || "#999";
+
+    const dot = document.createElement("div");
+    dot.className = "dot";
+
+    dot.style.background = displayColor;
+    dot.title = displayName;
+
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
+    dot.dataset.name = displayName;
+
+    dotContainer.appendChild(dot);
+  });
+
+  cell.appendChild(dotContainer);
+}
+
+  
+async function applyGoldStateForCell(cell, day) {
+  const goldThreshold = Number(currentTable?.gold_threshold);
+  if (!Number.isFinite(goldThreshold)) return;
+
+  const wasGold = cell.classList.contains("gold-cell");
+
+  let dotContainer = cell.querySelector(".dot-container");
+  let dotCount = dotContainer ? dotContainer.children.length : null;
+
+  // If dots are hidden (gold state), DOM can't tell us the real count.
+  // In that specific case, ask the DB for the real count for this cell.
+  if (dotCount === null && wasGold) {
+    const dayNum = parseInt(cell.dataset.day, 10);
+    const timeKey = String(cell.dataset.time || "").trim();
+
+    const { count, error } = await supabase
+      .from("availability_dev")
+      .select("id", { count: "exact", head: true })
+      .eq("table_id", currentTable.id)
+      .eq("day", dayNum)
+      .eq("time", timeKey);
+
+    if (error) {
+      console.warn("gold count check failed:", error);
+      return;
+    }
+
+    dotCount = count || 0;
+  }
+
+  // If still null, treat as 0
+  dotCount = dotCount ?? 0;
+
+  const shouldBeGold = dotCount >= goldThreshold;
+
+  if (shouldBeGold) {
+    cell.classList.add("gold-cell");
+    // hide dots while gold
+    cell.querySelector(".dot-container")?.remove();
+  } else {
+    cell.classList.remove("gold-cell");
+
+    // If we just transitioned gold -> normal, rebuild visible dots from DB
+    if (wasGold) {
+      await rebuildDotsForCell(cell);
+    }
+  }
+
+  // Update day header gold state
+  const dayNum = parseInt(day, 10);
+  const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+  if (!th) return;
+
+  const anyGoldInDay = !!table.querySelector(`td[data-day="${dayNum}"].gold-cell`);
+  if (anyGoldInDay) th.classList.add("gold-header");
+  else th.classList.remove("gold-header");
+}
+  
+  
+async function handleAvailabilityChange(payload) {
+  const entry =
+    payload.eventType === "DELETE"
+      ? payload.old
+      : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
+
+  if (!entry) return;
+
+  // If DELETE is missing fields we need, safest refresh
+  if (payload.eventType === "DELETE") {
+    if (entry.day == null || entry.time == null) {
+      await loadAvailability();
+      return;
+    }
+  }
+
+  const cell = table.querySelector(
+    `td[data-day="${entry.day}"][data-time="${entry.time}"]`
+  );
+
+  if (!cell) {
+    if (payload.eventType === "DELETE") await loadAvailability();
+    return;
+  }
+
+  // Helper: remove a dot for this entry
+  function removeDot(entryObj) {
+    let selector = null;
+
+    if (entryObj.user_id) {
+      selector = `.dot[data-user-id="${entryObj.user_id}"]`;
+    } else if (entryObj.name) {
+      selector = `.dot[data-name="${CSS.escape(entryObj.name)}"]`;
+    } else {
+      return;
+    }
+
+    const dot = cell.querySelector(selector);
+    if (dot) dot.remove();
+
+    const dc = cell.querySelector(".dot-container");
+    if (dc && dc.children.length === 0) dc.remove();
+  }
+
+  // DELETE: remove dot then re-evaluate gold state
+  if (payload.eventType === "DELETE") {
+    removeDot(entry);
+    await applyGoldStateForCell(cell, entry.day);
+    scheduleFullRefreshIdle(20000);
+    return;
+  }
+
+  // INSERT/UPDATE should never override gold visuals by adding dots
+  // If it IS gold, dots are intentionally hidden.
+  if (cell.classList.contains("gold-cell")) {
+    // Still keep legend/gold state correct in case thresholds changed
+    await applyGoldStateForCell(cell, entry.day);
+    scheduleFullRefreshIdle(20000);
+    return;
+  }
+
+  // Ensure dot container exists (only for non-gold cells)
+  let dotContainer = cell.querySelector(".dot-container");
+  if (!dotContainer) {
+    dotContainer = document.createElement("div");
+    dotContainer.className = "dot-container";
+    cell.appendChild(dotContainer);
+  }
+
+  // For UPDATE: easiest is remove then add back (rare)
+  if (payload.eventType === "UPDATE") {
+    removeDot(entry);
+  }
+
+  // If dot already exists (often from optimistic UI), do NOT add another.
+  const alreadyHasDot =
+    (entry.user_id && cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)) ||
+    (!entry.user_id && entry.name && cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`));
+
+  // Prefer latest profile name/color
+  const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
+  const displayName = prof?.name || entry.name || "—";
+  const displayColor = prof?.color || entry.color || "#999";
+
+  if (!alreadyHasDot) {
+    const dot = document.createElement("div");
+    dot.className = "dot";
+    dot.style.background = displayColor;
+    dot.title = displayName;
+
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
+    dot.dataset.name = displayName;
+
+    dotContainer.appendChild(dot);
+  } else {
+    // If it exists (optimistic), update its displayed values just in case
+    const existing = entry.user_id
+      ? cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)
+      : (entry.name ? cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`) : null);
+
+    if (existing) {
+      existing.style.background = displayColor;
+      existing.title = displayName;
+      existing.dataset.name = displayName;
+    }
+  }
+
+  ensureLegendUser({ ...entry, name: displayName, color: displayColor });
+
+  // Now that dot is present, see if we should flip to gold (this will remove dots container if needed)
+  await applyGoldStateForCell(cell, entry.day);
+
+  scheduleFullRefreshIdle(20000);
+}
+  
+  
+function subscribeRealtime() {
+  if (!currentTable) return;
+
+  // Clean up existing channels (important if loadTable runs again)
+  if (availabilityChannel) supabase.removeChannel(availabilityChannel);
+  if (tableChannel) supabase.removeChannel(tableChannel);
+
+  // Availability changes for this board
+  availabilityChannel = supabase
+    .channel(`availability:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "availability_dev",
+        filter: `table_id=eq.${currentTable.id}`
+      },
+      async (payload) => {
+        await handleAvailabilityChange(payload);
+      }
+    )
+    .subscribe((status) => {
+      log("availability channel:", status);
+    });
+
+  // Board changes (start_date / row_structure / gold_threshold updates)
+  tableChannel = supabase
+    .channel(`table:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "tables",
+        filter: `id=eq.${currentTable.id}`
+      },
+      async (payload) => {
+        currentTable = { ...currentTable, ...payload.new };
+        buildCalendar();
+        await loadAvailability();
+        renderCalendarNote();
+      }
+    )
+    .subscribe((status) => {
+      log("table channel:", status);
+    });
+}
+
+  
+function populateGoldThresholdSelect(isPro) {
+  const sel = document.getElementById("gold-threshold");
+  if (!sel) return;
+
+  // clear existing (keep the placeholder)
+  sel.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
+
+  for (let n = 1; n <= 30; n++) {
+    const opt = document.createElement("option");
+    opt.value = String(n);
+    opt.textContent = `${n}`;
+
+    // Free: 1–5 enabled, 6–30 disabled
+    if (!isPro && n >= 6) opt.disabled = true;
+
+    sel.appendChild(opt);
+  }
+}
+
+  
+function buildUserFromStorage() {
+  const name = localStorage.getItem("globalUserName");
+  const color = localStorage.getItem("globalUserColor");
+  if (!name || !color) return null;
+
+  return {
+    id: getOrCreateUserId(),
+    name,
+    color
+  };
+}
+
+  
+async function loadTable() {
+  if (!inviteToken && !manageToken) return;
+
+  const queryField = inviteToken ? "invite_token" : "owner_token";
+  const tokenValue = inviteToken || manageToken;
+
+  const { data, error } = await supabase
+    .from("tables")
+    .select("*")
+    .eq(queryField, tokenValue)
+    .maybeSingle();
+
+  if (error) {
+  console.error("Error loading table:", error);
+}
+
+if (!data) {
+  // No board exists for this token (e.g., DB wiped or invalid link)
+  document.getElementById("create-board").style.display = "none";
+  document.getElementById("calendar").style.display = "none";
+    const topbar = document.getElementById("calendar-topbar");
+      if (topbar) topbar.style.display = "none";
+  legendDiv.style.display = "none";
+
+  // optional: clear stale remembered board
+  localStorage.removeItem("lastBoardToken");
+
+  showRouteError();
+  return;
+}
+
+currentTable = data;
+
+  
+  // ⭐ remember this board for next time
+if (inviteToken) {
+  localStorage.setItem("lastBoardToken", inviteToken);
+}
+
+  // Roll board forward based on host timezone + start_date (any visitor can trigger)
+const shifted = await rollForwardIfNeeded(currentTable.id);
+
+// Always refetch so the UI always uses the DB's current start_date/host_tz
+const { data: refreshed, error: refreshErr } = await supabase
+  .from("tables")
+  .select("*")
+  .eq("id", currentTable.id)
+  .single();
+
+if (!refreshErr && refreshed) currentTable = refreshed;
+  // Always hide board creation when viewing a board
+document.getElementById("create-board").style.display = "none";
+
+// Use Supabase Auth identity (not localStorage UUID)
+const au = await getAuthUser();
+if (!au) {
+  // Not signed in → show blurred auth overlay and stop interactions
+  showAuthOverlay();
+
+  document.getElementById("identity-section").style.display = "none";
+  document.getElementById("create-board").style.display = "none";
+
+  // Show the calendar BEHIND the blur, but build it so there's something there
+  document.getElementById("calendar").style.display = "block";
+  document.getElementById("calendar-topbar").style.display = "flex";
+  document.getElementById("dashboard").style.display = "none";
+  const side = document.getElementById("calendar-side");
+    if (side) side.style.display = "none";
+  const footer = document.getElementById("board-footer");
+    if (footer) footer.style.display = "none";
+
+  await refreshBoardOwnerFlag();
+    renderCalendarNote();
+    setCalendarNoteEditing(false);
+
+  // ✅ Build grid so cells exist (clicks will still do nothing because user is null)
+  buildCalendar();
+
+  // Optional: try loadAvailability (if RLS blocks selects while logged out, it’ll just stay empty)
+  await loadAvailability();
+
+  return;
+}
+
+const hydrated = await hydrateUserFromAuth();
+if (!hydrated) {
+  showProfileSetup();
+  return;
+}
+
+  await ensureMembership(currentTable.id);
+
+// User exists → show the calendar UI
+document.getElementById("identity-section").style.display = "none";
+document.getElementById("calendar").style.display = "block";
+document.getElementById("calendar-topbar").style.display = "flex";
+document.getElementById("dashboard").style.display = "none";
+const side = document.getElementById("calendar-side");
+  if (side) side.style.display = "flex";
+const footer = document.getElementById("board-footer");
+  if (footer) footer.style.display = "block";
+
+// Now that UI is visible, start realtime + render
+subscribeRealtime();
+subscribePresence();
+
+buildCalendar();
+await loadAvailability();
+
+await refreshBoardOwnerFlag();
+renderCalendarNote();
+setCalendarNoteEditing(false);
+}
+  
+  function generateToken() {
+  return crypto.randomUUID() + crypto.randomUUID();
+}
+
+function getDetectedTimeZone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+function yyyyMmDdInTimeZone(date, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+
+  const y = parts.find(p => p.type === "year").value;
+  const m = parts.find(p => p.type === "month").value;
+  const d = parts.find(p => p.type === "day").value;
+  return `${y}-${m}-${d}`; // YYYY-MM-DD
+}
+
+  
+function getTimeZoneListPinned() {
+  const detected = getDetectedTimeZone();
+
+  // Best case: browser can list all IANA time zones
+  if (Intl.supportedValuesOf) {
+    const all = Intl.supportedValuesOf("timeZone");
+    // Put detected first, then the rest alphabetically
+    return [detected, ...all.filter(tz => tz !== detected).sort()];
+  }
+
+  // Fallback: small curated list + detected pinned
+  const fallback = [
+    "UTC",
+    "Australia/Brisbane",
+    "Australia/Sydney",
+    "Australia/Melbourne",
+    "Australia/Perth",
+    "Pacific/Auckland",
+    "America/Los_Angeles",
+    "America/New_York",
+    "Europe/London",
+    "Europe/Paris",
+    "Asia/Singapore",
+    "Asia/Tokyo"
+  ];
+
+  const unique = Array.from(new Set([detected, ...fallback]));
+  return [detected, ...unique.filter(tz => tz !== detected)];
+}
+
+function populateHostTimezoneSelect() {
+  const select = document.getElementById("host-timezone");
+  if (!select) return;
+
+  const tzs = getTimeZoneListPinned();
+  select.innerHTML = "";
+
+  tzs.forEach((tz, idx) => {
+    const opt = document.createElement("option");
+    opt.value = tz;
+    opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
+    select.appendChild(opt);
+  });
+
+  select.value = tzs[0];
+}
+
+  
+async function createBoard() {
+    // Gold threshold (now selected on the Name Your Calendar screen)
+  const goldSelect =
+    document.getElementById("gold-threshold") ||
+    document.getElementById("gold-threshold-select") ||
+    document.getElementById("goldThreshold") ||
+    document.querySelector('select[data-gold-threshold]');
+
+  const goldThreshold = parseInt(goldSelect?.value || "", 10) || 2;
+  const au = await getAuthUser();
+    if (!au) {
+      showAuthOverlay("Please sign in before creating a calendar.");
+      return;
+    }
+  const nameInput = document.getElementById("board-name");
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    alert("Please enter a board name");
+    return;
+  }
+
+  let timeBlocks = [];
+
+const structureChoice = selectedStructure || "custom";
+
+if (structureChoice === "custom") {
+  const rowInputs = document.querySelectorAll("#rows-container input");
+
+  rowInputs.forEach(input => {
+    const value = input.value.trim();
+    if (value) {
+      timeBlocks.push({ label: value });
+    }
+  });
+
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+} else {
+  timeBlocks = PREBUILT_STRUCTURES[structureChoice];
+}
+
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+
+  const inviteToken = generateToken();
+  const ownerToken = generateToken();
+  const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
+  const startDate = yyyyMmDdInTimeZone(new Date(), tz);
+  
+  // --- Gold threshold (required) ---
+  const goldRaw = document.getElementById("gold-threshold")?.value || "";
+    if (!goldRaw) {
+      const gold = parseInt(goldSelect.value, 10);
+    }
+
+    // TEMP: until you implement real Pro accounts
+    const isPro = false;
+
+    if (!Number.isFinite(goldThreshold) || goldThreshold < 1 || goldThreshold > 30) {
+      alert("Gold threshold must be between 1 and 30.");
+      return;
+    }
+if (!isPro && goldThreshold >= 6) {
+  alert("Free version allows gold threshold up to 5.");
+  return;
+}
+
+  const { error } = await supabase
+    .from("tables")
+    .insert([{
+      name,
+      invite_token: inviteToken,
+      owner_token: ownerToken,
+      owner_id: au.id,
+      row_structure: timeBlocks,
+      host_tz: tz,
+      start_date: startDate,
+      gold_threshold: goldThreshold
+    }])
+
+  if (error) {
+    console.error("Error creating board:", error);
+    return;
+  }
+
+  const { data: created, error: fetchErr } = await supabase
+  .from("tables")
+  .select("id")
+  .eq("invite_token", inviteToken)
+  .single();
+
+if (fetchErr || !created) {
+  console.error("Board insert succeeded but could not fetch id. Check SELECT RLS on tables.", fetchErr);
+  return;
+}
+
+  const { error: bmErr } = await supabase
+  .from("board_members")
+  .upsert(
+    {
+      board_id: created.id,
+      user_id: au.id,
+      role: "owner"
+    },
+    { onConflict: "board_id,user_id" }
+  );
+
+if (bmErr) {
+  console.warn("board_members owner upsert failed:", bmErr);
+}
+  
+  localStorage.setItem("lastBoardToken", inviteToken);
+  // keep invite token for “share link” / last joined link if you want
+localStorage.setItem("lastBoardToken", inviteToken);
+
+// add this so “last opened as owner” is possible later
+localStorage.setItem("lastBoardManageToken", ownerToken);
+
+// ✅ open as owner after create
+window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
+}
+
+  
+/* DOM refs */
+const table = document.getElementById("availabilityTable");
+const legendDiv = document.getElementById("legend");
+const legendList = document.getElementById("legendList");
+
+let user = null;
+
+
+async function toggleCell(e) {
+  if (!user || !currentTable) return;
+
+  let k; // ✅ so finally can always see it
+
+  try {
+    const cell = e.currentTarget;
+    if (!cell) return;
+
+    // normalize values
+    const dayNum = parseInt(cell.dataset.day, 10);
+    const timeKey = String(cell.dataset.time || "").trim();
+    if (!Number.isFinite(dayNum) || !timeKey) return;
+
+    const au = await getAuthUser();
+    if (!au) return;
+    const myUid = au.id;
+
+    k = addKey(currentTable.id, dayNum, timeKey, myUid);
+    if (inFlightCells.has(k)) return;
+    inFlightCells.add(k);
+
+    await ensureMembership(currentTable.id);
+
+    // DELETE FIRST (toggle off)
+    const { error: delErr, count: deletedCount } = await supabase
+      .from("availability_dev")
+      .delete({ count: "exact" })
+      .eq("table_id", currentTable.id)
+      .eq("day", dayNum)
+      .eq("time", timeKey)
+      .eq("user_id", myUid);
+
+    if (delErr) {
+      console.warn("Delete failed:", delErr);
+      await loadAvailability();
+      return;
+    }
+
+    // legacy delete if needed
+    let legacyDeletedCount = 0;
+    if ((deletedCount || 0) === 0) {
+      const { error: legacyErr, count: legacyCount } = await supabase
+        .from("availability_dev")
+        .delete({ count: "exact" })
+        .eq("table_id", currentTable.id)
+        .eq("day", dayNum)
+        .eq("time", timeKey)
+        .is("user_id", null)
+        .eq("name", user.name)
+        .eq("color", user.color);
+
+      if (legacyErr) {
+        console.warn("Legacy delete failed:", legacyErr);
+        await loadAvailability();
+        return;
+      }
+
+      legacyDeletedCount = legacyCount || 0;
+    }
+
+    if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
+      if (cell.classList.contains("gold-cell")) {
+        await loadAvailability();
+        return;
+      }
+
+      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+      if (myDot) myDot.remove();
+
+      const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
+      if (legacyDot) legacyDot.remove();
+
+      const container = cell.querySelector(".dot-container");
+      if (container && container.children.length === 0) container.remove();
+
+      return;
+    }
+
+    // INSERT (toggle on) — optimistic first
+    const key = addKey(currentTable.id, dayNum, timeKey, myUid);
+    if (pendingAdds.has(key)) return;
+    pendingAdds.add(key);
+
+    addOptimisticDot(cell, myUid, user.name, user.color);
+    maybeApplyGoldForCell(cell);
+
+    const { error: insErr } = await supabase
+      .from("availability_dev")
+      .insert({
+        table_id: currentTable.id,
+        day: dayNum,
+        time: timeKey,
+        user_id: myUid,
+        name: user.name,
+        color: user.color
+      });
+
+    if (insErr) {
+      console.warn("Insert failed:", insErr);
+
+      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+
+      const dc = cell.querySelector(".dot-container");
+      if (dc && dc.children.length === 0) dc.remove();
+
+      pendingAdds.delete(key);
+      await loadAvailability();
+      return;
+    }
+
+    // success: mark pending dot as real
+    cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
+      ?.removeAttribute("data-pending");
+      maybeApplyGoldForCell(cell);
+
+    pendingAdds.delete(key);
+
+  } finally {
+    if (k) inFlightCells.delete(k);
+  }
+}
+
+  
+function parseYMD(ymd) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return { y, m, d };
+}
+
+  
+function addDaysYMD(startYmd, offsetDays) {
+  const { y, m, d } = parseYMD(startYmd);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + offsetDays);
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+  
+function formatHeaderLabel(ymd) {
+  const { y, m, d } = parseYMD(ymd);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  const weekday = dt.toLocaleDateString("en-AU", { weekday: "short", timeZone: "UTC" });
+  const month = dt.toLocaleDateString("en-AU", { month: "short", timeZone: "UTC" });
+  return { weekday, monthDay: `${d} ${month}` };
+}
+
+  
+function buildCalendar() {
+  const table = document.getElementById("availabilityTable");
+  table.innerHTML = "";
+
+  if (!currentTable) return;
+
+  const times = currentTable.row_structure || [];
+  const days = 30;
+
+  // --- Header row (ONE time only) ---
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th")); // top-left blank corner
+
+  const startYmd =
+    currentTable.start_date ||
+    yyyyMmDdInTimeZone(new Date(), currentTable.host_tz || getDetectedTimeZone());
+
+  for (let dayNum = 1; dayNum <= days; dayNum++) {
+    const ymd = addDaysYMD(startYmd, dayNum - 1);
+    const { weekday, monthDay } = formatHeaderLabel(ymd);
+
+    const th = document.createElement("th");
+    th.classList.add("day-header");
+    th.dataset.day = String(dayNum);
+    th.innerHTML = `
+      <div style="font-weight:700;">${weekday}</div>
+      <span class="monthday">${monthDay}</span>
+    `;
+    headerRow.appendChild(th);
+  }
+
+  table.appendChild(headerRow);
+
+  // --- Body rows (time blocks) ---
+  times.forEach(timeObj => {
+    const row = document.createElement("tr");
+
+    const labelCell = document.createElement("td");
+    labelCell.textContent = timeObj.label;
+    labelCell.classList.add("time-label");
+    row.appendChild(labelCell);
+
+    for (let dayNum = 1; dayNum <= days; dayNum++) {
+      const cell = document.createElement("td");
+      cell.dataset.day = String(dayNum);
+      cell.dataset.time = timeObj.label;
+      row.appendChild(cell);
+    }
+
+    table.appendChild(row);
+  });
+
+  bindCalendarClickDelegation();
+}
+
+
+function showDeleteAccountOverlay(msg = "") {
+  const ov = document.getElementById("delete-account-overlay");
+  const m = document.getElementById("delete-account-msg");
+  if (!ov) return;
+
+  ov.style.display = "block";
+
+  if (m) {
+    if (msg) { m.style.display = "block"; m.textContent = msg; }
+    else { m.style.display = "none"; m.textContent = ""; }
+  }
+}
+
+function hideDeleteAccountOverlay() {
+  const ov = document.getElementById("delete-account-overlay");
+  if (ov) ov.style.display = "none";
+}
+
+async function deleteAccountFlow() {
+  const au = await getAuthUser();
+  if (!au) {
+    showDeleteAccountOverlay("You must be signed in.");
+    return;
+  }
+
+  const email = (document.getElementById("acct-email")?.textContent || "").trim();
+  const pass = (document.getElementById("delete-account-password")?.value || "").trim();
+  const conf = (document.getElementById("delete-account-confirm")?.value || "").trim();
+
+  if (!pass) return showDeleteAccountOverlay("Please enter your password.");
+  if (conf !== "DELETE") return showDeleteAccountOverlay('Type DELETE to confirm.');
+
+  // 1) Re-authenticate (proves password)
+  const { error: reauthErr } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (reauthErr) return showDeleteAccountOverlay(reauthErr.message || "Password incorrect.");
+
+  // 2) Call Edge Function that performs deletions + auth user delete (service role)
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) return showDeleteAccountOverlay("Session error. Please sign in again.");
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ confirm: "DELETE" })
+    });
+
+    const out = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      return showDeleteAccountOverlay(out?.error || "Delete failed.");
+    }
+
+    // 3) Sign out + reset UI
+    await supabase.auth.signOut();
+    hideDeleteAccountOverlay();
+
+    // clear your local remembered stuff
+    localStorage.removeItem("lastBoardToken");
+    localStorage.removeItem("lastBoardManageToken");
+    localStorage.removeItem("globalUserId");
+    localStorage.removeItem("globalUserName");
+    localStorage.removeItem("globalUserColor");
+
+    window.location.href = window.location.pathname; // fresh state
+  } catch (err) {
+    console.error(err);
+    showDeleteAccountOverlay("Network error while deleting account.");
+  }
+}
+
+// Bind buttons
+document.getElementById("acct-delete-account")?.addEventListener("click", () => {
+  // clear old values
+  const p = document.getElementById("delete-account-password");
+  const c = document.getElementById("delete-account-confirm");
+  if (p) p.value = "";
+  if (c) c.value = "";
+  showDeleteAccountOverlay("");
+});
+
+document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
+  hideDeleteAccountOverlay();
+});
+
+document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
+  await deleteAccountFlow();
+});
+  
+
+function bindCalendarClickDelegation() {
+  const table = document.getElementById("availabilityTable");
+  if (!table || table.dataset.bound === "1") return;
+
+  table.dataset.bound = "1";
+
+  table.addEventListener("click", (e) => {
+    const cell = e.target.closest("td[data-day][data-time]");
+    if (!cell) return;
+    toggleCell({ currentTarget: cell }); // reuse your existing toggleCell
+  });
+}
+
+  
+async function fetchProfilesMap(userIds) {
+  const ids = Array.from(new Set((userIds || []).filter(Boolean)));
+  if (ids.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .in("user_id", ids);
+
+  if (error) {
+    console.warn("fetchProfilesMap failed:", error);
+    return {};
+  }
+
+  const map = {};
+  (data || []).forEach(p => { map[p.user_id] = p; });
+  return map;
+}
+
+// Cache current profile info so realtime inserts/updates can display the latest name/color
+let profilesCache = {};
+
+async function getProfileCached(userId) {
+  if (!userId) return null;
+  if (profilesCache[userId]) return profilesCache[userId];
+
+  const map = await fetchProfilesMap([userId]);
+  profilesCache = { ...profilesCache, ...map };
+  return profilesCache[userId] || null;
+}  
+
+  
+/* === Render dots + gold === */
+async function loadAvailability() {
+  // ✅ prevent overlapping renders that duplicate rows/cells
+  if (loadAvailabilityRunning) {
+    loadAvailabilityQueued = true;
+    return;
+  }
+
+  loadAvailabilityRunning = true;
+
+  try {
+    const { data: rows, error } = await supabase
+      .from("availability_dev")
+      .select("*")
+      .eq("table_id", currentTable.id);
+
+    if (error) {
+      console.error("loadAvailability failed:", error);
+      return;
+    }
+
+    // Clear existing cells
+    const cells = table.querySelectorAll('td[data-day]');
+    cells.forEach(cell => {
+      cell.innerHTML = "";
+      cell.classList.remove("gold-cell");
+    });
+
+    if (!rows) return;
+
+    // Profiles map for latest name/color
+    const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
+    profilesCache = { ...profilesCache, ...profilesMap };
+
+    /* Legend */
+    const users = {};
+    rows.forEach(r => {
+      const prof = r.user_id ? profilesMap[r.user_id] : null;
+
+      const displayName = prof?.name || r.name || "—";
+      const displayColor = prof?.color || r.color || "#999";
+
+      const key = r.user_id || displayName; // fallback for old rows without user_id
+      if (!users[key]) users[key] = { name: displayName, color: displayColor };
+    });
+
+    legendList.innerHTML = "";
+    Object.entries(users).forEach(([key, { name, color }]) => {
+      const div = document.createElement("div");
+      div.className = "legend-item";
+
+      if (key.includes("-")) div.dataset.userId = key;
+      else div.dataset.name = name;
+
+      div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
+      legendList.appendChild(div);
+    });
+
+    /* Group by cell */
+    const map = {};
+    rows.forEach(entry => {
+      const key = `${entry.day}-${entry.time}`;
+      if (!map[key]) map[key] = [];
+      map[key].push(entry);
+    });
+
+    const goldDays = new Set();
+    const goldThreshold = Number(currentTable?.gold_threshold);
+    const enableGold = Number.isFinite(goldThreshold);
+
+    /* Render cells */
+    table.querySelectorAll('td[data-day]').forEach(cell => {
+      const day = cell.dataset.day;
+      const time = cell.dataset.time;
+      const key = `${day}-${time}`;
+      const entries = map[key] || [];
+
+      if (enableGold && entries.length >= goldThreshold) {
+        cell.classList.add("gold-cell");
+        goldDays.add(parseInt(day, 10));
+        return;
+      }
+
+      if (entries.length > 0) {
+        const dotContainer = document.createElement("div");
+        dotContainer.className = "dot-container";
+
+        entries.forEach(entry => {
+          const dot = document.createElement("div");
+          dot.className = "dot";
+
+          if (entry.user_id) dot.dataset.userId = entry.user_id;
+
+          const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+          const displayName = prof?.name || entry.name || "—";
+          const displayColor = prof?.color || entry.color || "#999";
+
+          dot.style.background = displayColor;
+          dot.title = displayName;
+          dot.dataset.name = displayName;
+
+          // Animate only the current user's dot
+          if (user && entry.user_id === user.id) {
+            dot.classList.add("pop-in");
+          }
+
+          dotContainer.appendChild(dot);
+        });
+
+        cell.appendChild(dotContainer);
+      }
+    });
+
+    // Gold header highlighting
+    const headerCells = table.querySelectorAll("th.day-header");
+    headerCells.forEach(th => {
+      const dayNum = parseInt(th.dataset.day, 10);
+      if (goldDays.has(dayNum)) th.classList.add("gold-header");
+      else th.classList.remove("gold-header");
+    });
+
+  } finally {
+    loadAvailabilityRunning = false;
+
+    if (loadAvailabilityQueued) {
+      loadAvailabilityQueued = false;
+      loadAvailability(); // run once more
+    }
+  }
+}
+
+
+async function resetBoard() {
+  if (!currentTable) return;
+
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
+
+  await loadAvailability();
+}
+  
+  
+  async function deleteBoard() {
+  if (!currentTable) return;
+
+  if (!confirm("Are you sure you want to permanently delete this board?")) return;
+                                                                                                          console.log("delete_calendar p_board_id =", boardId);
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
+
+  await supabase
+    .from("tables")
+    .delete()
+    .eq("id", currentTable.id);
+
+  window.location.href = "/";
+}
+
+  function saveIdentity() {
+  const input = document.getElementById("identity-name");
+
+  const name = (input?.value || "").trim();
+  const color = (identitySelectedColour || "").trim();
+
+  if (!name) {
+    alert("Please enter your name");
+    return;
+  }
+  if (!color) {
+    alert("Please choose a dot colour");
+    return;
+  }
+
+  localStorage.setItem("globalUserName", name);
+  localStorage.setItem("globalUserColor", color);
+  getOrCreateUserId();
+
+  // If we're on a board link, load it now (no full reload needed)
+  if (inviteToken || manageToken) {
+    loadTable();
+  } else {
+    location.reload();
+  }
+}
+
+  
+  function addRowInput(name = "") {
+  const container = document.getElementById("rows-container");
+
+  if (!container) return; // Prevent crash
+
+  if (container.children.length >= 4) {
+    alert("Free version allows up to 4 time blocks.");
+    return;
+  }
+
+  const input = document.createElement("input");
+  input.placeholder = "Time block (e.g. Dinner)";
+  input.value = name;
+
+  container.appendChild(input);
+}
+
+  
+  function showBoardSetup() {
+    const startBtn = document.getElementById("start-create");
+      if (startBtn) startBtn.style.display = "none";
+
+      const setup = document.getElementById("board-setup");
+      if (setup) setup.style.display = "block";
+
+      // Populate timezone dropdown when entering setup
+      if (typeof populateHostTimezoneSelect === "function") {
+        populateHostTimezoneSelect();
+          // TEMP: until you implement real Pro accounts
+        const isPro = false;
+        populateGoldThresholdSelect(isPro);
+      }
+
+  // Reset pages
+  const nameStep = document.getElementById("name-step");
+  const detailsStep = document.getElementById("details-step");
+  const rowBuilder = document.getElementById("row-builder");
+  const createActions = document.getElementById("create-actions");
+  const goldSel = document.getElementById("gold-threshold");
+  
+  if (goldSel) goldSel.value = "";
+
+  if (nameStep) nameStep.style.display = "block";
+  if (detailsStep) detailsStep.style.display = "none";
+  if (rowBuilder) rowBuilder.style.display = "none";
+  if (createActions) createActions.style.display = "none";
+
+  // Hide the page-2 create button until a structure is clicked
+  const goBtn = document.getElementById("go-create");
+  if (goBtn) goBtn.style.display = "none";
+
+  // Clear structure selection highlight + require click
+  selectedStructure = null;
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
+}
+
+
+function showBoardView() {
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+
+  const board = document.getElementById("board-view"); // or whatever your board container id is
+  if (board) board.style.display = "block";
+
+  document.body.style.visibility = "visible";
+}
+  
+
+function setActiveStructureCard(activeId) {
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("active", id === activeId);
+  });
+}
+
+  
+function showGoCreate() {
+  const btn = document.getElementById("go-create");
+  if (btn) btn.style.display = "inline-block";
+}  
+
+  
+function getOrCreateUserId() {
+  let id = localStorage.getItem("globalUserId");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("globalUserId", id);
+  }
+  return id;
+}
+
+  
+const PREBUILT_STRUCTURES = {
+  meals: [
+    { label: "Breakfast" },
+    { label: "Lunch" },
+    { label: "Dinner" }
+  ],
+  quick_meetup: [
+    { label: "Morning" },
+    { label: "Afternoon" },
+    { label: "Evening" }
+  ],
+  dinner_plan: [
+    { label: "Early Dinner" },
+    { label: "Dinner" },
+    { label: "Late Dinner" }
+  ]
+};
+
+
+const COLOUR_PRESETS = [
+  // Reds / Pinks
+  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
+  // Purples / Blues
+  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
+  "#06B6D4", "#0891B2", "#00C7BE",
+  // Greens
+  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
+  // Yellows / Oranges
+  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
+  // Neutrals / Earthy
+  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
+  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
+  // Extra tasteful accents
+  "#14B8A6", "#84CC16"
+];
+
+function renderSwatchGrid(containerEl, currentHex, onPick){
+  if (!containerEl) return;
+
+  containerEl.innerHTML = "";
+
+  COLOUR_PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "colour-swatch";
+    b.style.background = hex;
+    b.setAttribute("aria-label", hex);
+    b.dataset.hex = hex;
+
+    if (currentHex && hex === currentHex) b.classList.add("selected");
+
+    b.addEventListener("click", () => {
+      // update selected state in this grid
+      [...containerEl.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+      onPick(hex);
+    });
+
+    containerEl.appendChild(b);
+  });
+}
+
+  
+let uiListenersBound = false;
+  
+function bindUiListenersOnce() {
+  if (uiListenersBound) return;
+  uiListenersBound = true;
+
+  // Dashboard: Create New Calendar (your dashboard button)
+  const dashCreate = document.getElementById("create-board-btn");
+  if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
+
+  // Back to dashboard from board view
+  const backToDashBtn = document.getElementById("back-to-dashboard");
+  if (backToDashBtn) {
+    backToDashBtn.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+  }
+
+  // Create screen: Continue/Create after structure selection
+  const goCreateBtn = document.getElementById("go-create");
+  if (goCreateBtn) {
+    goCreateBtn.addEventListener("click", createBoard);
+  }
+
+  // Create page → Return to Dashboard
+  const returnBtn = document.getElementById("return-dashboard-btn");
+  if (returnBtn) {
+    returnBtn.addEventListener("click", showDashboard);
+  }
+
+  const setupGrid = document.getElementById("setup-colour-grid");
+  renderSwatchGrid(setupGrid, setupSelectedColour, (hex) => {
+    setupSelectedColour = hex;
+  });
+
+  const identityGrid = document.getElementById("identity-colour-grid");
+  renderSwatchGrid(identityGrid, identitySelectedColour, (hex) => {
+    identitySelectedColour = hex;
+  });
+  
+  // Profile setup save
+  const setupSaveBtn = document.getElementById("setup-save");
+  if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);
+
+  // Structure selection (Dev Custom + Meals)
+  const devCard = document.getElementById("dev-custom-card");
+  if (devCard) {
+    devCard.addEventListener("click", () => {
+      selectedStructure = "custom";
+      setActiveStructureCard("dev-custom-card");
+      showGoCreate();
+    });
+  }
+
+  // Dashboard: Settings drawer
+  const settingsBtn = document.getElementById("dash-settings");
+  const drawer = document.getElementById("settings-drawer");
+  const backdrop = document.getElementById("settings-backdrop");
+  const closeBtn = document.getElementById("settings-close");
+
+  function openDrawer() {
+    document.body.classList.add("drawer-open");
+    drawer?.setAttribute("aria-hidden", "false");
+    backdrop?.setAttribute("aria-hidden", "false");
+    closeBtn?.focus();
+  }
+
+  function closeDrawer() {
+    document.body.classList.remove("drawer-open");
+    document.body.classList.remove("settings-split");
+    document.body.classList.remove("account-view");
+    showDashboardPanel();
+
+    drawer?.setAttribute("aria-hidden", "true");
+    backdrop?.setAttribute("aria-hidden", "true");
+    settingsBtn?.focus();
+  }
+
+  settingsBtn?.addEventListener("click", openDrawer);
+  closeBtn?.addEventListener("click", closeDrawer);
+  backdrop?.addEventListener("click", closeDrawer);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
+      closeDrawer();
+    }
+  });
+
+function showAccountPanel() {
+  document.body.classList.add("account-view");   // 👈 add this
+
+  const dashBody = document.getElementById("dash-body");
+  const acct = document.getElementById("dash-account");
+
+  if (dashBody) dashBody.style.display = "none";
+  if (acct) acct.style.display = "block";
+}
+
+function showDashboardPanel() {
+  document.body.classList.remove("account-view");  // 👈 add this
+
+  const dashBody = document.getElementById("dash-body");
+  const acct = document.getElementById("dash-account");
+
+  if (acct) acct.style.display = "none";
+  if (dashBody) dashBody.style.display = "block";
+}
+
+async function hydrateAccountPanel() {
+  try {
+    const au = await getAuthUser();
+
+    // Email
+    const emailEl = document.getElementById("acct-email");
+    if (emailEl) emailEl.textContent = au?.email || "—";
+
+    // Name
+    const nameEl = document.getElementById("acct-name");
+    if (nameEl) nameEl.textContent = user?.name || "—";
+
+    // Colour
+    const colour = user?.color || "";
+    const dot = document.getElementById("acct-colour-dot");
+    const txt = document.getElementById("acct-colour-text");
+    if (dot) dot.style.background = colour || "transparent";
+    if (txt) txt.textContent = colour ? colour.toUpperCase() : "—";
+  } catch (e) {
+    console.error("hydrateAccountPanel failed", e);
+  }
+}
+  
+const signOutBtn = document.getElementById("drawer-signout");
+
+if (signOutBtn) {
+  signOutBtn.addEventListener("click", async () => {
+    // Close drawer so the modal is the only focus
+    document.body.classList.remove("drawer-open");
+
+    // Make OK button look dangerous for this one modal instance
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+    okBtn?.classList.add("modal-btn-danger");
+    cancelBtn?.classList.remove("modal-btn-danger");
+
+    const ok = await confirmModal({
+      title: "Sign out?",
+      message: "You’ll need to sign in again to access your calendars.",
+      okText: "Sign Out",
+      cancelText: "Cancel"
+    });
+
+    // Reset styling so other confirms aren't red
+    okBtn?.classList.remove("modal-btn-danger");
+
+    if (!ok) return;
+
+    try {
+      await supabase.auth.signOut();
+      location.reload(); // startApp will show auth overlay
+    } catch (err) {
+      console.error("Sign out failed", err);
+      alert("Could not sign out. Please try again.");
+    }
+  });
+}
+
+const feedbackBtn = document.getElementById("drawer-feedback");
+const feedbackModal = document.getElementById("feedback-modal");
+const feedbackCancel = document.getElementById("feedback-cancel");
+const feedbackSend = document.getElementById("feedback-send");
+const feedbackText = document.getElementById("feedback-text");
+
+if (feedbackBtn && feedbackModal) {
+  feedbackBtn.addEventListener("click", () => {
+    document.body.classList.remove("drawer-open");
+    feedbackText.value = "";
+    feedbackModal.hidden = false;
+    feedbackText.focus();
+  });
+}
+
+feedbackCancel?.addEventListener("click", () => {
+  feedbackModal.hidden = true;
+});
+
+feedbackSend?.addEventListener("click", async () => {
+  const text = feedbackText.value.trim();
+
+  if (!text) {
+    feedbackText.focus();
+    return;
+  }
+
+try {
+  feedbackSend.disabled = true;
+
+  const { error } = await supabase.functions.invoke("send-feedback", {
+    body: { message: text }
+  });
+
+  if (error) throw error;
+
+  feedbackModal.hidden = true;
+  feedbackText.value = "";
+
+  await confirmModal({
+    title: "Thank you!",
+    message: "Your feedback has been sent.",
+    okText: "Close",
+    cancelText: ""
+  });
+
+} catch (err) {
+  console.error("Feedback send failed:", err);
+  alert("Could not send feedback. Please try again.");
+} finally {
+  feedbackSend.disabled = false;
+}
+});
+
+// Drawer item routing (delegated so it works even if drawer DOM is rebuilt)
+drawer?.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+
+  if (btn.id === "drawer-account") {
+    // Keep drawer open, but make right side usable
+    document.body.classList.add("drawer-open");
+    document.body.classList.add("settings-split");
+
+    // On wide screens, CSS kills pointer-events; aria-hidden alone doesn't
+    drawer?.setAttribute("aria-hidden", "false");
+    backdrop?.setAttribute("aria-hidden", "true");
+
+    showAccountPanel();
+    await hydrateAccountPanel();
+    return;
+  }
+
+  // (optional later) handle other drawer buttons here:
+  // if (btn.id === "drawer-notifications") ...
+});
+
+document.getElementById("acct-back-dashboard")?.addEventListener("click", () => {
+  closeDrawer(); // ✅ same behavior as clicking the ✕
+});
+
+// Change Name modal wiring
+const nameModal = document.getElementById("name-modal");
+const nameInput = document.getElementById("name-input");
+const nameErr = document.getElementById("name-error");
+const nameCancel = document.getElementById("name-cancel");
+const nameSave = document.getElementById("name-save");
+
+function openNameModal() {
+  if (!nameModal || !nameInput || !nameErr) return;
+
+  nameErr.style.display = "none";
+  nameErr.textContent = "";
+  nameInput.value = (user?.name || "").trim();
+  updateNameCount();
+
+  nameModal.hidden = false;
+  nameInput.focus();
+  nameInput.select();
+}
+  
+nameInput?.addEventListener("input", updateNameCount);
+  
+function closeNameModal() {
+  if (!nameModal) return;
+  nameModal.hidden = true;
+}
+
+function setNameError(msg) {
+  if (!nameErr) return;
+  nameErr.textContent = msg;
+  nameErr.style.display = msg ? "block" : "none";
+}
+
+document.getElementById("acct-change-name")?.addEventListener("click", () => {
+  openNameModal();
+});
+
+nameCancel?.addEventListener("click", closeNameModal);
+
+// Change Colour modal wiring
+const colourModal = document.getElementById("colour-modal");
+const colourGrid = document.getElementById("colour-grid");
+const colourErr = document.getElementById("colour-error");
+const colourCancel = document.getElementById("colour-cancel");
+const colourSave = document.getElementById("colour-save");
+
+let selectedColour = null;
+
+  
+function setColourError(msg){
+  if (!colourErr) return;
+  colourErr.textContent = msg || "";
+  colourErr.style.display = msg ? "block" : "none";
+}
+
+function normaliseHex(input){
+  if (!input) return "";
+  let v = input.trim().toUpperCase();
+  if (v && !v.startsWith("#")) v = "#" + v;
+  return v;
+}
+
+function isValidHex(v){
+  return /^#[0-9A-F]{6}$/.test(v);
+}
+
+function renderColourGrid(current){
+  if (!colourGrid) return;
+  colourGrid.innerHTML = "";
+
+  COLOUR_PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "colour-swatch";
+    b.style.background = hex;
+    b.setAttribute("aria-label", hex);
+    b.dataset.hex = hex;
+
+    if (current && hex === current) b.classList.add("selected");
+
+    b.addEventListener("click", () => {
+      selectedColour = hex;
+
+      // update UI selected state
+      [...colourGrid.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+
+      setColourError("");
+    });
+
+    colourGrid.appendChild(b);
+  });
+}
+
+function openColourModal(){
+  if (!colourModal) return;
+
+  setColourError("");
+  selectedColour = normaliseHex(user?.color || "");
+
+  renderColourGrid(selectedColour);
+  colourModal.hidden = false;
+}
+
+function closeColourModal(){
+  if (!colourModal) return;
+  colourModal.hidden = true;
+}
+
+document.getElementById("acct-change-colour")?.addEventListener("click", () => {
+  openColourModal();
+});
+
+colourCancel?.addEventListener("click", closeColourModal);
+
+// click outside card closes
+colourModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closeColourModal();
+});
+
+colourSave?.addEventListener("click", async () => {
+  try {
+   const v = selectedColour;
+      if (!v) return setColourError("Please choose a colour.");
+      if (!COLOUR_PRESETS.includes(v)) return setColourError("Please choose a colour from the list.");
+
+    // no change
+    if (user?.color && v === user.color.toUpperCase()) {
+      closeColourModal();
+      return;
+    }
+
+    colourSave.disabled = true;
+    setColourError("");
+
+    const au = await getAuthUser();
+    if (!au) {
+      setColourError("You’re not signed in.");
+      return;
+    }
+
+    // Update profile colour
+    const { error } = await supabase
+      .from("profiles")
+      .update({ color: v })
+      .eq("user_id", au.id);
+
+    if (error) throw error;
+    
+    // Update in-memory + cache (important for realtime)
+    if (user) user.color = v;
+    profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
+
+    // Update account panel immediately
+    const dot = document.getElementById("acct-colour-dot");
+    const txt = document.getElementById("acct-colour-text");
+    if (dot) dot.style.background = v;
+    if (txt) txt.textContent = v;
+
+    closeColourModal();
+
+    await confirmModal({
+      title: "Colour updated",
+      message: "Your colour has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+    // Refresh dashboard previews (legend/dots)
+    await loadBoards();
+
+    // Refresh open calendar (legend/dots)
+    if (currentTable) {
+      await loadAvailability();
+    }
+
+  } catch (err) {
+    console.error("Change colour failed:", err);
+    setColourError("Could not update your colour. Please try again.");
+  } finally {
+    if (colourSave) colourSave.disabled = false;
+  }
+});
+
+// Change Password modal wiring
+const pwModal = document.getElementById("password-modal");
+const pwCurrent = document.getElementById("pw-current");
+const pwNew = document.getElementById("pw-new");
+const pwConfirm = document.getElementById("pw-confirm");
+const pwErr = document.getElementById("pw-error");
+const pwCancel = document.getElementById("pw-cancel");
+const pwSave = document.getElementById("pw-save");
+
+function setPwError(msg) {
+  if (!pwErr) return;
+  pwErr.textContent = msg || "";
+  pwErr.style.display = msg ? "block" : "none";
+}
+
+function openPwModal() {
+  if (!pwModal) return;
+
+  setPwError("");
+  if (pwCurrent) pwCurrent.value = "";
+  if (pwNew) pwNew.value = "";
+  if (pwConfirm) pwConfirm.value = "";
+
+  pwModal.hidden = false;
+  pwCurrent?.focus();
+}
+
+function closePwModal() {
+  if (!pwModal) return;
+  pwModal.hidden = true;
+}
+
+document.getElementById("acct-change-password")?.addEventListener("click", () => {
+  openPwModal();
+});
+
+pwCancel?.addEventListener("click", closePwModal);
+
+// click outside card closes
+pwModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closePwModal();
+});
+
+// Esc closes, Enter submits (from any field)
+[pwCurrent, pwNew, pwConfirm].forEach(el => {
+  el?.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closePwModal();
+    if (e.key === "Enter") pwSave?.click();
+  });
+});
+
+pwSave?.addEventListener("click", async () => {
+  try {
+    const au = await getAuthUser();
+    if (!au?.email) {
+      setPwError("You’re not signed in.");
+      return;
+    }
+
+    const current = (pwCurrent?.value || "").trim();
+    const next = (pwNew?.value || "").trim();
+    const confirm = (pwConfirm?.value || "").trim();
+
+    // validation
+    if (!current) return setPwError("Please enter your current password.");
+    if (!next) return setPwError("Please enter a new password.");
+    if (next.length < 8) return setPwError("New password must be at least 8 characters.");
+    if (next !== confirm) return setPwError("New passwords do not match.");
+    if (next === current) return setPwError("New password must be different from the current password.");
+
+    pwSave.disabled = true;
+    setPwError("");
+
+    // 1) Re-authenticate (security step)
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: au.email,
+      password: current
+    });
+    if (signInErr) {
+      setPwError("Current password is incorrect.");
+      return;
+    }
+
+    // 2) Update password
+    const { error: updErr } = await supabase.auth.updateUser({ password: next });
+    if (updErr) {
+      console.error("updateUser password failed:", updErr);
+      setPwError("Could not update password. Please try again.");
+      return;
+    }
+
+    closePwModal();
+
+    await confirmModal({
+      title: "Password updated",
+      message: "Your password has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+  } catch (err) {
+    console.error("Change password failed:", err);
+    setPwError("Could not update password. Please try again.");
+  } finally {
+    if (pwSave) pwSave.disabled = false;
+  }
+});
+  
+// close on clicking outside the card
+nameModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closeNameModal();
+});
+
+// Enter = save, Esc = close
+nameInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeNameModal();
+  if (e.key === "Enter") nameSave?.click();
+});
+
+nameSave?.addEventListener("click", async () => {
+  try {
+    if (!nameInput) return;
+
+    const newName = nameInput.value.trim();
+
+    // Basic validation
+    if (!newName) return setNameError("Please enter a name.");
+    if (newName.length < 2) return setNameError("Name must be at least 2 characters.");
+    if (newName.length > 15) return setNameError("Name must be 15 characters or fewer.");
+
+    // No change
+    if (user?.name && newName === user.name) {
+      closeNameModal();
+      return;
+    }
+
+    nameSave.disabled = true;
+    setNameError("");
+
+    // Update DB
+    const au = await getAuthUser();
+    if (!au) {
+      setNameError("You’re not signed in.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+
+    if (error) throw error;
+      // Keep legacy snapshot columns in sync so other users (who may not be allowed to read profiles)
+      // still see the updated name in legends / previews.
+      const { error: snapErr } = await supabase
+        .from("availability_dev")
+        .update({ name: newName })
+        .eq("user_id", au.id);
+
+      if (snapErr) console.warn("availability_dev snapshot name update failed:", snapErr);
+
+    const { error: availErr } = await supabase
+      .from("availability_dev")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+
+    if (availErr) throw availErr;
+    
+     await supabase
+      .from("availability_dev")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+    
+    // Update in-memory + UI
+    if (user) user.name = newName;
+
+    // refresh UI
+    await loadBoards(true);
+
+    if (currentTable) {
+      await loadAvailability();
+    }
+    
+    const acctNameEl = document.getElementById("acct-name");
+    if (acctNameEl) acctNameEl.textContent = newName;
+
+    const dashUser = document.getElementById("dash-username");
+    if (dashUser && user?.name) {
+      dashUser.textContent = possessive(user.name).toUpperCase();
+    }
+
+    closeNameModal();
+
+    await confirmModal({
+      title: "Username updated",
+      message: "Your display name has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+    // Refresh dashboard previews/legend with fresh profile data
+    await loadBoards();
+      if (currentTable) {
+          await loadAvailability();
+      }
+
+  } catch (err) {
+    console.error("Change name failed:", err);
+    setNameError("Could not update your name. Please try again.");
+  } finally {
+    if (nameSave) nameSave.disabled = false;
+  }
+});
+
+const nameCount = document.getElementById("name-count");
+
+function updateNameCount() {
+  if (!nameInput || !nameCount) return;
+
+  const len = nameInput.value.length;
+  nameCount.textContent = `${len} / 15`;
+
+  // turn red at the limit
+  if (len >= 15) {
+    nameCount.style.color = "#d11a2a";
+    nameCount.style.fontWeight = "700";
+  } else {
+    nameCount.style.color = "";
+    nameCount.style.fontWeight = "";
+  }
+};
+
+document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
+  if (!isBoardOwner) return;
+  setCalendarNoteEditing(true);
+});
+
+document.getElementById("footer-note-cancel")?.addEventListener("click", () => {
+  const ta = document.getElementById("footer-note-input");
+  if (ta) ta.value = noteDraftBeforeEdit;
+  setCalendarNoteEditing(false);
+});
+
+document.getElementById("footer-note-save")?.addEventListener("click", async () => {
+  await saveCalendarNote();
+});
+  
+document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
+  await confirmModal({
+    title: "Pro (later)",
+    message: "This will eventually show pricing and upgrade options.",
+    okText: "Close",
+    cancelText: ""
+  });
+});
+  
+  const mealsCard = document.getElementById("meals-card");
+  if (mealsCard) {
+    mealsCard.addEventListener("click", () => {
+      selectedStructure = "meals";
+      setActiveStructureCard("meals-card");
+      showGoCreate();
+    });
+  }
+
+  // Press Enter in confirm password field -> trigger update password
+document.getElementById("auth-new-password-confirm")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("auth-set-password")?.click();
+  }
+});
+  
+  // Password recovery submit
+document.getElementById("auth-set-password")?.addEventListener("click", async () => {
+  const setBtn = document.getElementById("auth-set-password");
+
+  const p1 = (document.getElementById("auth-new-password")?.value || "").trim();
+  const p2 = (document.getElementById("auth-new-password-confirm")?.value || "").trim();
+
+  if (!p1 || p1.length < 8) {
+    showConfirmPopup("Password must be at least 8 characters.", { title: "Reset password" });
+    setAuthMode("recovery");
+    return;
+  }
+  if (p1 !== p2) {
+    showConfirmPopup("Passwords do not match.", { title: "Reset password" });
+    setAuthMode("recovery");
+    return;
+  }
+
+  // ✅ Tiny UX polish: disable button + show immediate feedback
+  if (setBtn) {
+    setBtn.disabled = true;
+    setBtn.dataset.originalText = setBtn.textContent;
+    setBtn.textContent = "Updating...";
+  }
+
+  showConfirmPopup("Updating your password...", {
+  title: "Reset password",
+  showOk: false
+});
+
+  try {
+    const { error } = await supabase.auth.updateUser({ password: p1 });
+    if (error) {
+      showConfirmPopup(error.message || "Failed to update password.", {
+        title: "Reset password",
+        onOk: () => setAuthMode("recovery"),
+      });
+      return;
+    }
+
+    // ✅ Clean URL/hash so refresh doesn't re-trigger recovery mode
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+
+    // Optional: if you want to force them to sign in again (your current approach)
+    await supabase.auth.signOut();
+
+    showConfirmPopup("Password updated. Please sign in with your new password.", {
+      title: "Reset password",
+      onOk: () => {
+        resetAuthToFreshSignin();
+      },
+    });
+
+    setAuthMode("signin");
+  } finally {
+    // ✅ re-enable button
+    if (setBtn) {
+      setBtn.disabled = false;
+      setBtn.textContent = setBtn.dataset.originalText || "Update password";
+    }
+  }
+});
+
+  // Back to sign-in from recovery UI
+  document.getElementById("auth-recovery-cancel")?.addEventListener("click", async () => {
+    // Clean hash just in case
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    setAuthMode("signin");
+  });
+  
+    const authForm = document.getElementById("auth-form");
+      if (authForm) {
+        authForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          handleAuthSubmit();
+        });
+      }
+
+    document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const btn = document.getElementById("auth-submit");
+        if (!btn) return;
+
+        btn.classList.add("is-pressed");
+        setTimeout(() => {
+          btn.classList.remove("is-pressed");
+        }, 120);
+      }
+    });
+
+document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
+
+    // Enter key on password field = show button press + submit
+  document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      const btn = document.getElementById("auth-submit");
+      if (!btn) return;
+
+      btn.classList.add("is-pressed");
+
+      setTimeout(() => {
+        btn.classList.remove("is-pressed");
+        btn.click();
+      }, 120);
+    }
+  });
+  
+  // Auth overlay events (safe even if not used)
+  document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
+
+  document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
+    // If button is hidden (locked), do nothing
+    const btn = document.getElementById("auth-toggle-mode");
+    if (btn && btn.style.display === "none") return;
+
+    authMode = (authMode === "signin") ? "signup" : "signin";
+    showAuthOverlay();
+    });
+
+  // Forgot password
+document.getElementById("auth-forgot")?.addEventListener("click", async () => {
+  const forgotBtn = document.getElementById("auth-forgot");
+  const email = (document.getElementById("auth-email")?.value || "").trim();
+
+  if (!email) {
+    showConfirmPopup("Enter your email first, then click Forgot password.", {
+      title: "Forgot password",
+    });
+    return;
+  }
+
+  if (forgotBtn) {
+    forgotBtn.disabled = true;
+    forgotBtn.dataset.originalText = forgotBtn.textContent;
+    forgotBtn.textContent = "Sending...";
+  }
+
+  // show immediate feedback modal
+  showConfirmPopup("Sending password reset email...", {
+  title: "Forgot password",
+  showOk: false
+});
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname,
+    });
+
+    if (error) {
+      showConfirmPopup(error.message || "Failed to send reset email.", {
+        title: "Forgot password",
+      });
+      return;
+    }
+
+    showConfirmPopup("Password reset email sent. Check your inbox.", {
+      title: "Forgot password",
+      onOk: () => {
+        resetAuthToFreshSignin();
+      },
+    });
+  } finally {
+    if (forgotBtn) {
+      forgotBtn.disabled = false;
+      forgotBtn.textContent = forgotBtn.dataset.originalText || "Forgot password";
+    }
+  }
+});
+}
+
+
+
+
+  
+  
+                                                                                                /* === Startup === */
+async function startApp() {
+  document.body.classList.remove("show-landing-bg");
+  document.body.style.visibility = "visible";
+  bindUiListenersOnce(); // ✅ bind auth button handlers immediately
+
+  // 🔁 Password recovery link handling (from Supabase reset email)
+  const hash = window.location.hash || "";
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code"); // PKCE flow (if enabled)
+  const type = url.searchParams.get("type") || "";
+
+  // If Supabase uses PKCE recovery links, exchange code for session
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
+      return;
+    }
+    // Clean URL after exchanging
+    url.searchParams.delete("code");
+    window.history.replaceState({}, document.title, url.toString());
+  }
+
+   // If using hash tokens OR query param, look for recovery
+  const isRecovery = hash.includes("type=recovery") || type === "recovery";
+
+  if (isRecovery) {
+    showAuthOverlay("");
+    setAuthMode("recovery");
+    return;
+  }
+  
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    const lockSignin = !!manageToken; // for your owner-link behaviour
+    showAuthOverlay("", { lockSignin });
+    return;
+  }
+
+// ✅ If NO invite token, this is the homepage → dashboard flow
+if (!inviteToken && !manageToken) {
+  const prof = await loadProfile();
+
+  if (!prof || !prof.name || !prof.color) {
+    showProfileSetup();
+    return;
+  }
+
+  showDashboard();
+  setDashboardSubtitle();
+  await loadBoards();
+  return;
+}
+
+// ✅ If invite token exists, continue with your existing board flow below...
+  
+  try { 
+  populateHostTimezoneSelect();
+
+  // Always attach identity button
+ // const saveIdentityBtn = document.getElementById("save-identity");
+ // if (saveIdentityBtn) {
+ //   saveIdentityBtn.addEventListener("click", saveIdentity);
+ // }
+
+  const addRowBtn = document.getElementById("add-row");
+  if (addRowBtn) {
+    addRowBtn.addEventListener("click", () => addRowInput());
+  }
+
+  const backBtn = document.getElementById("route-error-back");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+  }
+
+const addUsersBtn = document.getElementById("add-users-btn");
+if (addUsersBtn) {
+  // Only show for owner links (?m=)
+  addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
+  addUsersBtn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // TODO: invite flow later
+  };
+}
+
+  if (addUsersBtn) {
+    addUsersBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (!manageToken) return;
+      if (!currentTable?.invite_token) {
+        console.error("Invite token missing on currentTable");
+        return;
+      }
+
+      openInviteModal({
+        boardId: currentTable.id,
+        inviteToken: currentTable.invite_token,
+        boardName: currentTable.name || "Availability Calendar"
+});
+    });
+  }    
+  
+  await loadTable();
+  } finally {
+    document.body.style.visibility = "visible";
+  }
+}
+  
+// Dashboard hosted card actions (+ menu) — stub only for now
+document.addEventListener("click", async (e) => {
+  // Toggle menu when clicking +
+  const actionsBtn = e.target.closest(".board-actions-btn");
+  if (actionsBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = actionsBtn.closest(".board-pill[data-kind]");
+    if (!card) return;
+
+    // Close any other open menus
+    document.querySelectorAll(".board-actions-menu:not([hidden])")
+      .forEach(m => m.hidden = true);
+
+    const menu = card.querySelector(".board-actions-menu");
+    if (!menu) return;
+
+    menu.hidden = !menu.hidden;
+    return;
+  }
+
+  // Handle menu item click
+  const item = e.target.closest(".board-actions-item");
+  if (item) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = item.closest(".board-pill[data-kind]");
+    if (!card) return;
+
+    // Close menu
+    const menu = card.querySelector(".board-actions-menu");
+    if (menu) menu.hidden = true;
+
+    const action = item.dataset.action;
+    const boardId = card.dataset.boardId;
+
+    const kind = card.dataset.kind;
+
+// Joined: remove calendar (stub for now)
+if (kind === "joined" && action === "remove") {
+  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+
+  const ok = await confirmModal({
+    title: "Remove calendar?",
+    message: `Remove "${boardName}"? You and all your logged times will be removed from this calendar.`,
+    okText: "Remove",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  // Actually remove current user from this board
+try {
+  const au = await getAuthUser();
+  if (!au?.id) throw new Error("Not signed in");
+
+  // 1) delete availability rows for this user on this board
+  const { error: availDelErr } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", boardId)
+    .eq("user_id", au.id);
+
+  if (availDelErr) throw availDelErr;
+
+  // 2) delete membership row
+  const { error: memDelErr } = await supabase
+    .from("board_members")
+    .delete()
+    .eq("board_id", boardId)
+    .eq("user_id", au.id);
+
+  if (memDelErr) throw memDelErr;
+
+  // 3) refresh dashboard lists + previews
+  await loadBoards();
+
+} catch (err) {
+  console.error("Remove calendar failed:", err);
+  alert("Could not remove you from this calendar. Please try again.");
+}
+return;
+
+  return;
+}
+
+    if (action === "add-user") {
+      const inviteTok = card.dataset.inviteToken;
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
+
+      if (!inviteTok) {
+        console.error("No invite token found on hosted board card.");
+        return;
+      }
+
+      openInviteModal({
+        boardId: card.dataset.boardId,
+        inviteToken: inviteTok,
+        boardName
+      });
+      return;
+    }
+    
+    if (action === "delete") {
+      // Confirm (no alert UI yet — we can swap to a custom modal next)
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+      const ok = await confirmModal({
+        title: "Delete calendar?",
+        message: `Delete "${boardName}"? This cannot be undone.`,
+        okText: "Delete",
+        cancelText: "Cancel"
+      });
+      if (!ok) return;
+
+      try {
+        // Disable the menu item to prevent double-clicks
+        item.disabled = true;
+        item.textContent = "Deleting…";
+
+        const { error } = await supabase.rpc("delete_calendar", { p_board_id: boardId });
+        if (error) throw error;
+
+        // Remove from dashboard immediately
+        card.remove();
+
+        // Optional: refresh lists in case you show counts etc.
+        if (typeof loadBoards === "function") await loadBoards();
+      } catch (err) {
+        console.error("Delete calendar failed:", err);
+        // Revert UI
+        item.disabled = false;
+        item.textContent = "Delete";
+      }
+    }
+    
+    return;
+  }
+
+  // Click outside closes any open menus
+  document.querySelectorAll(".board-actions-menu:not([hidden])")
+    .forEach(m => m.hidden = true);
+}, true);
+
+function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "OK", cancelText = "Cancel" } = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("confirm-modal");
+    const titleEl = document.getElementById("confirm-title");
+    const msgEl = document.getElementById("confirm-message");
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+
+    if (!overlay || !titleEl || !msgEl || !okBtn || !cancelBtn) {
+      // Fallback if modal is missing
+      resolve(window.confirm(message));
+      return;
+    }
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    okBtn.textContent = okText;
+    cancelBtn.textContent = cancelText;
+    // Hide cancel button if no cancelText supplied
+      if (!cancelText) {
+        cancelBtn.style.display = "none";
+      } else {
+        cancelBtn.style.display = "";
+      }
+
+    const cleanup = () => {
+      overlay.hidden = true;
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.removeEventListener("click", onOverlayClick, true);
+      okBtn.removeEventListener("click", onOk, true);
+      cancelBtn.removeEventListener("click", onCancel, true);
+    };
+
+    const onOk = (e) => { e.preventDefault(); cleanup(); resolve(true); };
+    const onCancel = (e) => { e.preventDefault(); cleanup(); resolve(false); };
+
+    const onOverlayClick = (e) => {
+      // Clicking outside the card cancels
+      const card = e.target.closest(".modal-card");
+      if (!card) { cleanup(); resolve(false); }
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") { cleanup(); resolve(false); }
+      if (e.key === "Enter") { cleanup(); resolve(true); }
+    };
+
+    overlay.hidden = false;
+
+    document.addEventListener("keydown", onKeyDown, true);
+    overlay.addEventListener("click", onOverlayClick, true);
+    okBtn.addEventListener("click", onOk, true);
+    cancelBtn.addEventListener("click", onCancel, true);
+
+    // Focus the safe option
+    cancelBtn.focus();
+  });
+}
+
+let inviteContext = { inviteToken: null, boardName: "" };
+
+function buildInviteLink(inviteToken) {
+  return `${window.location.origin}${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function openInviteModal({ inviteToken, boardName, boardId }) {
+  const overlay = document.getElementById("invite-modal");
+  const emailEl = document.getElementById("invite-email");
+  const sendBtn = document.getElementById("invite-send");
+  const cancelBtn = document.getElementById("invite-cancel");
+  const errEl = document.getElementById("invite-error");
+
+  if (!overlay || !emailEl || !sendBtn || !cancelBtn || !errEl) return;
+
+inviteContext = { boardId, inviteToken, boardName: boardName || "" };
+
+  // reset UI
+  errEl.style.display = "none";
+  errEl.textContent = "";
+  emailEl.value = "";
+
+  overlay.hidden = false;
+
+  const close = () => {
+    overlay.hidden = true;
+    document.removeEventListener("keydown", onKeyDown, true);
+    overlay.removeEventListener("click", onOverlayClick, true);
+  };
+
+  const onOverlayClick = (e) => {
+    const card = e.target.closest(".modal-card");
+    if (!card) close();
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") close();
+  };
+
+  const onSend = async (e) => {
+    const email = (emailEl.value || "").trim();
+
+    if (!email) {
+      errEl.style.display = "block";
+      errEl.textContent = "Please enter an email address.";
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      errEl.style.display = "block";
+      errEl.textContent = "Please enter a valid email address.";
+      return;
+    }
+
+    errEl.style.display = "none";
+
+try {
+  sendBtn.disabled = true;
+
+  const boardId = inviteContext?.boardId;
+  if (!boardId) {
+    alert("Could not determine which calendar to invite to. Please refresh and try again.");
+    return;
+  }
+
+  const inviteToken = inviteContext?.inviteToken;
+    if (!inviteToken) {
+      errEl.style.display = "block";
+      errEl.textContent = "Invite token is missing for this calendar. Please refresh and try again.";
+      return;
+    }
+
+    const inviteLink = buildInviteLink(inviteToken);
+    const boardName = inviteContext?.boardName || "Availability Calendar";
+
+    const { data, error } = await supabase.functions.invoke("send-invite", {
+      body: { 
+      toEmail: email,
+      boardId,
+      boardName,
+      inviteToken,
+      inviteLink
+      }
+    });
+
+if (error) throw error;
+
+  close();
+
+  await confirmModal({
+    title: "Invite sent",
+    message: `Invite email sent to ${email}.`,
+    okText: "Close",
+    cancelText: ""
+  });
+
+} catch (err) {
+  console.error("Invite send failed:", err);
+
+  // Try to show meaningful message in the modal
+  errEl.style.display = "block";
+  errEl.textContent =
+    (err && (err.message || err.error_description)) ||
+    "Invite failed (unknown error).";
+
+} finally {
+  sendBtn.disabled = false;
+}
+  };
+
+  // IMPORTANT: overwrite handlers so they don't stack
+  sendBtn.onclick = onSend;
+  cancelBtn.onclick = (e) => { e.preventDefault(); close(); };
+
+  document.addEventListener("keydown", onKeyDown, true);
+  overlay.addEventListener("click", onOverlayClick, true);
+
+  // focus the email field
+  setTimeout(() => emailEl.focus(), 0);
+}
+
+  
+async function renderBoardPreviews(owned) {
+  try {
+    if (!owned || owned.length === 0) return;
+
+    // Board ids
+    const boards = owned
+      .map(b => b.tables)
+      .filter(t => t && t.id);
+
+    const boardIds = boards.map(t => t.id);
+    if (boardIds.length === 0) return;
+
+    // Normalize row_structure into array of labels (strings)
+    const rowsByBoard = new Map(); // boardId -> [rowLabel...]
+    const startDateByBoard = new Map(); // boardId -> start_date
+    const tzByBoard = new Map(); // boardId -> host_tz
+    const goldByBoard = new Map(); // boardId -> threshold number
+
+    for (const t of boards) {
+      let rows = t.row_structure;
+
+      if (typeof rows === "string") {
+        try { rows = JSON.parse(rows); } catch { /* ignore */ }
+      }
+      if (!Array.isArray(rows)) rows = [];
+
+      const normalized = rows
+        .map(r => (typeof r === "string" ? r : (r?.key || r?.name || r?.label || "")))
+        .filter(Boolean);
+
+      rowsByBoard.set(String(t.id), normalized);
+      startDateByBoard.set(String(t.id), t.start_date || null);
+      tzByBoard.set(String(t.id), t.host_tz || null);
+      goldByBoard.set(String(t.id), Number(t.gold_threshold || 2));
+    }
+
+    // Pull availability for 7 days (0..6) for all hosted boards
+    const { data: avail, error: availErr } = await supabase
+      .from("availability_dev")
+      .select("table_id, day, time, user_id, name, color")
+      .in("table_id", boardIds)
+      .gte("day", 1)
+      .lte("day", 7);
+
+    if (availErr) throw availErr;
+
+    // Extra availability fallback for legend (not limited to first 7 days)
+    const { data: legendAvail, error: legendAvailErr } = await supabase
+      .from("availability_dev")
+      .select("table_id, user_id, name, color")
+      .in("table_id", boardIds)
+      .gte("day", 1)
+      .lte("day", 30); // match your board window
+
+    if (legendAvailErr) throw legendAvailErr;
+
+    // Fallback by board+user (so legend can show members even if not in first 7 days)
+    const fallbackByBoardUser = new Map(); // `${boardId}|${userId}` -> {name,color}
+
+    for (const r of (legendAvail || [])) {
+      if (!r.table_id || !r.user_id) continue;
+      const key = `${String(r.table_id)}|${String(r.user_id)}`;
+
+      if (!fallbackByBoardUser.has(key)) {
+        fallbackByBoardUser.set(key, {
+          name: (r.name || "").trim(),
+          color: r.color || ""
+        });
+      }
+    }
+
+    // Fallback (important if profiles RLS blocks reading other users)
+    const fallbackByUser = new Map(); // user_id -> { name, color }
+    for (const r of (avail || [])) {
+      const uid = r.user_id ? String(r.user_id) : null;
+      if (!uid) continue;
+
+      if (!fallbackByUser.has(uid)) {
+        fallbackByUser.set(uid, {
+          name: (r.name || "").trim(),
+          color: r.color || ""
+        });
+      }
+    }
+    
+    // Collect user_ids from membership (more reliable than "who has dots this week")
+    const { data: members, error: memErr } = await supabase
+      .from("board_members")
+      .select("board_id, user_id")
+      .in("board_id", boardIds);
+
+    if (memErr) throw memErr;
+
+    const memberUserIds = Array.from(new Set(
+      (legendAvail || [])
+        .map(r => r.user_id)
+        .filter(Boolean)
+        .map(String)
+    ));
+
+let profilesByUser = new Map(); // user_id -> {name,color}
+if (memberUserIds.length > 0) {
+  const { data: profs, error: profErr } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .in("user_id", memberUserIds);
+
+  if (profErr) {
+    console.warn("profiles lookup blocked or failed (preview will use fallback):", profErr);
+  } else {
+    profilesByUser = new Map((profs || []).map(p => [String(p.user_id), p]));
+  }
+}
+
+    // Build a map: (board|day|time) -> [user_id...]
+    const byCell = new Map();
+    for (const r of (avail || [])) {
+      const key = `${r.table_id}|${r.day}|${r.time}`;
+        if (!byCell.has(key)) byCell.set(key, []);
+        const arr = byCell.get(key);
+
+        if (!r.user_id) continue;               // ✅ guard
+        const uid = String(r.user_id);
+        if (!arr.includes(uid)) arr.push(uid);
+        }
+
+    // Render each preview
+    for (const t of boards) {
+      const boardId = String(t.id);
+      const previewEl = document.querySelector(`.board-preview[data-board-id="${boardId}"]`);
+      if (!previewEl) continue;
+
+      const rows = rowsByBoard.get(boardId) || [];
+      const days = 7;
+
+      // Day labels must match the board (day 0 = today, in the board's host_tz)
+      const dayNames = getWeekdayLabels7(tzByBoard.get(boardId));
+
+      // Build header row
+      const headerCells = [`<div class="mini-corner"></div>`]
+        .concat(dayNames.slice(0, days).map(d => `<div class="mini-colhead">${d}</div>`))
+        .join("");
+
+      // Build body rows
+      const bodyRows = rows.map((rowLabel) => {
+        const rowHead = `<div class="mini-rowhead">${escapeHtml(rowLabel)}</div>`;
+
+        const cells = [];
+        for (let d = 0; d < days; d++) {
+          const dayValue = d + 1; // ✅ your DB uses 1-based days (today = 1)
+          const users = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
+          const threshold = goldByBoard.get(boardId) || 2;
+          const isGold = users.length >= threshold;
+
+        // If the cell is gold, we hide dots entirely (match main board behavior)
+        let dotsHtml = "";
+        let extraHtml = "";
+
+        if (!isGold) {
+          // Build dot stack (cap visible dots to keep it clean)
+          const maxDots = 8;
+          const visible = users.slice(0, maxDots);
+          const extra = users.length - visible.length;
+
+          dotsHtml = visible.map(uid => {
+            const p = profilesByUser.get(String(uid));
+            const f = fallbackByUser.get(String(uid));
+
+            const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+            const name = (p?.name || f?.name || "").trim();
+            return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
+          }).join("");
+
+          extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
+        }
+
+          cells.push(`
+            <div class="mini-cell ${isGold ? "mini-gold" : ""}">
+              <div class="mini-dots">${dotsHtml}${extraHtml}</div>
+            </div>
+          `);
+        }
+
+        return `<div class="mini-row">${rowHead}${cells.join("")}</div>`;
+      }).join("");
+
+      // Auto-scale: fewer rows = bigger preview; more rows = smaller
+      const rowCount = Math.max(rows.length, 1);
+      const scale = Math.max(0.55, Math.min(1.05, 10 / (rowCount + 2)));
+      previewEl.style.setProperty("--mini-scale", String(scale));
+
+      // Legend: show EVERY user who has availability on this board (across the full window)
+      const legendUserIds = Array.from(new Set(
+        (legendAvail || [])
+          .filter(r => String(r.table_id) === boardId && r.user_id)
+          .map(r => String(r.user_id))
+      ));
+      
+const MAX_LEGEND = 9;
+const totalUsers = legendUserIds.length;
+
+let shown = legendUserIds.slice(0, MAX_LEGEND);
+let overflow = 0;
+
+// If more than 9 users, reserve the 9th slot for "+N"
+if (totalUsers > MAX_LEGEND) {
+  shown = legendUserIds.slice(0, 8);
+  overflow = totalUsers - 8;
+}
+
+const n = shown.length + (overflow ? 1 : 0);
+
+// Presets (your requested behaviour)
+let legendRows = 1;
+let legendCols = 2;
+let font = 13;
+let dot = 9;
+
+// Keep HEIGHT fixed always
+const legendHeight = 34;
+
+// Control how wide each name can be before ellipsis (keeps legend from getting too wide)
+let itemMax = 120;
+
+if (n <= 2) {
+  legendRows = 1; legendCols = 2; font = 11; dot = 9; itemMax = 130;
+} else if (n <= 4) {
+  legendRows = 2; legendCols = 2; font = 10; dot = 8; itemMax = 110;
+} else if (n <= 6) {
+  legendRows = 2; legendCols = 3; font = 8; dot = 7; itemMax = 85;
+} else {
+  legendRows = 3; legendCols = 3; font = 6; dot = 5; itemMax = 75;
+}
+
+const legendHtml = shown.length
+  ? `
+<div class="mini-legend" style="
+  height:${legendHeight}px;
+  overflow:hidden;
+  margin-top:6px;
+  padding:0 10px 0 8px;
+  box-sizing:border-box;
+">
+  <!-- This wrapper SHRINKS to content width -->
+  <div class="mini-legend-wrap" style="
+    display:inline-block;
+    width:fit-content;
+    max-width:100%;
+  ">
+    <div class="mini-legend-grid" style="
+      height:${legendHeight}px;
+      display:inline-grid;
+      grid-template-columns: repeat(${legendCols}, auto);
+      grid-template-rows: repeat(${legendRows}, auto);
+      column-gap:8px;
+      row-gap:2px;
+      align-content:center;
+      justify-content:start;
+      justify-items:start;
+    ">
+      ${[
+  ...shown.map(uid => {
+    const p = profilesByUser.get(String(uid));
+    const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+
+    const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+    const nm = (p?.name || f?.name || "").trim() || "User";
+
+    return `
+      <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
+        display:flex;
+        align-items:center;
+        gap:4px;
+        font-size:${font}px;
+        line-height:1;
+        max-width:${itemMax}px;
+        min-width:0;
+        overflow:hidden;
+        white-space:nowrap;
+        text-overflow:ellipsis;
+      ">
+        <span style="
+          width:${dot}px;
+          height:${dot}px;
+          border-radius:999px;
+          background:${col};
+          flex:0 0 auto;
+        "></span>
+        <span style="
+          opacity:0.85;
+          min-width:0;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        ">${escapeHtml(nm)}</span>
+      </div>
+    `;
+  }),
+  ...(overflow ? [`
+    <div class="mini-legend-item" title="${overflow} more" style="
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:${font}px;
+      line-height:0.5;
+      opacity:0.8;
+      border:1px solid rgba(0,0,0,0.10);
+      border-radius:999px;
+      padding:2px 6px;
+      white-space:nowrap;
+    ">+${overflow}</div>
+  `] : [])
+].join("")}
+    </div>
+  </div>
+</div>
+`
+  : "";
+      
+      previewEl.innerHTML = `
+        <div class="mini-board">
+          <div class="mini-head">${headerCells}</div>
+          <div class="mini-body">${bodyRows}</div>
+        </div>
+        ${legendHtml}
+      `;
+      
+    }
+  } catch (err) {
+    console.error("Preview render failed:", err);
+  }
+}
+
+
+function getWeekdayLabels7(timeZone) {
+  const base = new Date(); // "now"
+  const fmt = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    timeZone: timeZone || undefined
+  });
+
+    const labels = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      labels.push(fmt.format(d));
+    }
+    return labels;
+}
+
+  
+// Tiny helper to avoid breaking the preview with special chars
+function escapeHtml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+  
+  
+document.addEventListener("DOMContentLoaded", startApp);
+
+
+</script>
