@@ -1,14 +1,16 @@
-export function createAuthModule(deps) {
-  const {
-    supabase,
-    showConfirmPopup,
-    loadBoards,
-    loadTable,
-    inviteToken,
-    manageToken,
-    setUser,
-    getUser,
-  } = deps;
+const {
+  supabase,
+  showConfirmPopup,
+  loadBoards,
+  loadTable,
+  showDashboard,
+  inviteToken,
+  manageToken,
+  setUser,
+  getUser,
+  getSetupSelectedColour,
+  possessive,
+} = deps;
 
 let authMode = "signin";
 
@@ -143,7 +145,7 @@ async function loadProfile() {
 
   if (!data) return null;
 
-  user = {
+  setUser = {
     id: au.id,
     name: data.name,
     color: data.color
@@ -153,7 +155,7 @@ async function loadProfile() {
 }  
   
 async function hydrateUserFromAuth() {
-  const prof = await loadProfile(); // loadProfile already sets global `user`
+  const prof = await loadProfile();
   if (!prof || !prof.name || !prof.color) return null;
   return prof;
 }
@@ -209,11 +211,6 @@ async function handleAuthSubmit() {
       showDashboard();
       await loadBoards();
     }
-
-  // Now proceed to board or create screen
-  if (inviteToken || manageToken) {
-    await loadTable(); // will now have user set
-  }
 }
 
 async function saveProfileSetup() {
@@ -221,7 +218,7 @@ async function saveProfileSetup() {
   if (!au) return;
 
   const name = document.getElementById("setup-name")?.value?.trim();
-  const color = setupSelectedColour;
+  const color = getSetupSelectedColour();
 
   if (!name) return alert("Please choose a username.");
 
@@ -234,7 +231,7 @@ async function saveProfileSetup() {
   if (error) return alert(error.message);
 
   // update in-memory user immediately
-  user = { id: au.id, name, color };
+  setUser({ id: au.id, name, color });
 
   hideProfileSetup();
 
@@ -270,7 +267,7 @@ function hideProfileSetup() {
 
 
   
-
+// CHECK IF WE NEED THIS
 async function getOrCreateProfile({ name, color }) {
   const user = await getAuthUser();
   if (!user) return null;
@@ -297,14 +294,19 @@ async function getOrCreateProfile({ name, color }) {
   }
   return created;
 }
+// CHECK IF WE NEED THIS
+
+
 
 
 function setDashboardSubtitle() {
   const dashUser = document.getElementById("dash-username");
+  const user = getUser();
+
   if (dashUser && user?.name) {
     dashUser.textContent = possessive(user.name).toUpperCase();
   }
-}  
+}
 
 
 function bindAuthUi() {
