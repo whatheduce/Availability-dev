@@ -204,9 +204,7 @@
       <input id="auth-password" placeholder="Password" type="password"
         style="box-sizing: border-box; width:100%; padding:10px; padding-left: 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
 
-      <button id="auth-submit" class="primary-btn" style="width:100%;" type="submit">
-        Continue
-      </button>
+      <button id="auth-submit" class="primary-btn" style="width:100%;" type="button">Continue</button>
     </form>
 
     <!-- PASSWORD RECOVERY (shown only when user comes from reset email link) -->
@@ -3419,18 +3417,23 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
       if (authForm) {
         authForm.addEventListener("submit", (e) => {
           e.preventDefault();
+          handleAuthSubmit();
+        });
+      }
 
-      const btn = document.getElementById("auth-submit");
-      if (!btn) return;
+    document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const btn = document.getElementById("auth-submit");
+        if (!btn) return;
 
         btn.classList.add("is-pressed");
-
         setTimeout(() => {
           btn.classList.remove("is-pressed");
-          btn.click();
         }, 120);
-      });
-    }
+      }
+    });
+
+document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
 
     // Enter key on password field = show button press + submit
   document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
@@ -4511,6 +4514,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
