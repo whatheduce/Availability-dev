@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createClient } from "./auth.js";
+import { createAuthModule } from "./auth.js";
 
 const DEBUG = false;
 function log(...args) { if (DEBUG) console.log(...args); }
