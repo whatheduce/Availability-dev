@@ -484,5 +484,6 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
     hideProfileSetup,
     saveProfileSetup,
     bindAuthUi,
+    setDashboardSubtitle,
   };
 }
