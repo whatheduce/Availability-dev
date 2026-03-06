@@ -1752,6 +1752,11 @@ body.account-view #dash-account {
   box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
+#auth-overlay .primary-btn.is-pressed {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
 #auth-overlay .primary-btn:focus-visible {
   outline: none;
   box-shadow:
