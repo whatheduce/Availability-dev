@@ -2719,7 +2719,7 @@ if (!inviteToken && !manageToken) {
   }
 
   showDashboard();
-  setDashboardSubtitle();
+  auth.setDashboardSubtitle();
   await loadBoards();
   return;
 }
