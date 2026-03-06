@@ -444,6 +444,7 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
       title: "Reset password",
       onOk: () => {
         resetAuthToFreshSignin();
+        showAuthOverlay("");
       },
     });
 
