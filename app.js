@@ -2698,7 +2698,7 @@ async function startApp() {
 
   if (isRecovery) {
     auth.showAuthOverlay("");
-    setAuthMode("recovery");
+    auth.setAuthMode("recovery");
     return;
   }
   
