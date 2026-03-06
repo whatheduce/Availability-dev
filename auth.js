@@ -1,3 +1,5 @@
+export function createAuthModule(deps) {
+  
 const {
   supabase,
   showConfirmPopup,
@@ -467,7 +469,8 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
     document.getElementById("auth-set-password")?.click();
   }
 });
-
+}
+  
   return {
     showAuthOverlay,
     hideAuthOverlay,
