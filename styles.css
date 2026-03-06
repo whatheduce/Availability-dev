@@ -449,6 +449,19 @@ body.logged-in #landing-bg::after{
     0 8px 18px rgba(0,0,0,0.10);
 }
 
+.gear-icon{
+  display:inline-block;
+  transition: transform 220ms ease;
+}
+
+#dash-settings:hover .gear-icon{
+  transform: rotate(22deg);
+}
+
+#dash-settings:active .gear-icon{
+  transform: rotate(12deg);
+}
+
 #dash-title {
   text-align: center;
   line-height: 1.1;
