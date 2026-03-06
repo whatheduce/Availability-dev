@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "./auth.js";
 
 const DEBUG = false;
 function log(...args) { if (DEBUG) console.log(...args); }
@@ -48,7 +49,7 @@ let isBoardOwner = false;
 async function refreshBoardOwnerFlag() {
   isBoardOwner = false;
 
-  const au = await getAuthUser();
+  const au = await auth.getAuthUser();
   if (!au || !currentTable?.id) return;
 
   // Primary: owner_id on tables row
@@ -389,7 +390,7 @@ async function rollForwardIfNeeded(tableId) {
   
 
 async function loadBoards() {
-  const au = await getAuthUser();
+  const au = await auth.getAuthUser();
 
   const { data, error } = await supabase
     .from("board_members")
@@ -560,7 +561,7 @@ function ensureLegendUser(entry) {
 
 
 async function ensureMembership(boardId) {
-  const au = await getAuthUser();
+  const au = await auth.getAuthUser();
   if (!au) return false;
 
   // if membership already exists, do nothing
@@ -953,10 +954,10 @@ if (!refreshErr && refreshed) currentTable = refreshed;
 document.getElementById("create-board").style.display = "none";
 
 // Use Supabase Auth identity (not localStorage UUID)
-const au = await getAuthUser();
+const au = await auth.getAuthUser();
 if (!au) {
   // Not signed in → show blurred auth overlay and stop interactions
-  showAuthOverlay();
+  auth.showAuthOverlay();
 
   document.getElementById("identity-section").style.display = "none";
   document.getElementById("create-board").style.display = "none";
@@ -983,9 +984,9 @@ if (!au) {
   return;
 }
 
-const hydrated = await hydrateUserFromAuth();
+const hydrated = await auth.hydrateUserFromAuth();
 if (!hydrated) {
-  showProfileSetup();
+  auth.showProfileSetup();
   return;
 }
 
@@ -1012,14 +1013,18 @@ await refreshBoardOwnerFlag();
 renderCalendarNote();
 setCalendarNoteEditing(false);
 }
-  
+
+
+
   function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
 
+
 function getDetectedTimeZone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 }
+
 
 function yyyyMmDdInTimeZone(date, timeZone) {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -1093,9 +1098,9 @@ async function createBoard() {
     document.querySelector('select[data-gold-threshold]');
 
   const goldThreshold = parseInt(goldSelect?.value || "", 10) || 2;
-  const au = await getAuthUser();
+  const au = await auth.getAuthUser();
     if (!au) {
-      showAuthOverlay("Please sign in before creating a calendar.");
+      auth.showAuthOverlay("Please sign in before creating a calendar.");
       return;
     }
   const nameInput = document.getElementById("board-name");
@@ -1219,6 +1224,23 @@ const legendList = document.getElementById("legendList");
 
 let user = null;
 
+const getUser = () => user;
+const setUser = (nextUser) => { user = nextUser; };
+
+const auth = createAuthModule({
+  supabase,
+  showConfirmPopup,
+  loadBoards,
+  loadTable,
+  showDashboard,
+  inviteToken,
+  manageToken,
+  setUser,
+  getUser,
+  getSetupSelectedColour: () => setupSelectedColour,
+  possessive,
+});
+
 
 async function toggleCell(e) {
   if (!user || !currentTable) return;
@@ -1234,7 +1256,7 @@ async function toggleCell(e) {
     const timeKey = String(cell.dataset.time || "").trim();
     if (!Number.isFinite(dayNum) || !timeKey) return;
 
-    const au = await getAuthUser();
+    const au = await auth.getAuthUser();
     if (!au) return;
     const myUid = au.id;
 
@@ -1445,7 +1467,7 @@ function hideDeleteAccountOverlay() {
 }
 
 async function deleteAccountFlow() {
-  const au = await getAuthUser();
+  const au = await auth.getAuthUser();
   if (!au) {
     showDeleteAccountOverlay("You must be signed in.");
     return;
@@ -1967,7 +1989,7 @@ function bindUiListenersOnce() {
   
   // Profile setup save
   const setupSaveBtn = document.getElementById("setup-save");
-  if (setupSaveBtn) setupSaveBtn.addEventListener("click", saveProfileSetup);
+  if (setupSaveBtn) setupSaveBtn.addEventListener("click", auth.saveProfileSetup);
 
   // Structure selection (Dev Custom + Meals)
   const devCard = document.getElementById("dev-custom-card");
@@ -2035,7 +2057,7 @@ function showDashboardPanel() {
 
 async function hydrateAccountPanel() {
   try {
-    const au = await getAuthUser();
+    const au = await auth.getAuthUser();
 
     // Email
     const emailEl = document.getElementById("acct-email");
@@ -2308,7 +2330,7 @@ colourSave?.addEventListener("click", async () => {
     colourSave.disabled = true;
     setColourError("");
 
-    const au = await getAuthUser();
+    const au = await auth.getAuthUser();
     if (!au) {
       setColourError("You’re not signed in.");
       return;
@@ -2411,7 +2433,7 @@ pwModal?.addEventListener("click", (e) => {
 
 pwSave?.addEventListener("click", async () => {
   try {
-    const au = await getAuthUser();
+    const au = await auth.getAuthUser();
     if (!au?.email) {
       setPwError("You’re not signed in.");
       return;
@@ -2499,7 +2521,7 @@ nameSave?.addEventListener("click", async () => {
     setNameError("");
 
     // Update DB
-    const au = await getAuthUser();
+    const au = await auth.getAuthUser();
     if (!au) {
       setNameError("You’re not signed in.");
       return;
@@ -2666,7 +2688,7 @@ async function startApp() {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
+      auth.showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
       return;
     }
     // Clean URL after exchanging
@@ -2678,7 +2700,7 @@ async function startApp() {
   const isRecovery = hash.includes("type=recovery") || type === "recovery";
 
   if (isRecovery) {
-    showAuthOverlay("");
+    auth.showAuthOverlay("");
     setAuthMode("recovery");
     return;
   }
@@ -2686,7 +2708,7 @@ async function startApp() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
     const lockSignin = !!manageToken; // for your owner-link behaviour
-    showAuthOverlay("", { lockSignin });
+    auth.showAuthOverlay("", { lockSignin });
     return;
   }
 
@@ -2695,7 +2717,7 @@ if (!inviteToken && !manageToken) {
   const prof = await loadProfile();
 
   if (!prof || !prof.name || !prof.color) {
-    showProfileSetup();
+    auth.showProfileSetup();
     return;
   }
 
@@ -2819,7 +2841,7 @@ if (kind === "joined" && action === "remove") {
 
   // Actually remove current user from this board
 try {
-  const au = await getAuthUser();
+  const au = await auth.getAuthUser();
   if (!au?.id) throw new Error("Not signed in");
 
   // 1) delete availability rows for this user on this board
