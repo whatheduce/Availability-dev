@@ -1919,10 +1919,17 @@ function renderSwatchGrid(containerEl, currentHex, onPick){
 
   
 let uiListenersBound = false;
-  
+
+
+
+
+
+
 function bindUiListenersOnce() {
   if (uiListenersBound) return;
   uiListenersBound = true;
+
+  auth.bindAuthUi();
 
   // Dashboard: Create New Calendar (your dashboard button)
   const dashCreate = document.getElementById("create-board-btn");
@@ -2617,106 +2624,6 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
     });
   }
 
-  // Press Enter in confirm password field -> trigger update password
-document.getElementById("auth-new-password-confirm")?.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    document.getElementById("auth-set-password")?.click();
-  }
-});
-  
-  // Password recovery submit
-document.getElementById("auth-set-password")?.addEventListener("click", async () => {
-  const setBtn = document.getElementById("auth-set-password");
-
-  const p1 = (document.getElementById("auth-new-password")?.value || "").trim();
-  const p2 = (document.getElementById("auth-new-password-confirm")?.value || "").trim();
-
-  if (!p1 || p1.length < 8) {
-    showConfirmPopup("Password must be at least 8 characters.", { title: "Reset password" });
-    setAuthMode("recovery");
-    return;
-  }
-  if (p1 !== p2) {
-    showConfirmPopup("Passwords do not match.", { title: "Reset password" });
-    setAuthMode("recovery");
-    return;
-  }
-
-  // ✅ Tiny UX polish: disable button + show immediate feedback
-  if (setBtn) {
-    setBtn.disabled = true;
-    setBtn.dataset.originalText = setBtn.textContent;
-    setBtn.textContent = "Updating...";
-  }
-
-  showConfirmPopup("Updating your password...", {
-  title: "Reset password",
-  showOk: false
-});
-
-  try {
-    const { error } = await supabase.auth.updateUser({ password: p1 });
-    if (error) {
-      showConfirmPopup(error.message || "Failed to update password.", {
-        title: "Reset password",
-        onOk: () => setAuthMode("recovery"),
-      });
-      return;
-    }
-
-    // ✅ Clean URL/hash so refresh doesn't re-trigger recovery mode
-    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-
-    // Optional: if you want to force them to sign in again (your current approach)
-    await supabase.auth.signOut();
-
-    showConfirmPopup("Password updated. Please sign in with your new password.", {
-      title: "Reset password",
-      onOk: () => {
-        resetAuthToFreshSignin();
-      },
-    });
-
-    setAuthMode("signin");
-  } finally {
-    // ✅ re-enable button
-    if (setBtn) {
-      setBtn.disabled = false;
-      setBtn.textContent = setBtn.dataset.originalText || "Update password";
-    }
-  }
-});
-
-  // Back to sign-in from recovery UI
-  document.getElementById("auth-recovery-cancel")?.addEventListener("click", async () => {
-    // Clean hash just in case
-    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-    setAuthMode("signin");
-  });
-  
-    const authForm = document.getElementById("auth-form");
-      if (authForm) {
-        authForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          handleAuthSubmit();
-        });
-      }
-
-    document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const btn = document.getElementById("auth-submit");
-        if (!btn) return;
-
-        btn.classList.add("is-pressed");
-        setTimeout(() => {
-          btn.classList.remove("is-pressed");
-        }, 120);
-      }
-    });
-
-document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
-
     // Enter key on password field = show button press + submit
   document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
@@ -2736,65 +2643,6 @@ document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubm
   
   // Auth overlay events (safe even if not used)
   document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
-
-  document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
-    // If button is hidden (locked), do nothing
-    const btn = document.getElementById("auth-toggle-mode");
-    if (btn && btn.style.display === "none") return;
-
-    authMode = (authMode === "signin") ? "signup" : "signin";
-    showAuthOverlay();
-    });
-
-  // Forgot password
-document.getElementById("auth-forgot")?.addEventListener("click", async () => {
-  const forgotBtn = document.getElementById("auth-forgot");
-  const email = (document.getElementById("auth-email")?.value || "").trim();
-
-  if (!email) {
-    showConfirmPopup("Enter your email first, then click Forgot password.", {
-      title: "Forgot password",
-    });
-    return;
-  }
-
-  if (forgotBtn) {
-    forgotBtn.disabled = true;
-    forgotBtn.dataset.originalText = forgotBtn.textContent;
-    forgotBtn.textContent = "Sending...";
-  }
-
-  // show immediate feedback modal
-  showConfirmPopup("Sending password reset email...", {
-  title: "Forgot password",
-  showOk: false
-});
-
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + window.location.pathname,
-    });
-
-    if (error) {
-      showConfirmPopup(error.message || "Failed to send reset email.", {
-        title: "Forgot password",
-      });
-      return;
-    }
-
-    showConfirmPopup("Password reset email sent. Check your inbox.", {
-      title: "Forgot password",
-      onOk: () => {
-        resetAuthToFreshSignin();
-      },
-    });
-  } finally {
-    if (forgotBtn) {
-      forgotBtn.disabled = false;
-      forgotBtn.textContent = forgotBtn.dataset.originalText || "Forgot password";
-    }
-  }
-});
 }
 
 
