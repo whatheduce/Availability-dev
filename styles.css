@@ -1578,18 +1578,18 @@ body.account-view #dash-account {
 
 #calendar-side-left{
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-start;
+  justify-content: stretch;
+}
+
+#calendar-side-left > *{
+  width: 100%;
 }
 
 #calendar-side-right{
   display: flex;
-  justify-content: stretch;
-}
-
-#calendar-side-right > *{
-  width: 100%;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .presence-side{
