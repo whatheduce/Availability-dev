@@ -437,7 +437,7 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
     // Clean URL/hash so refresh doesn't re-trigger recovery mode
     window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
 
-    sessionStorage.removeItem("pw_recovery_in_progress");
+    localStorage.removeItem("pw_recovery_in_progress");
     await supabase.auth.signOut();
 
     showConfirmPopup("Password updated. Please sign in with your new password.", {
@@ -458,7 +458,7 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
 });
 
   document.getElementById("auth-recovery-cancel")?.addEventListener("click", async () => {
-    sessionStorage.removeItem("pw_recovery_in_progress");
+    localStorage.removeItem("pw_recovery_in_progress");
     await supabase.auth.signOut();
     window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
     setAuthMode("signin");
