@@ -433,7 +433,8 @@ body.logged-in #landing-bg::after{
 }
 
 #dash-settings:active .gear-icon{
-  transform: rotate(12deg);
+ transform: scale(0.92) rotate(8deg);
+ filter: brightness(0.90);
 }
 
 #dash-title {
