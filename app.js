@@ -2695,13 +2695,13 @@ async function startApp() {
 
   // If this is a recovery link, mark recovery mode in session storage
   if (isRecovery) {
-    sessionStorage.setItem("pw_recovery_in_progress", "1");
+    localStorage.setItem("pw_recovery_in_progress", "1");
     auth.showAuthOverlay("");
     auth.setAuthMode("recovery");
     return;
   }
 
-  const recoveryInProgress = sessionStorage.getItem("pw_recovery_in_progress") === "1";
+  const recoveryInProgress = localStorage.getItem("pw_recovery_in_progress") === "1";
 
   const { data: { session } } = await supabase.auth.getSession();
 
@@ -2709,7 +2709,7 @@ async function startApp() {
   // force sign-out so they cannot land straight in the dashboard
   if (recoveryInProgress && session) {
     await supabase.auth.signOut();
-    sessionStorage.removeItem("pw_recovery_in_progress");
+    localStorage.removeItem("pw_recovery_in_progress");
     auth.showAuthOverlay("Please sign in again.");
     return;
   }
