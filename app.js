@@ -2662,9 +2662,6 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
       }, 120);
     }
   });
-  
-  // Auth overlay events (safe even if not used)
-  document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
 }
 
 
