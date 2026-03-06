@@ -2711,7 +2711,7 @@ async function startApp() {
 
 // ✅ If NO invite token, this is the homepage → dashboard flow
 if (!inviteToken && !manageToken) {
-  const prof = await loadProfile();
+  const prof = await auth.loadProfile();
 
   if (!prof || !prof.name || !prof.color) {
     auth.showProfileSetup();
