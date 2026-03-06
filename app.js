@@ -2668,17 +2668,15 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
 
 
   
-  
-                                                                                                /* === Startup === */
 async function startApp() {
   document.body.classList.remove("show-landing-bg");
   document.body.style.visibility = "visible";
-  bindUiListenersOnce(); // ✅ bind auth button handlers immediately
+  bindUiListenersOnce();
 
-  // 🔁 Password recovery link handling (from Supabase reset email)
+  // Password recovery handling
   const hash = window.location.hash || "";
   const url = new URL(window.location.href);
-  const code = url.searchParams.get("code"); // PKCE flow (if enabled)
+  const code = url.searchParams.get("code");
   const type = url.searchParams.get("type") || "";
 
   // If Supabase uses PKCE recovery links, exchange code for session
@@ -2688,96 +2686,100 @@ async function startApp() {
       auth.showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
       return;
     }
-    // Clean URL after exchanging
+
     url.searchParams.delete("code");
     window.history.replaceState({}, document.title, url.toString());
   }
 
-   // If using hash tokens OR query param, look for recovery
   const isRecovery = hash.includes("type=recovery") || type === "recovery";
 
+  // If this is a recovery link, mark recovery mode in session storage
   if (isRecovery) {
+    sessionStorage.setItem("pw_recovery_in_progress", "1");
     auth.showAuthOverlay("");
     auth.setAuthMode("recovery");
     return;
   }
-  
+
+  const recoveryInProgress = sessionStorage.getItem("pw_recovery_in_progress") === "1";
+
   const { data: { session } } = await supabase.auth.getSession();
+
+  // If a recovery session exists but user is no longer on the recovery page,
+  // force sign-out so they cannot land straight in the dashboard
+  if (recoveryInProgress && session) {
+    await supabase.auth.signOut();
+    sessionStorage.removeItem("pw_recovery_in_progress");
+    auth.showAuthOverlay("Please sign in again.");
+    return;
+  }
+
   if (!session) {
-    const lockSignin = !!manageToken; // for your owner-link behaviour
+    const lockSignin = !!manageToken;
     auth.showAuthOverlay("", { lockSignin });
     return;
   }
 
-// ✅ If NO invite token, this is the homepage → dashboard flow
-if (!inviteToken && !manageToken) {
-  const prof = await auth.loadProfile();
+  // Homepage → dashboard flow
+  if (!inviteToken && !manageToken) {
+    const prof = await auth.loadProfile();
 
-  if (!prof || !prof.name || !prof.color) {
-    auth.showProfileSetup();
+    if (!prof || !prof.name || !prof.color) {
+      auth.showProfileSetup();
+      return;
+    }
+
+    showDashboard();
+    auth.setDashboardSubtitle();
+    await loadBoards();
     return;
   }
 
-  showDashboard();
-  auth.setDashboardSubtitle();
-  await loadBoards();
-  return;
-}
+  // Invite/manage-token board flow
+  try {
+    populateHostTimezoneSelect();
 
-// ✅ If invite token exists, continue with your existing board flow below...
-  
-  try { 
-  populateHostTimezoneSelect();
+    const addRowBtn = document.getElementById("add-row");
+    if (addRowBtn) {
+      addRowBtn.addEventListener("click", () => addRowInput());
+    }
 
-  // Always attach identity button
- // const saveIdentityBtn = document.getElementById("save-identity");
- // if (saveIdentityBtn) {
- //   saveIdentityBtn.addEventListener("click", saveIdentity);
- // }
-
-  const addRowBtn = document.getElementById("add-row");
-  if (addRowBtn) {
-    addRowBtn.addEventListener("click", () => addRowInput());
-  }
-
-  const backBtn = document.getElementById("route-error-back");
+    const backBtn = document.getElementById("route-error-back");
     if (backBtn) {
       backBtn.addEventListener("click", () => {
         window.location.href = "/";
       });
-  }
+    }
 
-const addUsersBtn = document.getElementById("add-users-btn");
-if (addUsersBtn) {
-  // Only show for owner links (?m=)
-  addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
-  addUsersBtn.onclick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // TODO: invite flow later
-  };
-}
+    const addUsersBtn = document.getElementById("add-users-btn");
+    if (addUsersBtn) {
+      addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
+      addUsersBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+    }
 
-  if (addUsersBtn) {
-    addUsersBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    if (addUsersBtn) {
+      addUsersBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-      if (!manageToken) return;
-      if (!currentTable?.invite_token) {
-        console.error("Invite token missing on currentTable");
-        return;
-      }
+        if (!manageToken) return;
+        if (!currentTable?.invite_token) {
+          console.error("Invite token missing on currentTable");
+          return;
+        }
 
-      openInviteModal({
-        boardId: currentTable.id,
-        inviteToken: currentTable.invite_token,
-        boardName: currentTable.name || "Availability Calendar"
-});
-    });
-  }    
-  
-  await loadTable();
+        openInviteModal({
+          boardId: currentTable.id,
+          inviteToken: currentTable.invite_token,
+          boardName: currentTable.name || "Availability Calendar"
+        });
+      });
+    }
+
+    await loadTable();
   } finally {
     document.body.style.visibility = "visible";
   }
