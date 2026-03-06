@@ -467,7 +467,6 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
     document.getElementById("auth-set-password")?.click();
   }
 });
-}
 
   return {
     showAuthOverlay,
