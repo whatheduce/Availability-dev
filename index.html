@@ -3415,13 +3415,39 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
     setAuthMode("signin");
   });
   
-  const authForm = document.getElementById("auth-form");
-    if (authForm) {
-      authForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        document.getElementById("auth-submit")?.click();
+    const authForm = document.getElementById("auth-form");
+      if (authForm) {
+        authForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+      const btn = document.getElementById("auth-submit");
+      if (!btn) return;
+
+        btn.classList.add("is-pressed");
+
+        setTimeout(() => {
+          btn.classList.remove("is-pressed");
+          btn.click();
+        }, 120);
       });
     }
+
+    // Enter key on password field = show button press + submit
+  document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      const btn = document.getElementById("auth-submit");
+      if (!btn) return;
+
+      btn.classList.add("is-pressed");
+
+      setTimeout(() => {
+        btn.classList.remove("is-pressed");
+        btn.click();
+      }, 120);
+    }
+  });
   
   // Auth overlay events (safe even if not used)
   document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
@@ -4485,6 +4511,7 @@ document.addEventListener("DOMContentLoaded", startApp);
   
 </body>
 </html>
+
 
 
 
