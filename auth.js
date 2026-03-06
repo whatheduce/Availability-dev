@@ -78,6 +78,9 @@ function hideAuthOverlay() {
 }
   
 function setAuthMode(mode /* "signin" | "recovery" */) {
+  if (mode === "signin") {
+    authMode = "signin";
+  }
   const form = document.getElementById("auth-form");
   const toggleRow = document.getElementById("auth-toggle-mode")?.parentElement; // the flex row
   const recovery = document.getElementById("auth-recovery");
@@ -145,11 +148,11 @@ async function loadProfile() {
 
   if (!data) return null;
 
-  setUser = {
+  setUser({
     id: au.id,
     name: data.name,
     color: data.color
-  };
+  });
 
   return data;
 }  
