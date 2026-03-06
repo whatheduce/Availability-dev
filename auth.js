@@ -1,3 +1,15 @@
+export function createAuthModule(deps) {
+  const {
+    supabase,
+    showConfirmPopup,
+    loadBoards,
+    loadTable,
+    inviteToken,
+    manageToken,
+    setUser,
+    getUser,
+  } = deps;
+
 let authMode = "signin";
 
 function showAuthOverlay(msg = "", opts = {}) {
@@ -55,6 +67,14 @@ function showAuthOverlay(msg = "", opts = {}) {
   }
 }
 
+function hideAuthOverlay() {
+  const overlay = document.getElementById("auth-overlay");
+  if (overlay) overlay.style.display = "none";
+
+  // ✅ Landing BG should only exist on the auth screen
+  document.body.classList.remove("show-landing-bg");
+}
+  
 function setAuthMode(mode /* "signin" | "recovery" */) {
   const form = document.getElementById("auth-form");
   const toggleRow = document.getElementById("auth-toggle-mode")?.parentElement; // the flex row
@@ -74,14 +94,6 @@ function setAuthMode(mode /* "signin" | "recovery" */) {
   if (subtitle) subtitle.textContent = isRecovery
     ? "Enter a new password to finish resetting your account."
     : "Create an account or sign in to continue.";
-}
-
-function hideAuthOverlay() {
-  const overlay = document.getElementById("auth-overlay");
-  if (overlay) overlay.style.display = "none";
-
-  // ✅ Landing BG should only exist on the auth screen
-  document.body.classList.remove("show-landing-bg");
 }
 
 function resetAuthToFreshSignin() {
@@ -108,10 +120,10 @@ function resetAuthToFreshSignin() {
   if (typeof setAuthMode === "function") setAuthMode("signin");
 }  
 
-async function hydrateUserFromAuth() {
-  const prof = await loadProfile(); // loadProfile already sets global `user`
-  if (!prof || !prof.name || !prof.color) return null;
-  return prof;
+async function getAuthUser() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) return null;
+  return data.user || null;
 }
 
 async function loadProfile() {
@@ -138,97 +150,13 @@ async function loadProfile() {
   };
 
   return data;
-}
-
-async function getAuthUser() {
-  const { data, error } = await supabase.auth.getUser();
-  if (error) return null;
-  return data.user || null;
-}
-
-async function getOrCreateProfile({ name, color }) {
-  const user = await getAuthUser();
-  if (!user) return null;
-
-  // try fetch
-  const { data: existing } = await supabase
-    .from("profiles")
-    .select("user_id, name, color")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existing) return existing;
-
-  // create
-  const { data: created, error } = await supabase
-    .from("profiles")
-    .insert({ user_id: user.id, name, color })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Profile create failed:", error);
-    return null;
-  }
-  return created;
-}
-
-function showProfileSetup() {
-  document.body.style.visibility = "visible";
-
-  const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "none";
-
-  const setup = document.getElementById("profile-setup");
-  if (setup) setup.style.display = "block";
-}
-
-function hideProfileSetup() {
-  const setup = document.getElementById("profile-setup");
-  if (setup) setup.style.display = "none";
-}
-
-async function saveProfileSetup() {
-  const au = await getAuthUser();
-  if (!au) return;
-
-  const name = document.getElementById("setup-name")?.value?.trim();
-  const color = setupSelectedColour;
-
-  if (!name) return alert("Please choose a username.");
-
-  const { error } = await supabase.from("profiles").upsert({
-    user_id: au.id,
-    name,
-    color
-  });
-
-  if (error) return alert(error.message);
-
-  // update in-memory user immediately
-  user = { id: au.id, name, color };
-
-  hideProfileSetup();
-
-    const params = new URLSearchParams(window.location.search);
-    const inviteToken = params.get("t");
-    const manageToken = params.get("m"); // if you use this
-
-    if (inviteToken || manageToken) {
-      await loadTable();
-      return;
-    }
-
-showDashboard();
-await loadBoards();
 }  
-
-function setDashboardSubtitle() {
-  const dashUser = document.getElementById("dash-username");
-  if (dashUser && user?.name) {
-    dashUser.textContent = possessive(user.name).toUpperCase();
-  }
-}  
+  
+async function hydrateUserFromAuth() {
+  const prof = await loadProfile(); // loadProfile already sets global `user`
+  if (!prof || !prof.name || !prof.color) return null;
+  return prof;
+}
 
 async function handleAuthSubmit() {
   const emailEl = document.getElementById("auth-email");
@@ -286,4 +214,268 @@ async function handleAuthSubmit() {
   if (inviteToken || manageToken) {
     await loadTable(); // will now have user set
   }
+}
+
+async function saveProfileSetup() {
+  const au = await getAuthUser();
+  if (!au) return;
+
+  const name = document.getElementById("setup-name")?.value?.trim();
+  const color = setupSelectedColour;
+
+  if (!name) return alert("Please choose a username.");
+
+  const { error } = await supabase.from("profiles").upsert({
+    user_id: au.id,
+    name,
+    color
+  });
+
+  if (error) return alert(error.message);
+
+  // update in-memory user immediately
+  user = { id: au.id, name, color };
+
+  hideProfileSetup();
+
+    const params = new URLSearchParams(window.location.search);
+    const inviteToken = params.get("t");
+    const manageToken = params.get("m"); // if you use this
+
+    if (inviteToken || manageToken) {
+      await loadTable();
+      return;
+    }
+
+showDashboard();
+await loadBoards();
+}  
+  
+function showProfileSetup() {
+  document.body.style.visibility = "visible";
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "block";
+}
+
+function hideProfileSetup() {
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+}
+  
+
+
+
+  
+
+async function getOrCreateProfile({ name, color }) {
+  const user = await getAuthUser();
+  if (!user) return null;
+
+  // try fetch
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing) return existing;
+
+  // create
+  const { data: created, error } = await supabase
+    .from("profiles")
+    .insert({ user_id: user.id, name, color })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Profile create failed:", error);
+    return null;
+  }
+  return created;
+}
+
+
+function setDashboardSubtitle() {
+  const dashUser = document.getElementById("dash-username");
+  if (dashUser && user?.name) {
+    dashUser.textContent = possessive(user.name).toUpperCase();
+  }
+}  
+
+
+function bindAuthUi() {
+    const authForm = document.getElementById("auth-form");
+      if (authForm) {
+        authForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          handleAuthSubmit();
+        });
+      }
+
+document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const btn = document.getElementById("auth-submit");
+        if (!btn) return;
+
+        btn.classList.add("is-pressed");
+        setTimeout(() => {
+          btn.classList.remove("is-pressed");
+        }, 120);
+      }
+    });
+
+document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
+
+  document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
+    // If button is hidden (locked), do nothing
+    const btn = document.getElementById("auth-toggle-mode");
+    if (btn && btn.style.display === "none") return;
+
+    authMode = (authMode === "signin") ? "signup" : "signin";
+    showAuthOverlay();
+    });
+
+document.getElementById("auth-forgot")?.addEventListener("click", async () => {
+  const forgotBtn = document.getElementById("auth-forgot");
+  const email = (document.getElementById("auth-email")?.value || "").trim();
+
+  if (!email) {
+    showConfirmPopup("Enter your email first, then click Forgot password.", {
+      title: "Forgot password",
+    });
+    return;
+  }
+
+  if (forgotBtn) {
+    forgotBtn.disabled = true;
+    forgotBtn.dataset.originalText = forgotBtn.textContent;
+    forgotBtn.textContent = "Sending...";
+  }
+
+  // show immediate feedback modal
+  showConfirmPopup("Sending password reset email...", {
+  title: "Forgot password",
+  showOk: false
+});
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname,
+    });
+
+    if (error) {
+      showConfirmPopup(error.message || "Failed to send reset email.", {
+        title: "Forgot password",
+      });
+      return;
+    }
+
+    showConfirmPopup("Password reset email sent. Check your inbox.", {
+      title: "Forgot password",
+      onOk: () => {
+        resetAuthToFreshSignin();
+      },
+    });
+  } finally {
+    if (forgotBtn) {
+      forgotBtn.disabled = false;
+      forgotBtn.textContent = forgotBtn.dataset.originalText || "Forgot password";
+    }
+  }
+});
+
+document.getElementById("auth-set-password")?.addEventListener("click", async () => {
+  const setBtn = document.getElementById("auth-set-password");
+
+  const p1 = (document.getElementById("auth-new-password")?.value || "").trim();
+  const p2 = (document.getElementById("auth-new-password-confirm")?.value || "").trim();
+
+  if (!p1 || p1.length < 8) {
+    showConfirmPopup("Password must be at least 8 characters.", { title: "Reset password" });
+    setAuthMode("recovery");
+    return;
+  }
+  if (p1 !== p2) {
+    showConfirmPopup("Passwords do not match.", { title: "Reset password" });
+    setAuthMode("recovery");
+    return;
+  }
+
+  // ✅ Tiny UX polish: disable button + show immediate feedback
+  if (setBtn) {
+    setBtn.disabled = true;
+    setBtn.dataset.originalText = setBtn.textContent;
+    setBtn.textContent = "Updating...";
+  }
+
+  showConfirmPopup("Updating your password...", {
+  title: "Reset password",
+  showOk: false
+});
+
+  try {
+    const { error } = await supabase.auth.updateUser({ password: p1 });
+    if (error) {
+      showConfirmPopup(error.message || "Failed to update password.", {
+        title: "Reset password",
+        onOk: () => setAuthMode("recovery"),
+      });
+      return;
+    }
+
+    // ✅ Clean URL/hash so refresh doesn't re-trigger recovery mode
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+
+    // Optional: if you want to force them to sign in again (your current approach)
+    await supabase.auth.signOut();
+
+    showConfirmPopup("Password updated. Please sign in with your new password.", {
+      title: "Reset password",
+      onOk: () => {
+        resetAuthToFreshSignin();
+      },
+    });
+
+    setAuthMode("signin");
+  } finally {
+    // ✅ re-enable button
+    if (setBtn) {
+      setBtn.disabled = false;
+      setBtn.textContent = setBtn.dataset.originalText || "Update password";
+    }
+  }
+});
+
+  document.getElementById("auth-recovery-cancel")?.addEventListener("click", async () => {
+    // Clean hash just in case
+    window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+    setAuthMode("signin");
+  });
+
+document.getElementById("auth-new-password-confirm")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("auth-set-password")?.click();
+  }
+});
+}
+
+  return {
+    showAuthOverlay,
+    hideAuthOverlay,
+    setAuthMode,
+    resetAuthToFreshSignin,
+    getAuthUser,
+    loadProfile,
+    hydrateUserFromAuth,
+    handleAuthSubmit,
+    showProfileSetup,
+    hideProfileSetup,
+    saveProfileSetup,
+    bindAuthUi,
+  };
 }
