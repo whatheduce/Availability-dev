@@ -3134,33 +3134,37 @@ try {
 
 if (error) throw error;
 
-  const au = await auth.getAuthUser();
+const au = await auth.getAuthUser();
 if (au) {
   const { error: inviteSaveErr } = await supabase
     .from("board_invites")
-    .upsert({
-      board_id: boardId,
-      invited_email: email.toLowerCase(),
-      invited_by: au.id,
-    }, {
-      onConflict: "board_id,invited_email"
-    });
+    .upsert(
+      {
+        board_id: boardId,
+        email: email.toLowerCase(),
+        role: "member",
+        created_by: au.id
+      },
+      {
+        onConflict: "board_id,email"
+      }
+    );
 
   if (inviteSaveErr) {
     console.warn("Failed to save invite record:", inviteSaveErr);
   }
 }
-  
-  await renderCalendarInviteStats();
 
-  close();
+await renderCalendarInviteStats();
 
-  await confirmModal({
-    title: "Invite sent",
-    message: `Invite email sent to ${email}.`,
-    okText: "Close",
-    cancelText: ""
-  });
+close();
+
+await confirmModal({
+  title: "Invite sent",
+  message: `Invite email sent to ${email}.`,
+  okText: "Close",
+  cancelText: ""
+});
 
 } catch (err) {
   console.error("Invite send failed:", err);
