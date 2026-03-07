@@ -3152,6 +3152,16 @@ if (!au) {
   }
 }
 
+await renderCalendarInviteStats();
+
+close();
+
+await confirmModal({
+  title: "Invite sent",
+  message: `Invite email sent to ${email}.`,
+  okText: "Close",
+  cancelText: ""
+});
 } catch (err) {
   console.error("Invite send failed:", err);
 
