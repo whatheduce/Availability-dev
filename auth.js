@@ -75,7 +75,6 @@ function hideAuthOverlay() {
   const overlay = document.getElementById("auth-overlay");
   if (overlay) overlay.style.display = "none";
 
-  // ✅ Landing BG should only exist on the auth screen
   document.body.classList.remove("show-landing-bg");
 }
   
