@@ -586,6 +586,21 @@ async function ensureMembership(boardId) {
 
   if (error) {
     console.error("ensureMembership failed:", error);
+    return;
+  }
+
+  // ✅ If this user was invited, mark that invite as accepted
+  if (au.email) {
+    const { error: acceptErr } = await supabase
+      .from("board_invites")
+      .update({ accepted_at: new Date().toISOString() })
+      .eq("board_id", boardId)
+      .eq("email", au.email.toLowerCase().trim())
+      .is("accepted_at", null);
+
+    if (acceptErr) {
+      console.warn("Failed to mark invite accepted:", acceptErr);
+    }
   }
 }
   
@@ -1871,14 +1886,15 @@ async function renderCalendarInviteStats() {
 
   if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
 
-  // x = joined users (owner + joined members)
-  const { count: joinedCount, error: joinedErr } = await supabase
-    .from("board_members")
-    .select("user_id", { count: "exact", head: true })
-    .eq("board_id", currentTable.id);
+  // x = accepted invites + owner
+  const { count: acceptedCount, error: acceptedErr } = await supabase
+    .from("board_invites")
+    .select("id", { count: "exact", head: true })
+    .eq("board_id", currentTable.id)
+    .not("accepted_at", "is", null);
 
-  if (joinedErr) {
-    console.warn("Failed to load joined count:", joinedErr);
+  if (acceptedErr) {
+    console.warn("Failed to load accepted invite count:", acceptedErr);
     wrap.style.display = "none";
     return;
   }
@@ -1895,8 +1911,8 @@ async function renderCalendarInviteStats() {
     return;
   }
 
-  const joined = joinedCount || 0;
-  const total = (inviteCount || 0) + 1; // +1 for owner
+  const joined = (acceptedCount || 0) + 1;
+  const total = (inviteCount || 0) + 1;
 
   joinedEl.textContent = String(joined);
   totalEl.textContent = String(total);
