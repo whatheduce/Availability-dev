@@ -1012,6 +1012,7 @@ await loadAvailability();
 await refreshBoardOwnerFlag();
 renderCalendarNote();
 setCalendarNoteEditing(false);
+await renderCalendarInviteStats();
 }
 
 
@@ -1858,6 +1859,46 @@ function setActiveStructureCard(activeId) {
     if (!el) return;
     el.classList.toggle("active", id === activeId);
   });
+}
+
+
+async function renderCalendarInviteStats() {
+  const wrap = document.getElementById("calendar-invite-stats");
+  const joinedEl = document.getElementById("calendar-invite-joined");
+  const totalEl = document.getElementById("calendar-invite-total");
+
+  if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
+
+  // x = joined users (owner + joined members)
+  const { count: joinedCount, error: joinedErr } = await supabase
+    .from("board_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("board_id", currentTable.id);
+
+  if (joinedErr) {
+    console.warn("Failed to load joined count:", joinedErr);
+    wrap.style.display = "none";
+    return;
+  }
+
+  // y = emails invited + owner
+  const { count: inviteCount, error: inviteErr } = await supabase
+    .from("board_invites")
+    .select("id", { count: "exact", head: true })
+    .eq("board_id", currentTable.id);
+
+  if (inviteErr) {
+    console.warn("Failed to load invite count:", inviteErr);
+    wrap.style.display = "none";
+    return;
+  }
+
+  const joined = joinedCount || 0;
+  const total = (inviteCount || 0) + 1; // +1 for owner
+
+  joinedEl.textContent = String(joined);
+  totalEl.textContent = String(total);
+  wrap.style.display = "block";
 }
 
   
@@ -3079,6 +3120,25 @@ try {
     });
 
 if (error) throw error;
+
+  const au = await auth.getAuthUser();
+if (au) {
+  const { error: inviteSaveErr } = await supabase
+    .from("board_invites")
+    .upsert({
+      board_id: boardId,
+      invited_email: email.toLowerCase(),
+      invited_by: au.id,
+    }, {
+      onConflict: "board_id,invited_email"
+    });
+
+  if (inviteSaveErr) {
+    console.warn("Failed to save invite record:", inviteSaveErr);
+  }
+}
+  
+  await renderCalendarInviteStats();
 
   close();
 
