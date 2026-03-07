@@ -1820,4 +1820,31 @@ body.account-view #dash-account {
 }
 
 
+
+
+
+/* TEMP FORCE MODALS ABOVE EVERYTHING */
+#feedback-modal,
+#invite-modal,
+#confirm-modal,
+#password-modal,
+#colour-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  background: rgba(0,0,0,0.35) !important;
+  z-index: 50000 !important;
+  padding: 20px !important;
+}
+
+#feedback-modal[hidden],
+#invite-modal[hidden],
+#confirm-modal[hidden],
+#password-modal[hidden],
+#colour-modal[hidden] {
+  display: none !important;
+}
+
+
 [hidden] { display: none !important; }
