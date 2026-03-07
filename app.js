@@ -563,32 +563,30 @@ function ensureLegendUser(entry) {
 
 async function ensureMembership(boardId) {
   const au = await auth.getAuthUser();
-  if (!au) return false;
+  console.log("ensureMembership auth user:", au, "boardId:", boardId);
 
-  // if membership already exists, do nothing
-  const { data: existing, error: selErr } = await supabase
-    .from("board_members")
-    .select("role")
-    .eq("board_id", boardId)
-    .eq("user_id", au.id)
-    .maybeSingle();
-
-  if (selErr) {
-    console.warn("ensureMembership select failed:", selErr);
-    // still try insert as a fallback
+  if (!au || !boardId) {
+    console.warn("ensureMembership skipped: missing auth user or boardId");
+    return;
   }
 
-  if (existing) return true;
+  const payload = {
+    board_id: boardId,
+    user_id: au.id
+  };
 
-  const { error } = await supabase
+  console.log("ensureMembership payload:", payload);
+
+  const { data, error } = await supabase
     .from("board_members")
-    .insert({ board_id: boardId, user_id: au.id, role: "member" });
+    .upsert(payload, { onConflict: "board_id,user_id" })
+    .select();
+
+  console.log("ensureMembership result:", data, error);
 
   if (error) {
-    console.warn("ensureMembership insert failed:", error);
-    return false;
+    console.error("ensureMembership failed:", error);
   }
-  return true;
 }
   
   
