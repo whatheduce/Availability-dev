@@ -1990,6 +1990,8 @@ let uiListenersBound = false;
 
 
 function bindUiListenersOnce() {
+  console.log("bindUiListenersOnce started");
+  
   if (uiListenersBound) return;
   uiListenersBound = true;
 
@@ -2713,6 +2715,7 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
       }, 120);
     }
   });
+  console.log("bindUiListenersOnce finished");
 }
 
 
