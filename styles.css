@@ -90,6 +90,14 @@ body.logged-in #landing-bg::after{
       padding: 20px;
     }
 
+.calendar-meta-line{
+  width: 280px;
+  text-align: center;
+  color: #555;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
     .centered-container {
       max-width: 500px;
       margin: 60px auto;
