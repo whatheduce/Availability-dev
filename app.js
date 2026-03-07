@@ -1990,21 +1990,9 @@ let uiListenersBound = false;
 
 
 function bindUiListenersOnce() {
-  console.log("bindUiListenersOnce started");
   
   if (uiListenersBound) return;
   uiListenersBound = true;
-
-
-  
-  try {
-  auth.bindAuthUi();
-  console.log("auth.bindAuthUi ran");
-} catch (err) {
-  console.error("auth.bindAuthUi failed:", err);
-}
-
-
   
   // Dashboard: Create New Calendar (your dashboard button)
   const dashCreate = document.getElementById("create-board-btn");
@@ -2715,7 +2703,6 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
       }, 120);
     }
   });
-  console.log("bindUiListenersOnce finished");
 }
 
 
