@@ -82,13 +82,13 @@ body.logged-in #landing-bg::after{
   opacity: 0;
 }
 
-    #calendar {
-      margin: 18px 0 40px;
-      overflow-x: auto;
-      display: block;
-      min-height: 200px;
-      padding: 20px;
-    }
+#calendar {
+  margin: 18px 0 40px;
+  overflow-x: auto;
+  display: block;
+  min-height: 200px;
+  padding: 20px;
+}
 
 .calendar-meta-line{
   width: 280px;
