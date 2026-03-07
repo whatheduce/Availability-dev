@@ -3129,7 +3129,7 @@ if (!au) {
   console.warn("Invite save skipped: auth.getAuthUser() returned null");
 } else {
   const payload = {
-    board_id: Number(boardId),
+    board_id: boardId,
     email: email.toLowerCase().trim(),
     role: "member",
     created_by: au.id
@@ -3142,10 +3142,15 @@ if (!au) {
     .insert(payload)
     .select();
 
-  console.log("board_invites insert result:", inviteSaveData, inviteSaveErr);
+  console.log("board_invites insert result:", inviteSaveData);
+  console.log("board_invites insert error full:", inviteSaveErr);
+  console.log("board_invites insert error json:", JSON.stringify(inviteSaveErr, null, 2));
 
   if (inviteSaveErr) {
-    console.warn("Failed to save invite record:", inviteSaveErr);
+    console.warn("Failed to save invite record code:", inviteSaveErr.code);
+    console.warn("Failed to save invite record message:", inviteSaveErr.message);
+    console.warn("Failed to save invite record details:", inviteSaveErr.details);
+    console.warn("Failed to save invite record hint:", inviteSaveErr.hint);
   }
 }
 
