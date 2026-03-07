@@ -1993,8 +1993,17 @@ function bindUiListenersOnce() {
   if (uiListenersBound) return;
   uiListenersBound = true;
 
-  auth.bindAuthUi();
 
+  
+  try {
+  auth.bindAuthUi();
+  console.log("auth.bindAuthUi ran");
+} catch (err) {
+  console.error("auth.bindAuthUi failed:", err);
+}
+
+
+  
   // Dashboard: Create New Calendar (your dashboard button)
   const dashCreate = document.getElementById("create-board-btn");
   if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
