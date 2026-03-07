@@ -3132,6 +3132,7 @@ if (!au) {
     board_id: boardId,
     email: email.toLowerCase().trim(),
     role: "member",
+    token_hash: inviteToken,
     created_by: au.id
   };
 
