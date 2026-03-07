@@ -1071,6 +1071,7 @@ function getTimeZoneListPinned() {
   return [detected, ...unique.filter(tz => tz !== detected)];
 }
 
+
 function populateHostTimezoneSelect() {
   const select = document.getElementById("host-timezone");
   if (!select) return;
@@ -1466,6 +1467,7 @@ function hideDeleteAccountOverlay() {
   if (ov) ov.style.display = "none";
 }
 
+
 async function deleteAccountFlow() {
   const au = await auth.getAuthUser();
   if (!au) {
@@ -1522,6 +1524,7 @@ async function deleteAccountFlow() {
     showDeleteAccountOverlay("Network error while deleting account.");
   }
 }
+
 
 // Bind buttons
 document.getElementById("acct-delete-account")?.addEventListener("click", () => {
@@ -1991,6 +1994,8 @@ function bindUiListenersOnce() {
   
   if (uiListenersBound) return;
   uiListenersBound = true;
+
+  auth.bindAuthUi();
   
   // Dashboard: Create New Calendar (your dashboard button)
   const dashCreate = document.getElementById("create-board-btn");
