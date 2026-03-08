@@ -247,16 +247,6 @@ function getLastUpdatedLabel(isoString) {
   return `${diffDay} days ago`;
 }
 
-function renderCalendarLastUpdated() {
-  const wrap = document.getElementById("calendar-last-updated");
-  const value = document.getElementById("calendar-last-updated-value");
-
-  if (!wrap || !value || !currentTable) return;
-
-  value.textContent = getLastUpdatedLabel(currentTable.last_activity_at);
-  wrap.style.display = "block";
-}
-
 
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
