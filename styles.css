@@ -112,6 +112,11 @@ body.logged-in #landing-bg::after{
     align-items: stretch;
   }
 
+  .footer-note--top{
+    width: 100%;
+  }
+}
+
 .calendar-topbar-right{
   display: flex;
   flex-direction: column;
@@ -1567,14 +1572,6 @@ body.account-view #dash-account {
   margin-left: 20px;
 }
 
-.calendar-topbar-right{
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  margin-right: 8%;
-}
-
-/* Optional: tighten spacing on small screens */
 @media (max-width: 520px) {
   .calendar-topbar { padding: 0 16px; }
 }
