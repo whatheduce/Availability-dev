@@ -126,7 +126,6 @@ body.logged-in #landing-bg::after{
 
 #calendar-title-wrap{
   flex: 1;
-  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -137,7 +136,7 @@ body.logged-in #landing-bg::after{
   letter-spacing: -0.02em;
   color: #1f2937;
   padding-top: 24px;
-  transform: translatex(-400px);
+  padding-left: 40px;
 }
 
     .centered-container {
