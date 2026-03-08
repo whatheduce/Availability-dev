@@ -1096,7 +1096,8 @@ setCalendarNoteEditing(false);
 await renderCalendarInviteStats();
 renderGoldThreshold();
 renderCalendarTimezone();
-renderCalendarTitle();
+renderCalendarTitle(); 
+renderCalendarLastUpdated();
 }
 
 
