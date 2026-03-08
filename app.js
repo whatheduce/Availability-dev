@@ -1,6 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createAuthModule } from "./auth.js";
 
+
+
+
 // =========================
 // DEBUG HELPERS
 // =========================
@@ -9,6 +12,9 @@ const DEBUG = false;
 function log(...args) { if (DEBUG) console.log(...args); }
 function warn(...args) { if (DEBUG) console.warn(...args); }
 
+
+
+
 // =========================
 // SUPABASE CREDENTIALS
 // =========================
@@ -16,6 +22,9 @@ function warn(...args) { if (DEBUG) console.warn(...args); }
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+
 
 
 // =========================
@@ -43,37 +52,84 @@ let isBoardOwner = false;
 
 
 
+
+
+// =========================
+// NAVIGATION HELPERS
+// =========================
+
 window.openBoard = function (inviteToken) {
   window.location.href = `${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
 };
 
+//----------
+window.openManageBoard = function (manageToken) {
+  window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
+};
 
-
-async function refreshBoardOwnerFlag() {
-  isBoardOwner = false;
-
-  const au = await auth.getAuthUser();
-  if (!au || !currentTable?.id) return;
-
-  // Primary: owner_id on tables row
-  if (currentTable.owner_id && currentTable.owner_id === au.id) {
-    isBoardOwner = true;
-  } else {
-    // Fallback: board_members role
-    const { data, error } = await supabase
-      .from("board_members")
-      .select("role")
-      .eq("board_id", currentTable.id)
-      .eq("user_id", au.id)
-      .maybeSingle();
-
-    if (!error) isBoardOwner = data?.role === "owner";
-  }
-
-  const editBtn = document.getElementById("footer-edit-btn");
-  if (editBtn) editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
+//----------
+function showDashboard() {
+  document.body.style.visibility = "visible";
+  document.body.classList.remove("show-landing-bg");
+  
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "block";
 }
 
+//----------
+function showCreateBoard() {
+  document.body.style.visibility = "visible";
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const create = document.getElementById("create-board");
+  if (create) create.style.display = "block";
+
+  // Initialize the create flow (resets, hides/reveals buttons, timezones, etc.)
+  if (typeof showBoardSetup === "function") {
+    showBoardSetup();
+  }
+}
+
+//----------
+function showRouteError() {
+  document.body.style.visibility = "visible";
+
+  // Hide other screens
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+  const board = document.getElementById("board-view");
+  if (board) board.style.display = "none";
+
+  // Show error panel
+  const err = document.getElementById("route-error");
+  if (err) err.style.display = "block";
+}
+
+//----------
+function showBoardView() {
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.style.display = "none";
+
+  const board = document.getElementById("board-view"); // or whatever your board container id is
+  if (board) board.style.display = "block";
+
+  document.body.style.visibility = "visible";
+}
+
+
+
+
+
+// =========================
+// GENERAL UI HELPERS
+// =========================
 
 function showConfirmPopup(message, { title = "Notice", onOk, showOk = true } = {}) {
   const overlay = document.getElementById("notice-overlay");
@@ -102,7 +158,99 @@ function showConfirmPopup(message, { title = "Notice", onOk, showOk = true } = {
   };
 }
 
-  
+//----------
+function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "OK", cancelText = "Cancel" } = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("confirm-modal");
+    const titleEl = document.getElementById("confirm-title");
+    const msgEl = document.getElementById("confirm-message");
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+
+    if (!overlay || !titleEl || !msgEl || !okBtn || !cancelBtn) {
+      // Fallback if modal is missing
+      resolve(window.confirm(message));
+      return;
+    }
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    okBtn.textContent = okText;
+    cancelBtn.textContent = cancelText;
+    // Hide cancel button if no cancelText supplied
+      if (!cancelText) {
+        cancelBtn.style.display = "none";
+      } else {
+        cancelBtn.style.display = "";
+      }
+
+    const cleanup = () => {
+      overlay.hidden = true;
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.removeEventListener("click", onOverlayClick, true);
+      okBtn.removeEventListener("click", onOk, true);
+      cancelBtn.removeEventListener("click", onCancel, true);
+    };
+
+    const onOk = (e) => { e.preventDefault(); cleanup(); resolve(true); };
+    const onCancel = (e) => { e.preventDefault(); cleanup(); resolve(false); };
+
+    const onOverlayClick = (e) => {
+      // Clicking outside the card cancels
+      const card = e.target.closest(".modal-card");
+      if (!card) { cleanup(); resolve(false); }
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") { cleanup(); resolve(false); }
+      if (e.key === "Enter") { cleanup(); resolve(true); }
+    };
+
+    overlay.hidden = false;
+
+    document.addEventListener("keydown", onKeyDown, true);
+    overlay.addEventListener("click", onOverlayClick, true);
+    okBtn.addEventListener("click", onOk, true);
+    cancelBtn.addEventListener("click", onCancel, true);
+
+    // Focus the safe option
+    cancelBtn.focus();
+  });
+}
+
+//----------
+function escapeHtml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+//----------
+function possessive(name) {
+  if (!name) return "";
+  const trimmed = name.trim();
+
+  // If the name already ends with "s" → James' Dashboard
+  if (trimmed.toLowerCase().endsWith("s")) {
+    return `${trimmed}'`;
+  }
+
+  return `${trimmed}'s`;
+}
+
+//----------
+function addKey(tableId, day, time, userId) {
+  return `${tableId}|${day}|${time}|${userId}`;
+}
+
+
+// =========================
+// CALENDAR TOPBAR / META HELPERS
+// =========================
+
 function renderCalendarNote() {
   const ta = document.getElementById("footer-note-input");
   if (!ta) return;
@@ -110,7 +258,7 @@ function renderCalendarNote() {
   ta.value = String(currentTable?.calendar_note || "");
 }
 
-  
+//----------
 function setCalendarNoteEditing(on) {
   const ta = document.getElementById("footer-note-input");
   const actions = document.getElementById("footer-note-actions");
@@ -138,7 +286,7 @@ function setCalendarNoteEditing(on) {
   }
 }
 
-
+//----------
 async function saveCalendarNote() {
   if (!isBoardOwner || !currentTable?.id) return;
 
@@ -159,32 +307,8 @@ async function saveCalendarNote() {
   renderCalendarNote();
   setCalendarNoteEditing(false);
 }
-  
-  
-function renderPresence() {
-  const wrap = document.getElementById("presence");
-  const countEl = document.getElementById("presence-count");
-  if (!wrap || !countEl || !presenceChannel) return;
 
-  const state = presenceChannel.presenceState(); // { key: [metas...] }
-  const metas = Object.values(state).flat();
-  const uniqueUsers = new Map();
-
-  metas.forEach(m => {
-    // de-dupe by user_id (a user can have multiple metas if multiple tabs)
-    if (m.user_id) uniqueUsers.set(m.user_id, m);
-  });
-
-  wrap.style.display = "block";
-  countEl.textContent = String(uniqueUsers.size || 0);
-}
-
-
-function addKey(tableId, day, time, userId) {
-  return `${tableId}|${day}|${time}|${userId}`;
-}
-  
-
+//----------
 function renderGoldThreshold() {
   const wrap = document.getElementById("calendar-gold-threshold");
   const value = document.getElementById("calendar-gold-value");
@@ -195,7 +319,7 @@ function renderGoldThreshold() {
   wrap.style.display = "block";
 }
 
-
+//----------
 function renderCalendarTimezone() {
   const wrap = document.getElementById("calendar-timezone");
   const value = document.getElementById("calendar-timezone-value");
@@ -206,7 +330,7 @@ function renderCalendarTimezone() {
   wrap.style.display = "block";
 }
 
-
+//----------
 function renderCalendarTitle() {
   const el = document.getElementById("calendar-title");
   if (!el || !currentTable) return;
@@ -214,7 +338,7 @@ function renderCalendarTitle() {
   el.textContent = currentTable.name || "Calendar";
 }
 
-
+//----------
 function renderCalendarLastUpdated() {
   const wrap = document.getElementById("calendar-last-updated");
   const value = document.getElementById("calendar-last-updated-value");
@@ -225,7 +349,7 @@ function renderCalendarLastUpdated() {
   wrap.style.display = "block";
 }
 
-
+//----------
 function getLastUpdatedLabel(isoString) {
   if (!isoString) return "—";
 
@@ -250,7 +374,7 @@ function getLastUpdatedLabel(isoString) {
   return `${diffDay} days ago`;
 }
 
-
+//----------
 async function refreshCurrentTableMeta() {
   if (!currentTable?.id) return;
 
@@ -265,98 +389,258 @@ async function refreshCurrentTableMeta() {
   currentTable = { ...currentTable, ...data };
 }
 
+//----------
+async function renderCalendarInviteStats() {
+  const wrap = document.getElementById("calendar-invite-stats");
+  const joinedEl = document.getElementById("calendar-invite-joined");
+  const totalEl = document.getElementById("calendar-invite-total");
 
-function scheduleFullRefreshIdle(ms = 15000) {
-  clearTimeout(fullRefreshTimer);
-  fullRefreshTimer = setTimeout(async () => {
-    if (!currentTable) return;
+  if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
 
-    await loadAvailability();
-    await refreshCurrentTableMeta();
-    renderCalendarLastUpdated();
-  }, ms);
-}
+  // x = accepted invites + owner
+  const { count: acceptedCount, error: acceptedErr } = await supabase
+    .from("board_invites")
+    .select("id", { count: "exact", head: true })
+    .eq("board_id", currentTable.id)
+    .not("accepted_at", "is", null);
 
-
-function ensureDotContainer(cell) {
-  let dc = cell.querySelector(".dot-container");
-  if (!dc) {
-    dc = document.createElement("div");
-    dc.className = "dot-container";
-    cell.appendChild(dc);
+  if (acceptedErr) {
+    console.warn("Failed to load accepted invite count:", acceptedErr);
+    wrap.style.display = "none";
+    return;
   }
-  return dc;
+
+  // y = emails invited + owner
+  const { count: inviteCount, error: inviteErr } = await supabase
+    .from("board_invites")
+    .select("id", { count: "exact", head: true })
+    .eq("board_id", currentTable.id);
+
+  if (inviteErr) {
+    console.warn("Failed to load invite count:", inviteErr);
+    wrap.style.display = "none";
+    return;
+  }
+
+  const joined = (acceptedCount || 0) + 1;
+  const total = (inviteCount || 0) + 1;
+
+  joinedEl.textContent = String(joined);
+  totalEl.textContent = String(total);
+  wrap.style.display = "block";
+}
+
+//----------
+async function refreshBoardOwnerFlag() {
+  isBoardOwner = false;
+
+  const au = await auth.getAuthUser();
+  if (!au || !currentTable?.id) return;
+
+  // Primary: owner_id on tables row
+  if (currentTable.owner_id && currentTable.owner_id === au.id) {
+    isBoardOwner = true;
+  } else {
+    // Fallback: board_members role
+    const { data, error } = await supabase
+      .from("board_members")
+      .select("role")
+      .eq("board_id", currentTable.id)
+      .eq("user_id", au.id)
+      .maybeSingle();
+
+    if (!error) isBoardOwner = data?.role === "owner";
+  }
+
+  const editBtn = document.getElementById("footer-edit-btn");
+  if (editBtn) editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
 }
 
 
-function addOptimisticDot(cell, userId, name, color) {
-  const dc = ensureDotContainer(cell);
 
-  // already there?
-  if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
 
-  const dot = document.createElement("div");
-  dot.className = "dot";
-  dot.dataset.userId = userId;
-  dot.dataset.name = name || "—";
-  dot.title = name || "—";
-  dot.style.background = color || "#999";
 
-  // mark as pending so we can remove if DB fails
-  dot.dataset.pending = "1";
+// =========================
+// PRESENCE / LEGEND HELPERS
+// =========================
 
-  dc.appendChild(dot);
+function renderPresence() {
+  const wrap = document.getElementById("presence");
+  const countEl = document.getElementById("presence-count");
+  if (!wrap || !countEl || !presenceChannel) return;
+
+  const state = presenceChannel.presenceState(); // { key: [metas...] }
+  const metas = Object.values(state).flat();
+  const uniqueUsers = new Map();
+
+  metas.forEach(m => {
+    // de-dupe by user_id (a user can have multiple metas if multiple tabs)
+    if (m.user_id) uniqueUsers.set(m.user_id, m);
+  });
+
+  wrap.style.display = "block";
+  countEl.textContent = String(uniqueUsers.size || 0);
+}
+
+//----------
+function subscribePresence() {
+  if (!currentTable) return;
+
+  // Clean up if re-subscribing
+  if (presenceChannel) supabase.removeChannel(presenceChannel);
+
+  // Ensure we have some identity to track
+  const safeUserId = user?.id;
+  if (!safeUserId) return; // no auth user yet, don’t track presence
+  if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
+
+  const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
+
+  presenceChannel = supabase
+    .channel(`presence:${currentTable.id}`, {
+      config: { presence: { key: safeUserId } }
+    })
+    .on("presence", { event: "sync" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "join" }, () => {
+      renderPresence();
+    })
+    .on("presence", { event: "leave" }, () => {
+      renderPresence();
+    })
+    .subscribe(async (status) => {
+      // helpful during dev
+      log("presence channel:", status);
+
+      if (status === "SUBSCRIBED") {
+        await presenceChannel.track({
+          user_id: safeUserId,
+          name: safeName,
+          at: new Date().toISOString()
+        });
+      }
+    });
+}
+
+//----------
+function ensureLegendUser(entry) {
+  if (!entry) return;
+  const key = entry.user_id || entry.name;
+  if (!key) return;
+
+  // already present?
+  const existing = legendList.querySelector(
+    entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
+                  : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
+  );
+  if (existing) return;
+
+  const div = document.createElement("div");
+  div.className = "legend-item";
+  if (entry.user_id) div.dataset.userId = entry.user_id;
+  if (entry.name) div.dataset.name = entry.name;
+
+  div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
+  legendList.appendChild(div);
+}
+
+
+
+
+
+// =========================
+// IDENTITY / PROFILE HELPERS
+// =========================
+
+function buildUserFromStorage() {
+  const name = localStorage.getItem("globalUserName");
+  const color = localStorage.getItem("globalUserColor");
+  if (!name || !color) return null;
+
+  return {
+    id: getOrCreateUserId(),
+    name,
+    color
+  };
+}
+
+//----------
+function getOrCreateUserId() {
+  let id = localStorage.getItem("globalUserId");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("globalUserId", id);
+  }
+  return id;
+}
+
+//----------
+async function fetchProfilesMap(userIds) {
+  const ids = Array.from(new Set((userIds || []).filter(Boolean)));
+  if (ids.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .in("user_id", ids);
+
+  if (error) {
+    console.warn("fetchProfilesMap failed:", error);
+    return {};
+  }
+
+  const map = {};
+  (data || []).forEach(p => { map[p.user_id] = p; });
+  return map;
+}
+
+//----------
+async function getProfileCached(userId) {
+  if (!userId) return null;
+  if (profilesCache[userId]) return profilesCache[userId];
+
+  const map = await fetchProfilesMap([userId]);
+  profilesCache = { ...profilesCache, ...map };
+  return profilesCache[userId] || null;
 }  
 
+//----------
+async function ensureMembership(boardId) {
+  const au = await auth.getAuthUser();
 
-function maybeApplyGoldForCell(cell) {
-  const th = Number(currentTable?.gold_threshold || 0);
-  if (!th || th <= 0) return;
+  if (!au || !boardId) return;
 
-  // If already gold, nothing to do
-  if (cell.classList.contains("gold-cell")) return;
+  const payload = {
+    board_id: boardId,
+    user_id: au.id
+  };
 
-  const dc = cell.querySelector(".dot-container");
-  const count = dc ? dc.querySelectorAll(".dot").length : 0;
+  const { data, error } = await supabase
+    .from("board_members")
+    .upsert(payload, { onConflict: "board_id,user_id" })
+    .select();
 
-  if (count >= th) {
-    cell.classList.add("gold-cell");
-
-    // Gold cells hide dots in your UI
-    dc?.remove();
+  if (error) {
+    console.error("ensureMembership failed:", error);
+    return;
   }
-}  
-  
-  
-function showCreateBoard() {
-  document.body.style.visibility = "visible";
 
-  const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "none";
+  if (au.email) {
+    const { error: acceptErr } = await supabase
+      .from("board_invites")
+      .update({ accepted_at: new Date().toISOString() })
+      .eq("board_id", boardId)
+      .eq("email", au.email.toLowerCase().trim())
+      .is("accepted_at", null);
 
-  const create = document.getElementById("create-board");
-  if (create) create.style.display = "block";
-
-  // Initialize the create flow (resets, hides/reveals buttons, timezones, etc.)
-  if (typeof showBoardSetup === "function") {
-    showBoardSetup();
+    if (acceptErr) {
+      console.warn("Failed to mark invite accepted:", acceptErr);
+    }
   }
 }
 
-  
-function possessive(name) {
-  if (!name) return "";
-  const trimmed = name.trim();
-
-  // If the name already ends with "s" → James' Dashboard
-  if (trimmed.toLowerCase().endsWith("s")) {
-    return `${trimmed}'`;
-  }
-
-  return `${trimmed}'s`;
-}
-
-  
+//----------
 async function getBoardColorMap(boardId) {
   // 1) Get member user_ids for this board
   const { data: members, error: memErr } = await supabase
@@ -390,8 +674,15 @@ async function getBoardColorMap(boardId) {
   });
   return map;
 }
-  
-  
+
+
+
+
+
+// =========================
+// TIMEZONE / DATE HELPERS
+// =========================
+
 async function loadTimezonesIntoSelect(selectEl) {
   if (!selectEl) return;
 
@@ -445,254 +736,177 @@ async function loadTimezonesIntoSelect(selectEl) {
     selectEl.dispatchEvent(new Event("change", { bubbles: true }));
   }
 }
-  
-  
 
-
-
-
-
-
-function showRouteError() {
-  document.body.style.visibility = "visible";
-
-  // Hide other screens
-  const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "none";
-  const setup = document.getElementById("profile-setup");
-  if (setup) setup.style.display = "none";
-  const board = document.getElementById("board-view");
-  if (board) board.style.display = "none";
-
-  // Show error panel
-  const err = document.getElementById("route-error");
-  if (err) err.style.display = "block";
+//----------
+function getDetectedTimeZone() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 }
-  
-  
-async function rollForwardIfNeeded(tableId) {
-  const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
-    p_table_id: tableId
+
+//----------
+function yyyyMmDdInTimeZone(date, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+
+  const y = parts.find(p => p.type === "year").value;
+  const m = parts.find(p => p.type === "month").value;
+  const d = parts.find(p => p.type === "day").value;
+  return `${y}-${m}-${d}`; // YYYY-MM-DD
+}
+
+//----------  
+function getTimeZoneListPinned() {
+  const detected = getDetectedTimeZone();
+
+  // Best case: browser can list all IANA time zones
+  if (Intl.supportedValuesOf) {
+    const all = Intl.supportedValuesOf("timeZone");
+    // Put detected first, then the rest alphabetically
+    return [detected, ...all.filter(tz => tz !== detected).sort()];
+  }
+
+  // Fallback: small curated list + detected pinned
+  const fallback = [
+    "UTC",
+    "Australia/Brisbane",
+    "Australia/Sydney",
+    "Australia/Melbourne",
+    "Australia/Perth",
+    "Pacific/Auckland",
+    "America/Los_Angeles",
+    "America/New_York",
+    "Europe/London",
+    "Europe/Paris",
+    "Asia/Singapore",
+    "Asia/Tokyo"
+  ];
+
+  const unique = Array.from(new Set([detected, ...fallback]));
+  return [detected, ...unique.filter(tz => tz !== detected)];
+}
+
+//----------
+function populateHostTimezoneSelect() {
+  const select = document.getElementById("host-timezone");
+  if (!select) return;
+
+  const tzs = getTimeZoneListPinned();
+  select.innerHTML = "";
+
+  tzs.forEach((tz, idx) => {
+    const opt = document.createElement("option");
+    opt.value = tz;
+    opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
+    select.appendChild(opt);
   });
 
-  if (error) {
-    console.error("roll_board_if_needed failed:", error);
-    return 0;
-  }
-
-  return data || 0;
+  select.value = tzs[0];
 }
 
-  
-
-  
-
-async function loadBoards() {
-  const au = await auth.getAuthUser();
-
-  const { data, error } = await supabase
-    .from("board_members")
-    .select(`
-      role,
-      board_id,
-      tables (
-        id,
-        name,
-        invite_token,
-        owner_token,
-        row_structure,
-        start_date,
-        host_tz,
-        gold_threshold
-      )
-    `)
-    .eq("user_id", au.id);
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  const owned = (data || []).filter(x => x.role === "owner");
-  const joined = (data || []).filter(x => x.role !== "owner");
-
-  const ownedEl = document.getElementById("owned-boards");
-  const joinedEl = document.getElementById("joined-boards");
-
-  // Hosted
-  if (!owned.length) {
-    ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
-  } else {
-    ownedEl.innerHTML = owned.map(b => `
-      <div
-        class="board-pill board-pill--square"
-        data-kind="hosted"
-        data-board-id="${b.tables.id}"
-        data-invite-token="${b.tables.invite_token}"
-        onclick="openManageBoard('${b.tables.owner_token}')"
-      >
-        <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
-
-        <div class="board-actions-menu" hidden>
-          <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
-          <button class="board-actions-item" type="button" data-action="delete">Delete</button>
-        </div>
-
-        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
-        <div class="board-preview" data-board-id="${b.tables.id}"></div>
-        <div class="board-pill-meta">Hosted</div>
-      </div>
-    `).join("");
-  }
-
-  // Joined (same look as hosted, no actions menu)
-  if (!joined.length) {
-    joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
-  } else {
-    joinedEl.innerHTML = joined.map(b => `
-        <div 
-    class="board-pill board-pill--square"
-    data-kind="joined"
-    data-board-id="${b.tables.id}"
-    data-invite-token="${b.tables.invite_token}"
-    onclick="openBoard('${b.tables.invite_token}')"
-  >
-    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
-
-    <div class="board-actions-menu" hidden>
-      <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
-    </div>
-
-    <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
-    <div class="board-preview" data-board-id="${b.tables.id}"></div>
-    <div class="board-pill-meta">Joined</div>
-  </div>
-`).join("");
-  }
-
-  // Render previews for both hosted + joined
-  const allBoards = [...owned, ...joined];
-  if (allBoards.length) renderBoardPreviews(allBoards);
+//----------
+function parseYMD(ymd) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return { y, m, d };
 }
 
-window.openManageBoard = function (manageToken) {
-  window.location.href = `${window.location.pathname}?m=${encodeURIComponent(manageToken)}`;
-};
-  
-  
-
-
-  
-
-
-  
-function showDashboard() {
-  document.body.style.visibility = "visible";
-  document.body.classList.remove("show-landing-bg");
-  
-  const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "block";
-}
-  
-
-function subscribePresence() {
-  if (!currentTable) return;
-
-  // Clean up if re-subscribing
-  if (presenceChannel) supabase.removeChannel(presenceChannel);
-
-  // Ensure we have some identity to track
-  const safeUserId = user?.id;
-  if (!safeUserId) return; // no auth user yet, don’t track presence
-  if (!localStorage.getItem("globalUserId")) localStorage.setItem("globalUserId", safeUserId);
-
-  const safeName = user?.name || localStorage.getItem("globalUserName") || "Guest";
-
-  presenceChannel = supabase
-    .channel(`presence:${currentTable.id}`, {
-      config: { presence: { key: safeUserId } }
-    })
-    .on("presence", { event: "sync" }, () => {
-      renderPresence();
-    })
-    .on("presence", { event: "join" }, () => {
-      renderPresence();
-    })
-    .on("presence", { event: "leave" }, () => {
-      renderPresence();
-    })
-    .subscribe(async (status) => {
-      // helpful during dev
-      log("presence channel:", status);
-
-      if (status === "SUBSCRIBED") {
-        await presenceChannel.track({
-          user_id: safeUserId,
-          name: safeName,
-          at: new Date().toISOString()
-        });
-      }
-    });
+//----------
+function addDaysYMD(startYmd, offsetDays) {
+  const { y, m, d } = parseYMD(startYmd);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + offsetDays);
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
 }
 
-  
-function ensureLegendUser(entry) {
-  if (!entry) return;
-  const key = entry.user_id || entry.name;
-  if (!key) return;
-
-  // already present?
-  const existing = legendList.querySelector(
-    entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
-                  : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
-  );
-  if (existing) return;
-
-  const div = document.createElement("div");
-  div.className = "legend-item";
-  if (entry.user_id) div.dataset.userId = entry.user_id;
-  if (entry.name) div.dataset.name = entry.name;
-
-  div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
-  legendList.appendChild(div);
+//----------  
+function formatHeaderLabel(ymd) {
+  const { y, m, d } = parseYMD(ymd);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  const weekday = dt.toLocaleDateString("en-AU", { weekday: "short", timeZone: "UTC" });
+  const month = dt.toLocaleDateString("en-AU", { month: "short", timeZone: "UTC" });
+  return { weekday, monthDay: `${d} ${month}` };
 }
 
+//----------
+function getWeekdayLabels7(timeZone) {
+  const base = new Date(); // "now"
+  const fmt = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    timeZone: timeZone || undefined
+  });
 
-async function ensureMembership(boardId) {
-  const au = await auth.getAuthUser();
-
-  if (!au || !boardId) return;
-
-  const payload = {
-    board_id: boardId,
-    user_id: au.id
-  };
-
-  const { data, error } = await supabase
-    .from("board_members")
-    .upsert(payload, { onConflict: "board_id,user_id" })
-    .select();
-
-  if (error) {
-    console.error("ensureMembership failed:", error);
-    return;
-  }
-
-  if (au.email) {
-    const { error: acceptErr } = await supabase
-      .from("board_invites")
-      .update({ accepted_at: new Date().toISOString() })
-      .eq("board_id", boardId)
-      .eq("email", au.email.toLowerCase().trim())
-      .is("accepted_at", null);
-
-    if (acceptErr) {
-      console.warn("Failed to mark invite accepted:", acceptErr);
+    const labels = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      labels.push(fmt.format(d));
     }
-  }
+    return labels;
 }
-  
-  
+
+
+
+
+
+// =========================
+// CALENDAR CELL / DOT HELPERS
+// =========================
+
+function ensureDotContainer(cell) {
+  let dc = cell.querySelector(".dot-container");
+  if (!dc) {
+    dc = document.createElement("div");
+    dc.className = "dot-container";
+    cell.appendChild(dc);
+  }
+  return dc;
+}
+
+//----------
+function addOptimisticDot(cell, userId, name, color) {
+  const dc = ensureDotContainer(cell);
+
+  // already there?
+  if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
+
+  const dot = document.createElement("div");
+  dot.className = "dot";
+  dot.dataset.userId = userId;
+  dot.dataset.name = name || "—";
+  dot.title = name || "—";
+  dot.style.background = color || "#999";
+
+  // mark as pending so we can remove if DB fails
+  dot.dataset.pending = "1";
+
+  dc.appendChild(dot);
+}  
+
+//----------
+function maybeApplyGoldForCell(cell) {
+  const th = Number(currentTable?.gold_threshold || 0);
+  if (!th || th <= 0) return;
+
+  // If already gold, nothing to do
+  if (cell.classList.contains("gold-cell")) return;
+
+  const dc = cell.querySelector(".dot-container");
+  const count = dc ? dc.querySelectorAll(".dot").length : 0;
+
+  if (count >= th) {
+    cell.classList.add("gold-cell");
+
+    // Gold cells hide dots in your UI
+    dc?.remove();
+  }
+}  
+
+//----------
 async function rebuildDotsForCell(cell) {
   if (!currentTable) return;
 
@@ -742,7 +956,7 @@ async function rebuildDotsForCell(cell) {
   cell.appendChild(dotContainer);
 }
 
-  
+//----------
 async function applyGoldStateForCell(cell, day) {
   const goldThreshold = Number(currentTable?.gold_threshold);
   if (!Number.isFinite(goldThreshold)) return;
@@ -800,8 +1014,27 @@ async function applyGoldStateForCell(cell, day) {
   if (anyGoldInDay) th.classList.add("gold-header");
   else th.classList.remove("gold-header");
 }
-  
-  
+
+
+
+
+
+// =========================
+// REALTIME / REFRESH
+// =========================
+
+function scheduleFullRefreshIdle(ms = 15000) {
+  clearTimeout(fullRefreshTimer);
+  fullRefreshTimer = setTimeout(async () => {
+    if (!currentTable) return;
+
+    await loadAvailability();
+    await refreshCurrentTableMeta();
+    renderCalendarLastUpdated();
+  }, ms);
+}
+
+//----------
 async function handleAvailabilityChange(payload) {
   const entry =
     payload.eventType === "DELETE"
@@ -918,7 +1151,7 @@ async function handleAvailabilityChange(payload) {
   scheduleFullRefreshIdle(15000);
 }
   
-  
+//----------  
 function subscribeRealtime() {
   if (!currentTable) return;
 
@@ -977,40 +1210,117 @@ function subscribeRealtime() {
     });
 }
 
-  
-function populateGoldThresholdSelect(isPro) {
-  const sel = document.getElementById("gold-threshold");
-  if (!sel) return;
 
-  // clear existing (keep the placeholder)
-  sel.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
 
-  for (let n = 1; n <= 30; n++) {
-    const opt = document.createElement("option");
-    opt.value = String(n);
-    opt.textContent = `${n}`;
 
-    // Free: 1–5 enabled, 6–30 disabled
-    if (!isPro && n >= 6) opt.disabled = true;
 
-    sel.appendChild(opt);
+// =========================
+// BOARD / TABLE DATA LOADING
+// =========================
+
+async function rollForwardIfNeeded(tableId) {
+  const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
+    p_table_id: tableId
+  });
+
+  if (error) {
+    console.error("roll_board_if_needed failed:", error);
+    return 0;
   }
+
+  return data || 0;
 }
 
-  
-function buildUserFromStorage() {
-  const name = localStorage.getItem("globalUserName");
-  const color = localStorage.getItem("globalUserColor");
-  if (!name || !color) return null;
+//----------  
+async function loadBoards() {
+  const au = await auth.getAuthUser();
 
-  return {
-    id: getOrCreateUserId(),
-    name,
-    color
-  };
+  const { data, error } = await supabase
+    .from("board_members")
+    .select(`
+      role,
+      board_id,
+      tables (
+        id,
+        name,
+        invite_token,
+        owner_token,
+        row_structure,
+        start_date,
+        host_tz,
+        gold_threshold
+      )
+    `)
+    .eq("user_id", au.id);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const owned = (data || []).filter(x => x.role === "owner");
+  const joined = (data || []).filter(x => x.role !== "owner");
+
+  const ownedEl = document.getElementById("owned-boards");
+  const joinedEl = document.getElementById("joined-boards");
+
+  // Hosted
+  if (!owned.length) {
+    ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
+  } else {
+    ownedEl.innerHTML = owned.map(b => `
+      <div
+        class="board-pill board-pill--square"
+        data-kind="hosted"
+        data-board-id="${b.tables.id}"
+        data-invite-token="${b.tables.invite_token}"
+        onclick="openManageBoard('${b.tables.owner_token}')"
+      >
+        <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+
+        <div class="board-actions-menu" hidden>
+          <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
+          <button class="board-actions-item" type="button" data-action="delete">Delete</button>
+        </div>
+
+        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
+        <div class="board-preview" data-board-id="${b.tables.id}"></div>
+        <div class="board-pill-meta">Hosted</div>
+      </div>
+    `).join("");
+  }
+
+  // Joined (same look as hosted, no actions menu)
+  if (!joined.length) {
+    joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
+  } else {
+    joinedEl.innerHTML = joined.map(b => `
+        <div 
+    class="board-pill board-pill--square"
+    data-kind="joined"
+    data-board-id="${b.tables.id}"
+    data-invite-token="${b.tables.invite_token}"
+    onclick="openBoard('${b.tables.invite_token}')"
+  >
+    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+
+    <div class="board-actions-menu" hidden>
+      <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
+    </div>
+
+    <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
+    <div class="board-preview" data-board-id="${b.tables.id}"></div>
+    <div class="board-pill-meta">Joined</div>
+  </div>
+`).join("");
+  }
+
+  // Render previews for both hosted + joined
+  const allBoards = [...owned, ...joined];
+  if (allBoards.length) renderBoardPreviews(allBoards);
 }
 
-  
+//----------  
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
 
@@ -1130,583 +1440,7 @@ renderCalendarTitle();
 renderCalendarLastUpdated();
 }
 
-
-  function generateToken() {
-  return crypto.randomUUID() + crypto.randomUUID();
-}
-
-
-function getDetectedTimeZone() {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-}
-
-
-function yyyyMmDdInTimeZone(date, timeZone) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(date);
-
-  const y = parts.find(p => p.type === "year").value;
-  const m = parts.find(p => p.type === "month").value;
-  const d = parts.find(p => p.type === "day").value;
-  return `${y}-${m}-${d}`; // YYYY-MM-DD
-}
-
-  
-function getTimeZoneListPinned() {
-  const detected = getDetectedTimeZone();
-
-  // Best case: browser can list all IANA time zones
-  if (Intl.supportedValuesOf) {
-    const all = Intl.supportedValuesOf("timeZone");
-    // Put detected first, then the rest alphabetically
-    return [detected, ...all.filter(tz => tz !== detected).sort()];
-  }
-
-  // Fallback: small curated list + detected pinned
-  const fallback = [
-    "UTC",
-    "Australia/Brisbane",
-    "Australia/Sydney",
-    "Australia/Melbourne",
-    "Australia/Perth",
-    "Pacific/Auckland",
-    "America/Los_Angeles",
-    "America/New_York",
-    "Europe/London",
-    "Europe/Paris",
-    "Asia/Singapore",
-    "Asia/Tokyo"
-  ];
-
-  const unique = Array.from(new Set([detected, ...fallback]));
-  return [detected, ...unique.filter(tz => tz !== detected)];
-}
-
-
-function populateHostTimezoneSelect() {
-  const select = document.getElementById("host-timezone");
-  if (!select) return;
-
-  const tzs = getTimeZoneListPinned();
-  select.innerHTML = "";
-
-  tzs.forEach((tz, idx) => {
-    const opt = document.createElement("option");
-    opt.value = tz;
-    opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
-    select.appendChild(opt);
-  });
-
-  select.value = tzs[0];
-}
-
-  
-async function createBoard() {
-    // Gold threshold (now selected on the Name Your Calendar screen)
-  const goldSelect =
-    document.getElementById("gold-threshold") ||
-    document.getElementById("gold-threshold-select") ||
-    document.getElementById("goldThreshold") ||
-    document.querySelector('select[data-gold-threshold]');
-
-  const goldThreshold = parseInt(goldSelect?.value || "", 10) || 2;
-  const au = await auth.getAuthUser();
-    if (!au) {
-      auth.showAuthOverlay("Please sign in before creating a calendar.");
-      return;
-    }
-  const nameInput = document.getElementById("board-name");
-  const name = nameInput.value.trim();
-
-  if (!name) {
-    alert("Please enter a board name");
-    return;
-  }
-
-  let timeBlocks = [];
-
-const structureChoice = selectedStructure || "custom";
-
-if (structureChoice === "custom") {
-  const rowInputs = document.querySelectorAll("#rows-container input");
-
-  rowInputs.forEach(input => {
-    const value = input.value.trim();
-    if (value) {
-      timeBlocks.push({ label: value });
-    }
-  });
-
-  if (timeBlocks.length === 0) {
-    alert("Please add at least one time block");
-    return;
-  }
-} else {
-  timeBlocks = PREBUILT_STRUCTURES[structureChoice];
-}
-
-  if (timeBlocks.length === 0) {
-    alert("Please add at least one time block");
-    return;
-  }
-
-  const inviteToken = generateToken();
-  const ownerToken = generateToken();
-  const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
-  const startDate = yyyyMmDdInTimeZone(new Date(), tz);
-  
-  // --- Gold threshold (required) ---
-  const goldRaw = document.getElementById("gold-threshold")?.value || "";
-    if (!goldRaw) {
-      const gold = parseInt(goldSelect.value, 10);
-    }
-
-    // TEMP: until you implement real Pro accounts
-    const isPro = false;
-
-    if (!Number.isFinite(goldThreshold) || goldThreshold < 1 || goldThreshold > 30) {
-      alert("Gold threshold must be between 1 and 30.");
-      return;
-    }
-if (!isPro && goldThreshold >= 6) {
-  alert("Free version allows gold threshold up to 5.");
-  return;
-}
-
-  const { error } = await supabase
-    .from("tables")
-    .insert([{
-      name,
-      invite_token: inviteToken,
-      owner_token: ownerToken,
-      owner_id: au.id,
-      row_structure: timeBlocks,
-      host_tz: tz,
-      start_date: startDate,
-      gold_threshold: goldThreshold
-    }])
-
-  if (error) {
-    console.error("Error creating board:", error);
-    return;
-  }
-
-  const { data: created, error: fetchErr } = await supabase
-  .from("tables")
-  .select("id")
-  .eq("invite_token", inviteToken)
-  .single();
-
-if (fetchErr || !created) {
-  console.error("Board insert succeeded but could not fetch id. Check SELECT RLS on tables.", fetchErr);
-  return;
-}
-
-  const { error: bmErr } = await supabase
-  .from("board_members")
-  .upsert(
-    {
-      board_id: created.id,
-      user_id: au.id,
-      role: "owner"
-    },
-    { onConflict: "board_id,user_id" }
-  );
-
-if (bmErr) {
-  console.warn("board_members owner upsert failed:", bmErr);
-}
-  
-  localStorage.setItem("lastBoardToken", inviteToken);
-  // keep invite token for “share link” / last joined link if you want
-localStorage.setItem("lastBoardToken", inviteToken);
-
-// add this so “last opened as owner” is possible later
-localStorage.setItem("lastBoardManageToken", ownerToken);
-
-// ✅ open as owner after create
-window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
-}
-
-  
-/* DOM refs */
-const table = document.getElementById("availabilityTable");
-const legendDiv = document.getElementById("legend");
-const legendList = document.getElementById("legendList");
-
-let user = null;
-
-const getUser = () => user;
-const setUser = (nextUser) => { user = nextUser; };
-
-const auth = createAuthModule({
-  supabase,
-  showConfirmPopup,
-  loadBoards,
-  loadTable,
-  showDashboard,
-  inviteToken,
-  manageToken,
-  setUser,
-  getUser,
-  getSetupSelectedColour: () => setupSelectedColour,
-  possessive,
-});
-
-
-async function toggleCell(e) {
-  if (!user || !currentTable) return;
-
-  let k; // ✅ so finally can always see it
-
-  try {
-    const cell = e.currentTarget;
-    if (!cell) return;
-
-    // normalize values
-    const dayNum = parseInt(cell.dataset.day, 10);
-    const timeKey = String(cell.dataset.time || "").trim();
-    if (!Number.isFinite(dayNum) || !timeKey) return;
-
-    const au = await auth.getAuthUser();
-    if (!au) return;
-    const myUid = au.id;
-
-    k = addKey(currentTable.id, dayNum, timeKey, myUid);
-    if (inFlightCells.has(k)) return;
-    inFlightCells.add(k);
-
-    await ensureMembership(currentTable.id);
-
-    // DELETE FIRST (toggle off)
-    const { error: delErr, count: deletedCount } = await supabase
-      .from("availability_dev")
-      .delete({ count: "exact" })
-      .eq("table_id", currentTable.id)
-      .eq("day", dayNum)
-      .eq("time", timeKey)
-      .eq("user_id", myUid);
-
-    if (delErr) {
-      console.warn("Delete failed:", delErr);
-      await loadAvailability();
-      return;
-    }
-
-    // legacy delete if needed
-    let legacyDeletedCount = 0;
-    if ((deletedCount || 0) === 0) {
-      const { error: legacyErr, count: legacyCount } = await supabase
-        .from("availability_dev")
-        .delete({ count: "exact" })
-        .eq("table_id", currentTable.id)
-        .eq("day", dayNum)
-        .eq("time", timeKey)
-        .is("user_id", null)
-        .eq("name", user.name)
-        .eq("color", user.color);
-
-      if (legacyErr) {
-        console.warn("Legacy delete failed:", legacyErr);
-        await loadAvailability();
-        return;
-      }
-
-      legacyDeletedCount = legacyCount || 0;
-    }
-
-    if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
-      if (cell.classList.contains("gold-cell")) {
-        await loadAvailability();
-        return;
-      }
-
-      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
-      if (myDot) myDot.remove();
-
-      const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
-      if (legacyDot) legacyDot.remove();
-
-      const container = cell.querySelector(".dot-container");
-      if (container && container.children.length === 0) container.remove();
-
-      return;
-    }
-
-    // INSERT (toggle on) — optimistic first
-    const key = addKey(currentTable.id, dayNum, timeKey, myUid);
-    if (pendingAdds.has(key)) return;
-    pendingAdds.add(key);
-
-    addOptimisticDot(cell, myUid, user.name, user.color);
-    maybeApplyGoldForCell(cell);
-
-    const { error: insErr } = await supabase
-      .from("availability_dev")
-      .insert({
-        table_id: currentTable.id,
-        day: dayNum,
-        time: timeKey,
-        user_id: myUid,
-        name: user.name,
-        color: user.color
-      });
-
-    if (insErr) {
-      console.warn("Insert failed:", insErr);
-
-      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
-
-      const dc = cell.querySelector(".dot-container");
-      if (dc && dc.children.length === 0) dc.remove();
-
-      pendingAdds.delete(key);
-      await loadAvailability();
-      return;
-    }
-
-    // success: mark pending dot as real
-    cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
-      ?.removeAttribute("data-pending");
-      maybeApplyGoldForCell(cell);
-
-    pendingAdds.delete(key);
-
-  } finally {
-    if (k) inFlightCells.delete(k);
-  }
-}
-
-  
-function parseYMD(ymd) {
-  const [y, m, d] = ymd.split("-").map(Number);
-  return { y, m, d };
-}
-
-  
-function addDaysYMD(startYmd, offsetDays) {
-  const { y, m, d } = parseYMD(startYmd);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  dt.setUTCDate(dt.getUTCDate() + offsetDays);
-  const yy = dt.getUTCFullYear();
-  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(dt.getUTCDate()).padStart(2, "0");
-  return `${yy}-${mm}-${dd}`;
-}
-
-  
-function formatHeaderLabel(ymd) {
-  const { y, m, d } = parseYMD(ymd);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  const weekday = dt.toLocaleDateString("en-AU", { weekday: "short", timeZone: "UTC" });
-  const month = dt.toLocaleDateString("en-AU", { month: "short", timeZone: "UTC" });
-  return { weekday, monthDay: `${d} ${month}` };
-}
-
-  
-function buildCalendar() {
-  const table = document.getElementById("availabilityTable");
-  table.innerHTML = "";
-
-  if (!currentTable) return;
-
-  const times = currentTable.row_structure || [];
-  const days = 30;
-
-  // --- Header row (ONE time only) ---
-  const headerRow = document.createElement("tr");
-  headerRow.appendChild(document.createElement("th")); // top-left blank corner
-
-  const startYmd =
-    currentTable.start_date ||
-    yyyyMmDdInTimeZone(new Date(), currentTable.host_tz || getDetectedTimeZone());
-
-  for (let dayNum = 1; dayNum <= days; dayNum++) {
-    const ymd = addDaysYMD(startYmd, dayNum - 1);
-    const { weekday, monthDay } = formatHeaderLabel(ymd);
-
-    const th = document.createElement("th");
-    th.classList.add("day-header");
-    th.dataset.day = String(dayNum);
-    th.innerHTML = `
-      <div style="font-weight:700;">${weekday}</div>
-      <span class="monthday">${monthDay}</span>
-    `;
-    headerRow.appendChild(th);
-  }
-
-  table.appendChild(headerRow);
-
-  // --- Body rows (time blocks) ---
-  times.forEach(timeObj => {
-    const row = document.createElement("tr");
-
-    const labelCell = document.createElement("td");
-    labelCell.textContent = timeObj.label;
-    labelCell.classList.add("time-label");
-    row.appendChild(labelCell);
-
-    for (let dayNum = 1; dayNum <= days; dayNum++) {
-      const cell = document.createElement("td");
-      cell.dataset.day = String(dayNum);
-      cell.dataset.time = timeObj.label;
-      row.appendChild(cell);
-    }
-
-    table.appendChild(row);
-  });
-
-  bindCalendarClickDelegation();
-}
-
-
-function showDeleteAccountOverlay(msg = "") {
-  const ov = document.getElementById("delete-account-overlay");
-  const m = document.getElementById("delete-account-msg");
-  if (!ov) return;
-
-  ov.style.display = "block";
-
-  if (m) {
-    if (msg) { m.style.display = "block"; m.textContent = msg; }
-    else { m.style.display = "none"; m.textContent = ""; }
-  }
-}
-
-function hideDeleteAccountOverlay() {
-  const ov = document.getElementById("delete-account-overlay");
-  if (ov) ov.style.display = "none";
-}
-
-
-async function deleteAccountFlow() {
-  const au = await auth.getAuthUser();
-  if (!au) {
-    showDeleteAccountOverlay("You must be signed in.");
-    return;
-  }
-
-  const email = (document.getElementById("acct-email")?.textContent || "").trim();
-  const pass = (document.getElementById("delete-account-password")?.value || "").trim();
-  const conf = (document.getElementById("delete-account-confirm")?.value || "").trim();
-
-  if (!pass) return showDeleteAccountOverlay("Please enter your password.");
-  if (conf !== "DELETE") return showDeleteAccountOverlay('Type DELETE to confirm.');
-
-  // 1) Re-authenticate (proves password)
-  const { error: reauthErr } = await supabase.auth.signInWithPassword({ email, password: pass });
-  if (reauthErr) return showDeleteAccountOverlay(reauthErr.message || "Password incorrect.");
-
-  // 2) Call Edge Function that performs deletions + auth user delete (service role)
-  const { data: sessionData } = await supabase.auth.getSession();
-  const accessToken = sessionData?.session?.access_token;
-  if (!accessToken) return showDeleteAccountOverlay("Session error. Please sign in again.");
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({ confirm: "DELETE" })
-    });
-
-    const out = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      return showDeleteAccountOverlay(out?.error || "Delete failed.");
-    }
-
-    // 3) Sign out + reset UI
-    await supabase.auth.signOut();
-    hideDeleteAccountOverlay();
-
-    // clear your local remembered stuff
-    localStorage.removeItem("lastBoardToken");
-    localStorage.removeItem("lastBoardManageToken");
-    localStorage.removeItem("globalUserId");
-    localStorage.removeItem("globalUserName");
-    localStorage.removeItem("globalUserColor");
-
-    window.location.href = window.location.pathname; // fresh state
-  } catch (err) {
-    console.error(err);
-    showDeleteAccountOverlay("Network error while deleting account.");
-  }
-}
-
-
-// Bind buttons
-document.getElementById("acct-delete-account")?.addEventListener("click", () => {
-  // clear old values
-  const p = document.getElementById("delete-account-password");
-  const c = document.getElementById("delete-account-confirm");
-  if (p) p.value = "";
-  if (c) c.value = "";
-  showDeleteAccountOverlay("");
-});
-
-document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
-  hideDeleteAccountOverlay();
-});
-
-document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
-  await deleteAccountFlow();
-});
-  
-
-function bindCalendarClickDelegation() {
-  const table = document.getElementById("availabilityTable");
-  if (!table || table.dataset.bound === "1") return;
-
-  table.dataset.bound = "1";
-
-  table.addEventListener("click", (e) => {
-    const cell = e.target.closest("td[data-day][data-time]");
-    if (!cell) return;
-    toggleCell({ currentTarget: cell }); // reuse your existing toggleCell
-  });
-}
-
-  
-async function fetchProfilesMap(userIds) {
-  const ids = Array.from(new Set((userIds || []).filter(Boolean)));
-  if (ids.length === 0) return {};
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("user_id, name, color")
-    .in("user_id", ids);
-
-  if (error) {
-    console.warn("fetchProfilesMap failed:", error);
-    return {};
-  }
-
-  const map = {};
-  (data || []).forEach(p => { map[p.user_id] = p; });
-  return map;
-}
-
-// Cache current profile info so realtime inserts/updates can display the latest name/color
-let profilesCache = {};
-
-async function getProfileCached(userId) {
-  if (!userId) return null;
-  if (profilesCache[userId]) return profilesCache[userId];
-
-  const map = await fetchProfilesMap([userId]);
-  profilesCache = { ...profilesCache, ...map };
-  return profilesCache[userId] || null;
-}  
-
-  
-/* === Render dots + gold === */
+//----------  
 async function loadAvailability() {
   // ✅ prevent overlapping renders that duplicate rows/cells
   if (loadAvailabilityRunning) {
@@ -1838,6 +1572,176 @@ async function loadAvailability() {
 }
 
 
+
+
+
+// =========================
+// BOARD CREATION / CONFIG
+// =========================
+
+function populateGoldThresholdSelect(isPro) {
+  const sel = document.getElementById("gold-threshold");
+  if (!sel) return;
+
+  // clear existing (keep the placeholder)
+  sel.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
+
+  for (let n = 1; n <= 30; n++) {
+    const opt = document.createElement("option");
+    opt.value = String(n);
+    opt.textContent = `${n}`;
+
+    // Free: 1–5 enabled, 6–30 disabled
+    if (!isPro && n >= 6) opt.disabled = true;
+
+    sel.appendChild(opt);
+  }
+}
+
+//----------  
+function setActiveStructureCard(activeId) {
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("active", id === activeId);
+  });
+}
+
+//---------- 
+function showGoCreate() {
+  const btn = document.getElementById("go-create");
+  if (btn) btn.style.display = "inline-block";
+}  
+
+//----------  
+async function createBoard() {
+    // Gold threshold (now selected on the Name Your Calendar screen)
+  const goldSelect =
+    document.getElementById("gold-threshold") ||
+    document.getElementById("gold-threshold-select") ||
+    document.getElementById("goldThreshold") ||
+    document.querySelector('select[data-gold-threshold]');
+
+  const goldThreshold = parseInt(goldSelect?.value || "", 10) || 2;
+  const au = await auth.getAuthUser();
+    if (!au) {
+      auth.showAuthOverlay("Please sign in before creating a calendar.");
+      return;
+    }
+  const nameInput = document.getElementById("board-name");
+  const name = nameInput.value.trim();
+
+  if (!name) {
+    alert("Please enter a board name");
+    return;
+  }
+
+  let timeBlocks = [];
+
+const structureChoice = selectedStructure || "custom";
+
+if (structureChoice === "custom") {
+  const rowInputs = document.querySelectorAll("#rows-container input");
+
+  rowInputs.forEach(input => {
+    const value = input.value.trim();
+    if (value) {
+      timeBlocks.push({ label: value });
+    }
+  });
+
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+} else {
+  timeBlocks = PREBUILT_STRUCTURES[structureChoice];
+}
+
+  if (timeBlocks.length === 0) {
+    alert("Please add at least one time block");
+    return;
+  }
+
+  const inviteToken = generateToken();
+  const ownerToken = generateToken();
+  const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
+  const startDate = yyyyMmDdInTimeZone(new Date(), tz);
+  
+  // --- Gold threshold (required) ---
+  const goldRaw = document.getElementById("gold-threshold")?.value || "";
+    if (!goldRaw) {
+      const gold = parseInt(goldSelect.value, 10);
+    }
+
+    // TEMP: until you implement real Pro accounts
+    const isPro = false;
+
+    if (!Number.isFinite(goldThreshold) || goldThreshold < 1 || goldThreshold > 30) {
+      alert("Gold threshold must be between 1 and 30.");
+      return;
+    }
+if (!isPro && goldThreshold >= 6) {
+  alert("Free version allows gold threshold up to 5.");
+  return;
+}
+
+  const { error } = await supabase
+    .from("tables")
+    .insert([{
+      name,
+      invite_token: inviteToken,
+      owner_token: ownerToken,
+      owner_id: au.id,
+      row_structure: timeBlocks,
+      host_tz: tz,
+      start_date: startDate,
+      gold_threshold: goldThreshold
+    }])
+
+  if (error) {
+    console.error("Error creating board:", error);
+    return;
+  }
+
+  const { data: created, error: fetchErr } = await supabase
+  .from("tables")
+  .select("id")
+  .eq("invite_token", inviteToken)
+  .single();
+
+if (fetchErr || !created) {
+  console.error("Board insert succeeded but could not fetch id. Check SELECT RLS on tables.", fetchErr);
+  return;
+}
+
+  const { error: bmErr } = await supabase
+  .from("board_members")
+  .upsert(
+    {
+      board_id: created.id,
+      user_id: au.id,
+      role: "owner"
+    },
+    { onConflict: "board_id,user_id" }
+  );
+
+if (bmErr) {
+  console.warn("board_members owner upsert failed:", bmErr);
+}
+  
+  localStorage.setItem("lastBoardToken", inviteToken);
+  // keep invite token for “share link” / last joined link if you want
+localStorage.setItem("lastBoardToken", inviteToken);
+
+// add this so “last opened as owner” is possible later
+localStorage.setItem("lastBoardManageToken", ownerToken);
+
+// ✅ open as owner after create
+window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
+}
+
+//----------  
 async function resetBoard() {
   if (!currentTable) return;
 
@@ -1848,351 +1752,215 @@ async function resetBoard() {
 
   await loadAvailability();
 }
-  
-  
-  async function deleteBoard() {
+
+
+
+
+
+// =========================
+// CALENDAR BUILD / INTERACTION
+// =========================
+
+function buildCalendar() {
+  const table = document.getElementById("availabilityTable");
+  table.innerHTML = "";
+
   if (!currentTable) return;
 
-  if (!confirm("Are you sure you want to permanently delete this board?")) return;
-  await supabase
-    .from("availability_dev")
-    .delete()
-    .eq("table_id", currentTable.id);
+  const times = currentTable.row_structure || [];
+  const days = 30;
 
-  await supabase
-    .from("tables")
-    .delete()
-    .eq("id", currentTable.id);
+  // --- Header row (ONE time only) ---
+  const headerRow = document.createElement("tr");
+  headerRow.appendChild(document.createElement("th")); // top-left blank corner
 
-  window.location.href = "/";
+  const startYmd =
+    currentTable.start_date ||
+    yyyyMmDdInTimeZone(new Date(), currentTable.host_tz || getDetectedTimeZone());
+
+  for (let dayNum = 1; dayNum <= days; dayNum++) {
+    const ymd = addDaysYMD(startYmd, dayNum - 1);
+    const { weekday, monthDay } = formatHeaderLabel(ymd);
+
+    const th = document.createElement("th");
+    th.classList.add("day-header");
+    th.dataset.day = String(dayNum);
+    th.innerHTML = `
+      <div style="font-weight:700;">${weekday}</div>
+      <span class="monthday">${monthDay}</span>
+    `;
+    headerRow.appendChild(th);
+  }
+
+  table.appendChild(headerRow);
+
+  // --- Body rows (time blocks) ---
+  times.forEach(timeObj => {
+    const row = document.createElement("tr");
+
+    const labelCell = document.createElement("td");
+    labelCell.textContent = timeObj.label;
+    labelCell.classList.add("time-label");
+    row.appendChild(labelCell);
+
+    for (let dayNum = 1; dayNum <= days; dayNum++) {
+      const cell = document.createElement("td");
+      cell.dataset.day = String(dayNum);
+      cell.dataset.time = timeObj.label;
+      row.appendChild(cell);
+    }
+
+    table.appendChild(row);
+  });
+
+  bindCalendarClickDelegation();
 }
 
-  function saveIdentity() {
-  const input = document.getElementById("identity-name");
+//----------  
+async function toggleCell(e) {
+  if (!user || !currentTable) return;
 
-  const name = (input?.value || "").trim();
-  const color = (identitySelectedColour || "").trim();
+  let k; // ✅ so finally can always see it
 
-  if (!name) {
-    alert("Please enter your name");
-    return;
-  }
-  if (!color) {
-    alert("Please choose a dot colour");
-    return;
-  }
+  try {
+    const cell = e.currentTarget;
+    if (!cell) return;
 
-  localStorage.setItem("globalUserName", name);
-  localStorage.setItem("globalUserColor", color);
-  getOrCreateUserId();
+    // normalize values
+    const dayNum = parseInt(cell.dataset.day, 10);
+    const timeKey = String(cell.dataset.time || "").trim();
+    if (!Number.isFinite(dayNum) || !timeKey) return;
 
-  // If we're on a board link, load it now (no full reload needed)
-  if (inviteToken || manageToken) {
-    loadTable();
-  } else {
-    location.reload();
-  }
-}
+    const au = await auth.getAuthUser();
+    if (!au) return;
+    const myUid = au.id;
 
-  
-  function addRowInput(name = "") {
-  const container = document.getElementById("rows-container");
+    k = addKey(currentTable.id, dayNum, timeKey, myUid);
+    if (inFlightCells.has(k)) return;
+    inFlightCells.add(k);
 
-  if (!container) return; // Prevent crash
+    await ensureMembership(currentTable.id);
 
-  if (container.children.length >= 4) {
-    alert("Free version allows up to 4 time blocks.");
-    return;
-  }
+    // DELETE FIRST (toggle off)
+    const { error: delErr, count: deletedCount } = await supabase
+      .from("availability_dev")
+      .delete({ count: "exact" })
+      .eq("table_id", currentTable.id)
+      .eq("day", dayNum)
+      .eq("time", timeKey)
+      .eq("user_id", myUid);
 
-  const input = document.createElement("input");
-  input.placeholder = "Time block (e.g. Dinner)";
-  input.value = name;
+    if (delErr) {
+      console.warn("Delete failed:", delErr);
+      await loadAvailability();
+      return;
+    }
 
-  container.appendChild(input);
-}
+    // legacy delete if needed
+    let legacyDeletedCount = 0;
+    if ((deletedCount || 0) === 0) {
+      const { error: legacyErr, count: legacyCount } = await supabase
+        .from("availability_dev")
+        .delete({ count: "exact" })
+        .eq("table_id", currentTable.id)
+        .eq("day", dayNum)
+        .eq("time", timeKey)
+        .is("user_id", null)
+        .eq("name", user.name)
+        .eq("color", user.color);
 
-  
-  function showBoardSetup() {
-    const startBtn = document.getElementById("start-create");
-      if (startBtn) startBtn.style.display = "none";
-
-      const setup = document.getElementById("board-setup");
-      if (setup) setup.style.display = "block";
-
-      // Populate timezone dropdown when entering setup
-      if (typeof populateHostTimezoneSelect === "function") {
-        populateHostTimezoneSelect();
-          // TEMP: until you implement real Pro accounts
-        const isPro = false;
-        populateGoldThresholdSelect(isPro);
+      if (legacyErr) {
+        console.warn("Legacy delete failed:", legacyErr);
+        await loadAvailability();
+        return;
       }
 
-  // Reset pages
-  const nameStep = document.getElementById("name-step");
-  const detailsStep = document.getElementById("details-step");
-  const rowBuilder = document.getElementById("row-builder");
-  const createActions = document.getElementById("create-actions");
-  const goldSel = document.getElementById("gold-threshold");
-  
-  if (goldSel) goldSel.value = "";
-
-  if (nameStep) nameStep.style.display = "block";
-  if (detailsStep) detailsStep.style.display = "none";
-  if (rowBuilder) rowBuilder.style.display = "none";
-  if (createActions) createActions.style.display = "none";
-
-  // Hide the page-2 create button until a structure is clicked
-  const goBtn = document.getElementById("go-create");
-  if (goBtn) goBtn.style.display = "none";
-
-  // Clear structure selection highlight + require click
-  selectedStructure = null;
-  ["dev-custom-card", "meals-card"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove("active");
-  });
-}
-
-
-function showBoardView() {
-  const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "none";
-
-  const setup = document.getElementById("profile-setup");
-  if (setup) setup.style.display = "none";
-
-  const board = document.getElementById("board-view"); // or whatever your board container id is
-  if (board) board.style.display = "block";
-
-  document.body.style.visibility = "visible";
-}
-  
-
-function setActiveStructureCard(activeId) {
-  ["dev-custom-card", "meals-card"].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle("active", id === activeId);
-  });
-}
-
-
-async function renderCalendarInviteStats() {
-  const wrap = document.getElementById("calendar-invite-stats");
-  const joinedEl = document.getElementById("calendar-invite-joined");
-  const totalEl = document.getElementById("calendar-invite-total");
-
-  if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
-
-  // x = accepted invites + owner
-  const { count: acceptedCount, error: acceptedErr } = await supabase
-    .from("board_invites")
-    .select("id", { count: "exact", head: true })
-    .eq("board_id", currentTable.id)
-    .not("accepted_at", "is", null);
-
-  if (acceptedErr) {
-    console.warn("Failed to load accepted invite count:", acceptedErr);
-    wrap.style.display = "none";
-    return;
-  }
-
-  // y = emails invited + owner
-  const { count: inviteCount, error: inviteErr } = await supabase
-    .from("board_invites")
-    .select("id", { count: "exact", head: true })
-    .eq("board_id", currentTable.id);
-
-  if (inviteErr) {
-    console.warn("Failed to load invite count:", inviteErr);
-    wrap.style.display = "none";
-    return;
-  }
-
-  const joined = (acceptedCount || 0) + 1;
-  const total = (inviteCount || 0) + 1;
-
-  joinedEl.textContent = String(joined);
-  totalEl.textContent = String(total);
-  wrap.style.display = "block";
-}
-
-  
-function showGoCreate() {
-  const btn = document.getElementById("go-create");
-  if (btn) btn.style.display = "inline-block";
-}  
-
-  
-function getOrCreateUserId() {
-  let id = localStorage.getItem("globalUserId");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("globalUserId", id);
-  }
-  return id;
-}
-
-  
-const PREBUILT_STRUCTURES = {
-  meals: [
-    { label: "Breakfast" },
-    { label: "Lunch" },
-    { label: "Dinner" }
-  ],
-  quick_meetup: [
-    { label: "Morning" },
-    { label: "Afternoon" },
-    { label: "Evening" }
-  ],
-  dinner_plan: [
-    { label: "Early Dinner" },
-    { label: "Dinner" },
-    { label: "Late Dinner" }
-  ]
-};
-
-
-const COLOUR_PRESETS = [
-  // Reds / Pinks
-  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
-  // Purples / Blues
-  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
-  "#06B6D4", "#0891B2", "#00C7BE",
-  // Greens
-  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
-  // Yellows / Oranges
-  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
-  // Neutrals / Earthy
-  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
-  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
-  // Extra tasteful accents
-  "#14B8A6", "#84CC16"
-];
-
-function renderSwatchGrid(containerEl, currentHex, onPick){
-  if (!containerEl) return;
-
-  containerEl.innerHTML = "";
-
-  COLOUR_PRESETS.forEach(hex => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "colour-swatch";
-    b.style.background = hex;
-    b.setAttribute("aria-label", hex);
-    b.dataset.hex = hex;
-
-    if (currentHex && hex === currentHex) b.classList.add("selected");
-
-    b.addEventListener("click", () => {
-      // update selected state in this grid
-      [...containerEl.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
-      b.classList.add("selected");
-      onPick(hex);
-    });
-
-    containerEl.appendChild(b);
-  });
-}
-
-  
-let uiListenersBound = false;
-
-
-
-
-
-
-function bindUiListenersOnce() {
-  
-  if (uiListenersBound) return;
-  uiListenersBound = true;
-
-  auth.bindAuthUi();
-  
-  // Dashboard: Create New Calendar (your dashboard button)
-  const dashCreate = document.getElementById("create-board-btn");
-  if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
-
-  // Back to dashboard from board view
-  const backToDashBtn = document.getElementById("back-to-dashboard");
-  if (backToDashBtn) {
-    backToDashBtn.addEventListener("click", () => {
-      window.location.href = "/";
-    });
-  }
-
-  // Create screen: Continue/Create after structure selection
-  const goCreateBtn = document.getElementById("go-create");
-  if (goCreateBtn) {
-    goCreateBtn.addEventListener("click", createBoard);
-  }
-
-  // Create page → Return to Dashboard
-  const returnBtn = document.getElementById("return-dashboard-btn");
-  if (returnBtn) {
-    returnBtn.addEventListener("click", showDashboard);
-  }
-
-  const setupGrid = document.getElementById("setup-colour-grid");
-  renderSwatchGrid(setupGrid, setupSelectedColour, (hex) => {
-    setupSelectedColour = hex;
-  });
-
-  const identityGrid = document.getElementById("identity-colour-grid");
-  renderSwatchGrid(identityGrid, identitySelectedColour, (hex) => {
-    identitySelectedColour = hex;
-  });
-  
-  // Profile setup save
-  const setupSaveBtn = document.getElementById("setup-save");
-  if (setupSaveBtn) setupSaveBtn.addEventListener("click", auth.saveProfileSetup);
-
-  // Structure selection (Dev Custom + Meals)
-  const devCard = document.getElementById("dev-custom-card");
-  if (devCard) {
-    devCard.addEventListener("click", () => {
-      selectedStructure = "custom";
-      setActiveStructureCard("dev-custom-card");
-      showGoCreate();
-    });
-  }
-
-  // Dashboard: Settings drawer
-  const settingsBtn = document.getElementById("dash-settings");
-  const drawer = document.getElementById("settings-drawer");
-  const backdrop = document.getElementById("settings-backdrop");
-  const closeBtn = document.getElementById("settings-close");
-
-  function openDrawer() {
-    document.body.classList.add("drawer-open");
-    drawer?.setAttribute("aria-hidden", "false");
-    backdrop?.setAttribute("aria-hidden", "false");
-    closeBtn?.focus();
-  }
-
-  function closeDrawer() {
-    document.body.classList.remove("drawer-open");
-    document.body.classList.remove("settings-split");
-    document.body.classList.remove("account-view");
-    showDashboardPanel();
-
-    drawer?.setAttribute("aria-hidden", "true");
-    backdrop?.setAttribute("aria-hidden", "true");
-    settingsBtn?.focus();
-  }
-
-  settingsBtn?.addEventListener("click", openDrawer);
-  closeBtn?.addEventListener("click", closeDrawer);
-  backdrop?.addEventListener("click", closeDrawer);
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
-      closeDrawer();
+      legacyDeletedCount = legacyCount || 0;
     }
+
+    if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
+      if (cell.classList.contains("gold-cell")) {
+        await loadAvailability();
+        return;
+      }
+
+      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+      if (myDot) myDot.remove();
+
+      const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
+      if (legacyDot) legacyDot.remove();
+
+      const container = cell.querySelector(".dot-container");
+      if (container && container.children.length === 0) container.remove();
+
+      return;
+    }
+
+    // INSERT (toggle on) — optimistic first
+    const key = addKey(currentTable.id, dayNum, timeKey, myUid);
+    if (pendingAdds.has(key)) return;
+    pendingAdds.add(key);
+
+    addOptimisticDot(cell, myUid, user.name, user.color);
+    maybeApplyGoldForCell(cell);
+
+    const { error: insErr } = await supabase
+      .from("availability_dev")
+      .insert({
+        table_id: currentTable.id,
+        day: dayNum,
+        time: timeKey,
+        user_id: myUid,
+        name: user.name,
+        color: user.color
+      });
+
+    if (insErr) {
+      console.warn("Insert failed:", insErr);
+
+      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+
+      const dc = cell.querySelector(".dot-container");
+      if (dc && dc.children.length === 0) dc.remove();
+
+      pendingAdds.delete(key);
+      await loadAvailability();
+      return;
+    }
+
+    // success: mark pending dot as real
+    cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
+      ?.removeAttribute("data-pending");
+      maybeApplyGoldForCell(cell);
+
+    pendingAdds.delete(key);
+
+  } finally {
+    if (k) inFlightCells.delete(k);
+  }
+}
+
+//----------  
+function bindCalendarClickDelegation() {
+  const table = document.getElementById("availabilityTable");
+  if (!table || table.dataset.bound === "1") return;
+
+  table.dataset.bound = "1";
+
+  table.addEventListener("click", (e) => {
+    const cell = e.target.closest("td[data-day][data-time]");
+    if (!cell) return;
+    toggleCell({ currentTarget: cell }); // reuse your existing toggleCell
   });
+}
+
+
+
+
+
+// =========================
+// ACCOUNT / DASHBOARD PANELS
+// =========================
 
 function showAccountPanel() {
   document.body.classList.add("account-view");   // 👈 add this
@@ -2204,6 +1972,7 @@ function showAccountPanel() {
   if (acct) acct.style.display = "block";
 }
 
+//----------  
 function showDashboardPanel() {
   document.body.classList.remove("account-view");  // 👈 add this
 
@@ -2214,6 +1983,7 @@ function showDashboardPanel() {
   if (dashBody) dashBody.style.display = "block";
 }
 
+//----------  
 async function hydrateAccountPanel() {
   try {
     const au = await auth.getAuthUser();
@@ -2236,129 +2006,99 @@ async function hydrateAccountPanel() {
     console.error("hydrateAccountPanel failed", e);
   }
 }
-  
-const signOutBtn = document.getElementById("drawer-signout");
 
-if (signOutBtn) {
-  signOutBtn.addEventListener("click", async () => {
-    // Close drawer so the modal is the only focus
-    document.body.classList.remove("drawer-open");
 
-    // Make OK button look dangerous for this one modal instance
-    const okBtn = document.getElementById("confirm-ok");
-    const cancelBtn = document.getElementById("confirm-cancel");
-    okBtn?.classList.add("modal-btn-danger");
-    cancelBtn?.classList.remove("modal-btn-danger");
 
-    const ok = await confirmModal({
-      title: "Sign out?",
-      message: "You’ll need to sign in again to access your calendars.",
-      okText: "Sign Out",
-      cancelText: "Cancel"
+
+
+// =========================
+// ACCOUNT DELETE FLOW
+// =========================
+
+function showDeleteAccountOverlay(msg = "") {
+  const ov = document.getElementById("delete-account-overlay");
+  const m = document.getElementById("delete-account-msg");
+  if (!ov) return;
+
+  ov.style.display = "block";
+
+  if (m) {
+    if (msg) { m.style.display = "block"; m.textContent = msg; }
+    else { m.style.display = "none"; m.textContent = ""; }
+  }
+}
+
+//---------- 
+function hideDeleteAccountOverlay() {
+  const ov = document.getElementById("delete-account-overlay");
+  if (ov) ov.style.display = "none";
+}
+
+//---------- 
+async function deleteAccountFlow() {
+  const au = await auth.getAuthUser();
+  if (!au) {
+    showDeleteAccountOverlay("You must be signed in.");
+    return;
+  }
+
+  const email = (document.getElementById("acct-email")?.textContent || "").trim();
+  const pass = (document.getElementById("delete-account-password")?.value || "").trim();
+  const conf = (document.getElementById("delete-account-confirm")?.value || "").trim();
+
+  if (!pass) return showDeleteAccountOverlay("Please enter your password.");
+  if (conf !== "DELETE") return showDeleteAccountOverlay('Type DELETE to confirm.');
+
+  // 1) Re-authenticate (proves password)
+  const { error: reauthErr } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (reauthErr) return showDeleteAccountOverlay(reauthErr.message || "Password incorrect.");
+
+  // 2) Call Edge Function that performs deletions + auth user delete (service role)
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) return showDeleteAccountOverlay("Session error. Please sign in again.");
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ confirm: "DELETE" })
     });
 
-    // Reset styling so other confirms aren't red
-    okBtn?.classList.remove("modal-btn-danger");
+    const out = await res.json().catch(() => ({}));
 
-    if (!ok) return;
-
-    try {
-      await supabase.auth.signOut();
-      location.reload(); // startApp will show auth overlay
-    } catch (err) {
-      console.error("Sign out failed", err);
-      alert("Could not sign out. Please try again.");
+    if (!res.ok) {
+      return showDeleteAccountOverlay(out?.error || "Delete failed.");
     }
-  });
-}
 
-const feedbackBtn = document.getElementById("drawer-feedback");
-const feedbackModal = document.getElementById("feedback-modal");
-const feedbackCancel = document.getElementById("feedback-cancel");
-const feedbackSend = document.getElementById("feedback-send");
-const feedbackText = document.getElementById("feedback-text");
+    // 3) Sign out + reset UI
+    await supabase.auth.signOut();
+    hideDeleteAccountOverlay();
 
-if (feedbackBtn && feedbackModal) {
-  feedbackBtn.addEventListener("click", () => {
-    document.body.classList.remove("drawer-open");
-    feedbackText.value = "";
-    feedbackModal.hidden = false;
-    feedbackText.focus();
-  });
-}
+    // clear your local remembered stuff
+    localStorage.removeItem("lastBoardToken");
+    localStorage.removeItem("lastBoardManageToken");
+    localStorage.removeItem("globalUserId");
+    localStorage.removeItem("globalUserName");
+    localStorage.removeItem("globalUserColor");
 
-feedbackCancel?.addEventListener("click", () => {
-  feedbackModal.hidden = true;
-});
-
-feedbackSend?.addEventListener("click", async () => {
-  const text = feedbackText.value.trim();
-
-  if (!text) {
-    feedbackText.focus();
-    return;
+    window.location.href = window.location.pathname; // fresh state
+  } catch (err) {
+    console.error(err);
+    showDeleteAccountOverlay("Network error while deleting account.");
   }
-
-try {
-  feedbackSend.disabled = true;
-
-  const { error } = await supabase.functions.invoke("send-feedback", {
-    body: { message: text }
-  });
-
-  if (error) throw error;
-
-  feedbackModal.hidden = true;
-  feedbackText.value = "";
-
-  await confirmModal({
-    title: "Thank you!",
-    message: "Your feedback has been sent.",
-    okText: "Close",
-    cancelText: ""
-  });
-
-} catch (err) {
-  console.error("Feedback send failed:", err);
-  alert("Could not send feedback. Please try again.");
-} finally {
-  feedbackSend.disabled = false;
 }
-});
 
-// Drawer item routing (delegated so it works even if drawer DOM is rebuilt)
-drawer?.addEventListener("click", async (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
 
-  if (btn.id === "drawer-account") {
-    // Keep drawer open, but make right side usable
-    document.body.classList.add("drawer-open");
-    document.body.classList.add("settings-split");
 
-    // On wide screens, CSS kills pointer-events; aria-hidden alone doesn't
-    drawer?.setAttribute("aria-hidden", "false");
-    backdrop?.setAttribute("aria-hidden", "true");
 
-    showAccountPanel();
-    await hydrateAccountPanel();
-    return;
-  }
 
-  // (optional later) handle other drawer buttons here:
-  // if (btn.id === "drawer-notifications") ...
-});
-
-document.getElementById("acct-back-dashboard")?.addEventListener("click", () => {
-  closeDrawer(); // ✅ same behavior as clicking the ✕
-});
-
-// Change Name modal wiring
-const nameModal = document.getElementById("name-modal");
-const nameInput = document.getElementById("name-input");
-const nameErr = document.getElementById("name-error");
-const nameCancel = document.getElementById("name-cancel");
-const nameSave = document.getElementById("name-save");
+// =========================
+// NAME / COLOUR / PASSWORD MODALS
+// =========================
 
 function openNameModal() {
   if (!nameModal || !nameInput || !nameErr) return;
@@ -2372,42 +2112,28 @@ function openNameModal() {
   nameInput.focus();
   nameInput.select();
 }
-  
-nameInput?.addEventListener("input", updateNameCount);
-  
+
+//----------  
 function closeNameModal() {
   if (!nameModal) return;
   nameModal.hidden = true;
 }
 
+//---------- 
 function setNameError(msg) {
   if (!nameErr) return;
   nameErr.textContent = msg;
   nameErr.style.display = msg ? "block" : "none";
 }
 
-document.getElementById("acct-change-name")?.addEventListener("click", () => {
-  openNameModal();
-});
-
-nameCancel?.addEventListener("click", closeNameModal);
-
-// Change Colour modal wiring
-const colourModal = document.getElementById("colour-modal");
-const colourGrid = document.getElementById("colour-grid");
-const colourErr = document.getElementById("colour-error");
-const colourCancel = document.getElementById("colour-cancel");
-const colourSave = document.getElementById("colour-save");
-
-let selectedColour = null;
-
-  
+//----------  
 function setColourError(msg){
   if (!colourErr) return;
   colourErr.textContent = msg || "";
   colourErr.style.display = msg ? "block" : "none";
 }
 
+//----------  
 function normaliseHex(input){
   if (!input) return "";
   let v = input.trim().toUpperCase();
@@ -2415,10 +2141,12 @@ function normaliseHex(input){
   return v;
 }
 
+//----------  
 function isValidHex(v){
   return /^#[0-9A-F]{6}$/.test(v);
 }
 
+//----------  
 function renderColourGrid(current){
   if (!colourGrid) return;
   colourGrid.innerHTML = "";
@@ -2447,6 +2175,7 @@ function renderColourGrid(current){
   });
 }
 
+//----------  
 function openColourModal(){
   if (!colourModal) return;
 
@@ -2457,102 +2186,20 @@ function openColourModal(){
   colourModal.hidden = false;
 }
 
+//----------  
 function closeColourModal(){
   if (!colourModal) return;
   colourModal.hidden = true;
 }
 
-document.getElementById("acct-change-colour")?.addEventListener("click", () => {
-  openColourModal();
-});
-
-colourCancel?.addEventListener("click", closeColourModal);
-
-// click outside card closes
-colourModal?.addEventListener("click", (e) => {
-  const card = e.target.closest(".modal-card");
-  if (!card) closeColourModal();
-});
-
-colourSave?.addEventListener("click", async () => {
-  try {
-   const v = selectedColour;
-      if (!v) return setColourError("Please choose a colour.");
-      if (!COLOUR_PRESETS.includes(v)) return setColourError("Please choose a colour from the list.");
-
-    // no change
-    if (user?.color && v === user.color.toUpperCase()) {
-      closeColourModal();
-      return;
-    }
-
-    colourSave.disabled = true;
-    setColourError("");
-
-    const au = await auth.getAuthUser();
-    if (!au) {
-      setColourError("You’re not signed in.");
-      return;
-    }
-
-    // Update profile colour
-    const { error } = await supabase
-      .from("profiles")
-      .update({ color: v })
-      .eq("user_id", au.id);
-
-    if (error) throw error;
-    
-    // Update in-memory + cache (important for realtime)
-    if (user) user.color = v;
-    profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
-
-    // Update account panel immediately
-    const dot = document.getElementById("acct-colour-dot");
-    const txt = document.getElementById("acct-colour-text");
-    if (dot) dot.style.background = v;
-    if (txt) txt.textContent = v;
-
-    closeColourModal();
-
-    await confirmModal({
-      title: "Colour updated",
-      message: "Your colour has been changed successfully.",
-      okText: "Close",
-      cancelText: ""
-    });
-
-    // Refresh dashboard previews (legend/dots)
-    await loadBoards();
-
-    // Refresh open calendar (legend/dots)
-    if (currentTable) {
-      await loadAvailability();
-    }
-
-  } catch (err) {
-    console.error("Change colour failed:", err);
-    setColourError("Could not update your colour. Please try again.");
-  } finally {
-    if (colourSave) colourSave.disabled = false;
-  }
-});
-
-// Change Password modal wiring
-const pwModal = document.getElementById("password-modal");
-const pwCurrent = document.getElementById("pw-current");
-const pwNew = document.getElementById("pw-new");
-const pwConfirm = document.getElementById("pw-confirm");
-const pwErr = document.getElementById("pw-error");
-const pwCancel = document.getElementById("pw-cancel");
-const pwSave = document.getElementById("pw-save");
-
+//----------   
 function setPwError(msg) {
   if (!pwErr) return;
   pwErr.textContent = msg || "";
   pwErr.style.display = msg ? "block" : "none";
 }
 
+//----------   
 function openPwModal() {
   if (!pwModal) return;
 
@@ -2565,197 +2212,13 @@ function openPwModal() {
   pwCurrent?.focus();
 }
 
+//----------   
 function closePwModal() {
   if (!pwModal) return;
   pwModal.hidden = true;
 }
 
-document.getElementById("acct-change-password")?.addEventListener("click", () => {
-  openPwModal();
-});
-
-pwCancel?.addEventListener("click", closePwModal);
-
-// click outside card closes
-pwModal?.addEventListener("click", (e) => {
-  const card = e.target.closest(".modal-card");
-  if (!card) closePwModal();
-});
-
-// Esc closes, Enter submits (from any field)
-[pwCurrent, pwNew, pwConfirm].forEach(el => {
-  el?.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closePwModal();
-    if (e.key === "Enter") pwSave?.click();
-  });
-});
-
-pwSave?.addEventListener("click", async () => {
-  try {
-    const au = await auth.getAuthUser();
-    if (!au?.email) {
-      setPwError("You’re not signed in.");
-      return;
-    }
-
-    const current = (pwCurrent?.value || "").trim();
-    const next = (pwNew?.value || "").trim();
-    const confirm = (pwConfirm?.value || "").trim();
-
-    // validation
-    if (!current) return setPwError("Please enter your current password.");
-    if (!next) return setPwError("Please enter a new password.");
-    if (next.length < 8) return setPwError("New password must be at least 8 characters.");
-    if (next !== confirm) return setPwError("New passwords do not match.");
-    if (next === current) return setPwError("New password must be different from the current password.");
-
-    pwSave.disabled = true;
-    setPwError("");
-
-    // 1) Re-authenticate (security step)
-    const { error: signInErr } = await supabase.auth.signInWithPassword({
-      email: au.email,
-      password: current
-    });
-    if (signInErr) {
-      setPwError("Current password is incorrect.");
-      return;
-    }
-
-    // 2) Update password
-    const { error: updErr } = await supabase.auth.updateUser({ password: next });
-    if (updErr) {
-      console.error("updateUser password failed:", updErr);
-      setPwError("Could not update password. Please try again.");
-      return;
-    }
-
-    closePwModal();
-
-    await confirmModal({
-      title: "Password updated",
-      message: "Your password has been changed successfully.",
-      okText: "Close",
-      cancelText: ""
-    });
-
-  } catch (err) {
-    console.error("Change password failed:", err);
-    setPwError("Could not update password. Please try again.");
-  } finally {
-    if (pwSave) pwSave.disabled = false;
-  }
-});
-  
-// close on clicking outside the card
-nameModal?.addEventListener("click", (e) => {
-  const card = e.target.closest(".modal-card");
-  if (!card) closeNameModal();
-});
-
-// Enter = save, Esc = close
-nameInput?.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeNameModal();
-  if (e.key === "Enter") nameSave?.click();
-});
-
-nameSave?.addEventListener("click", async () => {
-  try {
-    if (!nameInput) return;
-
-    const newName = nameInput.value.trim();
-
-    // Basic validation
-    if (!newName) return setNameError("Please enter a name.");
-    if (newName.length < 2) return setNameError("Name must be at least 2 characters.");
-    if (newName.length > 15) return setNameError("Name must be 15 characters or fewer.");
-
-    // No change
-    if (user?.name && newName === user.name) {
-      closeNameModal();
-      return;
-    }
-
-    nameSave.disabled = true;
-    setNameError("");
-
-    // Update DB
-    const au = await auth.getAuthUser();
-    if (!au) {
-      setNameError("You’re not signed in.");
-      return;
-    }
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({ name: newName })
-      .eq("user_id", au.id);
-
-    if (error) throw error;
-      // Keep legacy snapshot columns in sync so other users (who may not be allowed to read profiles)
-      // still see the updated name in legends / previews.
-      const { error: snapErr } = await supabase
-        .from("availability_dev")
-        .update({ name: newName })
-        .eq("user_id", au.id);
-
-      if (snapErr) console.warn("availability_dev snapshot name update failed:", snapErr);
-
-    const { error: availErr } = await supabase
-      .from("availability_dev")
-      .update({ name: newName })
-      .eq("user_id", au.id);
-
-    if (availErr) throw availErr;
-    
-     await supabase
-      .from("availability_dev")
-      .update({ name: newName })
-      .eq("user_id", au.id);
-    
-    // Update in-memory + UI
-    if (user) user.name = newName;
-
-    // refresh UI
-    await loadBoards(true);
-
-    if (currentTable) {
-      await loadAvailability();
-    }
-    
-    const acctNameEl = document.getElementById("acct-name");
-    if (acctNameEl) acctNameEl.textContent = newName;
-
-    const dashUser = document.getElementById("dash-username");
-    if (dashUser && user?.name) {
-      dashUser.textContent = possessive(user.name).toUpperCase();
-    }
-
-    closeNameModal();
-
-    await confirmModal({
-      title: "Username updated",
-      message: "Your display name has been changed successfully.",
-      okText: "Close",
-      cancelText: ""
-    });
-
-    // Refresh dashboard previews/legend with fresh profile data
-    await loadBoards();
-      if (currentTable) {
-          await loadAvailability();
-      }
-
-  } catch (err) {
-    console.error("Change name failed:", err);
-    setNameError("Could not update your name. Please try again.");
-  } finally {
-    if (nameSave) nameSave.disabled = false;
-  }
-});
-
-const nameCount = document.getElementById("name-count");
-
+//----------    
 function updateNameCount() {
   if (!nameInput || !nameCount) return;
 
@@ -2772,392 +2235,52 @@ function updateNameCount() {
   }
 };
 
-document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
-  if (!isBoardOwner) return;
-  setCalendarNoteEditing(true);
-});
-
-document.getElementById("footer-note-cancel")?.addEventListener("click", () => {
-  const ta = document.getElementById("footer-note-input");
-  if (ta) ta.value = noteDraftBeforeEdit;
-  setCalendarNoteEditing(false);
-});
-
-document.getElementById("footer-note-save")?.addEventListener("click", async () => {
-  await saveCalendarNote();
-});
   
-document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
-  await confirmModal({
-    title: "Pro (later)",
-    message: "This will eventually show pricing and upgrade options.",
-    okText: "Close",
-    cancelText: ""
-  });
-});
-  
-  const mealsCard = document.getElementById("meals-card");
-  if (mealsCard) {
-    mealsCard.addEventListener("click", () => {
-      selectedStructure = "meals";
-      setActiveStructureCard("meals-card");
-      showGoCreate();
+//----------  
+function renderSwatchGrid(containerEl, currentHex, onPick){
+  if (!containerEl) return;
+
+  containerEl.innerHTML = "";
+
+  COLOUR_PRESETS.forEach(hex => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "colour-swatch";
+    b.style.background = hex;
+    b.setAttribute("aria-label", hex);
+    b.dataset.hex = hex;
+
+    if (currentHex && hex === currentHex) b.classList.add("selected");
+
+    b.addEventListener("click", () => {
+      // update selected state in this grid
+      [...containerEl.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+      onPick(hex);
     });
-  }
 
-    // Enter key on password field = show button press + submit
-  document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-
-      const btn = document.getElementById("auth-submit");
-      if (!btn) return;
-
-      btn.classList.add("is-pressed");
-
-      setTimeout(() => {
-        btn.classList.remove("is-pressed");
-        btn.click();
-      }, 120);
-    }
+    containerEl.appendChild(b);
   });
 }
 
 
 
 
-  
-async function startApp() {
-  document.body.classList.remove("show-landing-bg");
-  document.body.style.visibility = "visible";
-  bindUiListenersOnce();
 
-  // Password recovery handling
-  const hash = window.location.hash || "";
-  const url = new URL(window.location.href);
-  const code = url.searchParams.get("code");
-  const type = url.searchParams.get("type") || "";
-
-  // If Supabase uses PKCE recovery links, exchange code for session
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) {
-      auth.showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
-      return;
-    }
-
-    url.searchParams.delete("code");
-    window.history.replaceState({}, document.title, url.toString());
-  }
-
-  const isRecovery = hash.includes("type=recovery") || type === "recovery";
-
-  // If this is a recovery link, mark recovery mode in session storage
-  if (isRecovery) {
-    localStorage.setItem("pw_recovery_in_progress", "1");
-    auth.showAuthOverlay("");
-    auth.setAuthMode("recovery");
-    return;
-  }
-
-  const recoveryInProgress = localStorage.getItem("pw_recovery_in_progress") === "1";
-
-  const { data: { session } } = await supabase.auth.getSession();
-
-  // If a recovery session exists but user is no longer on the recovery page,
-  // force sign-out so they cannot land straight in the dashboard
-  if (recoveryInProgress && session) {
-    await supabase.auth.signOut();
-    localStorage.removeItem("pw_recovery_in_progress");
-    auth.showAuthOverlay("Please sign in again.");
-    return;
-  }
-
-  if (!session) {
-    const lockSignin = !!manageToken;
-    auth.showAuthOverlay("", { lockSignin });
-    return;
-  }
-
-  // Homepage → dashboard flow
-  if (!inviteToken && !manageToken) {
-    const prof = await auth.loadProfile();
-
-    if (!prof || !prof.name || !prof.color) {
-      auth.showProfileSetup();
-      return;
-    }
-
-    showDashboard();
-    auth.setDashboardSubtitle();
-    await loadBoards();
-    return;
-  }
-
-  // Invite/manage-token board flow
-  try {
-    populateHostTimezoneSelect();
-
-    const addRowBtn = document.getElementById("add-row");
-    if (addRowBtn) {
-      addRowBtn.addEventListener("click", () => addRowInput());
-    }
-
-    const backBtn = document.getElementById("route-error-back");
-    if (backBtn) {
-      backBtn.addEventListener("click", () => {
-        window.location.href = "/";
-      });
-    }
-
-    const addUsersBtn = document.getElementById("add-users-btn");
-    if (addUsersBtn) {
-      addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
-      addUsersBtn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      };
-    }
-
-    if (addUsersBtn) {
-      addUsersBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!manageToken) return;
-        if (!currentTable?.invite_token) {
-          console.error("Invite token missing on currentTable");
-          return;
-        }
-
-        openInviteModal({
-          boardId: currentTable.id,
-          inviteToken: currentTable.invite_token,
-          boardName: currentTable.name || "Availability Calendar"
-        });
-      });
-    }
-
-    await loadTable();
-  } finally {
-    document.body.style.visibility = "visible";
-  }
-}
-  
-// Dashboard hosted card actions (+ menu) — stub only for now
-document.addEventListener("click", async (e) => {
-  // Toggle menu when clicking +
-  const actionsBtn = e.target.closest(".board-actions-btn");
-  if (actionsBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const card = actionsBtn.closest(".board-pill[data-kind]");
-    if (!card) return;
-
-    // Close any other open menus
-    document.querySelectorAll(".board-actions-menu:not([hidden])")
-      .forEach(m => m.hidden = true);
-
-    const menu = card.querySelector(".board-actions-menu");
-    if (!menu) return;
-
-    menu.hidden = !menu.hidden;
-    return;
-  }
-
-  // Handle menu item click
-  const item = e.target.closest(".board-actions-item");
-  if (item) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const card = item.closest(".board-pill[data-kind]");
-    if (!card) return;
-
-    // Close menu
-    const menu = card.querySelector(".board-actions-menu");
-    if (menu) menu.hidden = true;
-
-    const action = item.dataset.action;
-    const boardId = card.dataset.boardId;
-
-    const kind = card.dataset.kind;
-
-// Joined: remove calendar (stub for now)
-if (kind === "joined" && action === "remove") {
-  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
-
-  const ok = await confirmModal({
-    title: "Remove calendar?",
-    message: `Remove "${boardName}"? You and all your logged times will be removed from this calendar.`,
-    okText: "Remove",
-    cancelText: "Cancel"
-  });
-
-  if (!ok) return;
-
-  // Actually remove current user from this board
-try {
-  const au = await auth.getAuthUser();
-  if (!au?.id) throw new Error("Not signed in");
-
-  // 1) delete availability rows for this user on this board
-  const { error: availDelErr } = await supabase
-    .from("availability_dev")
-    .delete()
-    .eq("table_id", boardId)
-    .eq("user_id", au.id);
-
-  if (availDelErr) throw availDelErr;
-
-  // 2) delete membership row
-  const { error: memDelErr } = await supabase
-    .from("board_members")
-    .delete()
-    .eq("board_id", boardId)
-    .eq("user_id", au.id);
-
-  if (memDelErr) throw memDelErr;
-
-  // 3) refresh dashboard lists + previews
-  await loadBoards();
-
-} catch (err) {
-  console.error("Remove calendar failed:", err);
-  alert("Could not remove you from this calendar. Please try again.");
-}
-return;
-
-  return;
-}
-
-    if (action === "add-user") {
-      const inviteTok = card.dataset.inviteToken;
-      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
-
-      if (!inviteTok) {
-        console.error("No invite token found on hosted board card.");
-        return;
-      }
-
-      openInviteModal({
-        boardId: card.dataset.boardId,
-        inviteToken: inviteTok,
-        boardName
-      });
-      return;
-    }
-    
-    if (action === "delete") {
-      // Confirm (no alert UI yet — we can swap to a custom modal next)
-      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
-      const ok = await confirmModal({
-        title: "Delete calendar?",
-        message: `Delete "${boardName}"? This cannot be undone.`,
-        okText: "Delete",
-        cancelText: "Cancel"
-      });
-      if (!ok) return;
-
-      try {
-        // Disable the menu item to prevent double-clicks
-        item.disabled = true;
-        item.textContent = "Deleting…";
-
-        const { error } = await supabase.rpc("delete_calendar", { p_board_id: boardId });
-        if (error) throw error;
-
-        // Remove from dashboard immediately
-        card.remove();
-
-        // Optional: refresh lists in case you show counts etc.
-        if (typeof loadBoards === "function") await loadBoards();
-      } catch (err) {
-        console.error("Delete calendar failed:", err);
-        // Revert UI
-        item.disabled = false;
-        item.textContent = "Delete";
-      }
-    }
-    
-    return;
-  }
-
-  // Click outside closes any open menus
-  document.querySelectorAll(".board-actions-menu:not([hidden])")
-    .forEach(m => m.hidden = true);
-}, true);
-
-function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "OK", cancelText = "Cancel" } = {}) {
-  return new Promise((resolve) => {
-    const overlay = document.getElementById("confirm-modal");
-    const titleEl = document.getElementById("confirm-title");
-    const msgEl = document.getElementById("confirm-message");
-    const okBtn = document.getElementById("confirm-ok");
-    const cancelBtn = document.getElementById("confirm-cancel");
-
-    if (!overlay || !titleEl || !msgEl || !okBtn || !cancelBtn) {
-      // Fallback if modal is missing
-      resolve(window.confirm(message));
-      return;
-    }
-
-    titleEl.textContent = title;
-    msgEl.textContent = message;
-    okBtn.textContent = okText;
-    cancelBtn.textContent = cancelText;
-    // Hide cancel button if no cancelText supplied
-      if (!cancelText) {
-        cancelBtn.style.display = "none";
-      } else {
-        cancelBtn.style.display = "";
-      }
-
-    const cleanup = () => {
-      overlay.hidden = true;
-      document.removeEventListener("keydown", onKeyDown, true);
-      overlay.removeEventListener("click", onOverlayClick, true);
-      okBtn.removeEventListener("click", onOk, true);
-      cancelBtn.removeEventListener("click", onCancel, true);
-    };
-
-    const onOk = (e) => { e.preventDefault(); cleanup(); resolve(true); };
-    const onCancel = (e) => { e.preventDefault(); cleanup(); resolve(false); };
-
-    const onOverlayClick = (e) => {
-      // Clicking outside the card cancels
-      const card = e.target.closest(".modal-card");
-      if (!card) { cleanup(); resolve(false); }
-    };
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") { cleanup(); resolve(false); }
-      if (e.key === "Enter") { cleanup(); resolve(true); }
-    };
-
-    overlay.hidden = false;
-
-    document.addEventListener("keydown", onKeyDown, true);
-    overlay.addEventListener("click", onOverlayClick, true);
-    okBtn.addEventListener("click", onOk, true);
-    cancelBtn.addEventListener("click", onCancel, true);
-
-    // Focus the safe option
-    cancelBtn.focus();
-  });
-}
-
-let inviteContext = { inviteToken: null, boardName: "" };
+// =========================
+// INVITES
+// =========================
 
 function buildInviteLink(inviteToken) {
   return `${window.location.origin}${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
 }
 
+//----------   
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
 }
 
+//----------   
 function openInviteModal({ inviteToken, boardName, boardId }) {
   const overlay = document.getElementById("invite-modal");
   const emailEl = document.getElementById("invite-email");
@@ -3307,7 +2430,14 @@ await confirmModal({
   setTimeout(() => emailEl.focus(), 0);
 }
 
-  
+
+
+
+
+// =========================
+// DASHBOARD PREVIEWS
+// =========================
+
 async function renderBoardPreviews(owned) {
   try {
     if (!owned || owned.length === 0) return;
@@ -3641,31 +2771,1096 @@ const legendHtml = shown.length
 }
 
 
-function getWeekdayLabels7(timeZone) {
-  const base = new Date(); // "now"
-  const fmt = new Intl.DateTimeFormat(undefined, {
-    weekday: "short",
-    timeZone: timeZone || undefined
+
+
+
+// =========================
+// APP INITIALISATION
+// =========================
+
+function bindUiListenersOnce() {
+  
+  if (uiListenersBound) return;
+  uiListenersBound = true;
+
+  auth.bindAuthUi();
+  
+  // Dashboard: Create New Calendar (your dashboard button)
+  const dashCreate = document.getElementById("create-board-btn");
+  if (dashCreate) dashCreate.addEventListener("click", showCreateBoard);
+
+  // Back to dashboard from board view
+  const backToDashBtn = document.getElementById("back-to-dashboard");
+  if (backToDashBtn) {
+    backToDashBtn.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+  }
+
+  // Create screen: Continue/Create after structure selection
+  const goCreateBtn = document.getElementById("go-create");
+  if (goCreateBtn) {
+    goCreateBtn.addEventListener("click", createBoard);
+  }
+
+  // Create page → Return to Dashboard
+  const returnBtn = document.getElementById("return-dashboard-btn");
+  if (returnBtn) {
+    returnBtn.addEventListener("click", showDashboard);
+  }
+
+  const setupGrid = document.getElementById("setup-colour-grid");
+  renderSwatchGrid(setupGrid, setupSelectedColour, (hex) => {
+    setupSelectedColour = hex;
   });
 
-    const labels = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(base);
-      d.setDate(base.getDate() + i);
-      labels.push(fmt.format(d));
+  const identityGrid = document.getElementById("identity-colour-grid");
+  renderSwatchGrid(identityGrid, identitySelectedColour, (hex) => {
+    identitySelectedColour = hex;
+  });
+  
+  // Profile setup save
+  const setupSaveBtn = document.getElementById("setup-save");
+  if (setupSaveBtn) setupSaveBtn.addEventListener("click", auth.saveProfileSetup);
+
+  // Structure selection (Dev Custom + Meals)
+  const devCard = document.getElementById("dev-custom-card");
+  if (devCard) {
+    devCard.addEventListener("click", () => {
+      selectedStructure = "custom";
+      setActiveStructureCard("dev-custom-card");
+      showGoCreate();
+    });
+  }
+
+  // Dashboard: Settings drawer
+  const settingsBtn = document.getElementById("dash-settings");
+  const drawer = document.getElementById("settings-drawer");
+  const backdrop = document.getElementById("settings-backdrop");
+  const closeBtn = document.getElementById("settings-close");
+
+  function openDrawer() {
+    document.body.classList.add("drawer-open");
+    drawer?.setAttribute("aria-hidden", "false");
+    backdrop?.setAttribute("aria-hidden", "false");
+    closeBtn?.focus();
+  }
+
+  function closeDrawer() {
+    document.body.classList.remove("drawer-open");
+    document.body.classList.remove("settings-split");
+    document.body.classList.remove("account-view");
+    showDashboardPanel();
+
+    drawer?.setAttribute("aria-hidden", "true");
+    backdrop?.setAttribute("aria-hidden", "true");
+    settingsBtn?.focus();
+  }
+
+  settingsBtn?.addEventListener("click", openDrawer);
+  closeBtn?.addEventListener("click", closeDrawer);
+  backdrop?.addEventListener("click", closeDrawer);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
+      closeDrawer();
     }
-    return labels;
+  });
+
+
+  
+const signOutBtn = document.getElementById("drawer-signout");
+
+if (signOutBtn) {
+  signOutBtn.addEventListener("click", async () => {
+    // Close drawer so the modal is the only focus
+    document.body.classList.remove("drawer-open");
+
+    // Make OK button look dangerous for this one modal instance
+    const okBtn = document.getElementById("confirm-ok");
+    const cancelBtn = document.getElementById("confirm-cancel");
+    okBtn?.classList.add("modal-btn-danger");
+    cancelBtn?.classList.remove("modal-btn-danger");
+
+    const ok = await confirmModal({
+      title: "Sign out?",
+      message: "You’ll need to sign in again to access your calendars.",
+      okText: "Sign Out",
+      cancelText: "Cancel"
+    });
+
+    // Reset styling so other confirms aren't red
+    okBtn?.classList.remove("modal-btn-danger");
+
+    if (!ok) return;
+
+    try {
+      await supabase.auth.signOut();
+      location.reload(); // startApp will show auth overlay
+    } catch (err) {
+      console.error("Sign out failed", err);
+      alert("Could not sign out. Please try again.");
+    }
+  });
+}
+
+const feedbackBtn = document.getElementById("drawer-feedback");
+const feedbackModal = document.getElementById("feedback-modal");
+const feedbackCancel = document.getElementById("feedback-cancel");
+const feedbackSend = document.getElementById("feedback-send");
+const feedbackText = document.getElementById("feedback-text");
+
+if (feedbackBtn && feedbackModal) {
+  feedbackBtn.addEventListener("click", () => {
+    document.body.classList.remove("drawer-open");
+    feedbackText.value = "";
+    feedbackModal.hidden = false;
+    feedbackText.focus();
+  });
+}
+
+feedbackCancel?.addEventListener("click", () => {
+  feedbackModal.hidden = true;
+});
+
+feedbackSend?.addEventListener("click", async () => {
+  const text = feedbackText.value.trim();
+
+  if (!text) {
+    feedbackText.focus();
+    return;
+  }
+
+try {
+  feedbackSend.disabled = true;
+
+  const { error } = await supabase.functions.invoke("send-feedback", {
+    body: { message: text }
+  });
+
+  if (error) throw error;
+
+  feedbackModal.hidden = true;
+  feedbackText.value = "";
+
+  await confirmModal({
+    title: "Thank you!",
+    message: "Your feedback has been sent.",
+    okText: "Close",
+    cancelText: ""
+  });
+
+} catch (err) {
+  console.error("Feedback send failed:", err);
+  alert("Could not send feedback. Please try again.");
+} finally {
+  feedbackSend.disabled = false;
+}
+});
+
+// Drawer item routing (delegated so it works even if drawer DOM is rebuilt)
+drawer?.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+
+  if (btn.id === "drawer-account") {
+    // Keep drawer open, but make right side usable
+    document.body.classList.add("drawer-open");
+    document.body.classList.add("settings-split");
+
+    // On wide screens, CSS kills pointer-events; aria-hidden alone doesn't
+    drawer?.setAttribute("aria-hidden", "false");
+    backdrop?.setAttribute("aria-hidden", "true");
+
+    showAccountPanel();
+    await hydrateAccountPanel();
+    return;
+  }
+
+  // (optional later) handle other drawer buttons here:
+  // if (btn.id === "drawer-notifications") ...
+});
+
+document.getElementById("acct-back-dashboard")?.addEventListener("click", () => {
+  closeDrawer(); // ✅ same behavior as clicking the ✕
+});
+
+// Change Name modal wiring
+const nameModal = document.getElementById("name-modal");
+const nameInput = document.getElementById("name-input");
+const nameErr = document.getElementById("name-error");
+const nameCancel = document.getElementById("name-cancel");
+const nameSave = document.getElementById("name-save");
+
+
+  
+nameInput?.addEventListener("input", updateNameCount);
+  
+
+
+document.getElementById("acct-change-name")?.addEventListener("click", () => {
+  openNameModal();
+});
+
+nameCancel?.addEventListener("click", closeNameModal);
+
+// Change Colour modal wiring
+const colourModal = document.getElementById("colour-modal");
+const colourGrid = document.getElementById("colour-grid");
+const colourErr = document.getElementById("colour-error");
+const colourCancel = document.getElementById("colour-cancel");
+const colourSave = document.getElementById("colour-save");
+
+let selectedColour = null;
+
+  
+
+
+
+
+document.getElementById("acct-change-colour")?.addEventListener("click", () => {
+  openColourModal();
+});
+
+colourCancel?.addEventListener("click", closeColourModal);
+
+// click outside card closes
+colourModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closeColourModal();
+});
+
+colourSave?.addEventListener("click", async () => {
+  try {
+   const v = selectedColour;
+      if (!v) return setColourError("Please choose a colour.");
+      if (!COLOUR_PRESETS.includes(v)) return setColourError("Please choose a colour from the list.");
+
+    // no change
+    if (user?.color && v === user.color.toUpperCase()) {
+      closeColourModal();
+      return;
+    }
+
+    colourSave.disabled = true;
+    setColourError("");
+
+    const au = await auth.getAuthUser();
+    if (!au) {
+      setColourError("You’re not signed in.");
+      return;
+    }
+
+    // Update profile colour
+    const { error } = await supabase
+      .from("profiles")
+      .update({ color: v })
+      .eq("user_id", au.id);
+
+    if (error) throw error;
+    
+    // Update in-memory + cache (important for realtime)
+    if (user) user.color = v;
+    profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
+
+    // Update account panel immediately
+    const dot = document.getElementById("acct-colour-dot");
+    const txt = document.getElementById("acct-colour-text");
+    if (dot) dot.style.background = v;
+    if (txt) txt.textContent = v;
+
+    closeColourModal();
+
+    await confirmModal({
+      title: "Colour updated",
+      message: "Your colour has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+    // Refresh dashboard previews (legend/dots)
+    await loadBoards();
+
+    // Refresh open calendar (legend/dots)
+    if (currentTable) {
+      await loadAvailability();
+    }
+
+  } catch (err) {
+    console.error("Change colour failed:", err);
+    setColourError("Could not update your colour. Please try again.");
+  } finally {
+    if (colourSave) colourSave.disabled = false;
+  }
+});
+
+// Change Password modal wiring
+const pwModal = document.getElementById("password-modal");
+const pwCurrent = document.getElementById("pw-current");
+const pwNew = document.getElementById("pw-new");
+const pwConfirm = document.getElementById("pw-confirm");
+const pwErr = document.getElementById("pw-error");
+const pwCancel = document.getElementById("pw-cancel");
+const pwSave = document.getElementById("pw-save");
+
+
+
+document.getElementById("acct-change-password")?.addEventListener("click", () => {
+  openPwModal();
+});
+
+pwCancel?.addEventListener("click", closePwModal);
+
+// click outside card closes
+pwModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closePwModal();
+});
+
+// Esc closes, Enter submits (from any field)
+[pwCurrent, pwNew, pwConfirm].forEach(el => {
+  el?.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closePwModal();
+    if (e.key === "Enter") pwSave?.click();
+  });
+});
+
+pwSave?.addEventListener("click", async () => {
+  try {
+    const au = await auth.getAuthUser();
+    if (!au?.email) {
+      setPwError("You’re not signed in.");
+      return;
+    }
+
+    const current = (pwCurrent?.value || "").trim();
+    const next = (pwNew?.value || "").trim();
+    const confirm = (pwConfirm?.value || "").trim();
+
+    // validation
+    if (!current) return setPwError("Please enter your current password.");
+    if (!next) return setPwError("Please enter a new password.");
+    if (next.length < 8) return setPwError("New password must be at least 8 characters.");
+    if (next !== confirm) return setPwError("New passwords do not match.");
+    if (next === current) return setPwError("New password must be different from the current password.");
+
+    pwSave.disabled = true;
+    setPwError("");
+
+    // 1) Re-authenticate (security step)
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email: au.email,
+      password: current
+    });
+    if (signInErr) {
+      setPwError("Current password is incorrect.");
+      return;
+    }
+
+    // 2) Update password
+    const { error: updErr } = await supabase.auth.updateUser({ password: next });
+    if (updErr) {
+      console.error("updateUser password failed:", updErr);
+      setPwError("Could not update password. Please try again.");
+      return;
+    }
+
+    closePwModal();
+
+    await confirmModal({
+      title: "Password updated",
+      message: "Your password has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+  } catch (err) {
+    console.error("Change password failed:", err);
+    setPwError("Could not update password. Please try again.");
+  } finally {
+    if (pwSave) pwSave.disabled = false;
+  }
+});
+  
+// close on clicking outside the card
+nameModal?.addEventListener("click", (e) => {
+  const card = e.target.closest(".modal-card");
+  if (!card) closeNameModal();
+});
+
+// Enter = save, Esc = close
+nameInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeNameModal();
+  if (e.key === "Enter") nameSave?.click();
+});
+
+nameSave?.addEventListener("click", async () => {
+  try {
+    if (!nameInput) return;
+
+    const newName = nameInput.value.trim();
+
+    // Basic validation
+    if (!newName) return setNameError("Please enter a name.");
+    if (newName.length < 2) return setNameError("Name must be at least 2 characters.");
+    if (newName.length > 15) return setNameError("Name must be 15 characters or fewer.");
+
+    // No change
+    if (user?.name && newName === user.name) {
+      closeNameModal();
+      return;
+    }
+
+    nameSave.disabled = true;
+    setNameError("");
+
+    // Update DB
+    const au = await auth.getAuthUser();
+    if (!au) {
+      setNameError("You’re not signed in.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+
+    if (error) throw error;
+      // Keep legacy snapshot columns in sync so other users (who may not be allowed to read profiles)
+      // still see the updated name in legends / previews.
+      const { error: snapErr } = await supabase
+        .from("availability_dev")
+        .update({ name: newName })
+        .eq("user_id", au.id);
+
+      if (snapErr) console.warn("availability_dev snapshot name update failed:", snapErr);
+
+    const { error: availErr } = await supabase
+      .from("availability_dev")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+
+    if (availErr) throw availErr;
+    
+     await supabase
+      .from("availability_dev")
+      .update({ name: newName })
+      .eq("user_id", au.id);
+    
+    // Update in-memory + UI
+    if (user) user.name = newName;
+
+    // refresh UI
+    await loadBoards(true);
+
+    if (currentTable) {
+      await loadAvailability();
+    }
+    
+    const acctNameEl = document.getElementById("acct-name");
+    if (acctNameEl) acctNameEl.textContent = newName;
+
+    const dashUser = document.getElementById("dash-username");
+    if (dashUser && user?.name) {
+      dashUser.textContent = possessive(user.name).toUpperCase();
+    }
+
+    closeNameModal();
+
+    await confirmModal({
+      title: "Username updated",
+      message: "Your display name has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+    // Refresh dashboard previews/legend with fresh profile data
+    await loadBoards();
+      if (currentTable) {
+          await loadAvailability();
+      }
+
+  } catch (err) {
+    console.error("Change name failed:", err);
+    setNameError("Could not update your name. Please try again.");
+  } finally {
+    if (nameSave) nameSave.disabled = false;
+  }
+});
+
+const nameCount = document.getElementById("name-count");
+
+
+
+document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
+  if (!isBoardOwner) return;
+  setCalendarNoteEditing(true);
+});
+
+document.getElementById("footer-note-cancel")?.addEventListener("click", () => {
+  const ta = document.getElementById("footer-note-input");
+  if (ta) ta.value = noteDraftBeforeEdit;
+  setCalendarNoteEditing(false);
+});
+
+document.getElementById("footer-note-save")?.addEventListener("click", async () => {
+  await saveCalendarNote();
+});
+  
+document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
+  await confirmModal({
+    title: "Pro (later)",
+    message: "This will eventually show pricing and upgrade options.",
+    okText: "Close",
+    cancelText: ""
+  });
+});
+  
+  const mealsCard = document.getElementById("meals-card");
+  if (mealsCard) {
+    mealsCard.addEventListener("click", () => {
+      selectedStructure = "meals";
+      setActiveStructureCard("meals-card");
+      showGoCreate();
+    });
+  }
+
+    // Enter key on password field = show button press + submit
+  document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      const btn = document.getElementById("auth-submit");
+      if (!btn) return;
+
+      btn.classList.add("is-pressed");
+
+      setTimeout(() => {
+        btn.classList.remove("is-pressed");
+        btn.click();
+      }, 120);
+    }
+  });
+}
+
+//----------    
+async function startApp() {
+  document.body.classList.remove("show-landing-bg");
+  document.body.style.visibility = "visible";
+  bindUiListenersOnce();
+
+  // Password recovery handling
+  const hash = window.location.hash || "";
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+  const type = url.searchParams.get("type") || "";
+
+  // If Supabase uses PKCE recovery links, exchange code for session
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      auth.showAuthOverlay("This reset link is invalid or expired. Please request a new one.");
+      return;
+    }
+
+    url.searchParams.delete("code");
+    window.history.replaceState({}, document.title, url.toString());
+  }
+
+  const isRecovery = hash.includes("type=recovery") || type === "recovery";
+
+  // If this is a recovery link, mark recovery mode in session storage
+  if (isRecovery) {
+    localStorage.setItem("pw_recovery_in_progress", "1");
+    auth.showAuthOverlay("");
+    auth.setAuthMode("recovery");
+    return;
+  }
+
+  const recoveryInProgress = localStorage.getItem("pw_recovery_in_progress") === "1";
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // If a recovery session exists but user is no longer on the recovery page,
+  // force sign-out so they cannot land straight in the dashboard
+  if (recoveryInProgress && session) {
+    await supabase.auth.signOut();
+    localStorage.removeItem("pw_recovery_in_progress");
+    auth.showAuthOverlay("Please sign in again.");
+    return;
+  }
+
+  if (!session) {
+    const lockSignin = !!manageToken;
+    auth.showAuthOverlay("", { lockSignin });
+    return;
+  }
+
+  // Homepage → dashboard flow
+  if (!inviteToken && !manageToken) {
+    const prof = await auth.loadProfile();
+
+    if (!prof || !prof.name || !prof.color) {
+      auth.showProfileSetup();
+      return;
+    }
+
+    showDashboard();
+    auth.setDashboardSubtitle();
+    await loadBoards();
+    return;
+  }
+
+  // Invite/manage-token board flow
+  try {
+    populateHostTimezoneSelect();
+
+    const addRowBtn = document.getElementById("add-row");
+    if (addRowBtn) {
+      addRowBtn.addEventListener("click", () => addRowInput());
+    }
+
+    const backBtn = document.getElementById("route-error-back");
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        window.location.href = "/";
+      });
+    }
+
+    const addUsersBtn = document.getElementById("add-users-btn");
+    if (addUsersBtn) {
+      addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
+      addUsersBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+    }
+
+    if (addUsersBtn) {
+      addUsersBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!manageToken) return;
+        if (!currentTable?.invite_token) {
+          console.error("Invite token missing on currentTable");
+          return;
+        }
+
+        openInviteModal({
+          boardId: currentTable.id,
+          inviteToken: currentTable.invite_token,
+          boardName: currentTable.name || "Availability Calendar"
+        });
+      });
+    }
+
+    await loadTable();
+  } finally {
+    document.body.style.visibility = "visible";
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+//----------  
+
+
+  
+  
+
+
+  
+
+  
+  
+
+
+  
+
+  
+
+
+  
+
+  function generateToken() {
+  return crypto.randomUUID() + crypto.randomUUID();
+}
+ 
+/* DOM refs */
+const table = document.getElementById("availabilityTable");
+const legendDiv = document.getElementById("legend");
+const legendList = document.getElementById("legendList");
+
+let user = null;
+
+const getUser = () => user;
+const setUser = (nextUser) => { user = nextUser; };
+
+const auth = createAuthModule({
+  supabase,
+  showConfirmPopup,
+  loadBoards,
+  loadTable,
+  showDashboard,
+  inviteToken,
+  manageToken,
+  setUser,
+  getUser,
+  getSetupSelectedColour: () => setupSelectedColour,
+  possessive,
+});
+
+
+// Bind buttons
+document.getElementById("acct-delete-account")?.addEventListener("click", () => {
+  // clear old values
+  const p = document.getElementById("delete-account-password");
+  const c = document.getElementById("delete-account-confirm");
+  if (p) p.value = "";
+  if (c) c.value = "";
+  showDeleteAccountOverlay("");
+});
+
+document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
+  hideDeleteAccountOverlay();
+});
+
+document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
+  await deleteAccountFlow();
+});
+  
+
+// Cache current profile info so realtime inserts/updates can display the latest name/color
+let profilesCache = {};
+  
+  
+  async function deleteBoard() {
+  if (!currentTable) return;
+
+  if (!confirm("Are you sure you want to permanently delete this board?")) return;
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
+
+  await supabase
+    .from("tables")
+    .delete()
+    .eq("id", currentTable.id);
+
+  window.location.href = "/";
+}
+
+  function saveIdentity() {
+  const input = document.getElementById("identity-name");
+
+  const name = (input?.value || "").trim();
+  const color = (identitySelectedColour || "").trim();
+
+  if (!name) {
+    alert("Please enter your name");
+    return;
+  }
+  if (!color) {
+    alert("Please choose a dot colour");
+    return;
+  }
+
+  localStorage.setItem("globalUserName", name);
+  localStorage.setItem("globalUserColor", color);
+  getOrCreateUserId();
+
+  // If we're on a board link, load it now (no full reload needed)
+  if (inviteToken || manageToken) {
+    loadTable();
+  } else {
+    location.reload();
+  }
 }
 
   
-// Tiny helper to avoid breaking the preview with special chars
-function escapeHtml(str) {
-  return String(str || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  function addRowInput(name = "") {
+  const container = document.getElementById("rows-container");
+
+  if (!container) return; // Prevent crash
+
+  if (container.children.length >= 4) {
+    alert("Free version allows up to 4 time blocks.");
+    return;
+  }
+
+  const input = document.createElement("input");
+  input.placeholder = "Time block (e.g. Dinner)";
+  input.value = name;
+
+  container.appendChild(input);
 }
+
+  
+  function showBoardSetup() {
+    const startBtn = document.getElementById("start-create");
+      if (startBtn) startBtn.style.display = "none";
+
+      const setup = document.getElementById("board-setup");
+      if (setup) setup.style.display = "block";
+
+      // Populate timezone dropdown when entering setup
+      if (typeof populateHostTimezoneSelect === "function") {
+        populateHostTimezoneSelect();
+          // TEMP: until you implement real Pro accounts
+        const isPro = false;
+        populateGoldThresholdSelect(isPro);
+      }
+
+  // Reset pages
+  const nameStep = document.getElementById("name-step");
+  const detailsStep = document.getElementById("details-step");
+  const rowBuilder = document.getElementById("row-builder");
+  const createActions = document.getElementById("create-actions");
+  const goldSel = document.getElementById("gold-threshold");
+  
+  if (goldSel) goldSel.value = "";
+
+  if (nameStep) nameStep.style.display = "block";
+  if (detailsStep) detailsStep.style.display = "none";
+  if (rowBuilder) rowBuilder.style.display = "none";
+  if (createActions) createActions.style.display = "none";
+
+  // Hide the page-2 create button until a structure is clicked
+  const goBtn = document.getElementById("go-create");
+  if (goBtn) goBtn.style.display = "none";
+
+  // Clear structure selection highlight + require click
+  selectedStructure = null;
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
+}
+ 
+const PREBUILT_STRUCTURES = {
+  meals: [
+    { label: "Breakfast" },
+    { label: "Lunch" },
+    { label: "Dinner" }
+  ],
+  quick_meetup: [
+    { label: "Morning" },
+    { label: "Afternoon" },
+    { label: "Evening" }
+  ],
+  dinner_plan: [
+    { label: "Early Dinner" },
+    { label: "Dinner" },
+    { label: "Late Dinner" }
+  ]
+};
+
+
+const COLOUR_PRESETS = [
+  // Reds / Pinks
+  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
+  // Purples / Blues
+  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
+  "#06B6D4", "#0891B2", "#00C7BE",
+  // Greens
+  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
+  // Yellows / Oranges
+  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
+  // Neutrals / Earthy
+  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
+  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
+  // Extra tasteful accents
+  "#14B8A6", "#84CC16"
+];
+
+
+
+  
+let uiListenersBound = false;
+
+  
+// Dashboard hosted card actions (+ menu) — stub only for now
+document.addEventListener("click", async (e) => {
+  // Toggle menu when clicking +
+  const actionsBtn = e.target.closest(".board-actions-btn");
+  if (actionsBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = actionsBtn.closest(".board-pill[data-kind]");
+    if (!card) return;
+
+    // Close any other open menus
+    document.querySelectorAll(".board-actions-menu:not([hidden])")
+      .forEach(m => m.hidden = true);
+
+    const menu = card.querySelector(".board-actions-menu");
+    if (!menu) return;
+
+    menu.hidden = !menu.hidden;
+    return;
+  }
+
+  // Handle menu item click
+  const item = e.target.closest(".board-actions-item");
+  if (item) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = item.closest(".board-pill[data-kind]");
+    if (!card) return;
+
+    // Close menu
+    const menu = card.querySelector(".board-actions-menu");
+    if (menu) menu.hidden = true;
+
+    const action = item.dataset.action;
+    const boardId = card.dataset.boardId;
+
+    const kind = card.dataset.kind;
+
+// Joined: remove calendar (stub for now)
+if (kind === "joined" && action === "remove") {
+  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+
+  const ok = await confirmModal({
+    title: "Remove calendar?",
+    message: `Remove "${boardName}"? You and all your logged times will be removed from this calendar.`,
+    okText: "Remove",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  // Actually remove current user from this board
+try {
+  const au = await auth.getAuthUser();
+  if (!au?.id) throw new Error("Not signed in");
+
+  // 1) delete availability rows for this user on this board
+  const { error: availDelErr } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", boardId)
+    .eq("user_id", au.id);
+
+  if (availDelErr) throw availDelErr;
+
+  // 2) delete membership row
+  const { error: memDelErr } = await supabase
+    .from("board_members")
+    .delete()
+    .eq("board_id", boardId)
+    .eq("user_id", au.id);
+
+  if (memDelErr) throw memDelErr;
+
+  // 3) refresh dashboard lists + previews
+  await loadBoards();
+
+} catch (err) {
+  console.error("Remove calendar failed:", err);
+  alert("Could not remove you from this calendar. Please try again.");
+}
+return;
+
+  return;
+}
+
+    if (action === "add-user") {
+      const inviteTok = card.dataset.inviteToken;
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
+
+      if (!inviteTok) {
+        console.error("No invite token found on hosted board card.");
+        return;
+      }
+
+      openInviteModal({
+        boardId: card.dataset.boardId,
+        inviteToken: inviteTok,
+        boardName
+      });
+      return;
+    }
+    
+    if (action === "delete") {
+      // Confirm (no alert UI yet — we can swap to a custom modal next)
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+      const ok = await confirmModal({
+        title: "Delete calendar?",
+        message: `Delete "${boardName}"? This cannot be undone.`,
+        okText: "Delete",
+        cancelText: "Cancel"
+      });
+      if (!ok) return;
+
+      try {
+        // Disable the menu item to prevent double-clicks
+        item.disabled = true;
+        item.textContent = "Deleting…";
+
+        const { error } = await supabase.rpc("delete_calendar", { p_board_id: boardId });
+        if (error) throw error;
+
+        // Remove from dashboard immediately
+        card.remove();
+
+        // Optional: refresh lists in case you show counts etc.
+        if (typeof loadBoards === "function") await loadBoards();
+      } catch (err) {
+        console.error("Delete calendar failed:", err);
+        // Revert UI
+        item.disabled = false;
+        item.textContent = "Delete";
+      }
+    }
+    
+    return;
+  }
+
+  // Click outside closes any open menus
+  document.querySelectorAll(".board-actions-menu:not([hidden])")
+    .forEach(m => m.hidden = true);
+}, true);
+
+
+
+let inviteContext = { inviteToken: null, boardName: "" };
+
+
+
+  
+
+
+
+
+
+  
+
   
 document.addEventListener("DOMContentLoaded", startApp);
