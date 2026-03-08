@@ -102,6 +102,7 @@ body.logged-in #landing-bg::after{
   opacity: 0.7;
   padding-right: 4px;
   max-width: 220px;
+  padding-left: 10px;
 }
 
 @media (max-width: 720px){
