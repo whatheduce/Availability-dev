@@ -28,19 +28,6 @@ let noteDraftBeforeEdit = "";
 
 let setupSelectedColour = "#3b82f6";
 let identitySelectedColour = "#2d7ff9";  
-  
-// Full refresh only after the board has been idle for a while
-function scheduleFullRefreshIdle(ms = 15000) {
-  clearTimeout(fullRefreshTimer);
-  fullRefreshTimer = setTimeout(async () => {
-    if (!currentTable) return;
-
-    await loadAvailability();
-    await refreshCurrentTableMeta();
-    renderCalendarLastUpdated();
-  }, ms);
-}
-
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
   
@@ -264,6 +251,18 @@ async function refreshCurrentTableMeta() {
   if (error || !data) return;
 
   currentTable = { ...currentTable, ...data };
+}
+
+
+function scheduleFullRefreshIdle(ms = 15000) {
+  clearTimeout(fullRefreshTimer);
+  fullRefreshTimer = setTimeout(async () => {
+    if (!currentTable) return;
+
+    await loadAvailability();
+    await refreshCurrentTableMeta();
+    renderCalendarLastUpdated();
+  }, ms);
 }
 
 
