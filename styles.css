@@ -91,14 +91,13 @@ body.logged-in #landing-bg::after{
 }
 
 .calendar-meta-line{
-  text-align: right;
   color: #555;
   font-size: 14px;
   margin-top: 2px;
 }
 
 .calendar-meta-subtext{
-  font-size: 11px;
+  font-size: 10px;
   font-style: italic;
   opacity: 0.7;
   margin-top: 2px;
@@ -120,7 +119,7 @@ body.logged-in #landing-bg::after{
 .calendar-topbar-right{
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 4px;
   margin-right: 8%;
 }
