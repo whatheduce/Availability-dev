@@ -1827,7 +1827,8 @@ if (structureChoice === "custom") {
   // --- Gold threshold (required) ---
   const goldRaw = document.getElementById("gold-threshold")?.value || "";
     if (!goldRaw) {
-      const gold = parseInt(goldSelect.value, 10);
+      alert("Please choose a gold threshold");
+      return;
     }
 
     // TEMP: until you implement real Pro accounts
