@@ -950,6 +950,7 @@ function subscribeRealtime() {
           renderGoldThreshold();
         }
       }
+      )
     .subscribe((status) => {
       log("table channel:", status);
     });
