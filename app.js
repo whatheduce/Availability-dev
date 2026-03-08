@@ -30,10 +30,14 @@ let setupSelectedColour = "#3b82f6";
 let identitySelectedColour = "#2d7ff9";  
   
 // Full refresh only after the board has been idle for a while
-function scheduleFullRefreshIdle(ms = 20000) {
+function scheduleFullRefreshIdle(ms = 15000) {
   clearTimeout(fullRefreshTimer);
-  fullRefreshTimer = setTimeout(() => {
-    if (currentTable) loadAvailability();
+  fullRefreshTimer = setTimeout(async () => {
+    if (!currentTable) return;
+
+    await loadAvailability();
+    await refreshCurrentTableMeta();
+    renderCalendarLastUpdated();
   }, ms);
 }
 
@@ -245,6 +249,21 @@ function getLastUpdatedLabel(isoString) {
   const diffDay = Math.floor(diffHr / 24);
   if (diffDay === 1) return "1 day ago";
   return `${diffDay} days ago`;
+}
+
+
+async function refreshCurrentTableMeta() {
+  if (!currentTable?.id) return;
+
+  const { data, error } = await supabase
+    .from("tables")
+    .select("id, last_activity_at, gold_threshold, host_tz, name")
+    .eq("id", currentTable.id)
+    .single();
+
+  if (error || !data) return;
+
+  currentTable = { ...currentTable, ...data };
 }
 
 
@@ -830,7 +849,7 @@ async function handleAvailabilityChange(payload) {
   if (payload.eventType === "DELETE") {
     removeDot(entry);
     await applyGoldStateForCell(cell, entry.day);
-    scheduleFullRefreshIdle(20000);
+    scheduleFullRefreshIdle(15000);
     return;
   }
 
@@ -839,7 +858,7 @@ async function handleAvailabilityChange(payload) {
   if (cell.classList.contains("gold-cell")) {
     // Still keep legend/gold state correct in case thresholds changed
     await applyGoldStateForCell(cell, entry.day);
-    scheduleFullRefreshIdle(20000);
+    scheduleFullRefreshIdle(15000);
     return;
   }
 
@@ -894,7 +913,7 @@ async function handleAvailabilityChange(payload) {
   // Now that dot is present, see if we should flip to gold (this will remove dots container if needed)
   await applyGoldStateForCell(cell, entry.day);
 
-  scheduleFullRefreshIdle(20000);
+  scheduleFullRefreshIdle(15000);
 }
   
   
