@@ -812,6 +812,7 @@ async function handleAvailabilityChange(payload) {
   if (payload.eventType === "DELETE") {
     if (entry.day == null || entry.time == null) {
       await loadAvailability();
+      scheduleFullRefreshIdle(15000);
       return;
     }
   }
