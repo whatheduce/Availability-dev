@@ -182,6 +182,17 @@ function addKey(tableId, day, time, userId) {
 }
   
 
+function renderGoldThreshold() {
+  const wrap = document.getElementById("calendar-gold-threshold");
+  const value = document.getElementById("calendar-gold-value");
+
+  if (!wrap || !value || !currentTable) return;
+
+  value.textContent = currentTable.gold_threshold || 0;
+  wrap.style.display = "block";
+}
+
+
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1027,6 +1038,7 @@ await refreshBoardOwnerFlag();
 renderCalendarNote();
 setCalendarNoteEditing(false);
 await renderCalendarInviteStats();
+renderGoldThreshold();
 }
 
 
