@@ -212,6 +212,52 @@ function renderCalendarTitle() {
 }
 
 
+function renderCalendarLastUpdated() {
+  const wrap = document.getElementById("calendar-last-updated");
+  const value = document.getElementById("calendar-last-updated-value");
+
+  if (!wrap || !value || !currentTable) return;
+
+  value.textContent = getLastUpdatedLabel(currentTable.last_activity_at);
+  wrap.style.display = "block";
+}
+
+
+function getLastUpdatedLabel(isoString) {
+  if (!isoString) return "—";
+
+  const then = new Date(isoString).getTime();
+  const now = Date.now();
+
+  if (!Number.isFinite(then)) return "—";
+
+  const diffMs = Math.max(0, now - then);
+  const diffMin = Math.floor(diffMs / 60000);
+
+  if (diffMin <= 0) return "just now";
+  if (diffMin === 1) return "1 minute ago";
+  if (diffMin < 60) return `${diffMin} minutes ago`;
+
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr === 1) return "1 hour ago";
+  if (diffHr < 24) return `${diffHr} hours ago`;
+
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay === 1) return "1 day ago";
+  return `${diffDay} days ago`;
+}
+
+function renderCalendarLastUpdated() {
+  const wrap = document.getElementById("calendar-last-updated");
+  const value = document.getElementById("calendar-last-updated-value");
+
+  if (!wrap || !value || !currentTable) return;
+
+  value.textContent = getLastUpdatedLabel(currentTable.last_activity_at);
+  wrap.style.display = "block";
+}
+
+
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -221,6 +267,7 @@ function ensureDotContainer(cell) {
   }
   return dc;
 }
+
 
 function addOptimisticDot(cell, userId, name, color) {
   const dc = ensureDotContainer(cell);
