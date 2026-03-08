@@ -193,6 +193,17 @@ function renderGoldThreshold() {
 }
 
 
+function renderCalendarTimezone() {
+  const wrap = document.getElementById("calendar-timezone");
+  const value = document.getElementById("calendar-timezone-value");
+
+  if (!wrap || !value || !currentTable) return;
+
+  value.textContent = currentTable.host_tz || "—";
+  wrap.style.display = "block";
+}
+
+
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1039,8 +1050,8 @@ renderCalendarNote();
 setCalendarNoteEditing(false);
 await renderCalendarInviteStats();
 renderGoldThreshold();
+renderCalendarTimezone();
 }
-
 
 
   function generateToken() {
