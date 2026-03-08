@@ -1885,8 +1885,7 @@ if (fetchErr || !created) {
 if (bmErr) {
   console.warn("board_members owner upsert failed:", bmErr);
 }
-  
-  localStorage.setItem("lastBoardToken", inviteToken);
+
   // keep invite token for “share link” / last joined link if you want
 localStorage.setItem("lastBoardToken", inviteToken);
 
@@ -3514,7 +3513,7 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
         btn.click();
       }, 120);
     }
-    // Dashboard hosted card actions (+ menu) — stub only for now
+    // Dashboard hosted card actions (+ menu)
 document.addEventListener("click", async (e) => {
   // Toggle menu when clicking +
   const actionsBtn = e.target.closest(".board-actions-btn");
