@@ -1,21 +1,32 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createAuthModule } from "./auth.js";
 
+// =========================
+// DEBUG HELPERS
+// =========================
+
 const DEBUG = false;
 function log(...args) { if (DEBUG) console.log(...args); }
 function warn(...args) { if (DEBUG) console.warn(...args); }
 
+// =========================
+// SUPABASE CREDENTIALS
+// =========================
 
-/* Supabase credentials*/
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-  /* === Invite Token + Current Table === */
+
+
+// =========================
+// URL / GLOBAL CONSTANTS
+// =========================
+
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
 const pendingAdds = new Set();   // prevent spam insert per user+cell
-const inFlightCells = new Set(); // per-cell lock (replaces toggleInFlight)
+const inFlightCells = new Set(); // per-cell lock
 
 let currentTable = null;
 let availabilityChannel = null;
@@ -23,20 +34,20 @@ let tableChannel = null;
 let fullRefreshTimer = null;
 let loadAvailabilityRunning = false;
 let loadAvailabilityQueued = false;
-
 let noteDraftBeforeEdit = "";
-
 let setupSelectedColour = "#3b82f6";
 let identitySelectedColour = "#2d7ff9";  
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
-  
+let isBoardOwner = false;
+
+
+
 window.openBoard = function (inviteToken) {
   window.location.href = `${window.location.pathname}?t=${encodeURIComponent(inviteToken)}`;
 };
 
 
-let isBoardOwner = false;
 
 async function refreshBoardOwnerFlag() {
   isBoardOwner = false;
@@ -126,6 +137,7 @@ function setCalendarNoteEditing(on) {
     editBtn.style.display = "inline-flex";
   }
 }
+
 
 async function saveCalendarNote() {
   if (!isBoardOwner || !currentTable?.id) return;
@@ -648,33 +660,24 @@ function ensureLegendUser(entry) {
 
 async function ensureMembership(boardId) {
   const au = await auth.getAuthUser();
-  console.log("ensureMembership auth user:", au, "boardId:", boardId);
 
-  if (!au || !boardId) {
-    console.warn("ensureMembership skipped: missing auth user or boardId");
-    return;
-  }
+  if (!au || !boardId) return;
 
   const payload = {
     board_id: boardId,
     user_id: au.id
   };
 
-  console.log("ensureMembership payload:", payload);
-
   const { data, error } = await supabase
     .from("board_members")
     .upsert(payload, { onConflict: "board_id,user_id" })
     .select();
-
-  console.log("ensureMembership result:", data, error);
 
   if (error) {
     console.error("ensureMembership failed:", error);
     return;
   }
 
-  // ✅ If this user was invited, mark that invite as accepted
   if (au.email) {
     const { error: acceptErr } = await supabase
       .from("board_invites")
@@ -693,7 +696,6 @@ async function ensureMembership(boardId) {
 async function rebuildDotsForCell(cell) {
   if (!currentTable) return;
 
-  // Always start clean (prevents duplicate dot containers)
   cell.querySelector(".dot-container")?.remove();
 
   const dayNum = parseInt(cell.dataset.day, 10);
@@ -1852,7 +1854,6 @@ async function resetBoard() {
   if (!currentTable) return;
 
   if (!confirm("Are you sure you want to permanently delete this board?")) return;
-                                                                                                          console.log("delete_calendar p_board_id =", boardId);
   await supabase
     .from("availability_dev")
     .delete()
