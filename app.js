@@ -936,12 +936,20 @@ function subscribeRealtime() {
         filter: `id=eq.${currentTable.id}`
       },
       async (payload) => {
+        const prevTable = currentTable;
         currentTable = { ...currentTable, ...payload.new };
-        buildCalendar();
-        await loadAvailability();
-        renderCalendarNote();
+
+        const structureChanged =
+          prevTable?.start_date !== currentTable?.start_date ||
+          JSON.stringify(prevTable?.row_structure) !== JSON.stringify(currentTable?.row_structure) ||
+          prevTable?.gold_threshold !== currentTable?.gold_threshold;
+
+        if (structureChanged) {
+          buildCalendar();
+          await loadAvailability();
+          renderGoldThreshold();
+        }
       }
-    )
     .subscribe((status) => {
       log("table channel:", status);
     });
