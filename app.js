@@ -204,6 +204,14 @@ function renderCalendarTimezone() {
 }
 
 
+function renderCalendarTitle() {
+  const el = document.getElementById("calendar-title");
+  if (!el || !currentTable) return;
+
+  el.textContent = currentTable.name || "Calendar";
+}
+
+
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1051,6 +1059,7 @@ setCalendarNoteEditing(false);
 await renderCalendarInviteStats();
 renderGoldThreshold();
 renderCalendarTimezone();
+renderCalendarTitle();
 }
 
 
