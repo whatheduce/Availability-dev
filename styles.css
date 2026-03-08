@@ -121,7 +121,7 @@ body.logged-in #landing-bg::after{
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
-  margin-right: 8%;
+  margin-right: 25%;
 }
 
 #calendar-title-wrap{
