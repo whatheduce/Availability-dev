@@ -2,8 +2,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createAuthModule } from "./auth.js";
 
 
-
-
 // =========================
 // DEBUG HELPERS
 // =========================
@@ -37,6 +35,56 @@ const manageToken = params.get("m");
 const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock
 
+
+
+
+
+// =========================
+// STATIC CONFIG
+// =========================
+
+const PREBUILT_STRUCTURES = {
+  meals: [
+    { label: "Breakfast" },
+    { label: "Lunch" },
+    { label: "Dinner" }
+  ],
+  quick_meetup: [
+    { label: "Morning" },
+    { label: "Afternoon" },
+    { label: "Evening" }
+  ],
+  dinner_plan: [
+    { label: "Early Dinner" },
+    { label: "Dinner" },
+    { label: "Late Dinner" }
+  ]};
+
+const COLOUR_PRESETS = [
+  // Reds / Pinks
+  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
+  // Purples / Blues
+  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
+  "#06B6D4", "#0891B2", "#00C7BE",
+  // Greens
+  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
+  // Yellows / Oranges
+  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
+  // Neutrals / Earthy
+  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
+  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
+  // Extra tasteful accents
+  "#14B8A6", "#84CC16"
+];
+
+
+
+
+
+// =========================
+// GLOBAL RUNTIME STATE
+// =========================
+
 let currentTable = null;
 let availabilityChannel = null;
 let tableChannel = null;  
@@ -49,6 +97,19 @@ let identitySelectedColour = "#2d7ff9";
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
 let isBoardOwner = false;
+
+
+
+
+
+// =========================
+// GLOBAL USER STATE
+// =========================
+
+let user = null;
+
+const getUser = () => user;
+const setUser = (nextUser) => { user = nextUser; };
 
 
 
@@ -246,11 +307,41 @@ function addKey(tableId, day, time, userId) {
   return `${tableId}|${day}|${time}|${userId}`;
 }
 
+//----------
+function generateToken() {
+  return crypto.randomUUID() + crypto.randomUUID();
+}
 
 // =========================
 // CALENDAR TOPBAR / META HELPERS
 // =========================
 
+async function refreshBoardOwnerFlag() {
+  isBoardOwner = false;
+
+  const au = await auth.getAuthUser();
+  if (!au || !currentTable?.id) return;
+
+  // Primary: owner_id on tables row
+  if (currentTable.owner_id && currentTable.owner_id === au.id) {
+    isBoardOwner = true;
+  } else {
+    // Fallback: board_members role
+    const { data, error } = await supabase
+      .from("board_members")
+      .select("role")
+      .eq("board_id", currentTable.id)
+      .eq("user_id", au.id)
+      .maybeSingle();
+
+    if (!error) isBoardOwner = data?.role === "owner";
+  }
+
+  const editBtn = document.getElementById("footer-edit-btn");
+  if (editBtn) editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
+}
+
+//----------
 function renderCalendarNote() {
   const ta = document.getElementById("footer-note-input");
   if (!ta) return;
@@ -339,17 +430,6 @@ function renderCalendarTitle() {
 }
 
 //----------
-function renderCalendarLastUpdated() {
-  const wrap = document.getElementById("calendar-last-updated");
-  const value = document.getElementById("calendar-last-updated-value");
-
-  if (!wrap || !value || !currentTable) return;
-
-  value.textContent = getLastUpdatedLabel(currentTable.last_activity_at);
-  wrap.style.display = "block";
-}
-
-//----------
 function getLastUpdatedLabel(isoString) {
   if (!isoString) return "—";
 
@@ -372,6 +452,17 @@ function getLastUpdatedLabel(isoString) {
   const diffDay = Math.floor(diffHr / 24);
   if (diffDay === 1) return "1 day ago";
   return `${diffDay} days ago`;
+}
+
+//----------
+function renderCalendarLastUpdated() {
+  const wrap = document.getElementById("calendar-last-updated");
+  const value = document.getElementById("calendar-last-updated-value");
+
+  if (!wrap || !value || !currentTable) return;
+
+  value.textContent = getLastUpdatedLabel(currentTable.last_activity_at);
+  wrap.style.display = "block";
 }
 
 //----------
@@ -428,32 +519,6 @@ async function renderCalendarInviteStats() {
   joinedEl.textContent = String(joined);
   totalEl.textContent = String(total);
   wrap.style.display = "block";
-}
-
-//----------
-async function refreshBoardOwnerFlag() {
-  isBoardOwner = false;
-
-  const au = await auth.getAuthUser();
-  if (!au || !currentTable?.id) return;
-
-  // Primary: owner_id on tables row
-  if (currentTable.owner_id && currentTable.owner_id === au.id) {
-    isBoardOwner = true;
-  } else {
-    // Fallback: board_members role
-    const { data, error } = await supabase
-      .from("board_members")
-      .select("role")
-      .eq("board_id", currentTable.id)
-      .eq("user_id", au.id)
-      .maybeSingle();
-
-    if (!error) isBoardOwner = data?.role === "owner";
-  }
-
-  const editBtn = document.getElementById("footer-edit-btn");
-  if (editBtn) editBtn.style.display = isBoardOwner ? "inline-flex" : "none";
 }
 
 
@@ -563,6 +628,34 @@ function buildUserFromStorage() {
     name,
     color
   };
+}
+
+//----------
+function saveIdentity() {
+const input = document.getElementById("identity-name");
+
+const name = (input?.value || "").trim();
+const color = (identitySelectedColour || "").trim();
+
+  if (!name) {
+    alert("Please enter your name");
+    return;
+  }
+  if (!color) {
+    alert("Please choose a dot colour");
+    return;
+  }
+
+  localStorage.setItem("globalUserName", name);
+  localStorage.setItem("globalUserColor", color);
+  getOrCreateUserId();
+
+  // If we're on a board link, load it now (no full reload needed)
+  if (inviteToken || manageToken) {
+    loadTable();
+  } else {
+    location.reload();
+  }
 }
 
 //----------
@@ -1579,6 +1672,66 @@ async function loadAvailability() {
 // BOARD CREATION / CONFIG
 // =========================
 
+function showBoardSetup() {
+  const startBtn = document.getElementById("start-create");
+    if (startBtn) startBtn.style.display = "none";
+
+     const setup = document.getElementById("board-setup");
+    if (setup) setup.style.display = "block";
+
+     // Populate timezone dropdown when entering setup
+    if (typeof populateHostTimezoneSelect === "function") {
+      populateHostTimezoneSelect();
+         // TEMP: until you implement real Pro accounts
+       const isPro = false;
+       populateGoldThresholdSelect(isPro);
+      }
+
+  // Reset pages
+  const nameStep = document.getElementById("name-step");
+  const detailsStep = document.getElementById("details-step");
+  const rowBuilder = document.getElementById("row-builder");
+  const createActions = document.getElementById("create-actions");
+  const goldSel = document.getElementById("gold-threshold");
+  
+  if (goldSel) goldSel.value = "";
+
+  if (nameStep) nameStep.style.display = "block";
+  if (detailsStep) detailsStep.style.display = "none";
+  if (rowBuilder) rowBuilder.style.display = "none";
+  if (createActions) createActions.style.display = "none";
+
+  // Hide the page-2 create button until a structure is clicked
+  const goBtn = document.getElementById("go-create");
+  if (goBtn) goBtn.style.display = "none";
+
+  // Clear structure selection highlight + require click
+  selectedStructure = null;
+  ["dev-custom-card", "meals-card"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+  });
+}
+
+//----------  
+function addRowInput(name = "") {
+  const container = document.getElementById("rows-container");
+
+  if (!container) return; // Prevent crash
+
+  if (container.children.length >= 4) {
+    alert("Free version allows up to 4 time blocks.");
+    return;
+  }
+
+  const input = document.createElement("input");
+  input.placeholder = "Time block (e.g. Dinner)";
+  input.value = name;
+
+  container.appendChild(input);
+}
+
+//----------  
 function populateGoldThresholdSelect(isPro) {
   const sel = document.getElementById("gold-threshold");
   if (!sel) return;
@@ -1741,17 +1894,6 @@ localStorage.setItem("lastBoardManageToken", ownerToken);
 window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
 }
 
-//----------  
-async function resetBoard() {
-  if (!currentTable) return;
-
-  await supabase
-    .from("availability_dev")
-    .delete()
-    .eq("table_id", currentTable.id);
-
-  await loadAvailability();
-}
 
 
 
@@ -2775,10 +2917,49 @@ const legendHtml = shown.length
 
 
 // =========================
+// MODULE INITIALISATION
+// =========================
+
+const auth = createAuthModule({
+  supabase,
+  showConfirmPopup,
+  loadBoards,
+  loadTable,
+  showDashboard,
+  inviteToken,
+  manageToken,
+  setUser,
+  getUser,
+  getSetupSelectedColour: () => setupSelectedColour,
+  possessive,
+});
+
+
+
+
+
+// =========================
 // APP INITIALISATION
 // =========================
 
 function bindUiListenersOnce() {
+  // Bind buttons
+document.getElementById("acct-delete-account")?.addEventListener("click", () => {
+  // clear old values
+  const p = document.getElementById("delete-account-password");
+  const c = document.getElementById("delete-account-confirm");
+  if (p) p.value = "";
+  if (c) c.value = "";
+  showDeleteAccountOverlay("");
+});
+
+document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
+  hideDeleteAccountOverlay();
+});
+
+document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
+  await deleteAccountFlow();
+});
   
   if (uiListenersBound) return;
   uiListenersBound = true;
@@ -2866,9 +3047,7 @@ function bindUiListenersOnce() {
       closeDrawer();
     }
   });
-
-
-  
+ 
 const signOutBtn = document.getElementById("drawer-signout");
 
 if (signOutBtn) {
@@ -2992,11 +3171,7 @@ const nameErr = document.getElementById("name-error");
 const nameCancel = document.getElementById("name-cancel");
 const nameSave = document.getElementById("name-save");
 
-
-  
 nameInput?.addEventListener("input", updateNameCount);
-  
-
 
 document.getElementById("acct-change-name")?.addEventListener("click", () => {
   openNameModal();
@@ -3012,11 +3187,6 @@ const colourCancel = document.getElementById("colour-cancel");
 const colourSave = document.getElementById("colour-save");
 
 let selectedColour = null;
-
-  
-
-
-
 
 document.getElementById("acct-change-colour")?.addEventListener("click", () => {
   openColourModal();
@@ -3466,97 +3636,10 @@ async function startApp() {
 
 
 
+// =========================
+// BOARD ACTIONS
+// =========================
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-//----------  
-
-
-  
-  
-
-
-  
-
-  
-  
-
-
-  
-
-  
-
-
-  
-
-  function generateToken() {
-  return crypto.randomUUID() + crypto.randomUUID();
-}
- 
-/* DOM refs */
-const table = document.getElementById("availabilityTable");
-const legendDiv = document.getElementById("legend");
-const legendList = document.getElementById("legendList");
-
-let user = null;
-
-const getUser = () => user;
-const setUser = (nextUser) => { user = nextUser; };
-
-const auth = createAuthModule({
-  supabase,
-  showConfirmPopup,
-  loadBoards,
-  loadTable,
-  showDashboard,
-  inviteToken,
-  manageToken,
-  setUser,
-  getUser,
-  getSetupSelectedColour: () => setupSelectedColour,
-  possessive,
-});
-
-
-// Bind buttons
-document.getElementById("acct-delete-account")?.addEventListener("click", () => {
-  // clear old values
-  const p = document.getElementById("delete-account-password");
-  const c = document.getElementById("delete-account-confirm");
-  if (p) p.value = "";
-  if (c) c.value = "";
-  showDeleteAccountOverlay("");
-});
-
-document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
-  hideDeleteAccountOverlay();
-});
-
-document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
-  await deleteAccountFlow();
-});
-  
-
-// Cache current profile info so realtime inserts/updates can display the latest name/color
-let profilesCache = {};
-  
-  
   async function deleteBoard() {
   if (!currentTable) return;
 
@@ -3574,132 +3657,48 @@ let profilesCache = {};
   window.location.href = "/";
 }
 
-  function saveIdentity() {
-  const input = document.getElementById("identity-name");
+//----------  
+async function resetBoard() {
+  if (!currentTable) return;
 
-  const name = (input?.value || "").trim();
-  const color = (identitySelectedColour || "").trim();
+  await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id);
 
-  if (!name) {
-    alert("Please enter your name");
-    return;
-  }
-  if (!color) {
-    alert("Please choose a dot colour");
-    return;
-  }
-
-  localStorage.setItem("globalUserName", name);
-  localStorage.setItem("globalUserColor", color);
-  getOrCreateUserId();
-
-  // If we're on a board link, load it now (no full reload needed)
-  if (inviteToken || manageToken) {
-    loadTable();
-  } else {
-    location.reload();
-  }
+  await loadAvailability();
 }
 
-  
-  function addRowInput(name = "") {
-  const container = document.getElementById("rows-container");
-
-  if (!container) return; // Prevent crash
-
-  if (container.children.length >= 4) {
-    alert("Free version allows up to 4 time blocks.");
-    return;
-  }
-
-  const input = document.createElement("input");
-  input.placeholder = "Time block (e.g. Dinner)";
-  input.value = name;
-
-  container.appendChild(input);
-}
-
-  
-  function showBoardSetup() {
-    const startBtn = document.getElementById("start-create");
-      if (startBtn) startBtn.style.display = "none";
-
-      const setup = document.getElementById("board-setup");
-      if (setup) setup.style.display = "block";
-
-      // Populate timezone dropdown when entering setup
-      if (typeof populateHostTimezoneSelect === "function") {
-        populateHostTimezoneSelect();
-          // TEMP: until you implement real Pro accounts
-        const isPro = false;
-        populateGoldThresholdSelect(isPro);
-      }
-
-  // Reset pages
-  const nameStep = document.getElementById("name-step");
-  const detailsStep = document.getElementById("details-step");
-  const rowBuilder = document.getElementById("row-builder");
-  const createActions = document.getElementById("create-actions");
-  const goldSel = document.getElementById("gold-threshold");
-  
-  if (goldSel) goldSel.value = "";
-
-  if (nameStep) nameStep.style.display = "block";
-  if (detailsStep) detailsStep.style.display = "none";
-  if (rowBuilder) rowBuilder.style.display = "none";
-  if (createActions) createActions.style.display = "none";
-
-  // Hide the page-2 create button until a structure is clicked
-  const goBtn = document.getElementById("go-create");
-  if (goBtn) goBtn.style.display = "none";
-
-  // Clear structure selection highlight + require click
-  selectedStructure = null;
-  ["dev-custom-card", "meals-card"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove("active");
-  });
-}
- 
-const PREBUILT_STRUCTURES = {
-  meals: [
-    { label: "Breakfast" },
-    { label: "Lunch" },
-    { label: "Dinner" }
-  ],
-  quick_meetup: [
-    { label: "Morning" },
-    { label: "Afternoon" },
-    { label: "Evening" }
-  ],
-  dinner_plan: [
-    { label: "Early Dinner" },
-    { label: "Dinner" },
-    { label: "Late Dinner" }
-  ]
-};
 
 
-const COLOUR_PRESETS = [
-  // Reds / Pinks
-  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
-  // Purples / Blues
-  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
-  "#06B6D4", "#0891B2", "#00C7BE",
-  // Greens
-  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
-  // Yellows / Oranges
-  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
-  // Neutrals / Earthy
-  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
-  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
-  // Extra tasteful accents
-  "#14B8A6", "#84CC16"
-];
+
+
+// =========================
+// SHARED DOM REFERENCES / APP STATE
+// =========================
+const table = document.getElementById("availabilityTable");
+const legendDiv = document.getElementById("legend");
+const legendList = document.getElementById("legendList");
+
+
+
+
+
+
+
 
 
 
   
+
+
+  
+
+  
+
+// Cache current profile info so realtime inserts/updates can display the latest name/color
+let profilesCache = {};
+    
 let uiListenersBound = false;
 
   
@@ -3848,19 +3847,8 @@ return;
     .forEach(m => m.hidden = true);
 }, true);
 
-
-
 let inviteContext = { inviteToken: null, boardName: "" };
 
-
-
-  
-
-
-
-
-
-  
 
   
 document.addEventListener("DOMContentLoaded", startApp);
