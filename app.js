@@ -97,6 +97,9 @@ let identitySelectedColour = "#2d7ff9";
 let selectedStructure = "custom"; // dev-only selectable for now
 let presenceChannel = null;
 let isBoardOwner = false;
+let profilesCache = {};
+let uiListenersBound = false;
+let inviteContext = { inviteToken: null, boardName: "" };
 
 
 
@@ -3511,6 +3514,150 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
         btn.click();
       }, 120);
     }
+    // Dashboard hosted card actions (+ menu) — stub only for now
+document.addEventListener("click", async (e) => {
+  // Toggle menu when clicking +
+  const actionsBtn = e.target.closest(".board-actions-btn");
+  if (actionsBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = actionsBtn.closest(".board-pill[data-kind]");
+    if (!card) return;
+
+    // Close any other open menus
+    document.querySelectorAll(".board-actions-menu:not([hidden])")
+      .forEach(m => m.hidden = true);
+
+    const menu = card.querySelector(".board-actions-menu");
+    if (!menu) return;
+
+    menu.hidden = !menu.hidden;
+    return;
+  }
+
+  // Handle menu item click
+  const item = e.target.closest(".board-actions-item");
+  if (item) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const card = item.closest(".board-pill[data-kind]");
+    if (!card) return;
+
+    // Close menu
+    const menu = card.querySelector(".board-actions-menu");
+    if (menu) menu.hidden = true;
+
+    const action = item.dataset.action;
+    const boardId = card.dataset.boardId;
+
+    const kind = card.dataset.kind;
+
+// Joined: remove calendar (stub for now)
+if (kind === "joined" && action === "remove") {
+  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+
+  const ok = await confirmModal({
+    title: "Remove calendar?",
+    message: `Remove "${boardName}"? You and all your logged times will be removed from this calendar.`,
+    okText: "Remove",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  // Actually remove current user from this board
+try {
+  const au = await auth.getAuthUser();
+  if (!au?.id) throw new Error("Not signed in");
+
+  // 1) delete availability rows for this user on this board
+  const { error: availDelErr } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", boardId)
+    .eq("user_id", au.id);
+
+  if (availDelErr) throw availDelErr;
+
+  // 2) delete membership row
+  const { error: memDelErr } = await supabase
+    .from("board_members")
+    .delete()
+    .eq("board_id", boardId)
+    .eq("user_id", au.id);
+
+  if (memDelErr) throw memDelErr;
+
+  // 3) refresh dashboard lists + previews
+  await loadBoards();
+
+} catch (err) {
+  console.error("Remove calendar failed:", err);
+  alert("Could not remove you from this calendar. Please try again.");
+}
+return;
+
+  return;
+}
+
+    if (action === "add-user") {
+      const inviteTok = card.dataset.inviteToken;
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
+
+      if (!inviteTok) {
+        console.error("No invite token found on hosted board card.");
+        return;
+      }
+
+      openInviteModal({
+        boardId: card.dataset.boardId,
+        inviteToken: inviteTok,
+        boardName
+      });
+      return;
+    }
+    
+    if (action === "delete") {
+      // Confirm (no alert UI yet — we can swap to a custom modal next)
+      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
+      const ok = await confirmModal({
+        title: "Delete calendar?",
+        message: `Delete "${boardName}"? This cannot be undone.`,
+        okText: "Delete",
+        cancelText: "Cancel"
+      });
+      if (!ok) return;
+
+      try {
+        // Disable the menu item to prevent double-clicks
+        item.disabled = true;
+        item.textContent = "Deleting…";
+
+        const { error } = await supabase.rpc("delete_calendar", { p_board_id: boardId });
+        if (error) throw error;
+
+        // Remove from dashboard immediately
+        card.remove();
+
+        // Optional: refresh lists in case you show counts etc.
+        if (typeof loadBoards === "function") await loadBoards();
+      } catch (err) {
+        console.error("Delete calendar failed:", err);
+        // Revert UI
+        item.disabled = false;
+        item.textContent = "Delete";
+      }
+    }
+    
+    return;
+  }
+
+  // Click outside closes any open menus
+  document.querySelectorAll(".board-actions-menu:not([hidden])")
+    .forEach(m => m.hidden = true);
+}, true);
   });
 }
 
@@ -3682,173 +3829,4 @@ const legendList = document.getElementById("legendList");
 
 
 
-
-
-
-
-
-
-
-  
-
-
-  
-
-  
-
-// Cache current profile info so realtime inserts/updates can display the latest name/color
-let profilesCache = {};
-    
-let uiListenersBound = false;
-
-  
-// Dashboard hosted card actions (+ menu) — stub only for now
-document.addEventListener("click", async (e) => {
-  // Toggle menu when clicking +
-  const actionsBtn = e.target.closest(".board-actions-btn");
-  if (actionsBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const card = actionsBtn.closest(".board-pill[data-kind]");
-    if (!card) return;
-
-    // Close any other open menus
-    document.querySelectorAll(".board-actions-menu:not([hidden])")
-      .forEach(m => m.hidden = true);
-
-    const menu = card.querySelector(".board-actions-menu");
-    if (!menu) return;
-
-    menu.hidden = !menu.hidden;
-    return;
-  }
-
-  // Handle menu item click
-  const item = e.target.closest(".board-actions-item");
-  if (item) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const card = item.closest(".board-pill[data-kind]");
-    if (!card) return;
-
-    // Close menu
-    const menu = card.querySelector(".board-actions-menu");
-    if (menu) menu.hidden = true;
-
-    const action = item.dataset.action;
-    const boardId = card.dataset.boardId;
-
-    const kind = card.dataset.kind;
-
-// Joined: remove calendar (stub for now)
-if (kind === "joined" && action === "remove") {
-  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
-
-  const ok = await confirmModal({
-    title: "Remove calendar?",
-    message: `Remove "${boardName}"? You and all your logged times will be removed from this calendar.`,
-    okText: "Remove",
-    cancelText: "Cancel"
-  });
-
-  if (!ok) return;
-
-  // Actually remove current user from this board
-try {
-  const au = await auth.getAuthUser();
-  if (!au?.id) throw new Error("Not signed in");
-
-  // 1) delete availability rows for this user on this board
-  const { error: availDelErr } = await supabase
-    .from("availability_dev")
-    .delete()
-    .eq("table_id", boardId)
-    .eq("user_id", au.id);
-
-  if (availDelErr) throw availDelErr;
-
-  // 2) delete membership row
-  const { error: memDelErr } = await supabase
-    .from("board_members")
-    .delete()
-    .eq("board_id", boardId)
-    .eq("user_id", au.id);
-
-  if (memDelErr) throw memDelErr;
-
-  // 3) refresh dashboard lists + previews
-  await loadBoards();
-
-} catch (err) {
-  console.error("Remove calendar failed:", err);
-  alert("Could not remove you from this calendar. Please try again.");
-}
-return;
-
-  return;
-}
-
-    if (action === "add-user") {
-      const inviteTok = card.dataset.inviteToken;
-      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
-
-      if (!inviteTok) {
-        console.error("No invite token found on hosted board card.");
-        return;
-      }
-
-      openInviteModal({
-        boardId: card.dataset.boardId,
-        inviteToken: inviteTok,
-        boardName
-      });
-      return;
-    }
-    
-    if (action === "delete") {
-      // Confirm (no alert UI yet — we can swap to a custom modal next)
-      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "this calendar";
-      const ok = await confirmModal({
-        title: "Delete calendar?",
-        message: `Delete "${boardName}"? This cannot be undone.`,
-        okText: "Delete",
-        cancelText: "Cancel"
-      });
-      if (!ok) return;
-
-      try {
-        // Disable the menu item to prevent double-clicks
-        item.disabled = true;
-        item.textContent = "Deleting…";
-
-        const { error } = await supabase.rpc("delete_calendar", { p_board_id: boardId });
-        if (error) throw error;
-
-        // Remove from dashboard immediately
-        card.remove();
-
-        // Optional: refresh lists in case you show counts etc.
-        if (typeof loadBoards === "function") await loadBoards();
-      } catch (err) {
-        console.error("Delete calendar failed:", err);
-        // Revert UI
-        item.disabled = false;
-        item.textContent = "Delete";
-      }
-    }
-    
-    return;
-  }
-
-  // Click outside closes any open menus
-  document.querySelectorAll(".board-actions-menu:not([hidden])")
-    .forEach(m => m.hidden = true);
-}, true);
-
-let inviteContext = { inviteToken: null, boardName: "" };
-
-
-  
 document.addEventListener("DOMContentLoaded", startApp);
