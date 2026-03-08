@@ -98,6 +98,30 @@ body.logged-in #landing-bg::after{
   margin-top: 2px;
 }
 
+.calendar-meta-subtext{
+  font-size: 11px;
+  font-style: italic;
+  opacity: 0.65;
+  margin-top: 3px;
+  padding-left: 12px;
+  text-align: left;
+}
+
+@media (max-width: 720px){
+  .calendar-topbar{
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-topbar-right{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin-right: 8%;
+}
+
     .centered-container {
       max-width: 500px;
       margin: 60px auto;
@@ -254,16 +278,6 @@ body.logged-in #landing-bg::after{
   overflow: auto;
 }
 
-@media (max-width: 720px){
-  .calendar-topbar{
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .calendar-topbar-right{
-    justify-content: flex-start;
-  }
-
   .footer-note--top{
     width: 100%;
   }
@@ -273,6 +287,7 @@ body.logged-in #landing-bg::after{
       transition: box-shadow 0.3s ease, background 0.3s ease;
       border-radius: 8px;
     }
+
     td > .dot-container {
       display: flex;
       justify-content: center;
