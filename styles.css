@@ -124,6 +124,20 @@ body.logged-in #landing-bg::after{
   margin-right: 8%;
 }
 
+#calendar-title-wrap{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#calendar-title{
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1f2937;
+}
+
     .centered-container {
       max-width: 500px;
       margin: 60px auto;
