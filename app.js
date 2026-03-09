@@ -87,7 +87,8 @@ const COLOUR_PRESETS = [
 
 let currentTable = null;
 let availabilityChannel = null;
-let tableChannel = null;  
+let tableChannel = null; 
+let membershipChannel = null;
 let fullRefreshTimer = null;
 let loadAvailabilityRunning = false;
 let loadAvailabilityQueued = false;
@@ -1253,6 +1254,7 @@ function subscribeRealtime() {
   // Clean up existing channels (important if loadTable runs again)
   if (availabilityChannel) supabase.removeChannel(availabilityChannel);
   if (tableChannel) supabase.removeChannel(tableChannel);
+  if (membershipChannel) supabase.removeChannel(membershipChannel);
 
   // Availability changes for this board
   availabilityChannel = supabase
@@ -1273,6 +1275,43 @@ function subscribeRealtime() {
       log("availability channel:", status);
     });
 
+    const au = await auth.getAuthUser();
+
+  if (au?.id && currentTable?.id && !manageToken) {
+    membershipChannel = supabase
+      .channel(`membership:${currentTable.id}:${au.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "board_members",
+          filter: `board_id=eq.${currentTable.id}`
+        },
+        async () => {
+          const { data: memberRow, error: memberErr } = await supabase
+            .from("board_members")
+            .select("user_id")
+            .eq("board_id", currentTable.id)
+            .eq("user_id", au.id)
+            .maybeSingle();
+
+          if (memberErr) {
+            console.warn("Membership check failed:", memberErr);
+            return;
+          }
+
+          if (!memberRow) {
+            alert("You have been removed from this calendar.");
+            window.location.href = "/";
+          }
+        }
+      )
+      .subscribe((status) => {
+        log("membership channel:", status);
+      });
+  }
+  
   // Board changes (start_date / row_structure / gold_threshold updates)
   tableChannel = supabase
     .channel(`table:${currentTable.id}`)
