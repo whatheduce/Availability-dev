@@ -1277,7 +1277,7 @@ function subscribeRealtime() {
 
     const auId = getUser()?.id;
 
-  if (auId.id && currentTable?.id && !manageToken) {
+  if (auId && currentTable?.id && !manageToken) {
   membershipChannel = supabase
   .channel(`membership:${currentTable.id}`)
   .on(
