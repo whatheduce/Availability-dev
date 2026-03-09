@@ -2246,6 +2246,29 @@ async function deleteAccountFlow() {
 // NAME / COLOUR / PASSWORD MODALS
 // =========================
 
+const nameModal = document.getElementById("name-modal");
+const nameInput = document.getElementById("name-input");
+const nameErr = document.getElementById("name-error");
+const nameCancel = document.getElementById("name-cancel");
+const nameSave = document.getElementById("name-save");
+
+const colourModal = document.getElementById("colour-modal");
+const colourGrid = document.getElementById("colour-grid");
+const colourErr = document.getElementById("colour-error");
+const colourCancel = document.getElementById("colour-cancel");
+const colourSave = document.getElementById("colour-save");
+
+let selectedColour = null;
+
+const pwModal = document.getElementById("password-modal");
+const pwCurrent = document.getElementById("pw-current");
+const pwNew = document.getElementById("pw-new");
+const pwConfirm = document.getElementById("pw-confirm");
+const pwErr = document.getElementById("pw-error");
+const pwCancel = document.getElementById("pw-cancel");
+const pwSave = document.getElementById("pw-save");
+
+//----------
 function openNameModal() {
   if (!nameModal || !nameInput || !nameErr) return;
 
@@ -3168,13 +3191,6 @@ document.getElementById("acct-back-dashboard")?.addEventListener("click", () => 
   closeDrawer(); // ✅ same behavior as clicking the ✕
 });
 
-// Change Name modal wiring
-const nameModal = document.getElementById("name-modal");
-const nameInput = document.getElementById("name-input");
-const nameErr = document.getElementById("name-error");
-const nameCancel = document.getElementById("name-cancel");
-const nameSave = document.getElementById("name-save");
-
 nameInput?.addEventListener("input", updateNameCount);
 
 document.getElementById("acct-change-name")?.addEventListener("click", () => {
@@ -3182,15 +3198,6 @@ document.getElementById("acct-change-name")?.addEventListener("click", () => {
 });
 
 nameCancel?.addEventListener("click", closeNameModal);
-
-// Change Colour modal wiring
-const colourModal = document.getElementById("colour-modal");
-const colourGrid = document.getElementById("colour-grid");
-const colourErr = document.getElementById("colour-error");
-const colourCancel = document.getElementById("colour-cancel");
-const colourSave = document.getElementById("colour-save");
-
-let selectedColour = null;
 
 document.getElementById("acct-change-colour")?.addEventListener("click", () => {
   openColourModal();
@@ -3267,15 +3274,6 @@ colourSave?.addEventListener("click", async () => {
     if (colourSave) colourSave.disabled = false;
   }
 });
-
-// Change Password modal wiring
-const pwModal = document.getElementById("password-modal");
-const pwCurrent = document.getElementById("pw-current");
-const pwNew = document.getElementById("pw-new");
-const pwConfirm = document.getElementById("pw-confirm");
-const pwErr = document.getElementById("pw-error");
-const pwCancel = document.getElementById("pw-cancel");
-const pwSave = document.getElementById("pw-save");
 
 document.getElementById("acct-change-password")?.addEventListener("click", () => {
   openPwModal();
