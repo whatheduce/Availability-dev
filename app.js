@@ -1412,9 +1412,9 @@ async function loadBoards() {
         data-kind="hosted"
         data-board-id="${b.tables.id}"
         data-invite-token="${b.tables.invite_token}"
-        onclick="openManageBoard('${b.tables.owner_token}')"
+        data-owner-token="${b.tables.owner_token}"
       >
-        <button class="board-actions-btn" type="button" aria-label="Calendar actions" onclick="event.preventDefault();">+</button>
+        <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
         <div class="board-actions-menu" hidden>
           <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
@@ -1434,13 +1434,12 @@ async function loadBoards() {
   } else {
     joinedEl.innerHTML = joined.map(b => `
         <div 
-    class="board-pill board-pill--square"
-    data-kind="joined"
-    data-board-id="${b.tables.id}"
-    data-invite-token="${b.tables.invite_token}"
-    onclick="openBoard('${b.tables.invite_token}')"
-  >
-    <button class="board-actions-btn" type="button" aria-label="Calendar actions" onclick="event.preventDefault();"">+</button>
+        class="board-pill board-pill--square"
+        data-kind="joined"
+        data-board-id="${b.tables.id}"
+        data-invite-token="${b.tables.invite_token}"
+      >
+    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
     <div class="board-actions-menu" hidden>
       <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
@@ -3707,6 +3706,31 @@ return;
     return;
   }
 
+  // Handle normal card click
+  const card = e.target.closest(".board-pill[data-kind]");
+  if (card) {
+    if (
+      e.target.closest(".board-actions-btn") ||
+      e.target.closest(".board-actions-menu")
+    ) {
+      return;
+    }
+
+    const kind = card.dataset.kind;
+
+    if (kind === "hosted") {
+      const ownerToken = card.dataset.ownerToken;
+      if (ownerToken) openManageBoard(ownerToken);
+      return;
+    }
+
+    if (kind === "joined") {
+      const inviteToken = card.dataset.inviteToken;
+      if (inviteToken) openBoard(inviteToken);
+      return;
+    }
+  }
+  
   // Click outside closes any open menus
   document.querySelectorAll(".board-actions-menu:not([hidden])")
     .forEach(m => m.hidden = true);
