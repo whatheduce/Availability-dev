@@ -1289,28 +1289,10 @@ function subscribeRealtime() {
       filter: `board_id=eq.${currentTable.id}`
     },
     async () => {
-      const auId = getUser()?.id;
-
-      if (!auId || manageToken) return;
-
-      const { data: memberRow, error: memberErr } = await supabase
-        .from("board_members")
-        .select("user_id")
-        .eq("board_id", currentTable.id)
-        .eq("user_id", auId)
-        .maybeSingle();
-
-      if (memberErr) {
-        console.warn("Membership check failed:", memberErr);
-        return;
-      }
-
-      if (!memberRow) {
-        alert("You have been removed from this calendar.");
-        window.location.href = "/";
-      }
+      if (manageToken) return;
+      await kickOutIfNoBoardAccess();
     }
-  )
+    )
   .subscribe((status) => {
     log("membership channel:", status);
   });
@@ -2002,7 +1984,43 @@ function buildCalendar() {
 }
 
 //----------  
+async function userStillHasBoardAccess() {
+  if (!currentTable?.id) return false;
+
+  // Owner ?m= view always has access through owner token flow
+  if (manageToken) return true;
+
+  const au = getUser?.();
+  if (!au?.id) return false;
+
+  const { data, error } = await supabase
+    .from("board_members")
+    .select("user_id")
+    .eq("board_id", currentTable.id)
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Access check failed:", error);
+    return false;
+  }
+
+  return !!data;
+}
+
+//----------  
+async function kickOutIfNoBoardAccess() {
+  const hasAccess = await userStillHasBoardAccess();
+  if (hasAccess) return false;
+
+  alert("You have been removed from this calendar.");
+  window.location.href = "/";
+  return true;
+}
+
+//----------  
 async function toggleCell(e) {
+  if (await kickOutIfNoBoardAccess()) return;
   if (!user || !currentTable) return;
 
   let k; // ✅ so finally can always see it
