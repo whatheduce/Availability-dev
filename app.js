@@ -3577,6 +3577,11 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
     }
 });
   
+window.addEventListener("focus", async () => {
+  if (!currentTable?.id || manageToken) return;
+  await kickOutIfNoBoardAccess();
+});
+  
 document.addEventListener("pointerdown", (e) => {
   const actionsBtn = e.target.closest(".board-actions-btn");
   if (!actionsBtn) return;
