@@ -3557,7 +3557,8 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
         btn.click();
       }, 120);
     }
-
+});
+  
 document.addEventListener("pointerdown", (e) => {
   const actionsBtn = e.target.closest(".board-actions-btn");
   if (!actionsBtn) return;
@@ -3735,8 +3736,7 @@ return;
   document.querySelectorAll(".board-actions-menu:not([hidden])")
     .forEach(m => m.hidden = true);
 }, true);
-  });
-}
+  }
 
 //----------    
 async function startApp() {
