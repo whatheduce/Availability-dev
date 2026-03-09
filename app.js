@@ -3558,6 +3558,15 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
         btn.click();
       }, 120);
     }
+
+document.addEventListener("pointerdown", (e) => {
+  const actionsBtn = e.target.closest(".board-actions-btn");
+  if (!actionsBtn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+}, true);
+    
     // Dashboard hosted card actions (+ menu)
 document.addEventListener("click", async (e) => {
   // Toggle menu when clicking +
