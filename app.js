@@ -2951,11 +2951,12 @@ function bindUiListenersOnce() {
   uiListenersBound = true;
 
   // Delete account overlay controls
+const deleteAccountPasswordInput = document.getElementById("delete-account-password");
+const deleteAccountConfirmInput = document.getElementById("delete-account-confirm");
+  
   document.getElementById("acct-delete-account")?.addEventListener("click", () => {
-    const p = document.getElementById("delete-account-password");
-    const c = document.getElementById("delete-account-confirm");
-    if (p) p.value = "";
-    if (c) c.value = "";
+    if (deleteAccountPasswordInput) deleteAccountPasswordInput.value = "";
+    if (deleteAccountConfirmInput) deleteAccountConfirmInput.value = "";
     showDeleteAccountOverlay("");
   });
 
@@ -3276,8 +3277,6 @@ const pwErr = document.getElementById("pw-error");
 const pwCancel = document.getElementById("pw-cancel");
 const pwSave = document.getElementById("pw-save");
 
-
-
 document.getElementById("acct-change-password")?.addEventListener("click", () => {
   openPwModal();
 });
@@ -3463,8 +3462,6 @@ nameSave?.addEventListener("click", async () => {
 });
 
 const nameCount = document.getElementById("name-count");
-
-
 
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
   if (!isBoardOwner) return;
