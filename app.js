@@ -3734,40 +3734,59 @@ async function startApp() {
       });
     }
 
-    const addUsersBtn = document.getElementById("add-users-btn");
-    if (addUsersBtn) {
-      addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
-      addUsersBtn.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      };
-    }
-
-    if (addUsersBtn) {
-      addUsersBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!manageToken) return;
-        if (!currentTable?.invite_token) {
-          console.error("Invite token missing on currentTable");
-          return;
-        }
-
-        openInviteModal({
-          boardId: currentTable.id,
-          inviteToken: currentTable.invite_token,
-          boardName: currentTable.name || "Availability Calendar"
-        });
-      });
-    }
-
-    await loadTable();
-  } finally {
-    document.body.style.visibility = "visible";
-  }
+const addUsersBtn = document.getElementById("add-users-btn");
+if (addUsersBtn) {
+  addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
+  addUsersBtn.onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 }
 
+let removeUserBtn = document.getElementById("remove-user-btn");
+
+if (manageToken && addUsersBtn && !removeUserBtn) {
+  removeUserBtn = document.createElement("button");
+  removeUserBtn.id = "remove-user-btn";
+  removeUserBtn.className = addUsersBtn.className;
+  removeUserBtn.type = "button";
+  removeUserBtn.textContent = "Remove User";
+
+  addUsersBtn.insertAdjacentElement("afterend", removeUserBtn);
+}
+
+if (addUsersBtn) {
+  addUsersBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!manageToken) return;
+    if (!currentTable?.invite_token) {
+      console.error("Invite token missing on currentTable");
+      return;
+    }
+
+    openInviteModal({
+      boardId: currentTable.id,
+      inviteToken: currentTable.invite_token,
+      boardName: currentTable.name || "Availability Calendar"
+    });
+  });
+}
+
+if (removeUserBtn) {
+  removeUserBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!manageToken) return;
+
+    // wiring later
+    console.log("Remove User clicked");
+  });
+}
+
+await loadTable();
 
 
 
