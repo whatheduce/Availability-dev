@@ -1440,7 +1440,7 @@ async function loadBoards() {
     data-invite-token="${b.tables.invite_token}"
     onclick="openBoard('${b.tables.invite_token}')"
   >
-    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+    <button class="board-actions-btn" type="button" aria-label="Calendar actions" onclick="event.preventDefault(); event.stopPropagation();">+</button>
 
     <div class="board-actions-menu" hidden>
       <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
