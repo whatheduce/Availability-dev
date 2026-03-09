@@ -618,6 +618,25 @@
   </div>
 </div>  
 
+<!-- Remove User Modal -->
+<div id="remove-user-modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="remove-user-title">
+    <div class="modal-title" id="remove-user-title">Remove user</div>
+    <div class="modal-message">
+      Choose a current calendar user to remove from this calendar.
+    </div>
+
+    <div
+      id="remove-user-list"
+      style="display:flex; flex-direction:column; gap:10px; margin-top:14px;"
+    ></div>
+
+    <div class="modal-actions">
+      <button id="remove-user-cancel" class="modal-btn" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+  
 <!-- Generic confirmation popup -->
 <div id="notice-overlay" class="modal-overlay notice-overlay" style="display:none;">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="notice-title" aria-describedby="notice-message">
@@ -638,6 +657,7 @@
   
 </body>
 </html>
+
 
 
 
