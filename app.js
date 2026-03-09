@@ -3891,30 +3891,39 @@ async function removeUserFromCurrentBoard(member) {
 
   try {
     if (member.user_id) {
-      const { error: availDelErr } = await supabase
-        .from("availability_dev")
-        .delete()
-        .eq("table_id", currentTable.id)
-        .eq("user_id", member.user_id);
+     const { data: deletedAvailRows, error: availDelErr } = await supabase
+      .from("availability_dev")
+      .delete()
+      .eq("table_id", currentTable.id)
+      .eq("user_id", member.user_id)
+      .select("id");
 
-      if (availDelErr) throw availDelErr;
+    if (availDelErr) throw availDelErr;
 
-      const { error: memDelErr } = await supabase
-        .from("board_members")
-        .delete()
-        .eq("board_id", currentTable.id)
-        .eq("user_id", member.user_id);
+    const { data: deletedMemberRows, error: memDelErr } = await supabase
+      .from("board_members")
+      .delete()
+      .eq("board_id", currentTable.id)
+      .eq("user_id", member.user_id)
+      .select("user_id");
 
-      if (memDelErr) throw memDelErr;
+    if (memDelErr) throw memDelErr;
+
+console.log("Removed availability rows:", deletedAvailRows?.length || 0);
+console.log("Removed board_members rows:", deletedMemberRows?.length || 0);
     }
 
     if (member.invite_id) {
-      const { error: inviteDelErr } = await supabase
+      const { data: deletedInviteRows, error: inviteDelErr } = await supabase
         .from("board_invites")
         .delete()
-        .eq("id", member.invite_id);
+        .eq("id", member.invite_id)
+        .select("id");
 
       if (inviteDelErr) throw inviteDelErr;
+
+      console.log("Removed board_invites rows:", deletedInviteRows?.length || 0);
+      
     } else if (member.email) {
       const { error: inviteDelErr } = await supabase
         .from("board_invites")
