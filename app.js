@@ -3826,13 +3826,16 @@ async function getCurrentBoardMembersForRemoval() {
 
   const { data: members, error: memErr } = await supabase
     .from("board_members")
-    .select("user_id, role")
+    .select("user_id")
     .eq("board_id", currentTable.id);
 
   if (memErr) throw memErr;
 
-  const removable = (members || []).filter(m => m?.user_id && m.role !== "owner");
-  if (!removable.length) return [];
+  const removable = (members || []).filter(
+  m => m?.user_id && String(m.user_id) !== String(currentTable.owner_id)
+  );
+  
+    if (!removable.length) return [];
 
   const ids = removable.map(m => String(m.user_id));
   const profiles = await fetchProfilesMap(ids);
