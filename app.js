@@ -3787,10 +3787,12 @@ if (removeUserBtn) {
 }
 
 await loadTable();
+}
+
+  
 
 
-
-
+  
 // =========================
 // BOARD ACTIONS
 // =========================
