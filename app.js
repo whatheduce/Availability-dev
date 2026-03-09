@@ -720,17 +720,20 @@ async function ensureMembership(boardId) {
   }
 
   if (au.email) {
-    const { error: acceptErr } = await supabase
-      .from("board_invites")
-      .update({ accepted_at: new Date().toISOString() })
-      .eq("board_id", boardId)
-      .eq("email", au.email.toLowerCase().trim())
-      .is("accepted_at", null);
+  const { error: acceptErr } = await supabase
+    .from("board_invites")
+    .update({
+      accepted_at: new Date().toISOString(),
+      accepted_by_user_id: au.id
+    })
+    .eq("board_id", boardId)
+    .eq("email", au.email.toLowerCase().trim())
+    .is("accepted_at", null);
 
-    if (acceptErr) {
-      console.warn("Failed to mark invite accepted:", acceptErr);
-    }
+  if (acceptErr) {
+    console.warn("Failed to mark invite accepted:", acceptErr);
   }
+}
 }
 
 //----------
@@ -3824,37 +3827,62 @@ function closeRemoveUserModal() {
 async function getCurrentBoardMembersForRemoval() {
   if (!currentTable?.id) return [];
 
-  const { data: members, error: memErr } = await supabase
-    .from("board_members")
-    .select("user_id")
-    .eq("board_id", currentTable.id);
+  const { data: invites, error: inviteErr } = await supabase
+    .from("board_invites")
+    .select("id, email, accepted_at, accepted_by_user_id")
+    .eq("board_id", currentTable.id)
+    .not("accepted_at", "is", null);
 
-  if (memErr) throw memErr;
+  if (inviteErr) throw inviteErr;
 
-  const removable = (members || []).filter(
-  m => m?.user_id && String(m.user_id) !== String(currentTable.owner_id)
-  );
-  
-    if (!removable.length) return [];
+  const rows = invites || [];
+  if (!rows.length) return [];
 
-  const ids = removable.map(m => String(m.user_id));
-  const profiles = await fetchProfilesMap(ids);
+  const acceptedUserIds = [...new Set(
+    rows
+      .map(row => row.accepted_by_user_id ? String(row.accepted_by_user_id) : null)
+      .filter(Boolean)
+      .filter(id => String(id) !== String(currentTable.owner_id))
+  )];
 
-  return removable
-    .map(m => {
-      const p = profiles[m.user_id] || {};
-      return {
-        user_id: String(m.user_id),
-        name: (p.name || "Unknown user").trim() || "Unknown user",
-        color: p.color || "#8E8E93"
-      };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const profiles = acceptedUserIds.length
+    ? await fetchProfilesMap(acceptedUserIds)
+    : {};
+
+  const seen = new Set();
+  const removable = [];
+
+  rows.forEach((row) => {
+    const acceptedUserId = row.accepted_by_user_id
+      ? String(row.accepted_by_user_id)
+      : null;
+
+    if (acceptedUserId && acceptedUserId === String(currentTable.owner_id)) return;
+
+    const key = acceptedUserId || `email:${(row.email || "").toLowerCase().trim()}`;
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+
+    const profile = acceptedUserId ? (profiles[acceptedUserId] || {}) : {};
+
+    removable.push({
+      invite_id: row.id,
+      user_id: acceptedUserId,
+      email: (row.email || "").trim(),
+      name:
+        (profile.name || "").trim() ||
+        (row.email || "").trim() ||
+        "Unknown user",
+      color: profile.color || "#8E8E93"
+    });
+  });
+
+  return removable.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 //----------
 async function removeUserFromCurrentBoard(member) {
-  if (!manageToken || !isBoardOwner || !currentTable?.id || !member?.user_id) return;
+  if (!manageToken || !isBoardOwner || !currentTable?.id || !member) return;
 
   showConfirmPopup(`Removing ${member.name}…`, {
     title: "Remove user",
@@ -3862,24 +3890,42 @@ async function removeUserFromCurrentBoard(member) {
   });
 
   try {
-    const { error: availDelErr } = await supabase
-      .from("availability_dev")
-      .delete()
-      .eq("table_id", currentTable.id)
-      .eq("user_id", member.user_id);
+    if (member.user_id) {
+      const { error: availDelErr } = await supabase
+        .from("availability_dev")
+        .delete()
+        .eq("table_id", currentTable.id)
+        .eq("user_id", member.user_id);
 
-    if (availDelErr) throw availDelErr;
+      if (availDelErr) throw availDelErr;
 
-    const { error: memDelErr } = await supabase
-      .from("board_members")
-      .delete()
-      .eq("board_id", currentTable.id)
-      .eq("user_id", member.user_id);
+      const { error: memDelErr } = await supabase
+        .from("board_members")
+        .delete()
+        .eq("board_id", currentTable.id)
+        .eq("user_id", member.user_id);
 
-    if (memDelErr) throw memDelErr;
+      if (memDelErr) throw memDelErr;
+    }
+
+    if (member.invite_id) {
+      const { error: inviteDelErr } = await supabase
+        .from("board_invites")
+        .delete()
+        .eq("id", member.invite_id);
+
+      if (inviteDelErr) throw inviteDelErr;
+    } else if (member.email) {
+      const { error: inviteDelErr } = await supabase
+        .from("board_invites")
+        .delete()
+        .eq("board_id", currentTable.id)
+        .eq("email", member.email.toLowerCase().trim());
+
+      if (inviteDelErr) throw inviteDelErr;
+    }
 
     closeRemoveUserModal();
-
     await loadTable();
 
     showConfirmPopup(`${member.name} has been removed from this calendar.`, {
