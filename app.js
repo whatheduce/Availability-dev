@@ -490,18 +490,17 @@ async function renderCalendarInviteStats() {
 
   if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
 
-  // x = accepted invites + owner
-  const { count: acceptedCount, error: acceptedErr } = await supabase
-    .from("board_invites")
-    .select("id", { count: "exact", head: true })
-    .eq("board_id", currentTable.id)
-    .not("accepted_at", "is", null);
+  // x = current board members
+const { count: memberCount, error: memberErr } = await supabase
+  .from("board_members")
+  .select("user_id", { count: "exact", head: true })
+  .eq("board_id", currentTable.id);
 
-  if (acceptedErr) {
-    console.warn("Failed to load accepted invite count:", acceptedErr);
-    wrap.style.display = "none";
-    return;
-  }
+if (memberErr) {
+  console.warn("Failed to load current member count:", memberErr);
+  wrap.style.display = "none";
+  return;
+}
 
   // y = emails invited + owner
   const { count: inviteCount, error: inviteErr } = await supabase
@@ -515,7 +514,7 @@ async function renderCalendarInviteStats() {
     return;
   }
 
-  const joined = (acceptedCount || 0) + 1;
+  const joined = memberCount || 0;
   const total = (inviteCount || 0) + 1;
 
   joinedEl.textContent = String(joined);
@@ -3478,6 +3477,16 @@ document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () 
     cancelText: ""
   });
 });
+
+document.getElementById("remove-user-cancel")?.addEventListener("click", () => {
+  closeRemoveUserModal();
+});
+
+document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
+  if (!e.target.closest(".modal-card")) {
+    closeRemoveUserModal();
+  }
+});
   
   const mealsCard = document.getElementById("meals-card");
   if (mealsCard) {
@@ -3775,14 +3784,17 @@ if (addUsersBtn) {
 }
 
 if (removeUserBtn) {
-  removeUserBtn.addEventListener("click", (e) => {
+  removeUserBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!manageToken) return;
+    if (!currentTable?.id) return;
 
-    // wiring later
-    console.log("Remove User clicked");
+    await refreshBoardOwnerFlag();
+    if (!isBoardOwner) return;
+
+    await openRemoveUserModal();
   });
 }
 
@@ -3800,7 +3812,163 @@ await loadTable();
 // BOARD ACTIONS
 // =========================
 
-  async function deleteBoard() {
+function closeRemoveUserModal() {
+  const overlay = document.getElementById("remove-user-modal");
+  const list = document.getElementById("remove-user-list");
+
+  if (overlay) overlay.hidden = true;
+  if (list) list.innerHTML = "";
+}
+
+//----------
+async function getCurrentBoardMembersForRemoval() {
+  if (!currentTable?.id) return [];
+
+  const { data: members, error: memErr } = await supabase
+    .from("board_members")
+    .select("user_id, role")
+    .eq("board_id", currentTable.id);
+
+  if (memErr) throw memErr;
+
+  const removable = (members || []).filter(m => m?.user_id && m.role !== "owner");
+  if (!removable.length) return [];
+
+  const ids = removable.map(m => String(m.user_id));
+  const profiles = await fetchProfilesMap(ids);
+
+  return removable
+    .map(m => {
+      const p = profiles[m.user_id] || {};
+      return {
+        user_id: String(m.user_id),
+        name: (p.name || "Unknown user").trim() || "Unknown user",
+        color: p.color || "#8E8E93"
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+//----------
+async function removeUserFromCurrentBoard(member) {
+  if (!manageToken || !isBoardOwner || !currentTable?.id || !member?.user_id) return;
+
+  showConfirmPopup(`Removing ${member.name}…`, {
+    title: "Remove user",
+    showOk: false
+  });
+
+  try {
+    const { error: availDelErr } = await supabase
+      .from("availability_dev")
+      .delete()
+      .eq("table_id", currentTable.id)
+      .eq("user_id", member.user_id);
+
+    if (availDelErr) throw availDelErr;
+
+    const { error: memDelErr } = await supabase
+      .from("board_members")
+      .delete()
+      .eq("board_id", currentTable.id)
+      .eq("user_id", member.user_id);
+
+    if (memDelErr) throw memDelErr;
+
+    closeRemoveUserModal();
+
+    await loadTable();
+
+    showConfirmPopup(`${member.name} has been removed from this calendar.`, {
+      title: "User removed"
+    });
+  } catch (err) {
+    console.error("Remove user failed:", err);
+
+    showConfirmPopup("Could not remove that user from this calendar.", {
+      title: "Remove user"
+    });
+  }
+}
+
+//----------
+async function openRemoveUserModal() {
+  if (!manageToken || !isBoardOwner || !currentTable?.id) return;
+
+  const overlay = document.getElementById("remove-user-modal");
+  const list = document.getElementById("remove-user-list");
+
+  if (!overlay || !list) return;
+
+  overlay.hidden = false;
+  list.innerHTML = `<div style="opacity:0.7; padding:8px 2px;">Loading users…</div>`;
+
+  try {
+    const members = await getCurrentBoardMembersForRemoval();
+
+    list.innerHTML = "";
+
+    if (!members.length) {
+      list.innerHTML = `<div style="opacity:0.7; padding:8px 2px;">No removable users on this calendar.</div>`;
+      return;
+    }
+
+    members.forEach((member) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "modal-btn";
+      btn.style.display = "flex";
+      btn.style.alignItems = "center";
+      btn.style.justifyContent = "space-between";
+      btn.style.gap = "12px";
+      btn.style.width = "100%";
+      btn.style.textAlign = "left";
+
+      const left = document.createElement("span");
+      left.style.display = "inline-flex";
+      left.style.alignItems = "center";
+      left.style.gap = "10px";
+
+      const dot = document.createElement("span");
+      dot.className = "colour-dot";
+      dot.style.background = member.color;
+
+      const name = document.createElement("span");
+      name.textContent = member.name;
+
+      const right = document.createElement("span");
+      right.textContent = "Remove";
+      right.style.opacity = "0.7";
+      right.style.fontWeight = "700";
+
+      left.appendChild(dot);
+      left.appendChild(name);
+      btn.appendChild(left);
+      btn.appendChild(right);
+
+      btn.addEventListener("click", async () => {
+        const ok = await confirmModal({
+          title: "Remove user?",
+          message: `Remove "${member.name}" from "${currentTable.name || "this calendar"}"? Their logged times on this calendar will also be removed.`,
+          okText: "Remove",
+          cancelText: "Cancel"
+        });
+
+        if (!ok) return;
+
+        await removeUserFromCurrentBoard(member);
+      });
+
+      list.appendChild(btn);
+    });
+  } catch (err) {
+    console.error("Failed to load removable users:", err);
+    list.innerHTML = `<div style="opacity:0.7; padding:8px 2px;">Could not load current users.</div>`;
+  }
+}
+
+//----------
+async function deleteBoard() {
   if (!currentTable) return;
 
   if (!confirm("Are you sure you want to permanently delete this board?")) return;
