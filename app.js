@@ -3787,6 +3787,8 @@ if (removeUserBtn) {
 }
 
 await loadTable();
+} finally {
+  document.body.style.visibility = "visible";
 }
 }
 
