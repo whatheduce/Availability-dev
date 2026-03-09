@@ -165,8 +165,6 @@ function showRouteError() {
   if (dash) dash.style.display = "none";
   const setup = document.getElementById("profile-setup");
   if (setup) setup.style.display = "none";
-  const board = document.getElementById("board-view");
-  if (board) board.style.display = "none";
 
   // Show error panel
   const err = document.getElementById("route-error");
@@ -180,9 +178,6 @@ function showBoardView() {
 
   const setup = document.getElementById("profile-setup");
   if (setup) setup.style.display = "none";
-
-  const board = document.getElementById("board-view"); // or whatever your board container id is
-  if (board) board.style.display = "block";
 
   document.body.style.visibility = "visible";
 }
