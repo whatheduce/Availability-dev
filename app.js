@@ -1275,12 +1275,10 @@ function subscribeRealtime() {
       log("availability channel:", status);
     });
 
-    const {
-      data: { user: au }
-    } = await supabase.auth.getUser();
+    const auId = currentUserId;
 
   if (au?.id && currentTable?.id && !manageToken) {
-      membershipChannel = supabase
+  membershipChannel = supabase
     .channel(`membership:${currentTable.id}`)
     .on(
       "postgres_changes",
@@ -1295,13 +1293,13 @@ function subscribeRealtime() {
           data: { user: au }
         } = await supabase.auth.getUser();
 
-        if (!au?.id || manageToken) return;
+        if (!auId || manageToken) return;
 
         const { data: memberRow, error: memberErr } = await supabase
           .from("board_members")
           .select("user_id")
           .eq("board_id", currentTable.id)
-          .eq("user_id", au.id)
+          .eq("user_id", auId)
           .maybeSingle();
 
         if (memberErr) {
