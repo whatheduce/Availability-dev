@@ -2947,26 +2947,25 @@ const auth = createAuthModule({
 // =========================
 
 function bindUiListenersOnce() {
-  // Bind buttons
-document.getElementById("acct-delete-account")?.addEventListener("click", () => {
-  // clear old values
-  const p = document.getElementById("delete-account-password");
-  const c = document.getElementById("delete-account-confirm");
-  if (p) p.value = "";
-  if (c) c.value = "";
-  showDeleteAccountOverlay("");
-});
-
-document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
-  hideDeleteAccountOverlay();
-});
-
-document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
-  await deleteAccountFlow();
-});
-  
   if (uiListenersBound) return;
   uiListenersBound = true;
+
+  // Delete account overlay controls
+  document.getElementById("acct-delete-account")?.addEventListener("click", () => {
+    const p = document.getElementById("delete-account-password");
+    const c = document.getElementById("delete-account-confirm");
+    if (p) p.value = "";
+    if (c) c.value = "";
+    showDeleteAccountOverlay("");
+  });
+
+  document.getElementById("delete-account-cancel")?.addEventListener("click", () => {
+    hideDeleteAccountOverlay();
+  });
+
+  document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
+    await deleteAccountFlow();
+  });
 
   auth.bindAuthUi();
   
