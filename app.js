@@ -1275,41 +1275,49 @@ function subscribeRealtime() {
       log("availability channel:", status);
     });
 
-    const au = await auth.getAuthUser();
+    const {
+      data: { user: au }
+    } = await supabase.auth.getUser();
 
   if (au?.id && currentTable?.id && !manageToken) {
-    membershipChannel = supabase
-      .channel(`membership:${currentTable.id}:${au.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "board_members",
-          filter: `board_id=eq.${currentTable.id}`
-        },
-        async () => {
-          const { data: memberRow, error: memberErr } = await supabase
-            .from("board_members")
-            .select("user_id")
-            .eq("board_id", currentTable.id)
-            .eq("user_id", au.id)
-            .maybeSingle();
+      membershipChannel = supabase
+    .channel(`membership:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "board_members",
+        filter: `board_id=eq.${currentTable.id}`
+      },
+      async () => {
+        const {
+          data: { user: au }
+        } = await supabase.auth.getUser();
 
-          if (memberErr) {
-            console.warn("Membership check failed:", memberErr);
-            return;
-          }
+        if (!au?.id || manageToken) return;
 
-          if (!memberRow) {
-            alert("You have been removed from this calendar.");
-            window.location.href = "/";
-          }
+        const { data: memberRow, error: memberErr } = await supabase
+          .from("board_members")
+          .select("user_id")
+          .eq("board_id", currentTable.id)
+          .eq("user_id", au.id)
+          .maybeSingle();
+
+        if (memberErr) {
+          console.warn("Membership check failed:", memberErr);
+          return;
         }
-      )
-      .subscribe((status) => {
-        log("membership channel:", status);
-      });
+
+        if (!memberRow) {
+          alert("You have been removed from this calendar.");
+          window.location.href = "/";
+        }
+      }
+    )
+    .subscribe((status) => {
+      log("membership channel:", status);
+    });
   }
   
   // Board changes (start_date / row_structure / gold_threshold updates)
