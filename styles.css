@@ -1340,6 +1340,10 @@ body.account-view #dash-account {
   padding: 20px;
 }
 
+#confirm-modal {
+  z-index: 10001;
+}
+
 .modal-card {
   width: min(420px, 100%);
   border-radius: 18px;
