@@ -1246,7 +1246,42 @@ async function handleAvailabilityChange(payload) {
 
   scheduleFullRefreshIdle(15000);
 }
-  
+
+//----------  
+async function userStillHasBoardAccess() {
+  if (!currentTable?.id) return false;
+
+  // Owner ?m= view always has access through owner token flow
+  if (manageToken) return true;
+
+  const au = getUser?.();
+  if (!au?.id) return false;
+
+  const { data, error } = await supabase
+    .from("board_members")
+    .select("user_id")
+    .eq("board_id", currentTable.id)
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Access check failed:", error);
+    return false;
+  }
+
+  return !!data;
+}
+
+//----------  
+async function kickOutIfNoBoardAccess() {
+  const hasAccess = await userStillHasBoardAccess();
+  if (hasAccess) return false;
+
+  alert("You have been removed from this calendar.");
+  window.location.href = "/";
+  return true;
+}
+
 //----------  
 function subscribeRealtime() {
   if (!currentTable) return;
@@ -1981,41 +2016,6 @@ function buildCalendar() {
   });
 
   bindCalendarClickDelegation();
-}
-
-//----------  
-async function userStillHasBoardAccess() {
-  if (!currentTable?.id) return false;
-
-  // Owner ?m= view always has access through owner token flow
-  if (manageToken) return true;
-
-  const au = getUser?.();
-  if (!au?.id) return false;
-
-  const { data, error } = await supabase
-    .from("board_members")
-    .select("user_id")
-    .eq("board_id", currentTable.id)
-    .eq("user_id", au.id)
-    .maybeSingle();
-
-  if (error) {
-    console.warn("Access check failed:", error);
-    return false;
-  }
-
-  return !!data;
-}
-
-//----------  
-async function kickOutIfNoBoardAccess() {
-  const hasAccess = await userStillHasBoardAccess();
-  if (hasAccess) return false;
-
-  alert("You have been removed from this calendar.");
-  window.location.href = "/";
-  return true;
 }
 
 //----------  
