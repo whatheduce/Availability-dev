@@ -315,6 +315,10 @@ function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
 
+
+
+
+
 // =========================
 // CALENDAR TOPBAR / META HELPERS
 // =========================
@@ -597,7 +601,6 @@ function ensureLegendUser(entry) {
   const key = entry.user_id || entry.name;
   if (!key) return;
 
-  // already present?
   const existing = legendList.querySelector(
     entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
                   : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
@@ -712,7 +715,7 @@ async function ensureMembership(boardId) {
     user_id: au.id
   };
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("board_members")
     .upsert(payload, { onConflict: "board_id,user_id" })
     .select();
@@ -967,7 +970,6 @@ function ensureDotContainer(cell) {
 function addOptimisticDot(cell, userId, name, color) {
   const dc = ensureDotContainer(cell);
 
-  // already there?
   if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
 
   const dot = document.createElement("div");
@@ -1404,7 +1406,7 @@ async function loadBoards() {
       <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
     </div>
 
-    <div class="board-pill-title board-pill-title--top">${b.tables.name}</div>
+    <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
     <div class="board-preview" data-board-id="${b.tables.id}"></div>
     <div class="board-pill-meta">Joined</div>
   </div>
@@ -1449,7 +1451,6 @@ if (!data) {
 }
 
 currentTable = data;
-
   
   // ⭐ remember this board for next time
 if (inviteToken) {
@@ -1457,7 +1458,7 @@ if (inviteToken) {
 }
 
   // Roll board forward based on host timezone + start_date (any visitor can trigger)
-const shifted = await rollForwardIfNeeded(currentTable.id);
+await rollForwardIfNeeded(currentTable.id);
 
 // Always refetch so the UI always uses the DB's current start_date/host_tz
 const { data: refreshed, error: refreshErr } = await supabase
