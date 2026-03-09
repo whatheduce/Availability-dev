@@ -2251,6 +2251,7 @@ const nameInput = document.getElementById("name-input");
 const nameErr = document.getElementById("name-error");
 const nameCancel = document.getElementById("name-cancel");
 const nameSave = document.getElementById("name-save");
+const nameCount = document.getElementById("name-count");
 
 const colourModal = document.getElementById("colour-modal");
 const colourGrid = document.getElementById("colour-grid");
@@ -3458,8 +3459,6 @@ nameSave?.addEventListener("click", async () => {
     if (nameSave) nameSave.disabled = false;
   }
 });
-
-const nameCount = document.getElementById("name-count");
 
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
   if (!isBoardOwner) return;
