@@ -541,6 +541,26 @@ body.account-view #dash-account {
   margin: 6px 0 14px;
 }
 
+.dashboard-dev-note {
+  margin-top: 34px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.dashboard-dev-note-main {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(0,0,0,0.62);
+}
+
+.dashboard-dev-note-version {
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(140, 90, 40, 0.55);
+  font-style: italic;
+}
+
 /* =========================
    DASHBOARD SETTINGS DRAWER
    ========================= */
