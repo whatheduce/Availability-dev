@@ -3872,18 +3872,6 @@ if (manageToken && topbarLeft) {
   }
 }
 
-let removeUserBtn = document.getElementById("remove-user-btn");
-
-if (manageToken && addUsersBtn && !removeUserBtn) {
-  removeUserBtn = document.createElement("button");
-  removeUserBtn.id = "remove-user-btn";
-  removeUserBtn.className = addUsersBtn.className;
-  removeUserBtn.type = "button";
-  removeUserBtn.textContent = "Remove User";
-
-  addUsersBtn.insertAdjacentElement("afterend", removeUserBtn);
-}
-
 if (addUsersBtn) {
   addUsersBtn.addEventListener("click", (e) => {
     e.preventDefault();
