@@ -3846,13 +3846,31 @@ async function startApp() {
       });
     }
 
-const addUsersBtn = document.getElementById("add-users-btn");
-if (addUsersBtn) {
-  addUsersBtn.style.display = manageToken ? "inline-flex" : "none";
-  addUsersBtn.onclick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
+const topbarLeft = document.querySelector(".calendar-topbar-left");
+
+let addUsersBtn = document.getElementById("add-users-btn");
+let removeUserBtn = document.getElementById("remove-user-btn");
+
+if (manageToken && topbarLeft) {
+  if (!addUsersBtn) {
+    addUsersBtn = document.createElement("button");
+    addUsersBtn.id = "add-users-btn";
+    addUsersBtn.className = "topbar-btn";
+    addUsersBtn.type = "button";
+    addUsersBtn.textContent = "Add Users";
+
+    topbarLeft.appendChild(addUsersBtn);
+  }
+
+  if (!removeUserBtn) {
+    removeUserBtn = document.createElement("button");
+    removeUserBtn.id = "remove-user-btn";
+    removeUserBtn.className = "topbar-btn";
+    removeUserBtn.type = "button";
+    removeUserBtn.textContent = "Remove User";
+
+    addUsersBtn.insertAdjacentElement("afterend", removeUserBtn);
+  }
 }
 
 let removeUserBtn = document.getElementById("remove-user-btn");
