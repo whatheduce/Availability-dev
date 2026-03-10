@@ -559,7 +559,7 @@ body.account-view #dash-account {
 .dashboard-dev-note-version {
   margin-top: 10px;
   font-size: 11px;
-  color: rgba(120, 88, 48, 0.38);
+  color: rgba(160, 88, 48, 0.7);
   letter-spacing: 0.01em;
   font-style: italic;
 }
