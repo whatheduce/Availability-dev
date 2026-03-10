@@ -542,22 +542,25 @@ body.account-view #dash-account {
 }
 
 .dashboard-dev-note {
-  margin-top: 124px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  margin-top: 130px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(0,0,0,0.06);
   text-align: center;
 }
 
 .dashboard-dev-note-main {
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(0,0,0,0.62);
+  max-width: 680px;
+  margin: 0 auto;
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(0,0,0,0.52);
 }
 
 .dashboard-dev-note-version {
   margin-top: 10px;
-  font-size: 12px;
-  color: rgba(140, 90, 40, 0.55);
+  font-size: 11px;
+  color: rgba(120, 88, 48, 0.38);
+  letter-spacing: 0.01em;
   font-style: italic;
 }
 
