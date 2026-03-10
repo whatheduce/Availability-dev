@@ -2560,7 +2560,11 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
 
 try {
   sendBtn.disabled = true;
-
+  showConfirmPopup("Sending invite email...", {
+  title: "Add user",
+  showOk: false
+});
+  
   const boardId = inviteContext?.boardId;
   if (!boardId) {
     alert("Could not determine which calendar to invite to. Please refresh and try again.");
@@ -2640,6 +2644,9 @@ await confirmModal({
   errEl.textContent =
     (err && (err.message || err.error_description)) ||
     "Invite failed (unknown error).";
+  showConfirmPopup("Could not send the invite email.", {
+  title: "Add user"
+});
 
 } finally {
   sendBtn.disabled = false;
