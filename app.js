@@ -2550,23 +2550,22 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
       return;
     }
 
-    if (!isValidEmail(email)) {
-      errEl.style.display = "block";
-      errEl.textContent = "Please enter a valid email address.";
-      return;
-    }
+if (!isValidEmail(email)) {
+  errEl.style.display = "block";
+  errEl.textContent = "Please enter a valid email address.";
+  return;
+}
 
-    errEl.style.display = "none";
+errEl.style.display = "none";
 
-    const originalSendHtml = sendBtn.innerHTML;
-    
+const originalSendHtml = sendBtn.innerHTML;
+
 try {
   sendBtn.disabled = true;
   sendBtn.innerHTML = `<span class="notice-spinner" style="top:0; margin-right:8px;"></span><span>Sending...</span>`;
-});
 
-await new Promise(requestAnimationFrame);
-  
+  await new Promise(requestAnimationFrame);
+
   const boardId = inviteContext?.boardId;
   if (!boardId) {
     alert("Could not determine which calendar to invite to. Please refresh and try again.");
@@ -2574,82 +2573,77 @@ await new Promise(requestAnimationFrame);
   }
 
   const inviteToken = inviteContext?.inviteToken;
-    if (!inviteToken) {
-      errEl.style.display = "block";
-      errEl.textContent = "Invite token is missing for this calendar. Please refresh and try again.";
-      return;
-    }
+  if (!inviteToken) {
+    errEl.style.display = "block";
+    errEl.textContent = "Invite token is missing for this calendar. Please refresh and try again.";
+    return;
+  }
 
-    const inviteLink = buildInviteLink(inviteToken);
-    const boardName = inviteContext?.boardName || "Availability Calendar";
+  const inviteLink = buildInviteLink(inviteToken);
+  const boardName = inviteContext?.boardName || "Availability Calendar";
 
-    const { data, error } = await supabase.functions.invoke("send-invite", {
-      body: { 
+  const { data, error } = await supabase.functions.invoke("send-invite", {
+    body: {
       toEmail: email,
       boardId,
       boardName,
       inviteToken,
       inviteLink
-      }
-    });
+    }
+  });
 
-if (error) throw error;
+  if (error) throw error;
 
-const au = await auth.getAuthUser();
-console.log("invite save auth user:", au);
-console.log("invite save boardId/email:", boardId, email);
+  const au = await auth.getAuthUser();
+  console.log("invite save auth user:", au);
+  console.log("invite save boardId/email:", boardId, email);
 
-if (!au) {
-  console.warn("Invite save skipped: auth.getAuthUser() returned null");
-} else {
-  const payload = {
-    board_id: boardId,
-    email: email.toLowerCase().trim(),
-    role: "member",
-    created_by: au.id
-  };
+  if (!au) {
+    console.warn("Invite save skipped: auth.getAuthUser() returned null");
+  } else {
+    const payload = {
+      board_id: boardId,
+      email: email.toLowerCase().trim(),
+      role: "member",
+      created_by: au.id
+    };
 
-  console.log("board_invites payload:", payload);
+    console.log("board_invites payload:", payload);
 
-  const { data: inviteSaveData, error: inviteSaveErr } = await supabase
-    .from("board_invites")
-    .insert(payload)
-    .select();
+    const { data: inviteSaveData, error: inviteSaveErr } = await supabase
+      .from("board_invites")
+      .insert(payload)
+      .select();
 
-  console.log("board_invites insert result:", inviteSaveData);
-  console.log("board_invites insert error full:", inviteSaveErr);
-  console.log("board_invites insert error json:", JSON.stringify(inviteSaveErr, null, 2));
+    console.log("board_invites insert result:", inviteSaveData);
+    console.log("board_invites insert error full:", inviteSaveErr);
+    console.log("board_invites insert error json:", JSON.stringify(inviteSaveErr, null, 2));
 
-  if (inviteSaveErr) {
-    console.warn("Failed to save invite record code:", inviteSaveErr.code);
-    console.warn("Failed to save invite record message:", inviteSaveErr.message);
-    console.warn("Failed to save invite record details:", inviteSaveErr.details);
-    console.warn("Failed to save invite record hint:", inviteSaveErr.hint);
+    if (inviteSaveErr) {
+      console.warn("Failed to save invite record code:", inviteSaveErr.code);
+      console.warn("Failed to save invite record message:", inviteSaveErr.message);
+      console.warn("Failed to save invite record details:", inviteSaveErr.details);
+      console.warn("Failed to save invite record hint:", inviteSaveErr.hint);
+    }
   }
-}
 
-await renderCalendarInviteStats();
+  await renderCalendarInviteStats();
 
-close();
+  close();
 
-await confirmModal({
-  title: "Invite sent",
-  message: `Invite email sent to ${email}.`,
-  okText: "Close",
-  cancelText: ""
-});
+  await confirmModal({
+    title: "Invite sent",
+    message: `Invite email sent to ${email}.`,
+    okText: "Close",
+    cancelText: ""
+  });
 } catch (err) {
   console.error("Invite send failed:", err);
 
-  // Try to show meaningful message in the modal
   errEl.style.display = "block";
   errEl.textContent =
     (err && (err.message || err.error_description)) ||
     "Invite failed (unknown error).";
-  showConfirmPopup("Could not send the invite email.", {
-  title: "Add user"
-});
-
 } finally {
   sendBtn.disabled = false;
   sendBtn.innerHTML = originalSendHtml;
