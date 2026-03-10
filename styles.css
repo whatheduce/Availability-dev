@@ -339,6 +339,7 @@ body.logged-in #landing-bg::after{
       border-radius: 50%;
       border: 1px solid rgba(255,255,255,0.9);
       flex: 0 0 auto;
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.58);
     }
 
     .gold-cell {
