@@ -2558,11 +2558,11 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
 
     errEl.style.display = "none";
 
+    const originalSendHtml = sendBtn.innerHTML;
+    
 try {
   sendBtn.disabled = true;
-  showConfirmPopup("Sending invite email...", {
-  title: "Add user",
-  showOk: false
+  sendBtn.innerHTML = `<span class="notice-spinner" style="top:0; margin-right:8px;"></span><span>Sending...</span>`;
 });
 
 await new Promise(requestAnimationFrame);
@@ -2652,6 +2652,7 @@ await confirmModal({
 
 } finally {
   sendBtn.disabled = false;
+  sendBtn.innerHTML = originalSendHtml;
 }
   };
 
