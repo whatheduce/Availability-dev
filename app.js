@@ -2562,7 +2562,7 @@ const originalSendHtml = sendBtn.innerHTML;
 
 try {
   sendBtn.disabled = true;
-  ssendBtn.innerHTML = `<span class="notice-spinner" style="width:14px; height:14px; top:0; margin-right:8px; vertical-align:middle;"></span><span>Sending...</span>`;
+  sendBtn.innerHTML = `<span class="notice-spinner" style="width:14px; height:14px; top:0; margin-right:8px; vertical-align:middle;"></span><span>Sending...</span>`;
 
   await new Promise(requestAnimationFrame);
 
