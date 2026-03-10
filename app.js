@@ -491,11 +491,12 @@ async function renderCalendarInviteStats() {
 
   if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
 
-  // x = current board members
-const { count: memberCount, error: memberErr } = await supabase
-  .from("board_members")
-  .select("user_id", { count: "exact", head: true })
-  .eq("board_id", currentTable.id);
+// x = accepted invites + owner
+const { count: acceptedCount, error: memberErr } = await supabase
+  .from("board_invites")
+  .select("id", { count: "exact", head: true })
+  .eq("board_id", currentTable.id)
+  .not("accepted_at", "is", null);
 
 if (memberErr) {
   console.warn("Failed to load current member count:", memberErr);
@@ -515,7 +516,7 @@ if (memberErr) {
     return;
   }
 
-  const joined = memberCount || 0;
+  const joined = (acceptedCount || 0) + 1;
   const total = (inviteCount || 0) + 1;
 
   joinedEl.textContent = String(joined);
