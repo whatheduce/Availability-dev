@@ -515,7 +515,7 @@ if (memberErr) {
     return;
   }
 
-  const joined = (memberCount || 0) + 1;
+  const joined = memberCount || 0;
   const total = (inviteCount || 0) + 1;
 
   joinedEl.textContent = String(joined);
