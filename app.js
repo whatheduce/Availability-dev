@@ -2564,6 +2564,8 @@ try {
   title: "Add user",
   showOk: false
 });
+
+await new Promise(requestAnimationFrame);
   
   const boardId = inviteContext?.boardId;
   if (!boardId) {
