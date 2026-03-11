@@ -1391,31 +1391,32 @@ function subscribeRealtime() {
 
     const auId = getUser()?.id;
 
-  if (auId && currentTable?.id && !manageToken) {
+if (auId && currentTable?.id) {
   membershipChannel = supabase
-  .channel(`membership:${currentTable.id}`)
-  .on(
-    "postgres_changes",
-    {
-      event: "*",
-      schema: "public",
-      table: "board_members",
-      filter: `board_id=eq.${currentTable.id}`
-    },
-    async (payload) => {
-      // Only non-owners need kick-out checking
-      if (!manageToken) {
-        const kicked = await kickOutIfNoBoardAccess();
-        if (kicked) return;
-      }
+    .channel(`membership:${currentTable.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "board_members",
+        filter: `board_id=eq.${currentTable.id}`
+      },
+      async () => {
+        // Non-owner views still need access checking
+        if (!manageToken) {
+          const kicked = await kickOutIfNoBoardAccess();
+          if (kicked) return;
+        }
 
-      // local board colour changed (or membership changed) → rerender immediately
-      await loadAvailability();
-    }
-  )
-  .subscribe((status) => {
-    log("membership channel:", status);
-  });
+        await loadAvailability();
+        await refreshCurrentTableMeta();
+        renderCalendarLastUpdated();
+      }
+    )
+    .subscribe((status) => {
+      log("membership channel:", status);
+    });
   }
   
   // Board changes (start_date / row_structure / gold_threshold updates)
@@ -3438,35 +3439,37 @@ colourSave?.addEventListener("click", async () => {
     }
 
     if (colourModalMode === "local") {
-      if (!colourModalBoardId) {
-        setColourError("No calendar selected.");
-        return;
-      }
+  if (!colourModalBoardId) {
+    setColourError("No calendar selected.");
+    return;
+  }
 
-      const { error } = await supabase
-        .from("board_members")
-        .update({ local_color: v })
-        .eq("board_id", colourModalBoardId)
-        .eq("user_id", au.id);
+  const { error } = await supabase
+    .from("board_members")
+    .update({ local_color: v })
+    .eq("board_id", colourModalBoardId)
+    .eq("user_id", au.id);
 
-      if (error) throw error;
+  if (error) throw error;
 
-      closeColourModal();
+  closeColourModal();
 
-      await confirmModal({
-        title: "Local colour updated",
-        message: "Your colour has been changed for this calendar only.",
-        okText: "Close",
-        cancelText: ""
-      });
+  await confirmModal({
+    title: "Local colour updated",
+    message: "Your colour has been changed for this calendar only.",
+    okText: "Close",
+    cancelText: ""
+  });
 
-      if (currentTable?.id === colourModalBoardId) {
-        await loadAvailability();
-      }
+  if (currentTable?.id === colourModalBoardId) {
+    await loadAvailability();
+    await refreshCurrentTableMeta();
+    renderCalendarLastUpdated();
+  }
 
-      await loadBoards();
-      return;
-    }
+  await loadBoards();
+  return;
+}
 
     // profile mode
     if (user?.color && v === user.color.toUpperCase()) {
