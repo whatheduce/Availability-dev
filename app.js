@@ -600,14 +600,14 @@ function ensureLegendUser(entry) {
     ? legendList.querySelector(`.legend-item[data-user-id="${entry.user_id}"]`)
     : (entry.name ? legendList.querySelector(`.legend-item[data-name="${CSS.escape(entry.name)}"]`) : null);
 
+  const currentUserId = user?.id || null;
+  const currentUserName = String(user?.name || "").trim().toLowerCase();
   const normalisedRowName = String(entry.name || "").trim().toLowerCase();
-  const normalisedUserName = String(user?.name || "").trim().toLowerCase();
 
   const isCurrentUser =
     !!(
-      (user?.id && entry.user_id && entry.user_id === user.id) ||
-      (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
-      (currentTable?.owner_id && entry.user_id && entry.user_id === currentTable.owner_id)
+      (currentUserId && entry.user_id && entry.user_id === currentUserId) ||
+      (currentUserName && normalisedRowName && normalisedRowName === currentUserName)
     );
 
   if (existing) {
@@ -622,8 +622,9 @@ function ensureLegendUser(entry) {
 
   const div = document.createElement("div");
   div.className = "legend-item";
+
   if (entry.user_id) div.dataset.userId = entry.user_id;
-  if (entry.name) div.dataset.name = entry.name;
+  else div.dataset.name = entry.name;
 
   div.innerHTML = buildLegendRowHtml({
     userId: entry.user_id,
@@ -1674,6 +1675,10 @@ async function loadAvailability() {
 
     if (!rows) return;
 
+    const authUser = await auth.getAuthUser();
+    const currentUserId = authUser?.id || user?.id || null;
+    const currentUserName = String(user?.name || "").trim().toLowerCase();
+    
     // Profiles map for latest name/color
     const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
     profilesCache = { ...profilesCache, ...profilesMap };
@@ -1706,13 +1711,10 @@ Object.values(users).forEach(({ userId, name, color }) => {
   else div.dataset.name = name;
 
   const normalisedRowName = String(name || "").trim().toLowerCase();
-  const normalisedUserName = String(user?.name || "").trim().toLowerCase();
-
   const isCurrentUser =
     !!(
-      (user?.id && userId && userId === user.id) ||
-      (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
-      (currentTable?.owner_id && userId && userId === currentTable.owner_id)
+      (currentUserId && userId && userId === currentUserId) ||
+      (currentUserName && normalisedRowName && normalisedRowName === currentUserName)
     );
 
   div.innerHTML = buildLegendRowHtml({
