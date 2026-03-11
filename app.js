@@ -974,9 +974,11 @@ async function buildBoardDotVariantMap(boardId) {
   boardDotVariants = {};
   if (!boardId) return boardDotVariants;
 
+  const ownerId = currentTable?.owner_id || null;
+
   const { data: rows, error } = await supabase
     .from("availability_dev")
-    .select("user_id, name, color")
+    .select("user_id, name, color, created_at")
     .eq("table_id", boardId);
 
   if (error) {
@@ -989,22 +991,46 @@ async function buildBoardDotVariantMap(boardId) {
   (rows || []).forEach(row => {
     if (!row?.user_id) return;
 
-    if (!seen.has(row.user_id)) {
+    const existing = seen.get(row.user_id);
+
+    if (!existing) {
       seen.set(row.user_id, {
         user_id: row.user_id,
         name: row.name || "",
-        color: row.color || ""
+        color: row.color || "",
+        firstSeenAt: row.created_at || null,
+        hasBoardActivity: true
       });
+      return;
     }
+
+    // keep earliest activity timestamp
+    if (row.created_at && (!existing.firstSeenAt || row.created_at < existing.firstSeenAt)) {
+      existing.firstSeenAt = row.created_at;
+    }
+
+    // prefer a non-empty name/color if current stored one is blank
+    if (!existing.name && row.name) existing.name = row.name;
+    if (!existing.color && row.color) existing.color = row.color;
   });
 
-  // Make sure the signed-in user is represented with freshest in-memory values
+  // Ensure current signed-in user exists in the map,
+  // but treat them as "no board activity yet" if they have no rows.
   if (user?.id) {
-    seen.set(user.id, {
-      user_id: user.id,
-      name: user.name || "",
-      color: user.color || ""
-    });
+    const existing = seen.get(user.id);
+
+    if (existing) {
+      if (user.name) existing.name = user.name;
+      if (user.color) existing.color = user.color;
+    } else {
+      seen.set(user.id, {
+        user_id: user.id,
+        name: user.name || "",
+        color: user.color || "",
+        firstSeenAt: null,
+        hasBoardActivity: false
+      });
+    }
   }
 
   const members = Array.from(seen.values());
@@ -1020,12 +1046,23 @@ async function buildBoardDotVariantMap(boardId) {
 
   groups.forEach(group => {
     group.sort((a, b) => {
-      const nameA = String(a.name || "").trim().toLowerCase();
-      const nameB = String(b.name || "").trim().toLowerCase();
+      // 1) Owner always gets base style first
+      const aIsOwner = a.user_id === ownerId;
+      const bIsOwner = b.user_id === ownerId;
+      if (aIsOwner && !bIsOwner) return -1;
+      if (!aIsOwner && bIsOwner) return 1;
 
-      if (nameA < nameB) return -1;
-      if (nameA > nameB) return 1;
+      // 2) Users with existing board activity come before users with none
+      if (a.hasBoardActivity && !b.hasBoardActivity) return -1;
+      if (!a.hasBoardActivity && b.hasBoardActivity) return 1;
 
+      // 3) Earlier activity keeps priority
+      const aTime = a.firstSeenAt || "9999-12-31T23:59:59.999Z";
+      const bTime = b.firstSeenAt || "9999-12-31T23:59:59.999Z";
+      if (aTime < bTime) return -1;
+      if (aTime > bTime) return 1;
+
+      // 4) Stable fallback
       return String(a.user_id || "").localeCompare(String(b.user_id || ""));
     });
 
