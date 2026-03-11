@@ -954,6 +954,48 @@ function getWeekdayLabels7(timeZone) {
 // CALENDAR CELL / DOT HELPERS
 // =========================
 
+
+function normaliseColour(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+//----------
+function getDotVariantClass(existingDots, color) {
+  const target = normaliseColour(color);
+  if (!target) return "";
+
+  const sameColourDots = Array.from(existingDots).filter(dot => {
+    return normaliseColour(dot.dataset.dotColor) === target;
+  });
+
+  const idx = sameColourDots.length;
+
+  if (idx === 0) return "";
+  if (idx === 1) return "dot--dup-1";
+  if (idx === 2) return "dot--dup-2";
+  if (idx === 3) return "dot--dup-3";
+  return "dot--dup-4";
+}
+
+//----------
+function decorateDot(dot, { userId, name, color, existingDots = [] } = {}) {
+  dot.className = "dot";
+
+  if (userId) dot.dataset.userId = userId;
+  dot.dataset.name = name || "—";
+  dot.title = name || "—";
+
+  const safeColor = color || "#999";
+  dot.style.background = safeColor;
+  dot.dataset.dotColor = safeColor;
+
+  const variantClass = getDotVariantClass(existingDots, safeColor);
+  if (variantClass) dot.classList.add(variantClass);
+
+  return dot;
+}
+
+//----------
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -971,17 +1013,18 @@ function addOptimisticDot(cell, userId, name, color) {
   if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
 
   const dot = document.createElement("div");
-  dot.className = "dot";
-  dot.dataset.userId = userId;
-  dot.dataset.name = name || "—";
-  dot.title = name || "—";
-  dot.style.background = color || "#999";
+  decorateDot(dot, {
+    userId,
+    name,
+    color,
+    existingDots: dc.querySelectorAll(".dot")
+  });
 
   // mark as pending so we can remove if DB fails
   dot.dataset.pending = "1";
 
   dc.appendChild(dot);
-}  
+}
 
 //----------
 function maybeApplyGoldForCell(cell) {
@@ -1038,15 +1081,14 @@ async function rebuildDotsForCell(cell) {
     const displayColor = prof?.color || entry.color || "#999";
 
     const dot = document.createElement("div");
-    dot.className = "dot";
+      decorateDot(dot, {
+        userId: entry.user_id,
+        name: displayName,
+        color: displayColor,
+        existingDots: dotContainer.querySelectorAll(".dot")
+      });
 
-    dot.style.background = displayColor;
-    dot.title = displayName;
-
-    if (entry.user_id) dot.dataset.userId = entry.user_id;
-    dot.dataset.name = displayName;
-
-    dotContainer.appendChild(dot);
+      dotContainer.appendChild(dot);
   });
 
   cell.appendChild(dotContainer);
@@ -1218,14 +1260,14 @@ async function handleAvailabilityChange(payload) {
 
   if (!alreadyHasDot) {
     const dot = document.createElement("div");
-    dot.className = "dot";
-    dot.style.background = displayColor;
-    dot.title = displayName;
+      decorateDot(dot, {
+        userId: entry.user_id,
+        name: displayName,
+        color: displayColor,
+        existingDots: dotContainer.querySelectorAll(".dot")
+      });
 
-    if (entry.user_id) dot.dataset.userId = entry.user_id;
-    dot.dataset.name = displayName;
-
-    dotContainer.appendChild(dot);
+      dotContainer.appendChild(dot);
   } else {
     // If it exists (optimistic), update its displayed values just in case
     const existing = entry.user_id
@@ -1233,9 +1275,16 @@ async function handleAvailabilityChange(payload) {
       : (entry.name ? cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`) : null);
 
     if (existing) {
-      existing.style.background = displayColor;
-      existing.title = displayName;
-      existing.dataset.name = displayName;
+      decorateDot(existing, {
+        userId: entry.user_id,
+        name: displayName,
+        color: displayColor,
+        existingDots: Array.from(dotContainer.querySelectorAll(".dot")).filter(d => d !== existing)
+      });
+
+      if (existing.dataset.pending === "1") {
+        existing.dataset.pending = "1";
+      }
     }
   }
 
@@ -1681,25 +1730,25 @@ async function loadAvailability() {
         dotContainer.className = "dot-container";
 
         entries.forEach(entry => {
-          const dot = document.createElement("div");
-          dot.className = "dot";
+         const dot = document.createElement("div");
 
-          if (entry.user_id) dot.dataset.userId = entry.user_id;
+        const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+        const displayName = prof?.name || entry.name || "—";
+        const displayColor = prof?.color || entry.color || "#999";
 
-          const prof = entry.user_id ? profilesMap[entry.user_id] : null;
-          const displayName = prof?.name || entry.name || "—";
-          const displayColor = prof?.color || entry.color || "#999";
+        decorateDot(dot, {
+          userId: entry.user_id,
+          name: displayName,
+          color: displayColor,
+          existingDots: dotContainer.querySelectorAll(".dot")
+        });
 
-          dot.style.background = displayColor;
-          dot.title = displayName;
-          dot.dataset.name = displayName;
+      // Animate only the current user's dot
+      if (user && entry.user_id === user.id) {
+        dot.classList.add("pop-in");
+      }
 
-          // Animate only the current user's dot
-          if (user && entry.user_id === user.id) {
-            dot.classList.add("pop-in");
-          }
-
-          dotContainer.appendChild(dot);
+      dotContainer.appendChild(dot);
         });
 
         cell.appendChild(dotContainer);
