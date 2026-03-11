@@ -101,6 +101,7 @@ let isBoardOwner = false;
 let profilesCache = {};
 let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
+let boardDotVariants = {};
 
 
 
@@ -960,17 +961,8 @@ function normaliseColour(value) {
 }
 
 //----------
-function getDotVariantClass(existingDots, color) {
-  const target = normaliseColour(color);
-  if (!target) return "";
-
-  const sameColourDots = Array.from(existingDots).filter(dot => {
-    return normaliseColour(dot.dataset.dotColor) === target;
-  });
-
-  const idx = sameColourDots.length;
-
-  if (idx === 0) return "";
+function getVariantClassFromIndex(idx) {
+  if (idx <= 0) return "";
   if (idx === 1) return "dot--dup-1";
   if (idx === 2) return "dot--dup-2";
   if (idx === 3) return "dot--dup-3";
@@ -978,7 +970,70 @@ function getDotVariantClass(existingDots, color) {
 }
 
 //----------
-function decorateDot(dot, { userId, name, color, existingDots = [] } = {}) {
+async function buildBoardDotVariantMap(boardId) {
+  boardDotVariants = {};
+  if (!boardId) return boardDotVariants;
+
+  const { data: members, error: memErr } = await supabase
+    .from("board_members")
+    .select("user_id")
+    .eq("board_id", boardId);
+
+  if (memErr) {
+    console.warn("buildBoardDotVariantMap members error:", memErr);
+    return boardDotVariants;
+  }
+
+  const userIds = (members || []).map(m => m.user_id).filter(Boolean);
+  if (userIds.length === 0) return boardDotVariants;
+
+  const { data: profiles, error: profErr } = await supabase
+    .from("profiles")
+    .select("user_id, name, color")
+    .in("user_id", userIds);
+
+  if (profErr) {
+    console.warn("buildBoardDotVariantMap profiles error:", profErr);
+    return boardDotVariants;
+  }
+
+  const groups = new Map();
+
+  (profiles || []).forEach(profile => {
+    const colourKey = normaliseColour(profile.color);
+    if (!colourKey) return;
+
+    if (!groups.has(colourKey)) groups.set(colourKey, []);
+    groups.get(colourKey).push(profile);
+  });
+
+  groups.forEach(group => {
+    group.sort((a, b) => {
+      const nameA = String(a.name || "").trim().toLowerCase();
+      const nameB = String(b.name || "").trim().toLowerCase();
+
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+
+      return String(a.user_id || "").localeCompare(String(b.user_id || ""));
+    });
+
+    group.forEach((profile, idx) => {
+      boardDotVariants[profile.user_id] = getVariantClassFromIndex(idx);
+    });
+  });
+
+  return boardDotVariants;
+}
+
+//----------
+function getBoardDotVariantClass(userId) {
+  if (!userId) return "";
+  return boardDotVariants[userId] || "";
+}
+
+//----------
+function decorateDot(dot, { userId, name, color } = {}) {
   dot.className = "dot";
 
   if (userId) dot.dataset.userId = userId;
@@ -989,7 +1044,7 @@ function decorateDot(dot, { userId, name, color, existingDots = [] } = {}) {
   dot.style.background = safeColor;
   dot.dataset.dotColor = safeColor;
 
-  const variantClass = getDotVariantClass(existingDots, safeColor);
+  const variantClass = getBoardDotVariantClass(userId);
   if (variantClass) dot.classList.add(variantClass);
 
   return dot;
@@ -1013,12 +1068,11 @@ function addOptimisticDot(cell, userId, name, color) {
   if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
 
   const dot = document.createElement("div");
-  decorateDot(dot, {
-    userId,
-    name,
-    color,
-    existingDots: dc.querySelectorAll(".dot")
-  });
+    decorateDot(dot, {
+      userId,
+      name,
+      color
+    });
 
   // mark as pending so we can remove if DB fails
   dot.dataset.pending = "1";
@@ -1084,8 +1138,7 @@ async function rebuildDotsForCell(cell) {
       decorateDot(dot, {
         userId: entry.user_id,
         name: displayName,
-        color: displayColor,
-        existingDots: dotContainer.querySelectorAll(".dot")
+        color: displayColor
       });
 
       dotContainer.appendChild(dot);
@@ -1263,8 +1316,7 @@ async function handleAvailabilityChange(payload) {
       decorateDot(dot, {
         userId: entry.user_id,
         name: displayName,
-        color: displayColor,
-        existingDots: dotContainer.querySelectorAll(".dot")
+        color: displayColor
       });
 
       dotContainer.appendChild(dot);
@@ -1278,8 +1330,7 @@ async function handleAvailabilityChange(payload) {
       decorateDot(existing, {
         userId: entry.user_id,
         name: displayName,
-        color: displayColor,
-        existingDots: Array.from(dotContainer.querySelectorAll(".dot")).filter(d => d !== existing)
+        color: displayColor
       });
 
       if (existing.dataset.pending === "1") {
@@ -1374,7 +1425,12 @@ function subscribeRealtime() {
     },
     async () => {
       if (manageToken) return;
-      await kickOutIfNoBoardAccess();
+
+      const kicked = await kickOutIfNoBoardAccess();
+      if (kicked) return;
+
+      await buildBoardDotVariantMap(currentTable.id);
+      await loadAvailability();
     }
     )
   .subscribe((status) => {
@@ -1526,6 +1582,7 @@ async function loadBoards() {
 //----------  
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
+  boardDotVariants = {};
 
   const queryField = inviteToken ? "invite_token" : "owner_token";
   const tokenValue = inviteToken || manageToken;
@@ -1614,6 +1671,7 @@ if (!hydrated) {
 }
 
   await ensureMembership(currentTable.id);
+  await buildBoardDotVariantMap(currentTable.id);
 
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
@@ -1739,8 +1797,7 @@ async function loadAvailability() {
         decorateDot(dot, {
           userId: entry.user_id,
           name: displayName,
-          color: displayColor,
-          existingDots: dotContainer.querySelectorAll(".dot")
+          color: displayColor
         });
 
       // Animate only the current user's dot
