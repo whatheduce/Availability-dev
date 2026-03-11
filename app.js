@@ -597,52 +597,41 @@ function ensureLegendUser(entry) {
   if (!key) return;
 
   const existing = entry.user_id
-  ? legendList.querySelector(`.legend-item[data-user-id="${entry.user_id}"]`)
-  : (entry.name ? legendList.querySelector(`.legend-item[data-name="${CSS.escape(entry.name)}"]`) : null);
+    ? legendList.querySelector(`.legend-item[data-user-id="${entry.user_id}"]`)
+    : (entry.name ? legendList.querySelector(`.legend-item[data-name="${CSS.escape(entry.name)}"]`) : null);
 
-if (existing) {
-  const normalisedRowName = String(name || "").trim().toLowerCase();
+  const normalisedRowName = String(entry.name || "").trim().toLowerCase();
   const normalisedUserName = String(user?.name || "").trim().toLowerCase();
 
   const isCurrentUser =
     !!(
-      (user?.id && userId && userId === user.id) ||
+      (user?.id && entry.user_id && entry.user_id === user.id) ||
       (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
-      (currentTable?.owner_id && userId && userId === currentTable.owner_id)
+      (currentTable?.owner_id && entry.user_id && entry.user_id === currentTable.owner_id)
     );
 
-  existing.innerHTML = buildLegendRowHtml({
-    userId: entry.user_id,
-    name: entry.name,
-    color: entry.color,
-    showLocalColourAction: isCurrentUser
-  });
-
-  return;
-}
+  if (existing) {
+    existing.innerHTML = buildLegendRowHtml({
+      userId: entry.user_id,
+      name: entry.name,
+      color: entry.color,
+      showLocalColourAction: isCurrentUser
+    });
+    return;
+  }
 
   const div = document.createElement("div");
   div.className = "legend-item";
   if (entry.user_id) div.dataset.userId = entry.user_id;
   if (entry.name) div.dataset.name = entry.name;
 
- const normalisedRowName = String(name || "").trim().toLowerCase();
-  const normalisedUserName = String(user?.name || "").trim().toLowerCase();
+  div.innerHTML = buildLegendRowHtml({
+    userId: entry.user_id,
+    name: entry.name,
+    color: entry.color,
+    showLocalColourAction: isCurrentUser
+  });
 
-  const isCurrentUser =
-    !!(
-      (user?.id && userId && userId === user.id) ||
-      (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
-      (currentTable?.owner_id && userId && userId === currentTable.owner_id)
-    );
-
-    div.innerHTML = buildLegendRowHtml({
-      userId: entry.user_id,
-      name: entry.name,
-      color: entry.color,
-      showLocalColourAction: isCurrentUser
-    });
-  
   legendList.appendChild(div);
 }
 
