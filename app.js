@@ -101,6 +101,8 @@ let isBoardOwner = false;
 let profilesCache = {};
 let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
+let localColourEditMode = false;
+let localColourBoardId = null;
 
 
 
@@ -2391,8 +2393,12 @@ const colourGrid = document.getElementById("colour-grid");
 const colourErr = document.getElementById("colour-error");
 const colourCancel = document.getElementById("colour-cancel");
 const colourSave = document.getElementById("colour-save");
+const colourModalTitle = document.getElementById("colour-modal-title");
+const colourModalBody = document.getElementById("colour-modal-body");
 
 let selectedColour = null;
+let colourModalMode = "profile";   // "profile" | "local"
+let colourModalBoardId = null;
 
 const pwModal = document.getElementById("password-modal");
 const pwCurrent = document.getElementById("pw-current");
@@ -2479,11 +2485,26 @@ function renderColourGrid(current){
 }
 
 //----------  
-function openColourModal(){
+function openColourModal({ mode = "profile", boardId = null } = {}) {
   if (!colourModal) return;
+
+  colourModalMode = mode;
+  colourModalBoardId = boardId;
 
   setColourError("");
   selectedColour = normaliseHex(user?.color || "");
+
+  if (colourModalTitle) {
+    colourModalTitle.textContent =
+      mode === "local" ? "Change local calendar colour" : "Change colour";
+  }
+
+  if (colourModalBody) {
+    colourModalBody.textContent =
+      mode === "local"
+        ? "This changes your colour for this calendar only. Your profile colour stays the same."
+        : "Pick a colour for your dots and legend.";
+  }
 
   renderColourGrid(selectedColour);
   colourModal.hidden = false;
@@ -2493,6 +2514,8 @@ function openColourModal(){
 function closeColourModal(){
   if (!colourModal) return;
   colourModal.hidden = true;
+  colourModalMode = "profile";
+  colourModalBoardId = null;
 }
 
 //----------   
@@ -3338,9 +3361,25 @@ document.getElementById("acct-change-name")?.addEventListener("click", () => {
 nameCancel?.addEventListener("click", closeNameModal);
 
 document.getElementById("acct-change-colour")?.addEventListener("click", () => {
-  openColourModal();
+  openColourModal({ mode: "profile" });
 });
 
+  legendList?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".legend-local-colour-btn");
+  if (!btn) return;
+
+  const row = btn.closest(".legend-item");
+  const rowUserId = row?.dataset.userId || null;
+
+  if (!user?.id || !rowUserId || rowUserId !== user.id) return;
+  if (!currentTable?.id) return;
+
+  openColourModal({
+    mode: "local",
+    boardId: currentTable.id
+  });
+});
+  
 colourCancel?.addEventListener("click", closeColourModal);
 
 // click outside card closes
