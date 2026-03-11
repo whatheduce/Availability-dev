@@ -774,6 +774,7 @@ async function fetchBoardLocalColorMap(boardId, userIds) {
     if (row?.user_id && row?.local_color) map[row.user_id] = row.local_color;
   });
   return map;
+  console.log("localColorMap rows", data, error);
 }
 
 //----------
