@@ -101,8 +101,8 @@ let isBoardOwner = false;
 let profilesCache = {};
 let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
-let localColourEditMode = false;
-let localColourBoardId = null;
+let colourModalMode = "profile";   // "profile" | "local"
+let colourModalBoardId = null;
 
 
 
