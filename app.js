@@ -1105,7 +1105,7 @@ async function rebuildDotsForCell(cell) {
   // ✅ Fetch profiles ONCE
   const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
   profilesCache = { ...profilesCache, ...profilesMap };
-  const localColorMap = await fetchBoardLocalColorMap(currentTable.id, rows.map(r => r.user_id));
+  const localColorMap = await fetchBoardLocalColorMap(currentTable.id, data.map(d => d.user_id));
 
   const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
@@ -1709,6 +1709,7 @@ async function loadAvailability() {
     // Profiles map for latest name/color
     const profilesMap = await fetchProfilesMap(rows.map(r => r.user_id));
     profilesCache = { ...profilesCache, ...profilesMap };
+    const localColorMap = await fetchBoardLocalColorMap(currentTable.id, rows.map(r => r.user_id));
 
     /* Legend */
     const users = {};
@@ -3416,92 +3417,93 @@ colourModal?.addEventListener("click", (e) => {
 });
 
 colourSave?.addEventListener("click", async () => {
+  const v = selectedColour;
+  if (!v) return setColourError("Please choose a colour.");
+  if (!COLOUR_PRESETS.includes(v)) return setColourError("Please choose a colour from the list.");
+
+  colourSave.disabled = true;
+  setColourError("");
+
   try {
-   const v = selectedColour;
-      if (!v) return setColourError("Please choose a colour.");
-      if (!COLOUR_PRESETS.includes(v)) return setColourError("Please choose a colour from the list.");
+    const au = await auth.getAuthUser();
+    if (!au) {
+      setColourError("You’re not signed in.");
+      return;
+    }
 
-    colourSave.disabled = true;
-setColourError("");
+    if (colourModalMode === "local") {
+      if (!colourModalBoardId) {
+        setColourError("No calendar selected.");
+        return;
+      }
 
-const au = await auth.getAuthUser();
-if (!au) {
-  setColourError("You’re not signed in.");
-  return;
-}
+      const { error } = await supabase
+        .from("board_members")
+        .update({ local_color: v })
+        .eq("board_id", colourModalBoardId)
+        .eq("user_id", au.id);
 
-if (colourModalMode === "local") {
-  if (!colourModalBoardId) {
-    setColourError("No calendar selected.");
-    return;
-  }
+      if (error) throw error;
 
-  const { error } = await supabase
-    .from("board_members")
-    .update({ local_color: v })
-    .eq("board_id", colourModalBoardId)
-    .eq("user_id", au.id);
+      closeColourModal();
 
-  if (error) throw error;
+      await confirmModal({
+        title: "Local colour updated",
+        message: "Your colour has been changed for this calendar only.",
+        okText: "Close",
+        cancelText: ""
+      });
 
-  closeColourModal();
+      if (currentTable?.id === colourModalBoardId) {
+        await loadAvailability();
+      }
 
-  await confirmModal({
-    title: "Local colour updated",
-    message: "Your colour has been changed for this calendar only.",
-    okText: "Close",
-    cancelText: ""
-  });
+      await loadBoards();
+      return;
+    }
 
-  if (currentTable?.id === colourModalBoardId) {
-    await loadAvailability();
-  }
+    // profile mode
+    if (user?.color && v === user.color.toUpperCase()) {
+      closeColourModal();
+      return;
+    }
 
-  await loadBoards();
-  return;
-}
+    const { error } = await supabase
+      .from("profiles")
+      .update({ color: v })
+      .eq("user_id", au.id);
 
-// profile mode
-if (user?.color && v === user.color.toUpperCase()) {
-  closeColourModal();
-  return;
-}
+    if (error) throw error;
 
-const { error } = await supabase
-  .from("profiles")
-  .update({ color: v })
-  .eq("user_id", au.id);
+    // Update in-memory + cache
+    if (user) user.color = v;
+    profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
 
-if (error) throw error;
+    // Update account panel immediately
+    const dot = document.getElementById("acct-colour-dot");
+    const txt = document.getElementById("acct-colour-text");
+    if (dot) dot.style.background = v;
+    if (txt) txt.textContent = v;
 
-// Update in-memory + cache
-if (user) user.color = v;
-profilesCache[au.id] = { user_id: au.id, name: user?.name || "", color: v };
+    closeColourModal();
 
-// Update account panel immediately
-const dot = document.getElementById("acct-colour-dot");
-const txt = document.getElementById("acct-colour-text");
-if (dot) dot.style.background = v;
-if (txt) txt.textContent = v;
+    await confirmModal({
+      title: "Colour updated",
+      message: "Your colour has been changed successfully.",
+      okText: "Close",
+      cancelText: ""
+    });
 
-closeColourModal();
+    await loadBoards();
 
-await confirmModal({
-  title: "Colour updated",
-  message: "Your colour has been changed successfully.",
-  okText: "Close",
-  cancelText: ""
-});
-
-await loadBoards();
-
-if (currentTable) {
-  await loadAvailability();
-} catch (err) {
-    console.error("Change colour failed:", err);
-    setColourError("Could not update your colour. Please try again.");
+    if (currentTable) {
+      await loadAvailability();
+    }
+  } catch (err) {
+    console.error("save colour failed", err);
+    setColourError(err?.message || "Failed to save colour.");
   } finally {
-    if (colourSave) colourSave.disabled = false;
+    colourSave.disabled = false;
   }
 });
 
