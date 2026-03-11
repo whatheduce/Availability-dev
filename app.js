@@ -3451,23 +3451,25 @@ colourSave?.addEventListener("click", async () => {
 
   if (error) throw error;
 
-  closeColourModal();
+  const targetBoardId = colourModalBoardId;
 
-  await confirmModal({
-    title: "Local colour updated",
-    message: "Your colour has been changed for this calendar only.",
-    okText: "Close",
-    cancelText: ""
-  });
+closeColourModal();
 
-  if (currentTable?.id === colourModalBoardId) {
-    await loadAvailability();
-    await refreshCurrentTableMeta();
-    renderCalendarLastUpdated();
-  }
+await confirmModal({
+  title: "Local colour updated",
+  message: "Your colour has been changed for this calendar only.",
+  okText: "Close",
+  cancelText: ""
+});
 
-  await loadBoards();
-  return;
+if (currentTable?.id === targetBoardId) {
+  await loadAvailability();
+  await refreshCurrentTableMeta();
+  renderCalendarLastUpdated();
+}
+
+await loadBoards();
+return;
 }
 
     // profile mode
