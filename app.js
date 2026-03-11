@@ -607,7 +607,11 @@ function ensureLegendUser(entry) {
   if (entry.user_id) div.dataset.userId = entry.user_id;
   if (entry.name) div.dataset.name = entry.name;
 
- const isCurrentUser = !!(user?.id && entry.user_id && entry.user_id === user.id);
+ const isCurrentUser =
+  !!(
+    (user?.id && entry.user_id && entry.user_id === user.id) ||
+    (user?.name && entry.name && entry.name.trim().toLowerCase() === user.name.trim().toLowerCase())
+  );
 
     div.innerHTML = buildLegendRowHtml({
       userId: entry.user_id,
@@ -627,26 +631,18 @@ function buildLegendRowHtml({ userId, name, color, showLocalColourAction = false
   return `
     <div class="color-box" style="background:${safeColor}"></div>
 
-    <div class="legend-user-main">
+    <div class="legend-user-row">
       <div class="legend-user-name">${safeName}</div>
 
       ${
         showLocalColourAction
           ? `
-            <div class="legend-user-actions">
-              <button
-                type="button"
-                class="legend-local-colour-btn"
-                data-action="change-local-colour">
-                Change local colour
-              </button>
-              <div
-                class="legend-local-colour-note"
-                data-role="local-colour-note"
-                style="display:none;">
-                Same colour as another user on this calendar
-              </div>
-            </div>
+            <button
+              type="button"
+              class="legend-local-colour-btn"
+              data-action="change-local-colour">
+              Change local colour
+            </button>
           `
           : ""
       }
@@ -1692,7 +1688,11 @@ async function loadAvailability() {
         if (rowUserId) div.dataset.userId = rowUserId;
         else div.dataset.name = name;
 
-        const isCurrentUser = !!(user?.id && rowUserId && rowUserId === user.id);
+        const isCurrentUser =
+          !!(
+            (user?.id && rowUserId && rowUserId === user.id) ||
+            (user?.name && name && name.trim().toLowerCase() === user.name.trim().toLowerCase())
+          );
 
         div.innerHTML = buildLegendRowHtml({
           userId: rowUserId,
