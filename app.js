@@ -1716,13 +1716,6 @@ Object.values(users).forEach(({ userId, name, color }) => {
       (currentUserId && userId && userId === currentUserId) ||
       (currentUserName && normalisedRowName && normalisedRowName === currentUserName)
     );
-
-  console.log("legend check", {
-  currentUserId,
-  rowUserId: userId,
-  name,
-  isCurrentUser
-});
   
   div.innerHTML = buildLegendRowHtml({
     userId,
