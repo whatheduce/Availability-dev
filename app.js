@@ -1403,18 +1403,16 @@ function subscribeRealtime() {
       filter: `board_id=eq.${currentTable.id}`
     },
     async (payload) => {
-  if (manageToken) return;
+      // Only non-owners need kick-out checking
+      if (!manageToken) {
+        const kicked = await kickOutIfNoBoardAccess();
+        if (kicked) return;
+      }
 
-  const kicked = await kickOutIfNoBoardAccess();
-  if (kicked) return;
-
-  // local board colour changed (or membership changed) → rerender immediately
-  await loadAvailability();
-
-  // keep dashboard previews in sync too if you want
-  await loadBoards();
-}
-    )
+      // local board colour changed (or membership changed) → rerender immediately
+      await loadAvailability();
+    }
+  )
   .subscribe((status) => {
     log("membership channel:", status);
   });
