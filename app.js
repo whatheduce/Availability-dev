@@ -596,11 +596,26 @@ function ensureLegendUser(entry) {
   const key = entry.user_id || entry.name;
   if (!key) return;
 
-  const existing = legendList.querySelector(
-    entry.user_id ? `.legend-item[data-user-id="${entry.user_id}"]`
-                  : `.legend-item[data-name="${CSS.escape(entry.name || "")}"]`
-  );
-  if (existing) return;
+  const existing = entry.user_id
+  ? legendList.querySelector(`.legend-item[data-user-id="${entry.user_id}"]`)
+  : (entry.name ? legendList.querySelector(`.legend-item[data-name="${CSS.escape(entry.name)}"]`) : null);
+
+if (existing) {
+  const isCurrentUser =
+    !!(
+      (user?.id && entry.user_id && entry.user_id === user.id) ||
+      (user?.name && entry.name && entry.name.trim().toLowerCase() === user.name.trim().toLowerCase())
+    );
+
+  existing.innerHTML = buildLegendRowHtml({
+    userId: entry.user_id,
+    name: entry.name,
+    color: entry.color,
+    showLocalColourAction: isCurrentUser
+  });
+
+  return;
+}
 
   const div = document.createElement("div");
   div.className = "legend-item";
