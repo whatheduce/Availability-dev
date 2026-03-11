@@ -1668,41 +1668,46 @@ async function loadAvailability() {
 
     /* Legend */
     const users = {};
-    rows.forEach(r => {
-      const prof = r.user_id ? profilesMap[r.user_id] : null;
+      rows.forEach(r => {
+        const prof = r.user_id ? profilesMap[r.user_id] : null;
 
-      const displayName = prof?.name || r.name || "—";
-      const displayColor = prof?.color || r.color || "#999";
+        const displayName = prof?.name || r.name || "—";
+        const displayColor = prof?.color || r.color || "#999";
 
-      const key = r.user_id || displayName; // fallback for old rows without user_id
-      if (!users[key]) users[key] = { name: displayName, color: displayColor };
-    });
+        const key = r.user_id || displayName; // fallback for old rows without user_id
+
+  if (!users[key]) {
+    users[key] = {
+      userId: r.user_id || null,
+      name: displayName,
+      color: displayColor
+    };
+  }
+});
 
     legendList.innerHTML = "";
-      Object.entries(users).forEach(([key, { name, color }]) => {
-        const div = document.createElement("div");
-        div.className = "legend-item";
+Object.values(users).forEach(({ userId, name, color }) => {
+  const div = document.createElement("div");
+  div.className = "legend-item";
 
-        const rowUserId = key.includes("-") ? key : null;
+  if (userId) div.dataset.userId = userId;
+  else div.dataset.name = name;
 
-        if (rowUserId) div.dataset.userId = rowUserId;
-        else div.dataset.name = name;
+  const isCurrentUser =
+    !!(
+      (user?.id && userId && userId === user.id) ||
+      (user?.name && name && name.trim().toLowerCase() === user.name.trim().toLowerCase())
+    );
 
-        const isCurrentUser =
-          !!(
-            (user?.id && rowUserId && rowUserId === user.id) ||
-            (user?.name && name && name.trim().toLowerCase() === user.name.trim().toLowerCase())
-          );
+  div.innerHTML = buildLegendRowHtml({
+    userId,
+    name,
+    color,
+    showLocalColourAction: isCurrentUser
+  });
 
-        div.innerHTML = buildLegendRowHtml({
-          userId: rowUserId,
-          name,
-          color,
-          showLocalColourAction: isCurrentUser
-        });
-
-        legendList.appendChild(div);
-      });
+  legendList.appendChild(div);
+});
 
     /* Group by cell */
     const map = {};
