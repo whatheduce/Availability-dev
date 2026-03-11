@@ -219,45 +219,36 @@ body.logged-in #landing-bg::after{
 
 .legend-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   margin: 7px 0;
 }
 
-.legend-user-main {
-  min-width: 0;
+.legend-user-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
 }
 
 .legend-user-name {
   line-height: 1.25;
 }
 
-.legend-user-actions {
-  margin-top: 3px;
-}
-
 .legend-local-colour-btn {
-  padding: 0;
-  border: none;
-  background: transparent;
-  font: inherit;
-  font-size: 12px;
-  line-height: 1.2;
-  color: rgba(0,122,255,0.88);
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.9);
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
 }
 
 .legend-local-colour-btn:hover {
-  text-decoration: underline;
-}
-
-.legend-local-colour-note {
-  margin-top: 2px;
-  font-size: 11px;
-  line-height: 1.25;
-  color: rgba(0,0,0,0.52);
+  background: rgba(255,255,255,1);
 }
 
 .color-box {
@@ -266,7 +257,6 @@ body.logged-in #landing-bg::after{
   margin-right: 0;
   border: 1px solid #ccc;
   flex: 0 0 auto;
-  margin-top: 1px;
 }
 
     .footer-note{
