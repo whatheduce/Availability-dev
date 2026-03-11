@@ -601,10 +601,14 @@ function ensureLegendUser(entry) {
   : (entry.name ? legendList.querySelector(`.legend-item[data-name="${CSS.escape(entry.name)}"]`) : null);
 
 if (existing) {
+  const normalisedRowName = String(name || "").trim().toLowerCase();
+  const normalisedUserName = String(user?.name || "").trim().toLowerCase();
+
   const isCurrentUser =
     !!(
-      (user?.id && entry.user_id && entry.user_id === user.id) ||
-      (user?.name && entry.name && entry.name.trim().toLowerCase() === user.name.trim().toLowerCase())
+      (user?.id && userId && userId === user.id) ||
+      (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
+      (currentTable?.owner_id && userId && userId === currentTable.owner_id)
     );
 
   existing.innerHTML = buildLegendRowHtml({
@@ -622,11 +626,15 @@ if (existing) {
   if (entry.user_id) div.dataset.userId = entry.user_id;
   if (entry.name) div.dataset.name = entry.name;
 
- const isCurrentUser =
-  !!(
-    (user?.id && entry.user_id && entry.user_id === user.id) ||
-    (user?.name && entry.name && entry.name.trim().toLowerCase() === user.name.trim().toLowerCase())
-  );
+ const normalisedRowName = String(name || "").trim().toLowerCase();
+  const normalisedUserName = String(user?.name || "").trim().toLowerCase();
+
+  const isCurrentUser =
+    !!(
+      (user?.id && userId && userId === user.id) ||
+      (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
+      (currentTable?.owner_id && userId && userId === currentTable.owner_id)
+    );
 
     div.innerHTML = buildLegendRowHtml({
       userId: entry.user_id,
@@ -1708,10 +1716,14 @@ Object.values(users).forEach(({ userId, name, color }) => {
   if (userId) div.dataset.userId = userId;
   else div.dataset.name = name;
 
+  const normalisedRowName = String(name || "").trim().toLowerCase();
+  const normalisedUserName = String(user?.name || "").trim().toLowerCase();
+
   const isCurrentUser =
     !!(
       (user?.id && userId && userId === user.id) ||
-      (user?.name && name && name.trim().toLowerCase() === user.name.trim().toLowerCase())
+      (normalisedUserName && normalisedRowName && normalisedRowName === normalisedUserName) ||
+      (currentTable?.owner_id && userId && userId === currentTable.owner_id)
     );
 
   div.innerHTML = buildLegendRowHtml({
