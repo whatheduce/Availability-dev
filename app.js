@@ -1268,6 +1268,17 @@ async function handleAvailabilityChange(payload) {
 
   if (!entry) return;
 
+  if (
+  payload.eventType !== "DELETE" &&
+  entry.user_id &&
+  !boardDotVariants[entry.user_id]
+) {
+  await buildBoardDotVariantMap(currentTable.id);
+  await loadAvailability();
+  scheduleFullRefreshIdle(15000);
+  return;
+}
+  
   // If DELETE is missing fields we need, safest refresh
   if (payload.eventType === "DELETE") {
     if (entry.day == null || entry.time == null) {
