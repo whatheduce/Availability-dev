@@ -607,8 +607,51 @@ function ensureLegendUser(entry) {
   if (entry.user_id) div.dataset.userId = entry.user_id;
   if (entry.name) div.dataset.name = entry.name;
 
-  div.innerHTML = `<div class="color-box" style="background:${entry.color}"></div>${entry.name}`;
+ const isCurrentUser = !!(user?.id && entry.user_id && entry.user_id === user.id);
+
+    div.innerHTML = buildLegendRowHtml({
+      userId: entry.user_id,
+      name: entry.name,
+      color: entry.color,
+      showLocalColourAction: isCurrentUser
+    });
+  
   legendList.appendChild(div);
+}
+
+//----------
+function buildLegendRowHtml({ userId, name, color, showLocalColourAction = false } = {}) {
+  const safeName = escapeHtml(name || "—");
+  const safeColor = color || "#999";
+
+  return `
+    <div class="color-box" style="background:${safeColor}"></div>
+
+    <div class="legend-user-main">
+      <div class="legend-user-name">${safeName}</div>
+
+      ${
+        showLocalColourAction
+          ? `
+            <div class="legend-user-actions">
+              <button
+                type="button"
+                class="legend-local-colour-btn"
+                data-action="change-local-colour">
+                Change local colour
+              </button>
+              <div
+                class="legend-local-colour-note"
+                data-role="local-colour-note"
+                style="display:none;">
+                Same colour as another user on this calendar
+              </div>
+            </div>
+          `
+          : ""
+      }
+    </div>
+  `;
 }
 
 
@@ -1640,16 +1683,26 @@ async function loadAvailability() {
     });
 
     legendList.innerHTML = "";
-    Object.entries(users).forEach(([key, { name, color }]) => {
-      const div = document.createElement("div");
-      div.className = "legend-item";
+      Object.entries(users).forEach(([key, { name, color }]) => {
+        const div = document.createElement("div");
+        div.className = "legend-item";
 
-      if (key.includes("-")) div.dataset.userId = key;
-      else div.dataset.name = name;
+        const rowUserId = key.includes("-") ? key : null;
 
-      div.innerHTML = `<div class="color-box" style="background:${color}"></div>${name}`;
-      legendList.appendChild(div);
-    });
+        if (rowUserId) div.dataset.userId = rowUserId;
+        else div.dataset.name = name;
+
+        const isCurrentUser = !!(user?.id && rowUserId && rowUserId === user.id);
+
+        div.innerHTML = buildLegendRowHtml({
+          userId: rowUserId,
+          name,
+          color,
+          showLocalColourAction: isCurrentUser
+        });
+
+        legendList.appendChild(div);
+      });
 
     /* Group by cell */
     const map = {};
