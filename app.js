@@ -1402,10 +1402,18 @@ function subscribeRealtime() {
       table: "board_members",
       filter: `board_id=eq.${currentTable.id}`
     },
-    async () => {
-      if (manageToken) return;
-      await kickOutIfNoBoardAccess();
-    }
+    async (payload) => {
+  if (manageToken) return;
+
+  const kicked = await kickOutIfNoBoardAccess();
+  if (kicked) return;
+
+  // local board colour changed (or membership changed) → rerender immediately
+  await loadAvailability();
+
+  // keep dashboard previews in sync too if you want
+  await loadBoards();
+}
     )
   .subscribe((status) => {
     log("membership channel:", status);
