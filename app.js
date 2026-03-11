@@ -978,7 +978,7 @@ async function buildBoardDotVariantMap(boardId) {
 
   const { data: rows, error } = await supabase
     .from("availability_dev")
-    .select("user_id, name, color, created_at")
+    .select("user_id, name, color")
     .eq("table_id", boardId);
 
   if (error) {
@@ -1004,11 +1004,6 @@ async function buildBoardDotVariantMap(boardId) {
       return;
     }
 
-    // keep earliest activity timestamp
-    if (row.created_at && (!existing.firstSeenAt || row.created_at < existing.firstSeenAt)) {
-      existing.firstSeenAt = row.created_at;
-    }
-
     // prefer a non-empty name/color if current stored one is blank
     if (!existing.name && row.name) existing.name = row.name;
     if (!existing.color && row.color) existing.color = row.color;
@@ -1027,7 +1022,6 @@ async function buildBoardDotVariantMap(boardId) {
         user_id: user.id,
         name: user.name || "",
         color: user.color || "",
-        firstSeenAt: null,
         hasBoardActivity: false
       });
     }
@@ -1046,29 +1040,21 @@ async function buildBoardDotVariantMap(boardId) {
 
   groups.forEach(group => {
     group.sort((a, b) => {
-      // 1) Owner always gets base style first
       const aIsOwner = a.user_id === ownerId;
       const bIsOwner = b.user_id === ownerId;
+
       if (aIsOwner && !bIsOwner) return -1;
       if (!aIsOwner && bIsOwner) return 1;
 
-      // 2) Users with existing board activity come before users with none
       if (a.hasBoardActivity && !b.hasBoardActivity) return -1;
       if (!a.hasBoardActivity && b.hasBoardActivity) return 1;
 
-      // 3) Earlier activity keeps priority
-      const aTime = a.firstSeenAt || "9999-12-31T23:59:59.999Z";
-      const bTime = b.firstSeenAt || "9999-12-31T23:59:59.999Z";
-      if (aTime < bTime) return -1;
-      if (aTime > bTime) return 1;
-
-      // 4) Stable fallback
       return String(a.user_id || "").localeCompare(String(b.user_id || ""));
     });
 
-    group.forEach((member, idx) => {
-      boardDotVariants[member.user_id] = getVariantClassFromIndex(idx);
-    });
+      group.forEach((member, idx) => {
+        boardDotVariants[member.user_id] = getVariantClassFromIndex(idx);
+      });
   });
 
   return boardDotVariants;
