@@ -974,37 +974,48 @@ async function buildBoardDotVariantMap(boardId) {
   boardDotVariants = {};
   if (!boardId) return boardDotVariants;
 
-  const { data: members, error: memErr } = await supabase
-    .from("board_members")
-    .select("user_id")
-    .eq("board_id", boardId);
-
-  if (memErr) {
-    console.warn("buildBoardDotVariantMap members error:", memErr);
-    return boardDotVariants;
-  }
-
-  const userIds = (members || []).map(m => m.user_id).filter(Boolean);
-  if (userIds.length === 0) return boardDotVariants;
-
-  const { data: profiles, error: profErr } = await supabase
-    .from("profiles")
+  const { data: rows, error } = await supabase
+    .from("availability_dev")
     .select("user_id, name, color")
-    .in("user_id", userIds);
+    .eq("table_id", boardId);
 
-  if (profErr) {
-    console.warn("buildBoardDotVariantMap profiles error:", profErr);
+  if (error) {
+    console.warn("buildBoardDotVariantMap availability error:", error);
     return boardDotVariants;
   }
 
+  const seen = new Map();
+
+  (rows || []).forEach(row => {
+    if (!row?.user_id) return;
+
+    if (!seen.has(row.user_id)) {
+      seen.set(row.user_id, {
+        user_id: row.user_id,
+        name: row.name || "",
+        color: row.color || ""
+      });
+    }
+  });
+
+  // Make sure the signed-in user is represented with freshest in-memory values
+  if (user?.id) {
+    seen.set(user.id, {
+      user_id: user.id,
+      name: user.name || "",
+      color: user.color || ""
+    });
+  }
+
+  const members = Array.from(seen.values());
   const groups = new Map();
 
-  (profiles || []).forEach(profile => {
-    const colourKey = normaliseColour(profile.color);
+  members.forEach(member => {
+    const colourKey = normaliseColour(member.color);
     if (!colourKey) return;
 
     if (!groups.has(colourKey)) groups.set(colourKey, []);
-    groups.get(colourKey).push(profile);
+    groups.get(colourKey).push(member);
   });
 
   groups.forEach(group => {
@@ -1018,8 +1029,8 @@ async function buildBoardDotVariantMap(boardId) {
       return String(a.user_id || "").localeCompare(String(b.user_id || ""));
     });
 
-    group.forEach((profile, idx) => {
-      boardDotVariants[profile.user_id] = getVariantClassFromIndex(idx);
+    group.forEach((member, idx) => {
+      boardDotVariants[member.user_id] = getVariantClassFromIndex(idx);
     });
   });
 
@@ -3432,6 +3443,7 @@ colourSave?.addEventListener("click", async () => {
 
     // Refresh open calendar (legend/dots)
     if (currentTable) {
+      await buildBoardDotVariantMap(currentTable.id);
       await loadAvailability();
     }
 
