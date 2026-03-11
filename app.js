@@ -101,7 +101,6 @@ let isBoardOwner = false;
 let profilesCache = {};
 let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
-let boardDotVariants = {};
 
 
 
@@ -955,136 +954,6 @@ function getWeekdayLabels7(timeZone) {
 // CALENDAR CELL / DOT HELPERS
 // =========================
 
-
-function normaliseColour(value) {
-  return String(value || "").trim().toLowerCase();
-}
-
-//----------
-function getVariantClassFromIndex(idx) {
-  if (idx <= 0) return "";
-  if (idx === 1) return "dot--dup-1";
-  if (idx === 2) return "dot--dup-2";
-  if (idx === 3) return "dot--dup-3";
-  return "dot--dup-4";
-}
-
-//----------
-async function buildBoardDotVariantMap(boardId) {
-  boardDotVariants = {};
-  if (!boardId) return boardDotVariants;
-
-  const ownerId = currentTable?.owner_id || null;
-
-  const { data: rows, error } = await supabase
-    .from("availability_dev")
-    .select("user_id, name, color")
-    .eq("table_id", boardId);
-
-  if (error) {
-    console.warn("buildBoardDotVariantMap availability error:", error);
-    return boardDotVariants;
-  }
-
-  const seen = new Map();
-
-  (rows || []).forEach(row => {
-    if (!row?.user_id) return;
-
-    const existing = seen.get(row.user_id);
-
-    if (!existing) {
-      seen.set(row.user_id, {
-        user_id: row.user_id,
-        name: row.name || "",
-        color: row.color || "",
-        firstSeenAt: row.created_at || null,
-        hasBoardActivity: true
-      });
-      return;
-    }
-
-    // prefer a non-empty name/color if current stored one is blank
-    if (!existing.name && row.name) existing.name = row.name;
-    if (!existing.color && row.color) existing.color = row.color;
-  });
-
-  // Ensure current signed-in user exists in the map,
-  // but treat them as "no board activity yet" if they have no rows.
-  if (user?.id) {
-    const existing = seen.get(user.id);
-
-    if (existing) {
-      if (user.name) existing.name = user.name;
-      if (user.color) existing.color = user.color;
-    } else {
-      seen.set(user.id, {
-        user_id: user.id,
-        name: user.name || "",
-        color: user.color || "",
-        hasBoardActivity: false
-      });
-    }
-  }
-
-  const members = Array.from(seen.values());
-  const groups = new Map();
-
-  members.forEach(member => {
-    const colourKey = normaliseColour(member.color);
-    if (!colourKey) return;
-
-    if (!groups.has(colourKey)) groups.set(colourKey, []);
-    groups.get(colourKey).push(member);
-  });
-
-  groups.forEach(group => {
-    group.sort((a, b) => {
-      const aIsOwner = a.user_id === ownerId;
-      const bIsOwner = b.user_id === ownerId;
-
-      if (aIsOwner && !bIsOwner) return -1;
-      if (!aIsOwner && bIsOwner) return 1;
-
-      if (a.hasBoardActivity && !b.hasBoardActivity) return -1;
-      if (!a.hasBoardActivity && b.hasBoardActivity) return 1;
-
-      return String(a.user_id || "").localeCompare(String(b.user_id || ""));
-    });
-
-      group.forEach((member, idx) => {
-        boardDotVariants[member.user_id] = getVariantClassFromIndex(idx);
-      });
-  });
-
-  return boardDotVariants;
-}
-
-//----------
-function getBoardDotVariantClass(userId) {
-  if (!userId) return "";
-  return boardDotVariants[userId] || "";
-}
-
-//----------
-function decorateDot(dot, { userId, name, color } = {}) {
-  dot.className = "dot";
-
-  if (userId) dot.dataset.userId = userId;
-  dot.dataset.name = name || "—";
-  dot.title = name || "—";
-
-  const safeColor = color || "#999";
-  dot.style.background = safeColor;
-  dot.dataset.dotColor = safeColor;
-
-  const variantClass = getBoardDotVariantClass(userId);
-  if (variantClass) dot.classList.add(variantClass);
-
-  return dot;
-}
-
-//----------
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1102,17 +971,17 @@ function addOptimisticDot(cell, userId, name, color) {
   if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
 
   const dot = document.createElement("div");
-    decorateDot(dot, {
-      userId,
-      name,
-      color
-    });
+  dot.className = "dot";
+  dot.dataset.userId = userId;
+  dot.dataset.name = name || "—";
+  dot.title = name || "—";
+  dot.style.background = color || "#999";
 
   // mark as pending so we can remove if DB fails
   dot.dataset.pending = "1";
 
   dc.appendChild(dot);
-}
+}  
 
 //----------
 function maybeApplyGoldForCell(cell) {
@@ -1169,13 +1038,15 @@ async function rebuildDotsForCell(cell) {
     const displayColor = prof?.color || entry.color || "#999";
 
     const dot = document.createElement("div");
-      decorateDot(dot, {
-        userId: entry.user_id,
-        name: displayName,
-        color: displayColor
-      });
+    dot.className = "dot";
 
-      dotContainer.appendChild(dot);
+    dot.style.background = displayColor;
+    dot.title = displayName;
+
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
+    dot.dataset.name = displayName;
+
+    dotContainer.appendChild(dot);
   });
 
   cell.appendChild(dotContainer);
@@ -1268,17 +1139,6 @@ async function handleAvailabilityChange(payload) {
 
   if (!entry) return;
 
-  if (
-  payload.eventType !== "DELETE" &&
-  entry.user_id &&
-  !boardDotVariants[entry.user_id]
-) {
-  await buildBoardDotVariantMap(currentTable.id);
-  await loadAvailability();
-  scheduleFullRefreshIdle(15000);
-  return;
-}
-  
   // If DELETE is missing fields we need, safest refresh
   if (payload.eventType === "DELETE") {
     if (entry.day == null || entry.time == null) {
@@ -1358,13 +1218,14 @@ async function handleAvailabilityChange(payload) {
 
   if (!alreadyHasDot) {
     const dot = document.createElement("div");
-      decorateDot(dot, {
-        userId: entry.user_id,
-        name: displayName,
-        color: displayColor
-      });
+    dot.className = "dot";
+    dot.style.background = displayColor;
+    dot.title = displayName;
 
-      dotContainer.appendChild(dot);
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
+    dot.dataset.name = displayName;
+
+    dotContainer.appendChild(dot);
   } else {
     // If it exists (optimistic), update its displayed values just in case
     const existing = entry.user_id
@@ -1372,15 +1233,9 @@ async function handleAvailabilityChange(payload) {
       : (entry.name ? cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`) : null);
 
     if (existing) {
-      decorateDot(existing, {
-        userId: entry.user_id,
-        name: displayName,
-        color: displayColor
-      });
-
-      if (existing.dataset.pending === "1") {
-        existing.dataset.pending = "1";
-      }
+      existing.style.background = displayColor;
+      existing.title = displayName;
+      existing.dataset.name = displayName;
     }
   }
 
@@ -1470,12 +1325,7 @@ function subscribeRealtime() {
     },
     async () => {
       if (manageToken) return;
-
-      const kicked = await kickOutIfNoBoardAccess();
-      if (kicked) return;
-
-      await buildBoardDotVariantMap(currentTable.id);
-      await loadAvailability();
+      await kickOutIfNoBoardAccess();
     }
     )
   .subscribe((status) => {
@@ -1627,7 +1477,6 @@ async function loadBoards() {
 //----------  
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
-  boardDotVariants = {};
 
   const queryField = inviteToken ? "invite_token" : "owner_token";
   const tokenValue = inviteToken || manageToken;
@@ -1716,7 +1565,6 @@ if (!hydrated) {
 }
 
   await ensureMembership(currentTable.id);
-  await buildBoardDotVariantMap(currentTable.id);
 
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
@@ -1833,24 +1681,25 @@ async function loadAvailability() {
         dotContainer.className = "dot-container";
 
         entries.forEach(entry => {
-         const dot = document.createElement("div");
+          const dot = document.createElement("div");
+          dot.className = "dot";
 
-        const prof = entry.user_id ? profilesMap[entry.user_id] : null;
-        const displayName = prof?.name || entry.name || "—";
-        const displayColor = prof?.color || entry.color || "#999";
+          if (entry.user_id) dot.dataset.userId = entry.user_id;
 
-        decorateDot(dot, {
-          userId: entry.user_id,
-          name: displayName,
-          color: displayColor
-        });
+          const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+          const displayName = prof?.name || entry.name || "—";
+          const displayColor = prof?.color || entry.color || "#999";
 
-      // Animate only the current user's dot
-      if (user && entry.user_id === user.id) {
-        dot.classList.add("pop-in");
-      }
+          dot.style.background = displayColor;
+          dot.title = displayName;
+          dot.dataset.name = displayName;
 
-      dotContainer.appendChild(dot);
+          // Animate only the current user's dot
+          if (user && entry.user_id === user.id) {
+            dot.classList.add("pop-in");
+          }
+
+          dotContainer.appendChild(dot);
         });
 
         cell.appendChild(dotContainer);
@@ -3477,7 +3326,6 @@ colourSave?.addEventListener("click", async () => {
 
     // Refresh open calendar (legend/dots)
     if (currentTable) {
-      await buildBoardDotVariantMap(currentTable.id);
       await loadAvailability();
     }
 
