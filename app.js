@@ -1403,7 +1403,8 @@ if (auId && currentTable?.id) {
         table: "board_members",
         filter: `board_id=eq.${currentTable.id}`
       },
-      async () => {
+      async (payload) => {
+      console.log("membership realtime fired", payload);
         // Non-owner views still need access checking
         if (!manageToken) {
           const kicked = await kickOutIfNoBoardAccess();
