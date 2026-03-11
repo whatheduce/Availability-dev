@@ -2432,8 +2432,6 @@ const colourModalTitle = document.getElementById("colour-modal-title");
 const colourModalBody = document.getElementById("colour-modal-body");
 
 let selectedColour = null;
-let colourModalMode = "profile";   // "profile" | "local"
-let colourModalBoardId = null;
 
 const pwModal = document.getElementById("password-modal");
 const pwCurrent = document.getElementById("pw-current");
