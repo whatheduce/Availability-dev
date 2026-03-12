@@ -1219,12 +1219,22 @@ async function handleAvailabilityChange(payload) {
 
   // If DELETE is missing fields we need, safest refresh
   if (payload.eventType === "DELETE") {
-    if (entry.day == null || entry.time == null) {
-      await loadAvailability();
-      scheduleFullRefreshIdle(15000);
-      return;
-    }
+  console.log("[TRACE] delete entry fields:", {
+    old: payload.old,
+    entry,
+    day: entry?.day,
+    time: entry?.time,
+    table_id: entry?.table_id,
+    user_id: entry?.user_id
+  });
+
+  if (entry.day == null || entry.time == null) {
+    console.log("[TRACE] delete fallback -> loadAvailability because day/time missing");
+    await loadAvailability();
+    scheduleFullRefreshIdle(15000);
+    return;
   }
+}
 
   const cell = table.querySelector(
     `td[data-day="${entry.day}"][data-time="${entry.time}"]`
