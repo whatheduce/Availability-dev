@@ -1382,6 +1382,7 @@ function subscribeRealtime() {
         filter: `table_id=eq.${currentTable.id}`
       },
       async (payload) => {
+                                                                                          console.log("[TRACE] availability event:", payload.eventType, payload);
         await handleAvailabilityChange(payload);
       }
     )
@@ -1403,6 +1404,8 @@ if (auId && currentTable?.id) {
         filter: `board_id=eq.${currentTable.id}`
       },
       async (payload) => {
+                                                                                          console.log("[TRACE] membership event:", payload.eventType, payload);
+        
         const before = payload.old || {};
         const after = payload.new || {};
 
@@ -1444,6 +1447,7 @@ if (auId && currentTable?.id) {
         filter: `id=eq.${currentTable.id}`
       },
       async (payload) => {
+                                                                                  console.log("[TRACE] table event:", payload.eventType, payload);
         const prevTable = currentTable;
         currentTable = { ...currentTable, ...payload.new };
 
@@ -1694,6 +1698,7 @@ renderCalendarLastUpdated();
 
 //----------  
 async function loadAvailability() {
+                                                                                                                                                      console.log("[TRACE] loadAvailability called");
   // ✅ prevent overlapping renders that duplicate rows/cells
   if (loadAvailabilityRunning) {
     loadAvailabilityQueued = true;
