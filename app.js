@@ -1333,9 +1333,12 @@ async function handleAvailabilityChange(payload) {
   const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [entry.user_id]);
   const displayColor = localColorMap[entry.user_id] || prof?.color || entry.color || "#999";
 
-  if (!alreadyHasDot) {
+    if (!alreadyHasDot) {
     const dot = document.createElement("div");
     dot.className = "dot";
+
+    if (entry?.id != null) dot.dataset.entryId = String(entry.id);
+
     dot.style.background = displayColor;
     dot.title = displayName;
 
@@ -1349,10 +1352,13 @@ async function handleAvailabilityChange(payload) {
       ? cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)
       : (entry.name ? cell.querySelector(`.dot[data-name="${CSS.escape(entry.name)}"]`) : null);
 
-    if (existing) {
+      if (existing) {
+      if (entry?.id != null) existing.dataset.entryId = String(entry.id);
+
       existing.style.background = displayColor;
       existing.title = displayName;
       existing.dataset.name = displayName;
+      delete existing.dataset.pending;
     }
   }
 
