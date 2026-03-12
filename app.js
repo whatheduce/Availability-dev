@@ -1118,6 +1118,8 @@ async function rebuildDotsForCell(cell) {
     const dot = document.createElement("div");
     dot.className = "dot";
 
+    if (entry?.id != null) dot.dataset.entryId = String(entry.id);
+
     dot.style.background = displayColor;
     dot.title = displayName;
 
@@ -1216,25 +1218,52 @@ async function handleAvailabilityChange(payload) {
 
   if (!entry) return;
 
-  // If DELETE is missing fields we need, safest refresh
+  // DELETE: remove exact dot by DB row id, even if payload only contains { id }
   if (payload.eventType === "DELETE") {
-  console.log("[TRACE] delete entry fields:", {
-    old: payload.old,
-    entry,
-    day: entry?.day,
-    time: entry?.time,
-    table_id: entry?.table_id,
-    user_id: entry?.user_id
-  });
+    console.log("[TRACE] delete entry fields:", {
+      old: payload.old,
+      entry,
+      id: entry?.id,
+      day: entry?.day,
+      time: entry?.time,
+      table_id: entry?.table_id,
+      user_id: entry?.user_id
+    });
 
-  if (entry.day == null || entry.time == null) {
-    console.log("[TRACE] delete fallback -> loadAvailability because day/time missing");
-    await loadAvailability();
+    const entryId = entry?.id;
+    if (entryId == null) {
+      console.log("[TRACE] delete fallback -> loadAvailability because id missing");
+      await loadAvailability();
+      scheduleFullRefreshIdle(15000);
+      return;
+    }
+
+    const dot = table.querySelector(`.dot[data-entry-id="${String(entryId)}"]`);
+    if (!dot) {
+      console.log("[TRACE] delete fallback -> loadAvailability because dot not found by entryId");
+      await loadAvailability();
+      scheduleFullRefreshIdle(15000);
+      return;
+    }
+
+    const cell = dot.closest('td[data-day][data-time]');
+    if (!cell) {
+      console.log("[TRACE] delete fallback -> loadAvailability because parent cell not found");
+      await loadAvailability();
+      scheduleFullRefreshIdle(15000);
+      return;
+    }
+
+    dot.remove();
+
+    const dc = cell.querySelector(".dot-container");
+    if (dc && dc.children.length === 0) dc.remove();
+
+    await applyGoldStateForCell(cell, cell.dataset.day);
     scheduleFullRefreshIdle(15000);
     return;
   }
-}
-
+  
   const cell = table.querySelector(
     `td[data-day="${entry.day}"][data-time="${entry.time}"]`
   );
@@ -1822,6 +1851,7 @@ Object.values(users).forEach(({ userId, name, color }) => {
           const dot = document.createElement("div");
           dot.className = "dot";
 
+          if (entry?.id != null) dot.dataset.entryId = String(entry.id);
           if (entry.user_id) dot.dataset.userId = entry.user_id;
 
           const prof = entry.user_id ? profilesMap[entry.user_id] : null;
