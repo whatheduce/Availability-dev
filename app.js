@@ -2254,22 +2254,14 @@ async function toggleCell(e) {
     }
 
     if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
-      if (cell.classList.contains("gold-cell")) {
-        await loadAvailability();
-        return;
-      }
+  if (cell.classList.contains("gold-cell")) {
+    await loadAvailability();
+    return;
+  }
 
-      const myDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
-      if (myDot) myDot.remove();
-
-      const legacyDot = cell.querySelector(`.dot[data-name="${CSS.escape(user.name)}"]`);
-      if (legacyDot) legacyDot.remove();
-
-      const container = cell.querySelector(".dot-container");
-      if (container && container.children.length === 0) container.remove();
-
-      return;
-    }
+  // Let realtime DELETE remove the dot so it can use data-entry-id
+  return;
+}
 
     // INSERT (toggle on) — optimistic first
     const key = addKey(currentTable.id, dayNum, timeKey, myUid);
