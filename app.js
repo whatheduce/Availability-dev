@@ -1218,15 +1218,6 @@ async function handleAvailabilityChange(payload) {
 
   // DELETE: remove exact dot by DB row id, even if payload only contains { id }
   if (payload.eventType === "DELETE") {
-      old: payload.old,
-      entry,
-      id: entry?.id,
-      day: entry?.day,
-      time: entry?.time,
-      table_id: entry?.table_id,
-      user_id: entry?.user_id
-    });
-
     const entryId = entry?.id;
     if (entryId == null) {
       await loadAvailability();
