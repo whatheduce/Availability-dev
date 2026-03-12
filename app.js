@@ -2894,6 +2894,23 @@ async function renderBoardPreviews(owned) {
 
     if (memErr) throw memErr;
 
+        const { data: memberColours, error: memberColoursErr } = await supabase
+          .from("board_members")
+          .select("board_id, user_id, local_color")
+          .in("board_id", boardIds);
+
+        if (memberColoursErr) throw memberColoursErr;
+
+        const localColorByBoardUser = new Map(); // `${boardId}|${userId}` -> local_color
+
+        for (const row of (memberColours || [])) {
+          if (!row?.board_id || !row?.user_id || !row?.local_color) continue;
+          localColorByBoardUser.set(
+            `${String(row.board_id)}|${String(row.user_id)}`,
+            row.local_color
+          );
+        }
+
     const memberUserIds = Array.from(new Set(
       (legendAvail || [])
         .map(r => r.user_id)
@@ -2965,14 +2982,20 @@ if (memberUserIds.length > 0) {
           const visible = users.slice(0, maxDots);
           const extra = users.length - visible.length;
 
-          dotsHtml = visible.map(uid => {
-            const p = profilesByUser.get(String(uid));
-            const f = fallbackByUser.get(String(uid));
+       dotsHtml = visible.map(uid => {
+          const key = `${boardId}|${String(uid)}`;
+          const p = profilesByUser.get(String(uid));
+          const f = fallbackByUser.get(String(uid));
 
-            const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
-            const name = (p?.name || f?.name || "").trim();
-            return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
-          }).join("");
+          const col =
+            localColorByBoardUser.get(key) ||
+            p?.color ||
+            f?.color ||
+            "rgba(0,0,0,0.35)";
+
+  const name = (p?.name || f?.name || "").trim();
+  return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
+}).join("");
 
           extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
         }
@@ -3063,10 +3086,16 @@ const legendHtml = shown.length
     ">
       ${[
   ...shown.map(uid => {
+    const key = `${boardId}|${String(uid)}`;
     const p = profilesByUser.get(String(uid));
-    const f = fallbackByBoardUser.get(`${boardId}|${String(uid)}`);
+    const f = fallbackByBoardUser.get(key);
 
-    const col = p?.color || f?.color || "rgba(0,0,0,0.35)";
+    const col =
+      localColorByBoardUser.get(key) ||
+      p?.color ||
+      f?.color ||
+      "rgba(0,0,0,0.35)";
+
     const nm = (p?.name || f?.name || "").trim() || "User";
 
     return `
