@@ -2153,8 +2153,6 @@ async function toggleCell(e) {
     if (inFlightCells.has(k)) return;
     inFlightCells.add(k);
 
-    await ensureMembership(currentTable.id);
-
     // DELETE FIRST (toggle off)
     const { error: delErr, count: deletedCount } = await supabase
       .from("availability_dev")
