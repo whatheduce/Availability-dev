@@ -1214,13 +1214,10 @@ function scheduleFullRefreshIdle(ms = 15000) {
 async function handleAvailabilityChange(payload) {
   const entry = payload.eventType === "DELETE" ? payload.old : payload.new;
 
-  console.log("[TRACE] entry used:", entry);
-
   if (!entry) return;
 
   // DELETE: remove exact dot by DB row id, even if payload only contains { id }
   if (payload.eventType === "DELETE") {
-    console.log("[TRACE] delete entry fields:", {
       old: payload.old,
       entry,
       id: entry?.id,
@@ -1232,7 +1229,6 @@ async function handleAvailabilityChange(payload) {
 
     const entryId = entry?.id;
     if (entryId == null) {
-      console.log("[TRACE] delete fallback -> loadAvailability because id missing");
       await loadAvailability();
       scheduleFullRefreshIdle(15000);
       return;
@@ -1240,7 +1236,6 @@ async function handleAvailabilityChange(payload) {
 
     const dot = table.querySelector(`.dot[data-entry-id="${String(entryId)}"]`);
     if (!dot) {
-      console.log("[TRACE] delete fallback -> loadAvailability because dot not found by entryId");
       await loadAvailability();
       scheduleFullRefreshIdle(15000);
       return;
@@ -1248,7 +1243,6 @@ async function handleAvailabilityChange(payload) {
 
     const cell = dot.closest('td[data-day][data-time]');
     if (!cell) {
-      console.log("[TRACE] delete fallback -> loadAvailability because parent cell not found");
       await loadAvailability();
       scheduleFullRefreshIdle(15000);
       return;
@@ -1426,7 +1420,6 @@ function subscribeRealtime() {
         filter: `table_id=eq.${currentTable.id}`
       },
       async (payload) => {
-                                                                                          console.log("[TRACE] availability event:", payload.eventType, payload);
         await handleAvailabilityChange(payload);
       }
     )
@@ -1447,9 +1440,7 @@ if (auId && currentTable?.id) {
         table: "board_members",
         filter: `board_id=eq.${currentTable.id}`
       },
-      async (payload) => {
-                                                                                          console.log("[TRACE] membership event:", payload.eventType, payload);
-        
+      async (payload) => {      
         const before = payload.old || {};
         const after = payload.new || {};
 
@@ -1491,7 +1482,6 @@ if (auId && currentTable?.id) {
         filter: `id=eq.${currentTable.id}`
       },
       async (payload) => {
-                                                                                  console.log("[TRACE] table event:", payload.eventType, payload);
         const prevTable = currentTable;
         currentTable = { ...currentTable, ...payload.new };
 
@@ -1742,7 +1732,6 @@ renderCalendarLastUpdated();
 
 //----------  
 async function loadAvailability() {
-                                                                                                                                                      console.log("[TRACE] loadAvailability called");
   // ✅ prevent overlapping renders that duplicate rows/cells
   if (loadAvailabilityRunning) {
     loadAvailabilityQueued = true;
