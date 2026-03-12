@@ -1210,10 +1210,9 @@ function scheduleFullRefreshIdle(ms = 15000) {
 
 //----------
 async function handleAvailabilityChange(payload) {
-  const entry =
-    payload.eventType === "DELETE"
-      ? payload.old
-      : (payload.new && Object.keys(payload.new).length ? payload.new : payload.old);
+  const entry = payload.eventType === "DELETE" ? payload.old : payload.new;
+
+  console.log("[TRACE] entry used:", entry);
 
   if (!entry) return;
 
