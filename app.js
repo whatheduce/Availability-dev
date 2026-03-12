@@ -774,7 +774,6 @@ async function fetchBoardLocalColorMap(boardId, userIds) {
     if (row?.user_id && row?.local_color) map[row.user_id] = row.local_color;
   });
   return map;
-  console.log("localColorMap rows", data, error);
 }
 
 //----------
@@ -1404,7 +1403,6 @@ if (auId && currentTable?.id) {
         filter: `board_id=eq.${currentTable.id}`
       },
       async (payload) => {
-      console.log("membership realtime fired", payload);
         // Non-owner views still need access checking
         if (!manageToken) {
           const kicked = await kickOutIfNoBoardAccess();
@@ -3462,12 +3460,6 @@ await confirmModal({
   okText: "Close",
   cancelText: ""
 });
-
-if (currentTable?.id === targetBoardId) {
-  await loadAvailability();
-  await refreshCurrentTableMeta();
-  renderCalendarLastUpdated();
-}
 
 await loadBoards();
 return;
