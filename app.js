@@ -1403,6 +1403,19 @@ if (auId && currentTable?.id) {
         filter: `board_id=eq.${currentTable.id}`
       },
       async (payload) => {
+        const before = payload.old || {};
+        const after = payload.new || {};
+
+        const relevantMembershipChange =
+          payload.eventType === "INSERT" ||
+          payload.eventType === "DELETE" ||
+          before.user_id !== after.user_id ||
+          before.board_id !== after.board_id ||
+          before.role !== after.role ||
+          before.local_color !== after.local_color;
+
+        if (!relevantMembershipChange) return;
+
         // Non-owner views still need access checking
         if (!manageToken) {
           const kicked = await kickOutIfNoBoardAccess();
@@ -1417,7 +1430,7 @@ if (auId && currentTable?.id) {
     .subscribe((status) => {
       log("membership channel:", status);
     });
-  }
+}
   
   // Board changes (start_date / row_structure / gold_threshold updates)
   tableChannel = supabase
