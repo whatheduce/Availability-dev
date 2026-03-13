@@ -2246,7 +2246,7 @@ async function toggleCell(e) {
         .eq("color", user.color)
         .select("id");
 
-      const legacyCount = legacyDeletedRows?.length || 0;
+      const legacyDeletedCount = legacyDeletedRows?.length || 0;
 
       if (legacyErr) {
         console.warn("Legacy delete failed:", legacyErr);
