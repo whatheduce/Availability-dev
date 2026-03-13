@@ -448,7 +448,7 @@ function getLastUpdatedLabel(isoString) {
   const diffMs = Math.max(0, now - then);
   const diffMin = Math.floor(diffMs / 60000);
 
-  if (diffMin <= 0) return "just now";
+  if (diffMin <= 0) return "Just now";
   if (diffMin === 1) return "1 minute ago";
   if (diffMin < 60) return `${diffMin} minutes ago`;
 
