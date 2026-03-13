@@ -34,6 +34,7 @@ const inviteToken = params.get("t");
 const manageToken = params.get("m");
 const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock
+const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
 
 
 
@@ -103,6 +104,7 @@ let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
 let colourModalMode = "profile";   // "profile" | "local"
 let colourModalBoardId = null;
+
 
 
 
@@ -1226,11 +1228,27 @@ async function handleAvailabilityChange(payload) {
     }
 
     const dot = table.querySelector(`.dot[data-entry-id="${String(entryId)}"]`);
-    if (!dot) {
-      await loadAvailability();
-      scheduleFullRefreshIdle(15000);
+if (!dot) {
+  const pendingCell = pendingDeleteCellByEntryId.get(String(entryId));
+
+  if (pendingCell) {
+    pendingDeleteCellByEntryId.delete(String(entryId));
+
+    const cell = table.querySelector(
+      `td[data-day="${pendingCell.day}"][data-time="${pendingCell.time}"]`
+    );
+
+    if (cell) {
+      await rebuildDotsForCell(cell);
+      await applyGoldStateForCell(cell, pendingCell.day);
       return;
     }
+  }
+
+  await loadAvailability();
+  scheduleFullRefreshIdle(15000);
+  return;
+}
 
     const cell = dot.closest('td[data-day][data-time]');
     if (!cell) {
@@ -2197,13 +2215,16 @@ async function toggleCell(e) {
     inFlightCells.add(k);
 
     // DELETE FIRST (toggle off)
-    const { error: delErr, count: deletedCount } = await supabase
+    const { data: deletedRows, error: delErr } = await supabase
       .from("availability_dev")
-      .delete({ count: "exact" })
+      .delete()
       .eq("table_id", currentTable.id)
       .eq("day", dayNum)
       .eq("time", timeKey)
-      .eq("user_id", myUid);
+      .eq("user_id", myUid)
+      .select("id");
+
+    const deletedCount = deletedRows?.length || 0;
 
     if (delErr) {
       console.warn("Delete failed:", delErr);
@@ -2214,15 +2235,18 @@ async function toggleCell(e) {
     // legacy delete if needed
     let legacyDeletedCount = 0;
     if ((deletedCount || 0) === 0) {
-      const { error: legacyErr, count: legacyCount } = await supabase
+      const { data: legacyDeletedRows, error: legacyErr } = await supabase
         .from("availability_dev")
-        .delete({ count: "exact" })
+        .delete()
         .eq("table_id", currentTable.id)
         .eq("day", dayNum)
         .eq("time", timeKey)
         .is("user_id", null)
         .eq("name", user.name)
-        .eq("color", user.color);
+        .eq("color", user.color)
+        .select("id");
+
+      const legacyCount = legacyDeletedRows?.length || 0;
 
       if (legacyErr) {
         console.warn("Legacy delete failed:", legacyErr);
@@ -2234,6 +2258,20 @@ async function toggleCell(e) {
     }
 
     if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
+  const allDeletedRows = [
+    ...(deletedRows || []),
+    ...(legacyDeletedRows || [])
+  ];
+
+  for (const row of allDeletedRows) {
+    if (row?.id != null) {
+      pendingDeleteCellByEntryId.set(String(row.id), {
+        day: String(dayNum),
+        time: timeKey
+      });
+    }
+  }
+
   // Let realtime own delete rendering, including gold -> non-gold transitions
   return;
 }
