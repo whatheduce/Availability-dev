@@ -2234,12 +2234,7 @@ async function toggleCell(e) {
     }
 
     if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
-  if (cell.classList.contains("gold-cell")) {
-    await loadAvailability();
-    return;
-  }
-
-  // Let realtime DELETE remove the dot so it can use data-entry-id
+  // Let realtime own delete rendering, including gold -> non-gold transitions
   return;
 }
 
