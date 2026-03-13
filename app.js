@@ -2232,10 +2232,12 @@ async function toggleCell(e) {
       return;
     }
 
-    // legacy delete if needed
+        // legacy delete if needed
     let legacyDeletedCount = 0;
+    let legacyDeletedRows = [];
+
     if ((deletedCount || 0) === 0) {
-      const { data: legacyDeletedRows, error: legacyErr } = await supabase
+      const { data, error: legacyErr } = await supabase
         .from("availability_dev")
         .delete()
         .eq("table_id", currentTable.id)
@@ -2246,35 +2248,34 @@ async function toggleCell(e) {
         .eq("color", user.color)
         .select("id");
 
-      const legacyDeletedCount = legacyDeletedRows?.length || 0;
-
       if (legacyErr) {
         console.warn("Legacy delete failed:", legacyErr);
         await loadAvailability();
         return;
       }
 
-      legacyDeletedCount = legacyCount || 0;
+      legacyDeletedRows = data || [];
+      legacyDeletedCount = legacyDeletedRows.length;
     }
 
     if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
-  const allDeletedRows = [
-    ...(deletedRows || []),
-    ...(legacyDeletedRows || [])
-  ];
+      const allDeletedRows = [
+        ...(deletedRows || []),
+        ...legacyDeletedRows
+      ];
 
-  for (const row of allDeletedRows) {
-    if (row?.id != null) {
-      pendingDeleteCellByEntryId.set(String(row.id), {
-        day: String(dayNum),
-        time: timeKey
-      });
+      for (const row of allDeletedRows) {
+        if (row?.id != null) {
+          pendingDeleteCellByEntryId.set(String(row.id), {
+            day: String(dayNum),
+            time: timeKey
+          });
+        }
+      }
+
+      // Let realtime own delete rendering, including gold -> non-gold transitions
+      return;
     }
-  }
-
-  // Let realtime own delete rendering, including gold -> non-gold transitions
-  return;
-}
 
     // INSERT (toggle on) — optimistic first
     const key = addKey(currentTable.id, dayNum, timeKey, myUid);
