@@ -35,6 +35,7 @@ const manageToken = params.get("m");
 const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock
 const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
+const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
 
 
 
@@ -1120,6 +1121,12 @@ async function rebuildDotsForCell(cell) {
     const dot = document.createElement("div");
     dot.className = "dot";
 
+    if (entry?.id != null) {
+      availabilityMetaByEntryId.set(String(entry.id), {
+        day: String(entry.day),
+        time: String(entry.time)
+      });
+    }
     if (entry?.id != null) dot.dataset.entryId = String(entry.id);
 
     dot.style.background = displayColor;
@@ -1217,6 +1224,12 @@ async function handleAvailabilityChange(payload) {
   const entry = payload.eventType === "DELETE" ? payload.old : payload.new;
 
   if (!entry) return;
+  if (payload.eventType !== "DELETE" && entry?.id != null) {
+  availabilityMetaByEntryId.set(String(entry.id), {
+    day: String(entry.day),
+    time: String(entry.time)
+  });
+}
 
   // DELETE: remove exact dot by DB row id, even if payload only contains { id }
   if (payload.eventType === "DELETE") {
@@ -1230,17 +1243,21 @@ async function handleAvailabilityChange(payload) {
     const dot = table.querySelector(`.dot[data-entry-id="${String(entryId)}"]`);
 if (!dot) {
   const pendingCell = pendingDeleteCellByEntryId.get(String(entryId));
+  const knownCell = pendingCell || availabilityMetaByEntryId.get(String(entryId));
 
   if (pendingCell) {
     pendingDeleteCellByEntryId.delete(String(entryId));
+  }
 
+  if (knownCell) {
     const cell = table.querySelector(
-      `td[data-day="${pendingCell.day}"][data-time="${pendingCell.time}"]`
+      `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
     );
 
     if (cell) {
       await rebuildDotsForCell(cell);
-      await applyGoldStateForCell(cell, pendingCell.day);
+      await applyGoldStateForCell(cell, knownCell.day);
+      availabilityMetaByEntryId.delete(String(entryId));
       return;
     }
   }
@@ -1263,6 +1280,7 @@ if (!dot) {
     if (dc && dc.children.length === 0) dc.remove();
 
     await applyGoldStateForCell(cell, cell.dataset.day);
+    availabilityMetaByEntryId.delete(String(entryId));
     scheduleFullRefreshIdle(15000);
     return;
   }
@@ -1855,6 +1873,12 @@ Object.values(users).forEach(({ userId, name, color }) => {
           const dot = document.createElement("div");
           dot.className = "dot";
 
+          if (entry?.id != null) {
+            availabilityMetaByEntryId.set(String(entry.id), {
+              day: String(entry.day),
+              time: String(entry.time)
+            });
+          }
           if (entry?.id != null) dot.dataset.entryId = String(entry.id);
           if (entry.user_id) dot.dataset.userId = entry.user_id;
 
