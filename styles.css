@@ -1066,7 +1066,7 @@ body.account-view #dash-account {
   padding: 12px 18px;
   color: #fff;
   border-color: rgba(180, 83, 9, 0.38);
-  background: linear-gradient(135deg, #c96a12 0%, #e58a1f 52%, #f3b24a 100%);
+  background: linear-gradient(135deg, #CC5210 0%, #e58a1f 52%, #f3b24a 100%);
   box-shadow:
     0 10px 22px rgba(217, 119, 6, 0.22),
     inset 0 1px 0 rgba(255,255,255,0.22);
