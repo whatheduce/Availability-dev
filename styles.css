@@ -333,12 +333,9 @@ body.logged-in #landing-bg::after{
       border-radius: 8px;
     }
 
-    td > .dot-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-    }
+td > .dot-container {
+ width: 100%;
+}
 
     .gold-header {
       background: linear-gradient(135deg, gold, #ffef9f) !important;
@@ -352,23 +349,89 @@ body.logged-in #landing-bg::after{
       cursor: pointer;
     }
 
-    .dot-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      width: 100%;
-      height: 100%;
-    }
-    
-    .dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.9);
-      flex: 0 0 auto;
-      box-shadow: 1px 1px 2px rgba(0,0,0,0.58);
-    }
+.dot-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.9);
+  flex: 0 0 auto;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.58);
+}
+
+/* 1–3 dots */
+.dot-container.dots-1-3 {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 4–6 dots */
+.dot-container.dots-4-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 12px);
+  grid-auto-rows: 12px;
+  justify-content: center;
+  align-content: center;
+  gap: 4px 5px;
+  padding: 2px 0;
+}
+
+.dot-container.dots-4-6 .dot {
+  width: 12px;
+  height: 12px;
+}
+
+/* 7–8 dots */
+.dot-container.dots-7-8,
+.dot-container.dots-9plus {
+  display: grid;
+  grid-template-columns: repeat(4, 10px);
+  grid-auto-rows: 10px;
+  justify-content: center;
+  align-content: center;
+  gap: 4px 4px;
+  padding: 2px 0;
+}
+
+.dot-container.dots-7-8 .dot,
+.dot-container.dots-9plus .dot {
+  width: 10px;
+  height: 10px;
+}
+
+.dot-overflow-badge {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: rgba(31, 41, 55, 0.92);
+  color: #fff;
+  font-size: 9px;
+  line-height: 14px;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  pointer-events: none;
+}
 
     .gold-cell {
       background: linear-gradient(165deg, #ffd700, #ffea8a);
