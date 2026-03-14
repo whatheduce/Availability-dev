@@ -3133,36 +3133,47 @@ if (memberUserIds.length > 0) {
           const isGold = users.length >= threshold;
 
         // If the cell is gold, we hide dots entirely (match main board behavior)
+                // If the cell is gold, we hide dots entirely (match main board behavior)
         let dotsHtml = "";
         let extraHtml = "";
+        let miniDotsClass = "mini-dots mini-dots--1-2";
 
         if (!isGold) {
-          // Build dot stack (cap visible dots to keep it clean)
-          const maxDots = 8;
+          // Dashboard preview rules:
+          // 1-2 dots = one row
+          // 3-4 dots = 2 rows, smaller
+          // 5+ dots = show 4 dots + +N badge
+          const maxDots = 4;
           const visible = users.slice(0, maxDots);
-          const extra = users.length - visible.length;
+          const extra = Math.max(0, users.length - maxDots);
 
-       dotsHtml = visible.map(uid => {
-          const key = `${boardId}|${String(uid)}`;
-          const p = profilesByUser.get(String(uid));
-          const f = fallbackByUser.get(String(uid));
+          if (users.length <= 2) {
+            miniDotsClass = "mini-dots mini-dots--1-2";
+          } else {
+            miniDotsClass = "mini-dots mini-dots--3-4";
+          }
 
-          const col =
-            localColorByBoardUser.get(key) ||
-            p?.color ||
-            f?.color ||
-            "rgba(0,0,0,0.35)";
+          dotsHtml = visible.map(uid => {
+            const key = `${boardId}|${String(uid)}`;
+            const p = profilesByUser.get(String(uid));
+            const f = fallbackByUser.get(String(uid));
 
-  const name = (p?.name || f?.name || "").trim();
-  return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
-}).join("");
+            const col =
+              localColorByBoardUser.get(key) ||
+              p?.color ||
+              f?.color ||
+              "rgba(0,0,0,0.35)";
+
+            const name = (p?.name || f?.name || "").trim();
+            return `<span class="mini-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
+          }).join("");
 
           extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
         }
 
           cells.push(`
             <div class="mini-cell ${isGold ? "mini-gold" : ""}">
-              <div class="mini-dots">${dotsHtml}${extraHtml}</div>
+              <div class="${miniDotsClass}">${dotsHtml}${extraHtml}</div>
             </div>
           `);
         }
