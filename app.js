@@ -1034,6 +1034,66 @@ function getWeekdayLabels7(timeZone) {
 // CALENDAR CELL / DOT HELPERS
 // =========================
 
+function refreshDotLayout(cell) {
+  if (!cell) return;
+
+  const dc = cell.querySelector(".dot-container");
+  if (!dc) return;
+
+  // clear previous layout classes / overflow badge
+  dc.classList.remove(
+    "dots-1-3",
+    "dots-4-6",
+    "dots-7-8",
+    "dots-9plus"
+  );
+
+  dc.querySelector(".dot-overflow-badge")?.remove();
+
+  const dots = Array.from(dc.querySelectorAll(".dot"));
+  const count = dots.length;
+
+  // nothing left -> remove container
+  if (count === 0) {
+    dc.remove();
+    return;
+  }
+
+  // always make sure all dots are visible before re-deciding
+  dots.forEach(dot => {
+    dot.style.display = "";
+  });
+
+  if (count <= 3) {
+    dc.classList.add("dots-1-3");
+    return;
+  }
+
+  if (count <= 6) {
+    dc.classList.add("dots-4-6");
+    return;
+  }
+
+  if (count <= 8) {
+    dc.classList.add("dots-7-8");
+    return;
+  }
+
+  // 9+ dots
+  dc.classList.add("dots-9plus");
+
+  dots.slice(8).forEach(dot => {
+    dot.style.display = "none";
+  });
+
+  const badge = document.createElement("div");
+  badge.className = "dot-overflow-badge";
+  badge.textContent = `+${count - 8}`;
+  badge.title = `${count} users in this cell`;
+  dc.appendChild(badge);
+}
+
+//----------
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1041,6 +1101,8 @@ function ensureDotContainer(cell) {
     dc.className = "dot-container";
     cell.appendChild(dc);
   }
+
+  refreshDotLayout(cell);
   return dc;
 }
 
@@ -1061,7 +1123,8 @@ function addOptimisticDot(cell, userId, name, color) {
   dot.dataset.pending = "1";
 
   dc.appendChild(dot);
-}  
+  refreshDotLayout(cell);
+}
 
 //----------
 function maybeApplyGoldForCell(cell) {
@@ -1139,6 +1202,7 @@ async function rebuildDotsForCell(cell) {
   });
 
   cell.appendChild(dotContainer);
+  refreshDotLayout(cell);
 }
 
 //----------
@@ -1275,9 +1339,10 @@ if (!dot) {
     }
 
     dot.remove();
+    refreshDotLayout(cell);
 
     const dc = cell.querySelector(".dot-container");
-    if (dc && dc.children.length === 0) dc.remove();
+    if (dc && dc.querySelectorAll(".dot").length === 0) dc.remove();
 
     await applyGoldStateForCell(cell, cell.dataset.day);
     availabilityMetaByEntryId.delete(String(entryId));
@@ -1309,8 +1374,10 @@ if (!dot) {
     const dot = cell.querySelector(selector);
     if (dot) dot.remove();
 
+    refreshDotLayout(cell);
+
     const dc = cell.querySelector(".dot-container");
-    if (dc && dc.children.length === 0) dc.remove();
+    if (dc && dc.querySelectorAll(".dot").length === 0) dc.remove();
   }
 
   // DELETE: remove dot then re-evaluate gold state
@@ -1382,6 +1449,8 @@ if (!dot) {
       delete existing.dataset.pending;
     }
   }
+
+   refreshDotLayout(cell);
 
   ensureLegendUser({ ...entry, name: displayName, color: displayColor });
 
