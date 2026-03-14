@@ -1060,8 +1060,49 @@ body.account-view #dash-account {
 }
 
 #acct-upgrade-pro{
+  position: relative;
+  overflow: visible;
   font-weight: 800;
   padding: 12px 18px;
+  color: #fff;
+  border-color: rgba(180, 83, 9, 0.38);
+  background: linear-gradient(135deg, #c96a12 0%, #e58a1f 52%, #f3b24a 100%);
+  box-shadow:
+    0 10px 22px rgba(217, 119, 6, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.22);
+  cursor: default;
+}
+
+#acct-upgrade-pro:hover{
+  background: linear-gradient(135deg, #cf7116 0%, #eb931f 52%, #f5ba55 100%);
+  box-shadow:
+    0 12px 26px rgba(217, 119, 6, 0.28),
+    inset 0 1px 0 rgba(255,255,255,0.24);
+  transform: translateY(-1px);
+}
+
+#acct-upgrade-pro:active{
+  transform: translateY(0px) scale(0.99);
+}
+
+#acct-upgrade-pro::after{
+  content: "COMING SOON";
+  position: absolute;
+  top: 7px;
+  right: -22px;
+  transform: rotate(24deg);
+  padding: 2px 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff7ed, #fde7bf);
+  color: #9a3412;
+  border: 1px solid rgba(154, 52, 18, 0.12);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  pointer-events: none;
+  white-space: nowrap;
 }
 
 .colour-dot{
