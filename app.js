@@ -3909,13 +3909,9 @@ document.getElementById("footer-note-save")?.addEventListener("click", async () 
   await saveCalendarNote();
 });
   
-document.getElementById("acct-upgrade-pro")?.addEventListener("click", async () => {
-  await confirmModal({
-    title: "Pro (later)",
-    message: "This will eventually show pricing and upgrade options.",
-    okText: "Close",
-    cancelText: ""
-  });
+document.getElementById("acct-upgrade-pro")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 });
 
 document.getElementById("remove-user-cancel")?.addEventListener("click", () => {
