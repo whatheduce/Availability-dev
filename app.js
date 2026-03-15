@@ -1285,22 +1285,23 @@ function maybeApplyGoldForCell(cell) {
   const th = Number(currentTable?.gold_threshold || 0);
   if (!th || th <= 0) return;
 
-  // If already gold, nothing to do
-  if (cell.classList.contains("gold-cell")) return;
-
   const dc = cell.querySelector(".dot-container");
   const count = dc ? dc.querySelectorAll(".dot").length : 0;
 
+  const dayNum = parseInt(cell.dataset.day, 10);
+  const thEl = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+
   if (count >= th) {
-    cell.classList.add("gold-cell");
+    if (!cell.classList.contains("gold-cell")) {
+      cell.classList.add("gold-cell");
+      dc?.remove();
+    }
 
-    // Gold cells hide dots in your UI
-    dc?.remove();
-
-    // immediately reflect gold state in the day header too
-    const dayNum = parseInt(cell.dataset.day, 10);
-    const thEl = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
     if (thEl) thEl.classList.add("gold-header");
+  } else {
+    cell.classList.remove("gold-cell");
+
+    if (thEl) thEl.classList.remove("gold-header");
   }
 }
 
