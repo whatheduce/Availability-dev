@@ -1204,6 +1204,9 @@ async function renderCellHoverTooltip(cell) {
   `;
 
   cellHoverTooltip.hidden = false;
+  cellHoverTooltip.classList.remove("is-opening");
+  void cellHoverTooltip.offsetWidth;
+  cellHoverTooltip.classList.add("is-opening");
   hoverTooltipCell = cell;
 }
 
@@ -1240,6 +1243,7 @@ function hideCellHoverTooltip() {
   clearTimeout(hoverTooltipTimer);
   cellHoverTooltip.hidden = true;
   cellHoverTooltip.innerHTML = "";
+  cellHoverTooltip.classList.remove("is-opening");
   hoverTooltipCell = null;
 }
 
