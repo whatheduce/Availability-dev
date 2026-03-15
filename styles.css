@@ -357,13 +357,23 @@ td > .dot-container {
       font-weight: 700;
     }
 
-td:hover {
+td:not(.gold-cell):hover {
   background: linear-gradient(180deg, rgba(255, 250, 242, 0.98), rgba(249, 241, 229, 0.98));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.35),
     0 0 0 1px rgba(204, 82, 16, 0.10),
     0 6px 16px rgba(96, 72, 48, 0.08);
   cursor: pointer;
+}
+
+.gold-cell:hover {
+  filter: brightness(1.05);
+  background: linear-gradient(
+    145deg,
+    #f9de58 0%,
+    #f0c53d 58%,
+    #de9a24 100%
+  );
 }
 
 .dot-container {
@@ -463,10 +473,6 @@ td:hover {
     inset 0 0 8px rgba(255, 238, 176, 0.30);
 
   animation: goldPulse 1.6s infinite ease-in-out;
-}
-
-.gold-cell:hover {
-  filter: brightness(1.03);
 }
 
 @keyframes goldPulse {
