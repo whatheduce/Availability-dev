@@ -63,45 +63,29 @@ const PREBUILT_STRUCTURES = {
   ]};
 
 const COLOUR_PRESETS = [
-  // Reds / ember
-  "#7C2D12",
-  "#DC2626",
-  "#F87171",
+  // Reds
+  "#7F1D1D", "#B91C1C", "#DC2626", "#EF4444", "#F87171",
 
-  // Oranges / hearth fire
-  "#CC5210",
-  "#F97316",
-  "#FDBA74",
+  // Rose / pinks
+  "#9D174D", "#DB2777", "#EC4899", "#F472B6", "#F9A8D4",
 
-  // Gold / amber
-  "#B45309",
-  "#EAB308",
-  "#FDE68A",
+  // Oranges / ember
+  "#9A3412", "#C2410C", "#EA580C", "#F97316", "#FDBA74",
+
+  // Gold / amber / yellow
+  "#A16207", "#CA8A04", "#EAB308", "#FACC15", "#FDE68A",
 
   // Greens
-  "#166534",
-  "#22C55E",
-  "#86EFAC",
+  "#166534", "#16A34A", "#22C55E", "#4ADE80", "#86EFAC",
 
   // Teals
-  "#0F766E",
-  "#14B8A6",
-  "#99F6E4",
+  "#115E59", "#0F766E", "#14B8A6", "#2DD4BF", "#99F6E4",
 
   // Blues
-  "#1D4ED8",
-  "#3B82F6",
-  "#93C5FD",
+  "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD",
 
   // Purples
-  "#6D28D9",
-  "#8B5CF6",
-  "#C4B5FD",
-
-  // Pink / rose
-  "#BE185D",
-  "#EC4899",
-  "#F9A8D4"
+  "#6D28D9", "#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD"
 ];
 
 
