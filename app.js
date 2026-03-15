@@ -1347,6 +1347,30 @@ function hideCellHoverTooltip() {
 }
 
 //----------
+function applyLocalColourUpdateInPlace(userId, newColor) {
+  if (!userId || !newColor) return;
+
+  // Update all visible dots for this user on the current board
+  table
+    .querySelectorAll(`.dot[data-user-id="${CSS.escape(String(userId))}"]`)
+    .forEach(dot => {
+      dot.style.background = newColor;
+    });
+
+  // Update legend row colour box
+  const legendRow = legendList?.querySelector(
+    `.legend-item[data-user-id="${CSS.escape(String(userId))}"] .color-box`
+  );
+
+  if (legendRow) {
+    legendRow.style.background = newColor;
+  }
+
+  // If a tooltip is currently open, close it so it doesn't show stale colours
+  hideCellHoverTooltip();
+}
+
+//----------
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1823,7 +1847,13 @@ async (payload) => {
 // Local colour changes only need a visual availability/legend refresh.
 // They do not need table meta refresh or "last updated" churn.
 if (localColourOnlyChange) {
-  await loadAvailability();
+  const changedUserId = after.user_id;
+  const changedColour = after.local_color || null;
+
+  if (changedUserId && changedColour) {
+    applyLocalColourUpdateInPlace(changedUserId, changedColour);
+  }
+
   return;
 }
 
@@ -3969,7 +3999,7 @@ await confirmModal({
 await loadBoards();
 
 if (currentTable?.id === targetBoardId) {
-  await loadAvailability();
+  applyLocalColourUpdateInPlace(au.id, v);
 }
 
 return;
