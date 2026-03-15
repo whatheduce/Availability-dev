@@ -434,17 +434,38 @@ td > .dot-container {
   pointer-events: none;
 }
 
-    .gold-cell {
-      background: linear-gradient(165deg, #ffd700, #ffea8a);
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.7), inset 0 0 8px rgba(255,215,0,0.6);
-      animation: goldPulse 1.6s infinite ease-in-out;
-    }
+.gold-cell {
+  background: linear-gradient(
+    145deg,
+    #f4c430 0%,
+    #e6aa2a 55%,
+    #cc7818 100%
+  );
 
-    @keyframes goldPulse {
-      0% { box-shadow: 0 0 25px rgba(255,215,0,1); }
-      50% { box-shadow: 0 0 50px rgba(255,215,0,0.5); }
-      100% { box-shadow: 0 0 25px rgba(255,215,0,1); }
-    }
+  box-shadow:
+    0 0 10px rgba(204, 120, 24, 0.28),
+    inset 0 0 8px rgba(255, 232, 170, 0.28);
+
+  animation: goldPulse 1.8s infinite ease-in-out;
+}
+
+gold-cell:hover {
+  filter: brightness(1.03);
+}
+
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(204, 120, 24, 0.20),
+      inset 0 0 8px rgba(255, 232, 170, 0.20);
+  }
+
+  50% {
+    box-shadow:
+      0 0 14px rgba(204, 120, 24, 0.32),
+      inset 0 0 10px rgba(255, 232, 170, 0.28);
+  }
+}
 
     .structure-row {
       display: grid;
@@ -1410,12 +1431,14 @@ body.account-view #dash-account {
 }
 
 .mini-cell.mini-gold {
-  background: rgba(255, 215, 0, 0.75);
-  border-color: rgba(255, 215, 0, 0.38);
-  /* subtle glow + inner edge */
+  background: linear-gradient(
+    135deg,
+    rgba(244, 196, 48, 0.88),
+    rgba(204, 120, 24, 0.82)
+  );
   box-shadow:
-    0 0 8px rgba(255, 215, 0, 0.45),
-    inset 0 0 0 1px rgba(255, 215, 0, 0.18);
+   0 0 8px rgba(204, 120, 24, 0.20),
+   inset 0 0 0 1px rgba(255, 232, 170, 0.18);
 }
 
 .mini-dots {
