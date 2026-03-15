@@ -1234,6 +1234,7 @@ function positionCellHoverTooltip(evt) {
 
 //----------
 function hideCellHoverTooltip() {
+  clearTimeout(hoverTooltipTimer);
   cellHoverTooltip.hidden = true;
   cellHoverTooltip.innerHTML = "";
   hoverTooltipCell = null;
@@ -4665,16 +4666,24 @@ cellHoverTooltip.hidden = true;
 document.body.appendChild(cellHoverTooltip);
 
 let hoverTooltipCell = null;
+let hoverTooltipTimer = null;
+const HOVER_TOOLTIP_DELAY = 400;
 
-table?.addEventListener("mouseover", async (e) => {
+table?.addEventListener("mouseover", (e) => {
   const cell = e.target.closest('td[data-day][data-time]');
   if (!cell || !table.contains(cell)) return;
 
+  clearTimeout(hoverTooltipTimer);
   hoverTooltipCell = cell;
-  await renderCellHoverTooltip(cell);
 
-  if (hoverTooltipCell !== cell || cellHoverTooltip.hidden) return;
-  positionCellHoverTooltip(e);
+  hoverTooltipTimer = setTimeout(async () => {
+    if (hoverTooltipCell !== cell) return;
+
+    await renderCellHoverTooltip(cell);
+
+    if (hoverTooltipCell !== cell || cellHoverTooltip.hidden) return;
+    positionCellHoverTooltip(e);
+  }, HOVER_TOOLTIP_DELAY);
 });
 
 table?.addEventListener("mousemove", (e) => {
