@@ -1192,7 +1192,12 @@ async function renderCellHoverTooltip(cell) {
     </div>
   `).join("");
 
+  const isGold = cell.classList.contains("gold-cell");
+
+  cellHoverTooltip.classList.toggle("cell-hover-tooltip--gold", isGold);
+
   cellHoverTooltip.innerHTML = `
+    ${isGold ? `<div class="cell-hover-tooltip__heading">Availability Match!</div>` : ""}
     <div class="cell-hover-tooltip__list">
       ${rowsHtml}
     </div>
