@@ -787,6 +787,7 @@ async function getBoardColourUsage(boardId) {
       members: [],
       usedByOthers: new Set(),
       myEffectiveColour: null,
+      myLocalColour: null,
       hasConflict: false
     };
   }
@@ -797,6 +798,7 @@ async function getBoardColourUsage(boardId) {
       members: [],
       usedByOthers: new Set(),
       myEffectiveColour: null,
+      myLocalColour: null,
       hasConflict: false
     };
   }
@@ -812,6 +814,7 @@ async function getBoardColourUsage(boardId) {
       members: [],
       usedByOthers: new Set(),
       myEffectiveColour: null,
+      myLocalColour: null,
       hasConflict: false
     };
   }
@@ -834,6 +837,7 @@ async function getBoardColourUsage(boardId) {
 
   const me = resolvedMembers.find(m => m.user_id === au.id) || null;
   const myEffectiveColour = me?.effective_color || null;
+  const myLocalColour = me?.local_color || null;
 
   const usedByOthers = new Set(
     resolvedMembers
@@ -848,6 +852,7 @@ async function getBoardColourUsage(boardId) {
     members: resolvedMembers,
     usedByOthers,
     myEffectiveColour,
+    myLocalColour,
     hasConflict
   };
 }
@@ -870,7 +875,7 @@ async function enforceUniqueBoardColourIfNeeded(boardId) {
   });
 
   if (typeof openColourModal === "function") {
-    openColourModal("local", boardId);
+    await openColourModal({ mode: "local", boardId });
   }
 }
 
@@ -2901,8 +2906,8 @@ function isValidHex(v){
   return /^#[0-9A-F]{6}$/.test(v);
 }
 
-//----------  
-function renderColourGrid(current){
+//----------
+function renderColourGrid(current, disabledSet = new Set()) {
   if (!colourGrid) return;
   colourGrid.innerHTML = "";
 
@@ -2914,12 +2919,23 @@ function renderColourGrid(current){
     b.setAttribute("aria-label", hex);
     b.dataset.hex = hex;
 
-    if (current && hex === current) b.classList.add("selected");
+    const isSelected = !!(current && hex === current);
+    const isDisabled = disabledSet.has(hex) && !isSelected;
+
+    if (isSelected) b.classList.add("selected");
+
+    if (isDisabled) {
+      b.disabled = true;
+      b.classList.add("disabled");
+      b.setAttribute("aria-disabled", "true");
+      b.title = "Already in use on this calendar";
+    }
 
     b.addEventListener("click", () => {
+      if (isDisabled) return;
+
       selectedColour = hex;
 
-      // update UI selected state
       [...colourGrid.querySelectorAll(".colour-swatch")].forEach(x => x.classList.remove("selected"));
       b.classList.add("selected");
 
@@ -2930,15 +2946,31 @@ function renderColourGrid(current){
   });
 }
 
-//----------  
-function openColourModal({ mode = "profile", boardId = null } = {}) {
+//----------
+async function openColourModal({ mode = "profile", boardId = null } = {}) {
   if (!colourModal) return;
 
   colourModalMode = mode;
   colourModalBoardId = boardId;
 
   setColourError("");
-  selectedColour = normaliseHex(user?.color || "");
+
+  let disabledSet = new Set();
+
+  if (mode === "local" && boardId) {
+    const usage = await getBoardColourUsage(boardId);
+
+    // In local mode, start from my current board-local colour if set.
+    // Otherwise start with no selection so a conflicting profile colour
+    // doesn't feel like the "chosen" local colour.
+    selectedColour = usage.myLocalColour
+      ? normaliseHex(usage.myLocalColour)
+      : "";
+
+    disabledSet = usage.usedByOthers;
+  } else {
+    selectedColour = normaliseHex(user?.color || "");
+  }
 
   if (colourModalTitle) {
     colourModalTitle.textContent =
@@ -2952,7 +2984,7 @@ function openColourModal({ mode = "profile", boardId = null } = {}) {
         : "Pick a colour for your dots and legend.";
   }
 
-  renderColourGrid(selectedColour);
+  renderColourGrid(selectedColour, disabledSet);
   colourModal.hidden = false;
 }
 
@@ -3895,6 +3927,12 @@ colourSave?.addEventListener("click", async () => {
     return;
   }
 
+  const usage = await getBoardColourUsage(colourModalBoardId);
+  if (usage.usedByOthers.has(v)) {
+    setColourError("That colour is already in use on this calendar.");
+    return;
+  }
+
   const { error } = await supabase
     .from("board_members")
     .update({ local_color: v })
@@ -3915,6 +3953,11 @@ await confirmModal({
 });
 
 await loadBoards();
+
+if (currentTable?.id === targetBoardId) {
+  await loadAvailability();
+}
+
 return;
 }
 
