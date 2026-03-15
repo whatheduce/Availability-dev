@@ -1793,29 +1793,43 @@ if (auId && currentTable?.id) {
         table: "board_members",
         filter: `board_id=eq.${currentTable.id}`
       },
-      async (payload) => {      
-        const before = payload.old || {};
-        const after = payload.new || {};
+async (payload) => {      
+  const before = payload.old || {};
+  const after = payload.new || {};
 
-        const relevantMembershipChange =
-          payload.eventType === "INSERT" ||
-          payload.eventType === "DELETE" ||
-          before.user_id !== after.user_id ||
-          before.board_id !== after.board_id ||
-          before.role !== after.role ||
-          before.local_color !== after.local_color;
+  const localColourOnlyChange =
+    payload.eventType === "UPDATE" &&
+    before.user_id === after.user_id &&
+    before.board_id === after.board_id &&
+    before.role === after.role &&
+    before.local_color !== after.local_color;
 
-        if (!relevantMembershipChange) return;
+  const relevantMembershipChange =
+    payload.eventType === "INSERT" ||
+    payload.eventType === "DELETE" ||
+    before.user_id !== after.user_id ||
+    before.board_id !== after.board_id ||
+    before.role !== after.role ||
+    before.local_color !== after.local_color;
 
-        // Non-owner views still need access checking
-        if (!manageToken) {
-          const kicked = await kickOutIfNoBoardAccess();
-          if (kicked) return;
-        }
+  if (!relevantMembershipChange) return;
 
-        await loadAvailability();
-        await refreshCurrentTableMeta();
-        renderCalendarLastUpdated();
+  // Non-owner views still need access checking
+  if (!manageToken) {
+    const kicked = await kickOutIfNoBoardAccess();
+    if (kicked) return;
+  }
+
+// Local colour changes only need a visual availability/legend refresh.
+// They do not need table meta refresh or "last updated" churn.
+if (localColourOnlyChange) {
+  await loadAvailability();
+  return;
+}
+
+await loadAvailability();
+await refreshCurrentTableMeta();
+renderCalendarLastUpdated();
       }
     )
     .subscribe((status) => {
