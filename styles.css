@@ -476,6 +476,28 @@ td:not(.gold-cell):hover {
   pointer-events: none;
 }
 
+.cell-hover-tooltip--gold {
+  border: 1px solid rgba(212, 160, 23, 0.38);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 251, 235, 0.97),
+    rgba(255, 246, 214, 0.95)
+  );
+  box-shadow:
+    0 14px 34px rgba(212, 160, 23, 0.18),
+    0 0 0 1px rgba(255, 215, 0, 0.10);
+}
+
+.cell-hover-tooltip__heading {
+  font-size: 11px;
+  font-weight: 800;
+  color: #9a6700;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(212, 160, 23, 0.16);
+}
+
 .cell-hover-tooltip__list {
   display: flex;
   flex-direction: column;
