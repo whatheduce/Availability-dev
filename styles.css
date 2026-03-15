@@ -474,6 +474,22 @@ td:not(.gold-cell):hover {
   box-shadow: 0 14px 34px rgba(96, 72, 48, 0.16);
   backdrop-filter: blur(10px);
   pointer-events: none;
+ transform-origin: top left;
+}
+
+.cell-hover-tooltip.is-opening {
+  animation: cellTooltipPopIn 120ms ease-out;
+}
+
+@keyframes cellTooltipPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .cell-hover-tooltip--gold {
