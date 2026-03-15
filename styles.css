@@ -1843,6 +1843,14 @@ body.account-view #dash-account {
   outline-offset: 2px;
 }
 
+.colour-swatch.disabled,
+.colour-swatch:disabled {
+  opacity: 0.28;
+  filter: grayscale(0.45);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 @media (max-width: 520px){
   .colour-grid{ grid-template-columns: repeat(6, 1fr); }
 }
