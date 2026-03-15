@@ -4594,5 +4594,43 @@ document.body.appendChild(cellHoverTooltip);
 
 let hoverTooltipCell = null;
 
+table?.addEventListener("mouseover", (e) => {
+  const cell = e.target.closest('td[data-day][data-time]');
+  if (!cell || !table.contains(cell)) return;
+
+  const users = getCellUsersForTooltip(cell);
+  if (!users.length) {
+    hideCellHoverTooltip();
+    return;
+  }
+
+  renderCellHoverTooltip(cell);
+  positionCellHoverTooltip(e);
+});
+
+table?.addEventListener("mousemove", (e) => {
+  if (cellHoverTooltip.hidden) return;
+
+  const cell = e.target.closest('td[data-day][data-time]');
+  if (!cell || cell !== hoverTooltipCell) {
+    hideCellHoverTooltip();
+    return;
+  }
+
+  positionCellHoverTooltip(e);
+});
+
+table?.addEventListener("mouseout", (e) => {
+  const fromCell = e.target.closest('td[data-day][data-time]');
+  if (!fromCell) return;
+
+  const toEl = e.relatedTarget;
+  if (toEl && fromCell.contains(toEl)) return;
+
+  hideCellHoverTooltip();
+});
+
+window.addEventListener("scroll", hideCellHoverTooltip, true);
+window.addEventListener("resize", hideCellHoverTooltip);
 
 document.addEventListener("DOMContentLoaded", startApp);
