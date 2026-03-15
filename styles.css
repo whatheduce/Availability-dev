@@ -7,17 +7,18 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   margin: 0;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       circle at 20% 20%,
       rgba(255, 215, 0, 0.08),
       transparent 40%
     ),
     radial-gradient(
       circle at 80% 30%,
-      rgba(0, 122, 255, 0.08),
+      rgba(204, 82, 16, 0.06),
       transparent 40%
     ),
-    linear-gradient(180deg, #f9fafb, #eef1f5);
+    linear-gradient(180deg, #fbf8f4, #f1ebe3);
   min-height: 100vh;
   visibility: hidden;
 }
@@ -56,8 +57,8 @@ body.show-landing-bg #landing-bg{
   content:"";
   position:absolute;
   inset:0;
-  background: rgba(255,255,255,0.28);  /* tweak 0.20–0.40 */
-  transition: opacity 1s ease;     /* match the bg fade timing */
+  background: rgba(252, 248, 242, 0.30);
+  transition: opacity 1s ease;
   opacity: 1;
 }
 
@@ -91,7 +92,7 @@ body.logged-in #landing-bg::after{
 }
 
 .calendar-meta-line{
-  color: #555;
+  color: #6b5c4f;
   font-size: 14px;
   margin-top: 2px;
 }
@@ -195,22 +196,22 @@ body.logged-in #landing-bg::after{
       z-index: 5;
     }
     
-    .day-header { font-weight: bold; }
-    .monthday {
-      font-size: 13px;
-      color: #555;
-      margin-top: -34px;
-      display: block;
-    }
+.day-header { font-weight: bold; }
+.monthday {
+  font-size: 13px;
+  color: #6b5c4f;
+  margin-top: -34px;
+  display: block;
+}
     
-    .time-label {
-      font-weight: 600;
-      width: 120px;
-      border-right: 1px solid #b1b1b1;
-      position: sticky;
-      left: 0;
-      z-index: 4;
-    }
+.time-label {
+  font-weight: 600;
+  width: 120px;
+  border-right: 1px solid #b8aea3;
+  position: sticky;
+  left: 0;
+  z-index: 4;
+}
 
 #legend{
   width: 280px;
@@ -239,15 +240,15 @@ body.logged-in #landing-bg::after{
 .legend-local-colour-btn {
   padding: 6px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   cursor: pointer;
   font-size: 12px;
   font-weight: 600;
 }
 
 .legend-local-colour-btn:hover {
-  background: rgba(255,255,255,1);
+  background: rgba(253, 249, 244, 1);
 }
 
 .color-box {
@@ -258,14 +259,14 @@ body.logged-in #landing-bg::after{
   flex: 0 0 auto;
 }
 
-    .footer-note{
+.footer-note{
   max-width: 980px;
   margin: 8px 0 30px;
   margin-left: 20px;
   padding: 12px 14px;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(249, 243, 236, 0.78);
   backdrop-filter: blur(10px);
 }
 
@@ -301,8 +302,8 @@ body.logged-in #landing-bg::after{
   resize: vertical;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -314,15 +315,15 @@ body.logged-in #landing-bg::after{
   margin-top: 10px;
 }
 
-/* Note box when used in the topbar */
 .footer-note--top{
-  margin: 0;               /* override old footer margins */
+  margin: 0;
   margin-left: 0;
   width: 50%;
   max-height: clamp(120px, 22vh, 260px);
   overflow: auto;
 }
 
+@media (max-width: 720px){
   .footer-note--top{
     width: 100%;
   }
@@ -422,14 +423,14 @@ td > .dot-container {
   height: 14px;
   padding: 0 3px;
   border-radius: 999px;
-  background: rgba(31, 41, 55, 0.92);
+  background: rgba(88, 64, 42, 0.92);
   color: #fff;
   font-size: 9px;
   line-height: 14px;
   text-align: center;
   font-weight: 700;
   letter-spacing: -0.01em;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  box-shadow: 0 1px 3px rgba(96, 72, 48, 0.22);
   pointer-events: none;
 }
 
@@ -454,8 +455,8 @@ td > .dot-container {
     }
 
     .structure-card {
-      background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(0,0,0,0.12);
+      background: rgba(252, 248, 242, 0.92);
+      border: 1px solid rgba(126, 104, 82, 0.18);
       border-radius: 14px;
       padding: 16px;
       cursor: pointer;
@@ -465,14 +466,14 @@ td > .dot-container {
 
     .structure-card:hover {
       transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.08);
-      border-color: rgba(0,0,0,0.18);
+      box-shadow: 0 10px 22px rgba(96, 72, 48, 0.10);
+      border-color: rgba(126, 104, 82, 0.24);
     }
 
-    .structure-card.active {
-      outline: 2px solid rgba(0, 122, 255, 0.35);
-      box-shadow: 0 12px 26px rgba(0, 122, 255, 0.12);
-    }
+.structure-card.active {
+  outline: 2px solid rgba(204, 82, 16, 0.28);
+  box-shadow: 0 12px 26px rgba(204, 82, 16, 0.10);
+}
 
     .structure-title {
       font-weight: 700;
@@ -480,35 +481,35 @@ td > .dot-container {
       margin-bottom: 4px;
     }
 
-    .structure-subtitle {
-      font-size: 13px;
-      color: #555;
-    }
+.structure-subtitle {
+  font-size: 13px;
+  color: #6b5c4f;
+}
 
     .pro-heading {
       font-weight: 700;
       margin-bottom: 8px;
     }
 
-    .pro-select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,0.12);
-      background: #f1f1f1;
-      color: #777;
-      cursor: not-allowed;
-    }
+.pro-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: #f3ede6;
+  color: #7a6857;
+  cursor: not-allowed;
+}
 
     .pro-select:disabled {
       opacity: 0.8;
     }
 
-    .pro-hint {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #888;
-    }
+.pro-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #7a6857;
+}
 
     @keyframes dotPopIn {
       from { transform: scale(0.5); opacity: 0; }
@@ -523,15 +524,15 @@ td > .dot-container {
 .topbar-btn {
   padding: 8px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
 }
 
 .topbar-btn:hover {
-  background: rgba(255,255,255,1);
+  background: rgba(253, 249, 244, 1);
 }
 
     /* Dashboard */
@@ -629,14 +630,14 @@ body.account-view #dash-account {
 .dashboard-section-divider {
   height: 1px;
   width: 100%;
-  background: rgba(0,0,0,0.10);
+  background: rgba(126, 104, 82, 0.18);
   margin: 6px 0 14px;
 }
 
 .dashboard-dev-note {
   margin-top: 130px;
   padding-top: 22px;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  border-top: 1px solid rgba(126, 104, 82, 0.14);
   text-align: center;
 }
 
@@ -645,7 +646,7 @@ body.account-view #dash-account {
   margin: 0 auto;
   font-size: 12px;
   line-height: 1.7;
-  color: rgba(0,0,0,0.52);
+  color: rgba(92, 72, 56, 0.62);
 }
 
 .dashboard-dev-note-version {
@@ -678,10 +679,10 @@ body.account-view #dash-account {
   height: 100vh;
   width: 320px;
   max-width: calc(100vw - 48px);
-  background: rgba(255,255,255,0.75);
+  background: rgba(249, 243, 236, 0.78);
   backdrop-filter: blur(10px);
-  border-right: 1px solid rgba(0,0,0,0.12);
-  box-shadow: 18px 0 50px rgba(0,0,0,0.18);
+  border-right: 1px solid rgba(126, 104, 82, 0.18);
+  box-shadow: 18px 0 50px rgba(96, 72, 48, 0.18);
 
   transform: translateX(-104%);
   transition: transform 220ms ease;
@@ -696,7 +697,7 @@ body.account-view #dash-account {
   align-items: center;
   justify-content: space-between;
   padding: 16px 14px 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.10);
+  border-bottom: 1px solid rgba(126, 104, 82, 0.18);
 }
 
 .drawer-title {
@@ -708,15 +709,15 @@ body.account-view #dash-account {
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.88);
   cursor: pointer;
   transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
 .drawer-close:hover {
-  background: rgba(255,255,255,1);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  background: rgba(253, 249, 244, 1);
+  box-shadow: 0 8px 18px rgba(96, 72, 48, 0.10);
   transform: translateY(-1px);
 }
 
@@ -726,7 +727,7 @@ body.account-view #dash-account {
 
 .drawer-close:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.22), 0 8px 18px rgba(0,0,0,0.10);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.20), 0 8px 18px rgba(96, 72, 48, 0.10);
 }
 
 .drawer-body {
@@ -765,7 +766,7 @@ body.account-view #dash-account {
 .drawer-group--secondary {
   margin-top: 64px;
   padding-top: 14px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  border-top: 1px solid rgba(126, 104, 82, 0.16);
 }
 
 /* Individual clickable items */
@@ -787,8 +788,8 @@ body.account-view #dash-account {
 }
 
 .drawer-item:hover {
-  background: rgba(0,0,0,0.05);
-  border-color: rgba(0,0,0,0.08);
+  background: rgba(126, 104, 82, 0.08);
+  border-color: rgba(126, 104, 82, 0.14);
   transform: translateX(2px);
 }
 
@@ -798,7 +799,7 @@ body.account-view #dash-account {
 
 .drawer-item:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0,122,255,0.22);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.20);
 }
 
 /* Danger item (sign out) */
@@ -845,8 +846,8 @@ body.account-view #dash-account {
 
 /* Simple card styles for account panel */
 .settings-card{
-  background: rgba(255,255,255,0.90);
-  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(252, 248, 242, 0.92);
+  border: 1px solid rgba(126, 104, 82, 0.18);
   border-radius: 16px;
   padding: 0px 14px;
   margin-top: 14px;
@@ -897,14 +898,15 @@ body.account-view #dash-account {
   justify-content:space-between;
   gap: 12px;
   padding: 10px 2px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+  border-top: 1px solid rgba(126, 104, 82, 0.14);
 }
 
 .settings-row:first-child{ border-top:none; }
 
 .settings-label{
   font-size: 13px;
-  opacity: 0.7;
+  color: #7a6857;
+  opacity: 0.9;
 }
 
 .settings-value{
@@ -926,16 +928,17 @@ body.account-view #dash-account {
   text-align: left;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.88);
   cursor: pointer;
   font-weight: 650;
   margin-top: 10px;
   transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
+
 .settings-action:hover{
-  background: rgba(255,255,255,1);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  background: rgba(253, 249, 244, 1);
+  box-shadow: 0 8px 18px rgba(96, 72, 48, 0.10);
   transform: translateY(-1px);
 }
 .settings-action:active{ transform: translateY(0px) scale(0.99); }
@@ -964,10 +967,9 @@ body.account-view #dash-account {
   grid-template-columns: 140px 1fr auto;
   align-items: center;
   column-gap: 14px;
-   /* consistent row height + vertical centering */
   min-height: 48px;
-  padding: 10px 2px;  /* matches your old spacing */
-  border-top: 1px solid rgba(0,0,0,0.08);
+  padding: 10px 2px;
+  border-top: 1px solid rgba(126, 104, 82, 0.14);
 }
 
 /* push the value column to the far right (right aligned) */
@@ -997,12 +999,11 @@ body.account-view #dash-account {
   justify-self: end;
 }
 
-/* Mini inline action button (“Change”) */
 .settings-mini-btn{
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.88);
   cursor: pointer;
   font-weight: 700;
   font-size: 12px;
@@ -1010,8 +1011,8 @@ body.account-view #dash-account {
 }
 
 .settings-mini-btn:hover{
-  background: rgba(255,255,255,1);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  background: rgba(253, 249, 244, 1);
+  box-shadow: 0 8px 18px rgba(96, 72, 48, 0.10);
   transform: translateY(-1px);
 }
 .settings-mini-btn:active{
@@ -1096,7 +1097,7 @@ body.account-view #dash-account {
   background: linear-gradient(135deg, #fff7ed, #fde7bf);
   color: #9a3412;
   border: 1px solid rgba(154, 52, 18, 0.12);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+  box-shadow: 0 3px 10px rgba(96, 72, 48, 0.10);
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -1112,21 +1113,21 @@ body.account-view #dash-account {
   border-radius: 999px;
   margin-right: 8px;
   vertical-align: -1px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(126, 104, 82, 0.18);
 }
 
 .settings-action.primary{
-  border-color: rgba(0,0,0,0.14);
+  border-color: rgba(126, 104, 82, 0.18);
   font-weight: 800;
 }
 
 .empty-boards {
   padding: 14px 12px;
   border-radius: 14px;
-  border: 1px dashed rgba(0,0,0,0.18);
-  background: rgba(0,0,0,0.02);
+  border: 1px dashed rgba(126, 104, 82, 0.22);
+  background: rgba(126, 104, 82, 0.04);
   font-size: 13px;
-  opacity: 0.75;
+  opacity: 0.78;
 }
     
 .back-btn {
@@ -1142,18 +1143,18 @@ body.account-view #dash-account {
 
 .back-btn:hover {
   opacity: 1;
-  background: rgba(0,0,0,0.05);
+  background: rgba(126, 104, 82, 0.08);
 }
 
 .secondary-btn{
-  background:#f3f4f6;
-  color:#111827;
-  border:1px solid rgba(0,0,0,0.08);
-  border-radius:12px;
+  background: #f3ede6;
+  color: #2f241b;
+  border: 1px solid rgba(126, 104, 82, 0.16);
+  border-radius: 12px;
 }
 
 .secondary-btn:hover{
-  background:#e5e7eb;
+  background: #ece3d8;
 }
 
 /* =========================
@@ -1176,9 +1177,9 @@ body.account-view #dash-account {
 #notice-overlay.notice-overlay .modal-card{
   width: min(460px, calc(100vw - 40px));
   border-radius: 18px;
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(0,0,0,0.10);
-  box-shadow: 0 24px 70px rgba(0,0,0,0.28);
+  background: rgba(252, 248, 242, 0.92);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  box-shadow: 0 24px 70px rgba(96, 72, 48, 0.22);
   padding: 16px 16px 14px;
 }
 
@@ -1191,7 +1192,7 @@ body.account-view #dash-account {
 #notice-message{
   font-size: 14px;
   line-height: 1.4;
-  color: rgba(0,0,0,0.75);
+  color: rgba(72, 54, 40, 0.78);
   margin-bottom: 14px;
   margin-top: 6px;
   white-space: pre-wrap;
@@ -1204,12 +1205,10 @@ body.account-view #dash-account {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.15);
-  border-top-color: rgba(0,0,0,0.65);
+  border: 2px solid rgba(126, 104, 82, 0.18);
+  border-top-color: rgba(184, 134, 11, 0.85);
   animation: notice-spin 0.7s linear infinite;
   flex-shrink: 0;
-  border-top-color: rgba(184, 134, 11, 0.85);
-
   position: relative;
   top: -5px; 
 }
@@ -1239,9 +1238,9 @@ body.account-view #dash-account {
     min-width: 160px;
     padding: 14px 14px;
     border-radius: 14px;
-    border: 1px solid rgba(0,0,0,0.12);
+    border: 1px solid rgba(126, 104, 82, 0.18);
     cursor: pointer;
-    background: rgba(255,255,255,0.9);
+    background: rgba(252, 248, 242, 0.92);
     transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
   }
 
@@ -1252,8 +1251,8 @@ body.account-view #dash-account {
   width: 26px;
   height: 26px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   cursor: pointer;
   line-height: 1;
   display: grid;
@@ -1265,10 +1264,10 @@ body.account-view #dash-account {
   top: 42px;
   right: 10px;
   min-width: 140px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(126, 104, 82, 0.18);
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  background: rgba(253, 249, 244, 0.98);
+  box-shadow: 0 8px 24px rgba(126, 104, 82, 0.18);
   overflow: hidden;
   z-index: 20;
 }
@@ -1284,7 +1283,7 @@ body.account-view #dash-account {
 }
 
 .board-actions-item:hover {
-  background: rgba(0,0,0,0.04);
+  background: rgba(126, 104, 82, 0.08);
 }
     
 .board-pill-title {
@@ -1314,12 +1313,12 @@ body.account-view #dash-account {
 
 .board-pill:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 34px rgba(0,0,0,0.10);
-  border-color: rgba(0,0,0,0.18);
+  box-shadow: 0 14px 34px rgba(96, 72, 48, 0.10);
+  border-color: rgba(126, 104, 82, 0.24);
 }
 
 .board-actions-btn:hover {
-  box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+  box-shadow: 0 10px 22px rgba(126, 104, 82, 0.18);
   transform: translateY(-1px);
 }
 
@@ -1333,7 +1332,7 @@ body.account-view #dash-account {
   flex: 1;
   border-radius: 12px;
   border: 1px solid rgba(0,0,0,0.10);
-  background: rgba(255,255,255,0.75);
+  background: rgba(249, 243, 236, 0.78);
   overflow: hidden;
   position: relative;
 }
@@ -1371,7 +1370,7 @@ body.account-view #dash-account {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(126, 104, 82, 0.06);
 }
 
 .mini-body {
@@ -1392,7 +1391,7 @@ body.account-view #dash-account {
   opacity: 0.8;
   padding: 2px 4px;
   border-radius: 6px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(126, 104, 82, 0.06);
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -1402,8 +1401,8 @@ body.account-view #dash-account {
 
 .mini-cell {
   border-radius: 6px;
-  background: rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(126, 104, 82, 0.035);
+  border: 1px solid rgba(126, 104, 82, 0.10);
   height: 18px;
   display: flex;
   align-items: center;
@@ -1462,14 +1461,14 @@ body.account-view #dash-account {
   height: 9px;
   padding: 0 2px;
   border-radius: 999px;
-  background: rgba(31, 41, 55, 0.92);
+  background: rgba(88, 64, 42, 0.92);
   color: #fff;
   font-size: 6px;
   line-height: 9px;
   text-align: center;
   font-weight: 700;
   letter-spacing: -0.01em;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.22);
+  box-shadow: 0 1px 2px rgba(96, 72, 48, 0.22);
   pointer-events: none;
 }
 
@@ -1485,10 +1484,10 @@ body.account-view #dash-account {
   align-items: center;
   padding: 6px 8px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(0,0,0,0.10);
+  background: rgba(252, 248, 242, 0.60);
+  border: 1px solid rgba(126, 104, 82, 0.14);
   backdrop-filter: blur(10px);
-  pointer-events: none; /* don’t steal clicks */
+  pointer-events: none;
   filter: blur(0.6px);
   opacity: 0.95;
 }
@@ -1510,7 +1509,8 @@ body.account-view #dash-account {
 .mini-legend-name {
   font-size: 10px;
   font-weight: 600;
-  opacity: 0.8;
+  color: #5f4c3d;
+  opacity: 0.88;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1537,9 +1537,9 @@ body.account-view #dash-account {
 .modal-card {
   width: min(420px, 100%);
   border-radius: 18px;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(0,0,0,0.10);
-  box-shadow: 0 18px 50px rgba(0,0,0,0.22);
+  background: rgba(252, 248, 242, 0.92);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  box-shadow: 0 18px 50px rgba(96, 72, 48, 0.18);
   padding: 16px 16px 14px;
   backdrop-filter: blur(12px);
 }
@@ -1579,38 +1579,36 @@ body.account-view #dash-account {
 .modal-btn {
   border-radius: 12px;
   padding: 10px 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   cursor: pointer;
-
-  /* Make it feel clickable */
   transition:
   transform 120ms ease,
   box-shadow 120ms ease,
   background 120ms ease,
   border-color 120ms ease,
   opacity 120ms ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(96, 72, 48, 0.08);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .modal-btn:hover {
-  background: rgba(255,255,255,1);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  background: rgba(253, 249, 244, 1);
+  box-shadow: 0 6px 16px rgba(126, 104, 82, 0.18);
   transform: translateY(-1px);
 }
 
 .modal-btn:active {
   transform: translateY(0px) scale(0.98);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow: 0 2px 6px rgba(96, 72, 48, 0.10), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
 .modal-btn:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(0, 122, 255, 0.28),
-    0 6px 16px rgba(0,0,0,0.12);
+    0 0 0 3px rgba(204, 82, 16, 0.20),
+    0 6px 16px rgba(126, 104, 82, 0.18);
 }
 
 /* Disabled state (in case you start disabling buttons during async ops) */
@@ -1649,8 +1647,8 @@ body.account-view #dash-account {
   width:100%;
   padding:10px 12px;
   border-radius:12px;
-  border:1px solid rgba(0,0,0,0.12);
-  background:rgba(255,255,255,0.9);
+  border:1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   outline:none;
 }
 
@@ -1685,7 +1683,7 @@ body.account-view #dash-account {
 .modal-hint{
   margin-top:10px;
   font-size:12px;
-  color:#666;
+  color:#7a6857;
   line-height:1.35;
 }
 
@@ -1700,7 +1698,7 @@ body.account-view #dash-account {
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(126, 104, 82, 0.18);
   cursor: pointer;
   position: relative;
 }
@@ -1734,8 +1732,8 @@ body.account-view #dash-account {
 }
 
 #create-board-btn {
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.90);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   padding: 10px 14px;
   border-radius: 12px;
   cursor: pointer;
@@ -1743,8 +1741,8 @@ body.account-view #dash-account {
 }
 
 #create-board-btn:hover {
-  background: rgba(255,255,255,1);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+  background: rgba(253, 249, 244, 1);
+  box-shadow: 0 10px 22px rgba(96, 72, 48, 0.10);
   transform: translateY(-1px);
 }
 
@@ -1754,7 +1752,7 @@ body.account-view #dash-account {
 
 #create-board-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0,122,255,0.22), 0 10px 22px rgba(0,0,0,0.10);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.20), 0 10px 22px rgba(96, 72, 48, 0.10);
 }
 
 
@@ -1795,10 +1793,10 @@ body.account-view #dash-account {
 }
 
 .side-card{
-  background: #fff;
+  background: rgba(252, 248, 242, 0.96);
   padding: 10px;
   border-radius: 6px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(96, 72, 48, 0.10);
 }
 
 #calendar-side-left{
@@ -1820,7 +1818,7 @@ body.account-view #dash-account {
 .presence-side{
   width: 280px;
   text-align: center;
-  color: #555;
+  color: #6b5c4f;
   font-size: 14px;
 }
 
@@ -1856,15 +1854,15 @@ body.account-view #dash-account {
   resize: vertical;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
   font-size: 13px;
   line-height: 1.4;
   white-space: pre-wrap;
 }
 
 .footer-note__textarea[readonly]{
-  background: rgba(255,255,255,0.70);
+  background: rgba(252, 248, 242, 0.70);
 }
 
 /* Actions row */
@@ -1904,18 +1902,18 @@ body.account-view #dash-account {
   border: none;
   font-weight: 600;
   font-size: 14px;
-  color: rgba(0,0,0,0.65);
+  color: rgba(92, 72, 56, 0.72);
   cursor: pointer;
   padding: 6px 0 54px;
 }
 
 .ghost-btn:hover {
-  color: rgba(0,0,0,0.9);
+  color: rgba(72, 54, 40, 0.92);
 }
 
 .ghost-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0,122,255,0.25);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.20);
   border-radius: 8px;
 }
 
@@ -1942,15 +1940,15 @@ body.account-view #dash-account {
 #auth-overlay input:focus,
 #auth-overlay input:focus-visible {
   outline: none;
-  border-color: rgba(0, 122, 255, 0.55);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.22);
-  background: rgba(255,255,255,1);
+  border-color: rgba(204, 82, 16, 0.32);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.16);
+  background: rgba(253, 249, 244, 1);
 }
 
 /* Make buttons in auth overlay feel clickable without changing global buttons */
 #auth-overlay .primary-btn {
   border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(126, 104, 82, 0.18);
   background: rgba(0,0,0,0.92);
   color: #fff;
 
@@ -1961,7 +1959,7 @@ body.account-view #dash-account {
     border-color 120ms ease,
     opacity 120ms ease;
 
-  box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.14);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1969,24 +1967,24 @@ body.account-view #dash-account {
 #auth-overlay .primary-btn:hover {
   background: rgba(0,0,0,1);
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 22px rgba(96, 72, 48, 0.18);
 }
 
 #auth-overlay .primary-btn:active {
   transform: translateY(0px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.10);
+  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.16), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
 #auth-overlay .primary-btn.is-pressed {
   transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.10);
+  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.16), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
 #auth-overlay .primary-btn:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(0, 122, 255, 0.28),
-    0 8px 22px rgba(0,0,0,0.18);
+    0 0 0 3px rgba(204, 82, 16, 0.20),
+    0 8px 22px rgba(96, 72, 48, 0.18);
 }
 
 #auth-overlay .primary-btn:disabled,
@@ -2001,24 +1999,24 @@ body.account-view #dash-account {
    This keeps their text readable + gives them the same interactions. */
 #auth-overlay #auth-toggle-mode.primary-btn,
 #auth-overlay #auth-forgot.primary-btn {
-  color: rgba(0,0,0,0.86);
-  border-color: rgba(0,0,0,0.10);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  color: rgba(47, 36, 27, 0.90);
+  border-color: rgba(126, 104, 82, 0.16);
+  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.08);
 }
 
 #auth-overlay #auth-toggle-mode.primary-btn:hover,
 #auth-overlay #auth-forgot.primary-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 22px rgba(126, 104, 82, 0.18);
 }
 
 .auth-privacy-note {
   margin-top: 18px;
   padding-top: 12px;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  border-top: 1px solid rgba(126, 104, 82, 0.14);
   font-size: 12px;
   line-height: 1.5;
-  color: rgba(0,0,0,0.55);
+  color: rgba(92, 72, 56, 0.62);
   text-align: center;
 }
 
@@ -2028,13 +2026,13 @@ body.account-view #dash-account {
 }
 
 #auth-overlay .primary-btn.secondary-btn{
-  background: #f3f4f6;
-  color:#111827;
-  border:1px solid rgba(0,0,0,0.08);
+  background: #f3ede6;
+  color: #2f241b;
+  border: 1px solid rgba(126, 104, 82, 0.16);
 }
 
 #auth-overlay .primary-btn.secondary-btn:hover{
-  background: rgba(255,255,255,0.9);
+  background: rgba(253, 249, 244, 0.96);
 }
 
 [hidden] { display: none !important; }
