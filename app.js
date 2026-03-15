@@ -105,6 +105,7 @@ let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
 let colourModalMode = "profile";   // "profile" | "local"
 let colourModalBoardId = null;
+let cellTooltipCache = new Map(); // key: "day|time" -> [{ name, color }]
 
 
 
@@ -1095,7 +1096,7 @@ function refreshDotLayout(cell) {
 
 //----------
 function getCellUsersForTooltip(cell) {
-  if (!cell || cell.classList.contains("gold-cell")) return [];
+  if (!cell) return [];
 
   const dots = Array.from(cell.querySelectorAll(".dot"));
   if (!dots.length) return [];
@@ -1110,13 +1111,77 @@ function getCellUsersForTooltip(cell) {
 }
 
 //----------
-function renderCellHoverTooltip(cell) {
-  const users = getCellUsersForTooltip(cell);
+async function getGoldCellUsersForTooltip(cell) {
+  if (!cell || !currentTable?.id) return [];
+
+  const day = String(cell.dataset.day || "");
+  const time = String(cell.dataset.time || "").trim();
+  if (!day || !time) return [];
+
+  const cacheKey = `${day}|${time}`;
+  const cached = cellTooltipCache.get(cacheKey);
+  if (cached) return cached;
+
+  const { data, error } = await supabase
+    .from("availability_dev")
+    .select("*")
+    .eq("table_id", currentTable.id)
+    .eq("day", parseInt(day, 10))
+    .eq("time", time);
+
+  if (error) {
+    console.warn("getGoldCellUsersForTooltip failed:", error);
+    return [];
+  }
+
+  if (!data || data.length === 0) {
+    cellTooltipCache.set(cacheKey, []);
+    return [];
+  }
+
+  const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
+  profilesCache = { ...profilesCache, ...profilesMap };
+
+  const localColorMap = await fetchBoardLocalColorMap(
+    currentTable.id,
+    data.map(d => d.user_id)
+  );
+
+  const users = data
+    .map(entry => {
+      const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+      const displayName = (prof?.name || entry.name || "—").trim() || "—";
+      const displayColor =
+        localColorMap[entry.user_id] ||
+        prof?.color ||
+        entry.color ||
+        "#999";
+
+      return { name: displayName, color: displayColor };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  cellTooltipCache.set(cacheKey, users);
+  return users;
+}
+
+//----------
+async function renderCellHoverTooltip(cell) {
+  if (!cell) {
+    hideCellHoverTooltip();
+    return;
+  }
+
+  let users = [];
+
+  if (cell.classList.contains("gold-cell")) {
+    users = await getGoldCellUsersForTooltip(cell);
+  } else {
+    users = getCellUsersForTooltip(cell);
+  }
 
   if (!users.length) {
-    cellHoverTooltip.hidden = true;
-    cellHoverTooltip.innerHTML = "";
-    hoverTooltipCell = null;
+    hideCellHoverTooltip();
     return;
   }
 
@@ -1364,6 +1429,7 @@ async function handleAvailabilityChange(payload) {
   const entry = payload.eventType === "DELETE" ? payload.old : payload.new;
 
   if (!entry) return;
+  cellTooltipCache.clear();
   if (payload.eventType !== "DELETE" && entry?.id != null) {
   availabilityMetaByEntryId.set(String(entry.id), {
     day: String(entry.day),
@@ -1913,6 +1979,7 @@ async function loadAvailability() {
   loadAvailabilityRunning = true;
 
   try {
+    cellTooltipCache.clear();
     const { data: rows, error } = await supabase
       .from("availability_dev")
       .select("*")
@@ -4594,17 +4661,14 @@ document.body.appendChild(cellHoverTooltip);
 
 let hoverTooltipCell = null;
 
-table?.addEventListener("mouseover", (e) => {
+table?.addEventListener("mouseover", async (e) => {
   const cell = e.target.closest('td[data-day][data-time]');
   if (!cell || !table.contains(cell)) return;
 
-  const users = getCellUsersForTooltip(cell);
-  if (!users.length) {
-    hideCellHoverTooltip();
-    return;
-  }
+  hoverTooltipCell = cell;
+  await renderCellHoverTooltip(cell);
 
-  renderCellHoverTooltip(cell);
+  if (hoverTooltipCell !== cell || cellHoverTooltip.hidden) return;
   positionCellHoverTooltip(e);
 });
 
