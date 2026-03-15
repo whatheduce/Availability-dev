@@ -460,6 +460,54 @@ td:not(.gold-cell):hover {
   pointer-events: none;
 }
 
+.cell-hover-tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 30000;
+  min-width: 150px;
+  max-width: 240px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.96);
+  box-shadow: 0 14px 34px rgba(96, 72, 48, 0.16);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.cell-hover-tooltip__list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cell-hover-tooltip__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cell-hover-tooltip__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.85);
+  box-shadow: 0 1px 2px rgba(96, 72, 48, 0.16);
+  flex: 0 0 auto;
+}
+
+.cell-hover-tooltip__name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4e3f33;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .gold-cell {
   background: linear-gradient(
     145deg,
