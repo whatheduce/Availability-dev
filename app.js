@@ -2991,6 +2991,9 @@ async function openColourModal({ mode = "profile", boardId = null } = {}) {
 
   colourModalMode = mode;
   colourModalBoardId = boardId;
+  if (colourCancel) {
+    colourCancel.hidden = mustChooseLocalBoardColour && mode === "local";
+  }
 
   setColourError("");
 
@@ -3036,6 +3039,9 @@ function closeColourModal() {
   }
 
   colourModal.hidden = true;
+  if (colourCancel) {
+    colourCancel.hidden = false;
+  }
   colourModalMode = "profile";
   colourModalBoardId = null;
 }
