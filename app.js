@@ -1208,21 +1208,24 @@ async function renderCellHoverTooltip(cell) {
 }
 
 //----------
-function positionCellHoverTooltip(evt) {
-  if (cellHoverTooltip.hidden) return;
+function positionCellHoverTooltip(cell) {
+  if (cellHoverTooltip.hidden || !cell) return;
 
   const pad = 14;
+  const rect = cell.getBoundingClientRect();
   const tooltipRect = cellHoverTooltip.getBoundingClientRect();
 
-  let left = evt.clientX + 16;
-  let top = evt.clientY + 16;
+  let left = rect.right + 10;
+  let top = rect.top;
 
+  // Flip to left side if too close to screen edge
   if (left + tooltipRect.width > window.innerWidth - pad) {
-    left = evt.clientX - tooltipRect.width - 16;
+    left = rect.left - tooltipRect.width - 10;
   }
 
+  // Keep inside bottom viewport
   if (top + tooltipRect.height > window.innerHeight - pad) {
-    top = evt.clientY - tooltipRect.height - 16;
+    top = window.innerHeight - tooltipRect.height - pad;
   }
 
   left = Math.max(pad, left);
@@ -4679,7 +4682,7 @@ table?.addEventListener("mouseover", (e) => {
     await renderCellHoverTooltip(cell);
 
     if (hoverTooltipCell !== cell || cellHoverTooltip.hidden) return;
-    positionCellHoverTooltip(e);
+    positionCellHoverTooltip(cell);
   }, HOVER_TOOLTIP_DELAY);
 });
 
@@ -4692,7 +4695,7 @@ table?.addEventListener("mousemove", (e) => {
     return;
   }
 
-  positionCellHoverTooltip(e);
+  positionCellHoverTooltip(cell);
 });
 
 table?.addEventListener("mouseout", (e) => {
