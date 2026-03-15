@@ -1094,6 +1094,82 @@ function refreshDotLayout(cell) {
 }
 
 //----------
+function getCellUsersForTooltip(cell) {
+  if (!cell || cell.classList.contains("gold-cell")) return [];
+
+  const dots = Array.from(cell.querySelectorAll(".dot"));
+  if (!dots.length) return [];
+
+  return dots
+    .map(dot => {
+      const name = (dot.dataset.name || dot.title || "—").trim() || "—";
+      const color = dot.style.background || "#999";
+      return { name, color };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+//----------
+function renderCellHoverTooltip(cell) {
+  const users = getCellUsersForTooltip(cell);
+
+  if (!users.length) {
+    cellHoverTooltip.hidden = true;
+    cellHoverTooltip.innerHTML = "";
+    hoverTooltipCell = null;
+    return;
+  }
+
+  const rowsHtml = users.map(user => `
+    <div class="cell-hover-tooltip__item">
+      <span class="cell-hover-tooltip__dot" style="background:${user.color}"></span>
+      <span class="cell-hover-tooltip__name">${escapeHtml(user.name)}</span>
+    </div>
+  `).join("");
+
+  cellHoverTooltip.innerHTML = `
+    <div class="cell-hover-tooltip__list">
+      ${rowsHtml}
+    </div>
+  `;
+
+  cellHoverTooltip.hidden = false;
+  hoverTooltipCell = cell;
+}
+
+//----------
+function positionCellHoverTooltip(evt) {
+  if (cellHoverTooltip.hidden) return;
+
+  const pad = 14;
+  const tooltipRect = cellHoverTooltip.getBoundingClientRect();
+
+  let left = evt.clientX + 16;
+  let top = evt.clientY + 16;
+
+  if (left + tooltipRect.width > window.innerWidth - pad) {
+    left = evt.clientX - tooltipRect.width - 16;
+  }
+
+  if (top + tooltipRect.height > window.innerHeight - pad) {
+    top = evt.clientY - tooltipRect.height - 16;
+  }
+
+  left = Math.max(pad, left);
+  top = Math.max(pad, top);
+
+  cellHoverTooltip.style.left = `${left}px`;
+  cellHoverTooltip.style.top = `${top}px`;
+}
+
+//----------
+function hideCellHoverTooltip() {
+  cellHoverTooltip.hidden = true;
+  cellHoverTooltip.innerHTML = "";
+  hoverTooltipCell = null;
+}
+
+//----------
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
@@ -1116,7 +1192,7 @@ function addOptimisticDot(cell, userId, name, color) {
   dot.className = "dot";
   dot.dataset.userId = userId;
   dot.dataset.name = name || "—";
-  dot.title = name || "—";
+  dot.title = "";
   dot.style.background = color || "#999";
 
   // mark as pending so we can remove if DB fails
@@ -1193,7 +1269,7 @@ async function rebuildDotsForCell(cell) {
     if (entry?.id != null) dot.dataset.entryId = String(entry.id);
 
     dot.style.background = displayColor;
-    dot.title = displayName;
+    dot.title = "";
 
     if (entry.user_id) dot.dataset.userId = entry.user_id;
     dot.dataset.name = displayName;
@@ -4511,7 +4587,12 @@ async function resetBoard() {
 const table = document.getElementById("availabilityTable");
 const legendDiv = document.getElementById("legend");
 const legendList = document.getElementById("legendList");
+const cellHoverTooltip = document.createElement("div");
+cellHoverTooltip.className = "cell-hover-tooltip";
+cellHoverTooltip.hidden = true;
+document.body.appendChild(cellHoverTooltip);
 
+let hoverTooltipCell = null;
 
 
 document.addEventListener("DOMContentLoaded", startApp);
