@@ -840,22 +840,36 @@ async function getBoardColourUsage(boardId) {
   const myEffectiveColour = me?.effective_color || null;
   const myLocalColour = me?.local_color || null;
 
-  const usedByOthers = new Set(
-    resolvedMembers
-      .filter(m => m.user_id !== au.id)
-      .map(m => m.effective_color)
-      .filter(Boolean)
-  );
+  const usedByOthers = new Set();
+  const usedByOthersMap = new Map();
 
-  const hasConflict = !!(myEffectiveColour && usedByOthers.has(myEffectiveColour));
+  resolvedMembers
+    .filter(m => m.user_id !== au.id)
+    .forEach(m => {
+      if (!m.effective_color) return;
 
-  return {
-    members: resolvedMembers,
-    usedByOthers,
-    myEffectiveColour,
-    myLocalColour,
-    hasConflict
-  };
+    usedByOthers.add(m.effective_color);
+
+    const prof = m.user_id ? profilesMap[m.user_id] : null;
+    const displayName = (prof?.name || "Someone").trim() || "Someone";
+
+    if (!usedByOthersMap.has(m.effective_color)) {
+      usedByOthersMap.set(m.effective_color, []);
+    }
+
+    usedByOthersMap.get(m.effective_color).push(displayName);
+  });
+
+const hasConflict = !!(myEffectiveColour && usedByOthers.has(myEffectiveColour));
+
+return {
+  members: resolvedMembers,
+  usedByOthers,
+  usedByOthersMap,
+  myEffectiveColour,
+  myLocalColour,
+  hasConflict
+};
 }
 
 //----------
@@ -2946,7 +2960,7 @@ function isValidHex(v){
 }
 
 //----------
-function renderColourGrid(current, disabledSet = new Set()) {
+function renderColourGrid(current, disabledSet = new Set(), usedByMap = new Map()) {
   if (!colourGrid) return;
   colourGrid.innerHTML = "";
 
@@ -2967,7 +2981,16 @@ function renderColourGrid(current, disabledSet = new Set()) {
       b.disabled = true;
       b.classList.add("disabled");
       b.setAttribute("aria-disabled", "true");
-      b.title = "Already in use on this calendar";
+
+      const owners = usedByMap.get(hex) || [];
+      const label =
+        owners.length === 1
+          ? `Used by ${owners[0]}`
+          : owners.length > 1
+            ? `Used by ${owners.join(", ")}`
+            : "Already in use on this calendar";
+
+      b.title = label;
     }
 
     b.addEventListener("click", () => {
@@ -2999,17 +3022,17 @@ async function openColourModal({ mode = "profile", boardId = null } = {}) {
 
   let disabledSet = new Set();
 
+  let usedByMap = new Map();
+
   if (mode === "local" && boardId) {
     const usage = await getBoardColourUsage(boardId);
 
-    // In local mode, start from my current board-local colour if set.
-    // Otherwise start with no selection so a conflicting profile colour
-    // doesn't feel like the "chosen" local colour.
     selectedColour = usage.myLocalColour
       ? normaliseHex(usage.myLocalColour)
       : "";
 
     disabledSet = usage.usedByOthers;
+    usedByMap = usage.usedByOthersMap || new Map();
   } else {
     selectedColour = normaliseHex(user?.color || "");
   }
@@ -3026,7 +3049,7 @@ async function openColourModal({ mode = "profile", boardId = null } = {}) {
         : "Pick a colour for your dots and legend.";
   }
 
-  renderColourGrid(selectedColour, disabledSet);
+  renderColourGrid(selectedColour, disabledSet, usedByMap);
   colourModal.hidden = false;
 }
 
