@@ -1576,7 +1576,6 @@ if (!dot) {
     if (entry?.id != null) dot.dataset.entryId = String(entry.id);
 
     dot.style.background = displayColor;
-    dot.title = displayName;
 
     if (entry.user_id) dot.dataset.userId = entry.user_id;
     dot.dataset.name = displayName;
@@ -1592,7 +1591,6 @@ if (!dot) {
       if (entry?.id != null) existing.dataset.entryId = String(entry.id);
 
       existing.style.background = displayColor;
-      existing.title = displayName;
       existing.dataset.name = displayName;
       delete existing.dataset.pending;
     }
@@ -2105,7 +2103,6 @@ Object.values(users).forEach(({ userId, name, color }) => {
           const displayColor = localColorMap[entry.user_id] || prof?.color || entry.color || "#999";
 
           dot.style.background = displayColor;
-          dot.title = displayName;
           dot.dataset.name = displayName;
 
           // Animate only the current user's dot
