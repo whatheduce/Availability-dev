@@ -63,20 +63,45 @@ const PREBUILT_STRUCTURES = {
   ]};
 
 const COLOUR_PRESETS = [
-  // Reds / Pinks
-  "#DC2626", "#FF3B30", "#FF2D55", "#E11D48", "#DB2777", "#C026D3", "#A855F7", "#FF8DA1",
-  // Purples / Blues
-  "#7C3AED", "#5856D6", "#4F46E5", "#2563EB", "#007AFF", "#0A84FF", "#0284C7",
-  "#06B6D4", "#0891B2", "#00C7BE",
+  // Reds / ember
+  "#7C2D12",
+  "#DC2626",
+  "#F87171",
+
+  // Oranges / hearth fire
+  "#CC5210",
+  "#F97316",
+  "#FDBA74",
+
+  // Gold / amber
+  "#B45309",
+  "#EAB308",
+  "#FDE68A",
+
   // Greens
-  "#34C759", "#22C55E", "#16A34A", "#2D7D46", "#0F766E", "#059669",
-  // Yellows / Oranges
-  "#FFD60A", "#FFCC00", "#F59E0B", "#FF9500", "#F97316", "#EA580C",
-  // Neutrals / Earthy
-  "#8E8E93", "#6B7280", "#374151", "#1C1C1E",
-  "#A2845E", "#8B5E34", "#6D4C41", "#4E342E",
-  // Extra tasteful accents
-  "#14B8A6", "#84CC16"
+  "#166534",
+  "#22C55E",
+  "#86EFAC",
+
+  // Teals
+  "#0F766E",
+  "#14B8A6",
+  "#99F6E4",
+
+  // Blues
+  "#1D4ED8",
+  "#3B82F6",
+  "#93C5FD",
+
+  // Purples
+  "#6D28D9",
+  "#8B5CF6",
+  "#C4B5FD",
+
+  // Pink / rose
+  "#BE185D",
+  "#EC4899",
+  "#F9A8D4"
 ];
 
 
