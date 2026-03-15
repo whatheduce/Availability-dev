@@ -1836,6 +1836,45 @@ body.account-view #dash-account {
   border: 1px solid rgba(126, 104, 82, 0.18);
   cursor: pointer;
   position: relative;
+  transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease;
+}
+
+.colour-swatch:hover:not(:disabled):not(.disabled){
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(96, 72, 48, 0.14);
+}
+
+.colour-swatch.disabled,
+.colour-swatch:disabled {
+  opacity: 0.38;
+  filter: grayscale(0.55);
+  cursor: not-allowed;
+  box-shadow: none;
+  position: relative;
+}
+
+.colour-swatch.disabled::after,
+.colour-swatch:disabled::after {
+  content: "×";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: rgba(48, 32, 20, 0.72);
+  text-shadow: 0 1px 2px rgba(255,255,255,0.35);
+  pointer-events: none;
+}
+
+.colour-swatch.disabled::before,
+.colour-swatch:disabled::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 10px;
+  border: 2px solid rgba(48, 32, 20, 0.22);
+  pointer-events: none;
 }
 
 .colour-swatch.selected{
