@@ -781,6 +781,100 @@ async function fetchBoardLocalColorMap(boardId, userIds) {
 }
 
 //----------
+async function getBoardColourUsage(boardId) {
+  if (!boardId) {
+    return {
+      members: [],
+      usedByOthers: new Set(),
+      myEffectiveColour: null,
+      hasConflict: false
+    };
+  }
+
+  const au = await auth.getAuthUser();
+  if (!au?.id) {
+    return {
+      members: [],
+      usedByOthers: new Set(),
+      myEffectiveColour: null,
+      hasConflict: false
+    };
+  }
+
+  const { data: members, error } = await supabase
+    .from("board_members")
+    .select("user_id, local_color")
+    .eq("board_id", boardId);
+
+  if (error) {
+    console.warn("getBoardColourUsage board_members failed:", error);
+    return {
+      members: [],
+      usedByOthers: new Set(),
+      myEffectiveColour: null,
+      hasConflict: false
+    };
+  }
+
+  const userIds = (members || []).map(m => m.user_id).filter(Boolean);
+  const profilesMap = await fetchProfilesMap(userIds);
+  profilesCache = { ...profilesCache, ...profilesMap };
+
+  const resolvedMembers = (members || []).map(m => {
+    const prof = m.user_id ? profilesMap[m.user_id] : null;
+    const effectiveColor = m.local_color || prof?.color || null;
+
+    return {
+      user_id: m.user_id,
+      local_color: m.local_color || null,
+      profile_color: prof?.color || null,
+      effective_color: effectiveColor
+    };
+  });
+
+  const me = resolvedMembers.find(m => m.user_id === au.id) || null;
+  const myEffectiveColour = me?.effective_color || null;
+
+  const usedByOthers = new Set(
+    resolvedMembers
+      .filter(m => m.user_id !== au.id)
+      .map(m => m.effective_color)
+      .filter(Boolean)
+  );
+
+  const hasConflict = !!(myEffectiveColour && usedByOthers.has(myEffectiveColour));
+
+  return {
+    members: resolvedMembers,
+    usedByOthers,
+    myEffectiveColour,
+    hasConflict
+  };
+}
+
+//----------
+async function enforceUniqueBoardColourIfNeeded(boardId) {
+  if (!boardId) return;
+
+  const usage = await getBoardColourUsage(boardId);
+  if (!usage.hasConflict) return;
+
+  colourModalMode = "local";
+  colourModalBoardId = boardId;
+
+  await confirmModal({
+    title: "Choose a local colour",
+    message: "That colour is already being used on this calendar. Please choose a different local colour to continue.",
+    okText: "OK",
+    cancelText: ""
+  });
+
+  if (typeof openColourModal === "function") {
+    openColourModal("local", boardId);
+  }
+}
+
+//----------
 async function ensureMembership(boardId) {
   const au = await auth.getAuthUser();
 
@@ -1956,6 +2050,7 @@ if (!hydrated) {
 }
 
   await ensureMembership(currentTable.id);
+  await enforceUniqueBoardColourIfNeeded(currentTable.id);
 
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
