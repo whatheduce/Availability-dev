@@ -178,25 +178,32 @@ body.logged-in #landing-bg::after{
       min-width: 700px;
     }
 
-    #availabilityTable th, 
-    #availabilityTable td {
-      border: 1px solid #000;
-      min-width: 70px;
-      height: 50px;
-    }
+#availabilityTable th, 
+#availabilityTable td {
+  border: 1px solid rgba(126, 104, 82, 0.22);
+  min-width: 70px;
+  height: 50px;
+}
 
-    th, td {
-      border: 1px solid black;
-      padding: 10px;
-    }
+th, td {
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  padding: 10px;
+}
 
-    th {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-    }
+th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: linear-gradient(180deg, rgba(246, 240, 232, 0.98), rgba(238, 229, 218, 0.98));
+  box-shadow: inset 0 -1px 0 rgba(126, 104, 82, 0.12);
+}
     
-.day-header { font-weight: bold; }
+.day-header {
+  font-weight: 700;
+  color: #4e3f33;
+  letter-spacing: -0.01em;
+}
+
 .monthday {
   font-size: 13px;
   color: #6b5c4f;
@@ -205,12 +212,15 @@ body.logged-in #landing-bg::after{
 }
     
 .time-label {
-  font-weight: 600;
+  font-weight: 650;
   width: 120px;
-  border-right: 1px solid #b8aea3;
+  border-right: 1px solid rgba(126, 104, 82, 0.24);
+  background: linear-gradient(180deg, rgba(246, 240, 232, 0.98), rgba(240, 232, 222, 0.98));
+  color: #3f3329;
   position: sticky;
   left: 0;
   z-index: 4;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.35);
 }
 
 #legend{
@@ -330,8 +340,10 @@ body.logged-in #landing-bg::after{
 }
 
 td {
-  transition: box-shadow 0.3s ease, background 0.3s ease;
+  transition: box-shadow 0.22s ease, background 0.22s ease, transform 0.22s ease;
   border-radius: 0;
+  background: linear-gradient(180deg, rgba(252, 249, 244, 0.96), rgba(247, 241, 232, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
 }
 
 td > .dot-container {
@@ -345,10 +357,14 @@ td > .dot-container {
       font-weight: 700;
     }
 
-    td:hover {
-      outline: 1px solid rgba(255, 215, 0, 0.3);
-      cursor: pointer;
-    }
+td:hover {
+  background: linear-gradient(180deg, rgba(255, 250, 242, 0.98), rgba(249, 241, 229, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 0 1px rgba(204, 82, 16, 0.10),
+    0 6px 16px rgba(96, 72, 48, 0.08);
+  cursor: pointer;
+}
 
 .dot-container {
   position: relative;
@@ -449,7 +465,7 @@ td > .dot-container {
   animation: goldPulse 1.6s infinite ease-in-out;
 }
 
-gold-cell:hover {
+.gold-cell:hover {
   filter: brightness(1.03);
 }
 
