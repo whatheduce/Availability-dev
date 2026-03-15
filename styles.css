@@ -367,7 +367,7 @@ td:not(.gold-cell):hover {
 }
 
 .gold-cell:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.02);
   background: linear-gradient(
     145deg,
     #f9de58 0%,
