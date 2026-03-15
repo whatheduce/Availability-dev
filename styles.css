@@ -456,14 +456,14 @@ gold-cell:hover {
 @keyframes goldPulse {
   0%, 100% {
     box-shadow:
-      0 0 10px rgba(216, 146, 30, 0.22),
+      0 0 10px rgba(216, 146, 30, 0.24),
       inset 0 0 8px rgba(255, 238, 176, 0.22);
   }
 
   50% {
     box-shadow:
-      0 0 18px rgba(216, 146, 30, 0.38),
-      inset 0 0 10px rgba(255, 238, 176, 0.30);
+      0 0 24px rgba(255, 196, 64, 0.48),
+      inset 0 0 12px rgba(255, 244, 190, 0.34);
   }
 }
 
@@ -1432,13 +1432,17 @@ body.account-view #dash-account {
 
 .mini-cell.mini-gold {
   background: linear-gradient(
-    135deg,
-    rgba(244, 196, 48, 0.88),
-    rgba(204, 120, 24, 0.82)
+    145deg,
+    #f7d84a 0%,
+    #edbc34 58%,
+    #d8921e 100%
   );
+
+  border-color: rgba(247, 216, 74, 0.34);
+
   box-shadow:
-   0 0 8px rgba(204, 120, 24, 0.20),
-   inset 0 0 0 1px rgba(255, 232, 170, 0.18);
+    0 0 8px rgba(216, 146, 30, 0.22),
+    inset 0 0 0 1px rgba(255, 238, 176, 0.18);
 }
 
 .mini-dots {
