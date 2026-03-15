@@ -478,7 +478,7 @@ td:not(.gold-cell):hover {
 }
 
 .cell-hover-tooltip.is-opening {
-  animation: cellTooltipPopIn 120ms ease-out;
+  animation: cellTooltipPopIn 100ms ease-in;
 }
 
 @keyframes cellTooltipPopIn {
