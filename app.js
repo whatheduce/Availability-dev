@@ -1296,8 +1296,13 @@ function maybeApplyGoldForCell(cell) {
 
     // Gold cells hide dots in your UI
     dc?.remove();
+
+    // immediately reflect gold state in the day header too
+    const dayNum = parseInt(cell.dataset.day, 10);
+    const thEl = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+    if (thEl) thEl.classList.add("gold-header");
   }
-}  
+}
 
 //----------
 async function rebuildDotsForCell(cell) {
