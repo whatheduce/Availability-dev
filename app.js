@@ -865,15 +865,9 @@ async function enforceUniqueBoardColourIfNeeded(boardId) {
   const usage = await getBoardColourUsage(boardId);
   if (!usage.hasConflict) return;
 
+  mustChooseLocalBoardColour = true;
   colourModalMode = "local";
   colourModalBoardId = boardId;
-
-  await confirmModal({
-    title: "Choose a local colour",
-    message: "That colour is already being used on this calendar. Please choose a different local colour to continue.",
-    okText: "OK",
-    cancelText: ""
-  });
 
   if (typeof openColourModal === "function") {
     await openColourModal({ mode: "local", boardId });
@@ -3034,8 +3028,13 @@ async function openColourModal({ mode = "profile", boardId = null } = {}) {
 }
 
 //----------  
-function closeColourModal(){
+function closeColourModal() {
   if (!colourModal) return;
+
+  if (mustChooseLocalBoardColour && colourModalMode === "local") {
+    return;
+  }
+
   colourModal.hidden = true;
   colourModalMode = "profile";
   colourModalBoardId = null;
@@ -3951,6 +3950,13 @@ colourModal?.addEventListener("click", (e) => {
   if (!card) closeColourModal();
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!colourModal || colourModal.hidden) return;
+
+  closeColourModal();
+});
+
 colourSave?.addEventListener("click", async () => {
   const v = selectedColour;
   if (!v) return setColourError("Please choose a colour.");
@@ -3988,22 +3994,16 @@ colourSave?.addEventListener("click", async () => {
 
   const targetBoardId = colourModalBoardId;
 
-closeColourModal();
+  mustChooseLocalBoardColour = false;
+  closeColourModal();
 
-await confirmModal({
-  title: "Local colour updated",
-  message: "Your colour has been changed for this calendar only.",
-  okText: "Close",
-  cancelText: ""
-});
+  await loadBoards();
 
-await loadBoards();
+  if (currentTable?.id === targetBoardId) {
+    applyLocalColourUpdateInPlace(au.id, v);
+  }
 
-if (currentTable?.id === targetBoardId) {
-  applyLocalColourUpdateInPlace(au.id, v);
-}
-
-return;
+  return;
 }
 
     // profile mode
