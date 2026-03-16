@@ -602,7 +602,7 @@ td:not(.gold-cell):hover {
 }
 
 .create-shell__header {
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 
 .create-shell__header h2 {
@@ -622,9 +622,9 @@ td:not(.gold-cell):hover {
 .create-shell__header h2::after {
   content: "";
   position: absolute;
-  left: 42%;
+  left: 1%;
   bottom: -5px;
-  width: 130px;
+  width: 300px;
   height: 2px;
   border-radius: 999px;
   background: linear-gradient(
