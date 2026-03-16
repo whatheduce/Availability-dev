@@ -2608,8 +2608,18 @@ function showBoardSetup() {
 
   // Clear structure selection highlight + require click
   selectedStructure = null;
-  ["dev-custom-card", "meals-card"].forEach(id => {
-    const el = document.getElementById(id);
+  [
+  "whole-day-card",
+  "am-pm-card",
+  "meals-card",
+  "school-times-card",
+  "workday-card",
+  "shifts-card",
+  "custom-card",
+  "hours-card",
+  "extended-custom-card"
+  ].forEach(id => {
+  const el = document.getElementById(id);
     if (el) el.classList.remove("active");
   });
 }
@@ -2654,7 +2664,17 @@ function populateGoldThresholdSelect(isPro) {
 
 //----------  
 function setActiveStructureCard(activeId) {
-  ["dev-custom-card", "meals-card"].forEach(id => {
+  [
+    "whole-day-card",
+    "am-pm-card",
+    "meals-card",
+    "school-times-card",
+    "workday-card",
+    "shifts-card",
+    "custom-card",
+    "hours-card",
+    "extended-custom-card"
+  ].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.toggle("active", id === activeId);
@@ -4048,15 +4068,27 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
   const setupSaveBtn = document.getElementById("setup-save");
   if (setupSaveBtn) setupSaveBtn.addEventListener("click", auth.saveProfileSetup);
 
-  // Structure selection (Dev Custom + Meals)
-  const devCard = document.getElementById("dev-custom-card");
-  if (devCard) {
-    devCard.addEventListener("click", () => {
-      selectedStructure = "custom";
-      setActiveStructureCard("dev-custom-card");
-      showGoCreate();
-    });
-  }
+// Structure selection
+const structureCards = [
+  { id: "whole-day-card", value: "whole_day" },
+  { id: "am-pm-card", value: "am_pm" },
+  { id: "meals-card", value: "meals" },
+  { id: "school-times-card", value: "school_times" },
+  { id: "workday-card", value: "workday" },
+  { id: "shifts-card", value: "shifts" },
+  { id: "custom-card", value: "custom" }
+];
+
+structureCards.forEach(({ id, value }) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.addEventListener("click", () => {
+    selectedStructure = value;
+    setActiveStructureCard(id);
+    showGoCreate();
+  });
+});
 
   // Dashboard: Settings drawer
   const settingsBtn = document.getElementById("dash-settings");
