@@ -106,7 +106,7 @@ let loadAvailabilityQueued = false;
 let noteDraftBeforeEdit = "";
 let setupSelectedColour = "#3b82f6";
 let identitySelectedColour = "#2d7ff9";  
-let selectedStructure = "custom"; // dev-only selectable for now
+let selectedStructure = null;
 let presenceChannel = null;
 let isBoardOwner = false;
 let profilesCache = {};
@@ -2827,6 +2827,11 @@ async function createBoard() {
 
 const structureChoice = selectedStructure || "custom";
 
+if (!structureChoice) {
+  alert("Please choose a calendar structure");
+  return;
+}
+
 if (structureChoice === "custom") {
   const rowInputs = document.querySelectorAll("#rows-container input");
 
@@ -2852,15 +2857,21 @@ if (structureChoice === "custom") {
 
   const inviteToken = generateToken();
   const ownerToken = generateToken();
-  const tz = document.getElementById("host-timezone")?.value || getDetectedTimeZone();
-  const startDate = yyyyMmDdInTimeZone(new Date(), tz);
+  const tzSelect = document.getElementById("host-timezone");
+  const tz = tzSelect?.value || "";
+
+if (!tz || tz === "__other__") {
+  alert("Please choose a timezone");
+  return;
+}
+
+const startDate = yyyyMmDdInTimeZone(new Date(), tz);
   
   // --- Gold threshold (required) ---
-  const goldRaw = document.getElementById("gold-threshold")?.value || "";
-    if (!goldRaw) {
-      alert("Please choose a gold threshold");
-      return;
-    }
+  if (!Number.isFinite(goldThreshold)) {
+    alert("Please choose a gold threshold");
+    return;
+  }
 
     // TEMP: until you implement real Pro accounts
     const isPro = false;
@@ -4725,15 +4736,6 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
   }
 });
   
-  const mealsCard = document.getElementById("meals-card");
-  if (mealsCard) {
-    mealsCard.addEventListener("click", () => {
-      selectedStructure = "meals";
-      setActiveStructureCard("meals-card");
-      updateGoCreateVisibility({ showErrors: true });
-    });
-  }
-
     // Enter key on password field = show button press + submit
   document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
