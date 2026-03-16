@@ -2575,53 +2575,79 @@ Object.values(users).forEach(({ userId, name, color }) => {
 
 function showBoardSetup() {
   const startBtn = document.getElementById("start-create");
-    if (startBtn) startBtn.style.display = "none";
+  if (startBtn) startBtn.style.display = "none";
 
-     const setup = document.getElementById("board-setup");
-    if (setup) setup.style.display = "block";
-
-     // Populate timezone dropdown when entering setup
-    if (typeof populateHostTimezoneSelect === "function") {
-      populateHostTimezoneSelect();
-         // TEMP: until you implement real Pro accounts
-       const isPro = false;
-       populateGoldThresholdSelect(isPro);
-      }
+  const setup = document.getElementById("board-setup");
+  if (setup) setup.style.display = "block";
 
   // Reset pages
   const nameStep = document.getElementById("name-step");
   const detailsStep = document.getElementById("details-step");
   const rowBuilder = document.getElementById("row-builder");
   const createActions = document.getElementById("create-actions");
+  const goBtn = document.getElementById("go-create");
+
+  const nameInput = document.getElementById("board-name");
+  const tzSelect = document.getElementById("host-timezone");
   const goldSel = document.getElementById("gold-threshold");
-  
-  if (goldSel) goldSel.value = "";
 
   if (nameStep) nameStep.style.display = "block";
   if (detailsStep) detailsStep.style.display = "none";
   if (rowBuilder) rowBuilder.style.display = "none";
   if (createActions) createActions.style.display = "none";
-
-  // Hide the page-2 create button until a structure is clicked
-  const goBtn = document.getElementById("go-create");
   if (goBtn) goBtn.style.display = "none";
+
+  // Reset field values
+  if (nameInput) nameInput.value = "";
+  if (goldSel) goldSel.value = "";
+
+  // Reset invalid styles
+  if (nameInput) nameInput.classList.remove("is-invalid");
+  if (tzSelect) tzSelect.classList.remove("is-invalid");
+  if (goldSel) goldSel.classList.remove("is-invalid");
+
+  [
+    "whole-day-card",
+    "am-pm-card",
+    "meals-card",
+    "school-times-card",
+    "workday-card",
+    "shifts-card",
+    "custom-card"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("is-invalid");
+  });
 
   // Clear structure selection highlight + require click
   selectedStructure = null;
   [
-  "whole-day-card",
-  "am-pm-card",
-  "meals-card",
-  "school-times-card",
-  "workday-card",
-  "shifts-card",
-  "custom-card",
-  "hours-card",
-  "extended-custom-card"
+    "whole-day-card",
+    "am-pm-card",
+    "meals-card",
+    "school-times-card",
+    "workday-card",
+    "shifts-card",
+    "custom-card",
+    "hours-card",
+    "extended-custom-card"
   ].forEach(id => {
-  const el = document.getElementById(id);
+    const el = document.getElementById(id);
     if (el) el.classList.remove("active");
   });
+
+  // Populate selects after reset
+  if (typeof populateHostTimezoneSelect === "function") {
+    populateHostTimezoneSelect();
+  }
+
+  if (typeof populateGoldThresholdSelect === "function") {
+    const isPro = false; // TEMP: until you implement real Pro accounts
+    populateGoldThresholdSelect(isPro);
+  }
+
+  // Final validation pass
+  updateGoCreateVisibility();
 }
 
 //----------  
@@ -2694,10 +2720,85 @@ function setActiveStructureCard(activeId) {
 }
 
 //---------- 
-function showGoCreate() {
+function getCreateCalendarRequirements() {
+  const nameInput = document.getElementById("board-name");
+  const tzSelect = document.getElementById("host-timezone");
+  const goldSelect = document.getElementById("gold-threshold");
+
+  const hasName = !!nameInput?.value.trim();
+  const hasTimezone = !!tzSelect?.value && tzSelect.value !== "__other__";
+  const hasGold = !!goldSelect?.value;
+  const hasStructure = !!selectedStructure;
+
+  return {
+    nameInput,
+    tzSelect,
+    goldSelect,
+    hasName,
+    hasTimezone,
+    hasGold,
+    hasStructure,
+    isReady: hasName && hasTimezone && hasGold && hasStructure
+  };
+}
+
+//----------
+function setCreateFieldErrors({ showErrors = false } = {}) {
+  const {
+    nameInput,
+    tzSelect,
+    goldSelect,
+    hasName,
+    hasTimezone,
+    hasGold,
+    hasStructure
+  } = getCreateCalendarRequirements();
+
+  if (nameInput) {
+    nameInput.classList.toggle("is-invalid", showErrors && !hasName);
+  }
+
+  if (tzSelect) {
+    tzSelect.classList.toggle("is-invalid", showErrors && !hasTimezone);
+  }
+
+  if (goldSelect) {
+    goldSelect.classList.toggle("is-invalid", showErrors && !hasGold);
+  }
+
+  const structureIds = [
+    "whole-day-card",
+    "am-pm-card",
+    "meals-card",
+    "school-times-card",
+    "workday-card",
+    "shifts-card",
+    "custom-card"
+  ];
+
+  structureIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("is-invalid", showErrors && !hasStructure);
+  });
+}
+
+//----------
+function updateGoCreateVisibility({ showErrors = false } = {}) {
   const btn = document.getElementById("go-create");
-  if (btn) btn.style.display = "inline-block";
-}  
+  if (!btn) return;
+
+  const { isReady } = getCreateCalendarRequirements();
+
+  setCreateFieldErrors({ showErrors });
+
+  btn.style.display = isReady ? "inline-block" : "none";
+}
+
+//----------
+function showGoCreate() {
+  updateGoCreateVisibility({ showErrors: true });
+}
 
 //----------  
 async function createBoard() {
@@ -2708,7 +2809,7 @@ async function createBoard() {
     document.getElementById("goldThreshold") ||
     document.querySelector('select[data-gold-threshold]');
 
-  const goldThreshold = parseInt(goldSelect?.value || "", 10) || 2;
+  const goldThreshold = parseInt(goldSelect?.value || "", 10);
   const au = await auth.getAuthUser();
     if (!au) {
       auth.showAuthOverlay("Please sign in before creating a calendar.");
@@ -4098,7 +4199,7 @@ structureCards.forEach(({ id, value }) => {
   el.addEventListener("click", () => {
     selectedStructure = value;
     setActiveStructureCard(id);
-    showGoCreate();
+    updateGoCreateVisibility({ showErrors: true });
   });
 });
 
@@ -4573,6 +4674,27 @@ nameSave?.addEventListener("click", async () => {
   }
 });
 
+const boardNameInput = document.getElementById("board-name");
+if (boardNameInput) {
+  boardNameInput.addEventListener("input", () => {
+    updateGoCreateVisibility();
+  });
+}
+
+const timezoneSelect = document.getElementById("host-timezone");
+if (timezoneSelect) {
+  timezoneSelect.addEventListener("change", () => {
+    updateGoCreateVisibility();
+  });
+}
+
+const goldThresholdSelect = document.getElementById("gold-threshold");
+if (goldThresholdSelect) {
+  goldThresholdSelect.addEventListener("change", () => {
+    updateGoCreateVisibility();
+  });
+}  
+
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
   if (!isBoardOwner) return;
   setCalendarNoteEditing(true);
@@ -4608,7 +4730,7 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
     mealsCard.addEventListener("click", () => {
       selectedStructure = "meals";
       setActiveStructureCard("meals-card");
-      showGoCreate();
+      updateGoCreateVisibility({ showErrors: true });
     });
   }
 
