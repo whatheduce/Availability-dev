@@ -2603,7 +2603,10 @@ function showBoardSetup() {
   if (goBtn) goBtn.style.display = "none";
 
   // Reset field values
-  if (nameInput) nameInput.value = "";
+  if (nameInput) {
+    nameInput.value = "";
+    nameInput.defaultValue = "";
+  }
   if (goldSel) goldSel.value = "";
 
   // Reset invalid styles
