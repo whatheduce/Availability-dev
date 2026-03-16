@@ -886,19 +886,32 @@ td:not(.gold-cell):hover {
   align-items: center;
   justify-content: center;
   padding: 18px 24px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.28);
+
   border-radius: 22px;
-  border: 1px solid rgba(196, 148, 88, 0.62);
-  background: linear-gradient(180deg, rgba(250, 236, 205, 0.98), rgba(239, 216, 171, 0.98));
-  color: #4b3522;
+  border: 1px solid rgba(191, 145, 74, 0.72);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(246, 225, 170, 0.98),
+      rgba(231, 196, 118, 0.98)
+    );
+
+  color: #4a3520;
   font: inherit;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.01em;
+
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.76) inset,
-    0 0 0 1px rgba(255,214,153,0.14),
-    0 16px 32px rgba(120,84,41,0.14);
+    inset 0 0 0 2px rgba(255, 244, 214, 0.55),   /* inner border */
+    inset 0 1px 0 rgba(255,255,255,0.72),
+    0 0 0 1px rgba(214,170,96,0.16),
+    0 18px 34px rgba(120,84,41,0.16);
+
   cursor: pointer;
+
   transition:
     transform 140ms ease,
     box-shadow 140ms ease,
@@ -908,11 +921,20 @@ td:not(.gold-cell):hover {
 
 #create-board #go-create:hover {
   transform: translateY(-1px);
-  border-color: rgba(196, 148, 88, 0.78);
-  background: linear-gradient(180deg, rgba(252, 240, 212, 0.99), rgba(243, 222, 181, 0.99));
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(250, 232, 182, 1),
+      rgba(238, 205, 126, 1)
+    );
+
+  border-color: rgba(191, 145, 74, 0.84);
+
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.82) inset,
-    0 20px 36px rgba(120,84,41,0.18);
+    inset 0 0 0 2px rgba(255, 248, 224, 0.62),
+    inset 0 1px 0 rgba(255,255,255,0.78),
+    0 22px 38px rgba(120,84,41,0.18);
 }
 
 #create-board #go-create:active {
