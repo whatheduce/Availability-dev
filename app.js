@@ -2643,23 +2643,35 @@ function addRowInput(name = "") {
 }
 
 //----------  
-function populateGoldThresholdSelect(isPro) {
-  const sel = document.getElementById("gold-threshold");
-  if (!sel) return;
+function populateGoldThresholdSelect() {
+  const select = document.getElementById("gold-threshold");
+  if (!select) return;
 
-  // clear existing (keep the placeholder)
-  sel.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
+  select.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
 
-  for (let n = 1; n <= 30; n++) {
+  const freeGroup = document.createElement("optgroup");
+  freeGroup.label = "Free";
+
+  for (let i = 1; i <= 5; i++) {
     const opt = document.createElement("option");
-    opt.value = String(n);
-    opt.textContent = `${n}`;
-
-    // Free: 1–5 enabled, 6–30 disabled
-    if (!isPro && n >= 6) opt.disabled = true;
-
-    sel.appendChild(opt);
+    opt.value = String(i);
+    opt.textContent = String(i);
+    freeGroup.appendChild(opt);
   }
+
+  const proGroup = document.createElement("optgroup");
+  proGroup.label = "Pro Version";
+
+  for (let i = 6; i <= 30; i++) {
+    const opt = document.createElement("option");
+    opt.value = String(i);
+    opt.textContent = `${i} (Pro)`;
+    opt.disabled = true;
+    proGroup.appendChild(opt);
+  }
+
+  select.appendChild(freeGroup);
+  select.appendChild(proGroup);
 }
 
 //----------  
