@@ -879,7 +879,7 @@ td:not(.gold-cell):hover {
 
 #create-board #go-create {
   width: 100%;
-  margin-top: 18px;
+  margin-top: 24px;
   flex: 1 1 auto;
   min-height: 120px;
   display: flex;
@@ -891,7 +891,7 @@ td:not(.gold-cell):hover {
   background: linear-gradient(180deg, rgba(250, 236, 205, 0.98), rgba(239, 216, 171, 0.98));
   color: #4b3522;
   font: inherit;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: 0.01em;
   box-shadow:
