@@ -1822,6 +1822,74 @@ body.account-view #dash-account {
   line-height:1.35;
 }
 
+.timezone-modal-card {
+  width: min(520px, 100%);
+}
+
+#timezone-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(255,255,255,0.92);
+  outline: none;
+  margin-bottom: 12px;
+  font: inherit;
+}
+
+#timezone-search:focus {
+  border-color: rgba(126, 104, 82, 0.35);
+  box-shadow: 0 0 0 3px rgba(126, 104, 82, 0.08);
+}
+
+.timezone-results {
+  max-height: 320px;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(126, 104, 82, 0.14);
+  background: rgba(255,255,255,0.62);
+}
+
+.timezone-result-btn {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 11px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(126, 104, 82, 0.08);
+  transition: background 120ms ease;
+}
+
+.timezone-result-btn:last-child {
+  border-bottom: 0;
+}
+
+.timezone-result-btn:hover,
+.timezone-result-btn:focus {
+  background: rgba(126, 104, 82, 0.08);
+  outline: none;
+}
+
+.timezone-result-main {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4f3f33;
+}
+
+.timezone-result-sub {
+  font-size: 12px;
+  color: #7a6757;
+  margin-top: 2px;
+}
+
+.timezone-empty {
+  padding: 14px;
+  font-size: 13px;
+  color: #7a6757;
+}
+
 .colour-grid{
   margin-top: 12px;
   display: grid;
