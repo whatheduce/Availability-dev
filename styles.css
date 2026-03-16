@@ -733,14 +733,16 @@ td:not(.gold-cell):hover {
 }
 
 .create-input.is-invalid,
-.create-select.is-invalid,
-.structure-card.is-invalid {
-  border-color: rgba(190, 58, 48, 0.58) !important;
-  box-shadow: 0 0 0 3px rgba(190, 58, 48, 0.10);
+.create-select.is-invalid {
+  border-color: rgba(186, 58, 48, 0.72) !important;
+  box-shadow: 0 0 0 3px rgba(186, 58, 48, 0.12);
+  background: rgba(255, 248, 247, 0.96);
 }
 
 .structure-card.is-invalid {
-  background: rgba(255, 245, 244, 0.92);
+  border-color: rgba(186, 58, 48, 0.72) !important;
+  box-shadow: 0 0 0 3px rgba(186, 58, 48, 0.10);
+  background: rgba(255, 245, 244, 0.96);
 }
 
 .create-help {
