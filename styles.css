@@ -642,7 +642,7 @@ td:not(.gold-cell):hover {
 
 .create-layout {
   display: grid;
-  grid-template-columns: minmax(380px, 460px) minmax(500px, 680px);
+  grid-template-columns: minmax(430px, 500px) minmax(500px, 680px);
   gap: 24px;
   align-items: start;
   justify-content: start;
