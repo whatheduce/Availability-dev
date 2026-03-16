@@ -598,7 +598,7 @@ td:not(.gold-cell):hover {
 .create-shell {
   text-align: left;
   max-width: 1180px;
-  margin: -12px auto 0;
+  margin: -24px auto 0;
 }
 
 .create-shell__header {
