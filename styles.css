@@ -602,7 +602,7 @@ td:not(.gold-cell):hover {
 }
 
 .create-shell__header {
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 
 .create-shell__header h2 {
@@ -2340,7 +2340,7 @@ body.account-view #dash-account {
 #create-topbar {
   width: 100%;
   max-width: 1180px;
-  margin: 0 0 20px 0;
+  margin: 0 0 8px 0;
   display: flex;
   justify-content: flex-start;
 }
