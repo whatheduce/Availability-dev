@@ -2776,10 +2776,17 @@ function setCreateFieldErrors({ showErrors = false } = {}) {
     "custom-card"
   ];
 
+structureIds.forEach((id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("is-invalid");
+});
+
+if (showErrors && !hasStructure) {
   structureIds.forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.classList.toggle("is-invalid", showErrors && !hasStructure);
+    el.classList.add("is-invalid");
   });
 }
 
