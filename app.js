@@ -2793,6 +2793,7 @@ if (showErrors && !hasStructure) {
     if (!el) return;
     el.classList.add("is-invalid");
   });
+  }
 }
 
 //----------
