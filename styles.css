@@ -801,7 +801,7 @@ td:not(.gold-cell):hover {
 .structure-card--locked {
   opacity: 0.72;
   cursor: not-allowed;
-  background: rgba(243, 237, 230, 0.88);
+  background: rgba(223, 217, 210, 0.88);
 }
 
 .structure-card--locked:hover {
