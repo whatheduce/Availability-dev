@@ -141,9 +141,10 @@ body.logged-in #landing-bg::after{
 }
 
     .centered-container {
-      max-width: 500px;
-      margin: 60px auto;
-      padding: 20px;
+      width: 100%;
+      max-width: 1180px;
+      margin: 0;
+      padding: 34px;
       text-align: center;
     }
 
