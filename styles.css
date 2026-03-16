@@ -598,7 +598,7 @@ td:not(.gold-cell):hover {
 .create-shell {
   text-align: left;
   max-width: 1180px;
-  margin: 0;
+  margin: -12px auto 0;
 }
 
 .create-shell__header {
@@ -712,6 +712,10 @@ td:not(.gold-cell):hover {
 
 .threshold-lock {
   opacity: 0.8;
+}
+
+#gold-threshold-wrap {
+  margin-top: 36px;
 }
 
 .structure-columns {
