@@ -2587,7 +2587,12 @@ function showBoardSetup() {
   const createActions = document.getElementById("create-actions");
   const goBtn = document.getElementById("go-create");
 
-  const nameInput = document.getElementById("board-name");
+  const boardNameInput = document.getElementById("board-name");
+    if (boardNameInput) {
+      boardNameInput.addEventListener("input", () => {
+        updateGoCreateVisibility();
+      });
+    }
   const tzSelect = document.getElementById("host-timezone");
   const goldSel = document.getElementById("gold-threshold");
 
