@@ -663,16 +663,17 @@ td:not(.gold-cell):hover {
 
 .create-panel__heading::after {
   content: "";
-  width: 46px;
-  height: 1px;
-  margin-left: 10px;
+  position: absolute;
+  left: 56%;
+  bottom: -6px;
+  width: 140px;
+  height: 1.5px;
   background: linear-gradient(
     90deg,
-    rgba(176, 132, 90, 0.38),
-    rgba(176, 132, 90, 0.14),
-    rgba(176, 132, 90, 0)
+    rgba(176,132,90,0.42),
+    rgba(176,132,90,0.16),
+    rgba(176,132,90,0)
   );
-  align-self: center;
 }
 
 .create-field + .create-field {
