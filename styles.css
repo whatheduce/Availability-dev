@@ -732,6 +732,17 @@ td:not(.gold-cell):hover {
   box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.08);
 }
 
+.create-input.is-invalid,
+.create-select.is-invalid,
+.structure-card.is-invalid {
+  border-color: rgba(190, 58, 48, 0.58) !important;
+  box-shadow: 0 0 0 3px rgba(190, 58, 48, 0.10);
+}
+
+.structure-card.is-invalid {
+  background: rgba(255, 245, 244, 0.92);
+}
+
 .create-help {
   font-size: 12px;
   color: #7a6757;
