@@ -739,43 +739,6 @@ td:not(.gold-cell):hover {
   line-height: 1.45;
 }
 
-.threshold-group + .threshold-group {
-  margin-top: 14px;
-}
-
-.threshold-group__title {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #7b6857;
-  margin-bottom: 8px;
-}
-
-.threshold-group--locked {
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px dashed rgba(126, 104, 82, 0.18);
-  background: rgba(245, 239, 231, 0.72);
-}
-
-.threshold-locked-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 44px;
-  padding: 0 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.56);
-  border: 1px solid rgba(126, 104, 82, 0.12);
-  color: #6f6256;
-  font-weight: 700;
-}
-
-.threshold-lock {
-  opacity: 0.8;
-}
-
 #gold-threshold-wrap {
   margin-top: 36px;
 }
