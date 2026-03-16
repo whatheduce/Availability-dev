@@ -644,8 +644,18 @@ td:not(.gold-cell):hover {
   display: grid;
   grid-template-columns: minmax(430px, 500px) minmax(500px, 680px);
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
   justify-content: start;
+}
+
+.create-left-column {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.create-panel--basics {
+  flex: 0 0 auto;
 }
 
 .create-panel {
@@ -700,22 +710,6 @@ td:not(.gold-cell):hover {
     rgba(176,132,90,0.16),
     rgba(176,132,90,0)
   );
-}
-
-.create-panel #go-create {
-  width: 100%;
-  margin-top: 18px;
-  min-height: 56px;
-  border-radius: 16px;
-  border: 1px solid rgba(191,139,79,.55);
-  background:
-    linear-gradient(180deg, rgba(255,244,226,.96), rgba(245,224,190,.96));
-  color: #4a3523;
-  font-weight: 800;
-  font-size: 16px;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.75) inset,
-    0 12px 28px rgba(120,84,41,.14);
 }
 
 .create-field + .create-field {
@@ -881,6 +875,60 @@ td:not(.gold-cell):hover {
 
 #create-board-btn:active {
   transform: translateY(0);
+}
+
+.create-submit-btn,
+#create-board #go-create {
+  width: 100%;
+  margin-top: 18px;
+  flex: 1 1 auto;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(196, 148, 88, 0.62);
+  background: linear-gradient(180deg, rgba(250, 236, 205, 0.98), rgba(239, 216, 171, 0.98));
+  color: #4b3522;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.76) inset,
+    0 0 0 1px rgba(255,214,153,0.14),
+    0 16px 32px rgba(120,84,41,0.14);
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+#create-board #go-create:hover {
+  transform: translateY(-1px);
+  border-color: rgba(196, 148, 88, 0.78);
+  background: linear-gradient(180deg, rgba(252, 240, 212, 0.99), rgba(243, 222, 181, 0.99));
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.82) inset,
+    0 20px 36px rgba(120,84,41,0.18);
+}
+
+#create-board #go-create:active {
+  transform: translateY(0);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.72) inset,
+    0 10px 20px rgba(120,84,41,0.12);
+}
+
+#create-board #go-create:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 4px rgba(212,154,86,0.18),
+    0 1px 0 rgba(255,255,255,0.76) inset,
+    0 18px 34px rgba(120,84,41,0.16);
 }
 
 @media (max-width: 1100px) {
