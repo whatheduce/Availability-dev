@@ -2588,13 +2588,11 @@ function showBoardSetup() {
   const goBtn = document.getElementById("go-create");
 
   const boardNameInput = document.getElementById("board-name");
-    if (boardNameInput) {
-      boardNameInput.addEventListener("input", () => {
-        updateGoCreateVisibility();
-      });
-    }
+    if (boardNameInput) boardNameInput.value = "";
+    if (boardNameInput) boardNameInput.classList.remove("is-invalid");
   const tzSelect = document.getElementById("host-timezone");
   const goldSel = document.getElementById("gold-threshold");
+    if (goldSel) goldSel.value = "";
 
   if (nameStep) nameStep.style.display = "block";
   if (detailsStep) detailsStep.style.display = "none";
