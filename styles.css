@@ -877,7 +877,6 @@ td:not(.gold-cell):hover {
   transform: translateY(0);
 }
 
-.create-submit-btn,
 #create-board #go-create {
   width: 100%;
   margin-top: 18px;
@@ -2312,31 +2311,6 @@ body.account-view #dash-account {
     font-weight: 700;
   }
 }
-
-#create-board-btn {
-  border: 1px solid rgba(126, 104, 82, 0.18);
-  background: rgba(252, 248, 242, 0.92);
-  padding: 10px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-#create-board-btn:hover {
-  background: rgba(253, 249, 244, 1);
-  box-shadow: 0 10px 22px rgba(96, 72, 48, 0.10);
-  transform: translateY(-1px);
-}
-
-#create-board-btn:active {
-  transform: translateY(0) scale(0.99);
-}
-
-#create-board-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.20), 0 10px 22px rgba(96, 72, 48, 0.10);
-}
-
 
 /* ===========================
    CALENDAR TOP BAR POLISH
