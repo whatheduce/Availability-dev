@@ -660,6 +660,29 @@
   </div>
 </div>
 
+<!-- Timezone Modal -->  
+<div id="timezone-modal" class="modal-overlay" hidden>
+  <div class="modal-card timezone-modal-card">
+    <div class="modal-title">Choose a timezone</div>
+    <div class="modal-message">
+      Search by city or region. For example: Brisbane, London, New York.
+    </div>
+
+    <input
+      id="timezone-search"
+      type="text"
+      placeholder="Search timezones…"
+      autocomplete="off"
+    />
+
+    <div id="timezone-results" class="timezone-results"></div>
+
+    <div class="modal-actions">
+      <button id="timezone-cancel" class="modal-btn" type="button">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="./app.js"></script>
   
 </body>
