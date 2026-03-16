@@ -1052,35 +1052,69 @@ function yyyyMmDdInTimeZone(date, timeZone) {
   return `${y}-${m}-${d}`; // YYYY-MM-DD
 }
 
-//----------  
+//----------
+function getUtcOffsetLabel(timeZone) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      timeZoneName: "shortOffset",
+      hour: "2-digit"
+    }).formatToParts(new Date());
+
+    const tzName = parts.find(p => p.type === "timeZoneName")?.value || "GMT";
+
+    if (tzName === "GMT" || tzName === "UTC") return "GMT+0";
+
+    return tzName.replace("UTC", "GMT");
+  } catch {
+    return "GMT";
+  }
+}
+
+//----------
+function formatTimeZoneLabel(timeZone, { detected = false } = {}) {
+  const city = timeZone.includes("/")
+    ? timeZone.split("/").pop().replaceAll("_", " ")
+    : timeZone;
+
+  const offset = getUtcOffsetLabel(timeZone);
+
+  return detected
+    ? `${city} (${offset}) — Detected`
+    : `${city} (${offset})`;
+}
+
+//----------
 function getTimeZoneListPinned() {
   const detected = getDetectedTimeZone();
 
-  // Best case: browser can list all IANA time zones
-  if (Intl.supportedValuesOf) {
-    const all = Intl.supportedValuesOf("timeZone");
-    // Put detected first, then the rest alphabetically
-    return [detected, ...all.filter(tz => tz !== detected).sort()];
-  }
-
-  // Fallback: small curated list + detected pinned
-  const fallback = [
+  const curated = [
     "UTC",
     "Australia/Brisbane",
     "Australia/Sydney",
     "Australia/Melbourne",
+    "Australia/Adelaide",
     "Australia/Perth",
     "Pacific/Auckland",
-    "America/Los_Angeles",
-    "America/New_York",
+    "Asia/Singapore",
+    "Asia/Tokyo",
+    "Asia/Bangkok",
+    "Asia/Dubai",
     "Europe/London",
     "Europe/Paris",
-    "Asia/Singapore",
-    "Asia/Tokyo"
+    "Europe/Berlin",
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "America/Toronto",
+    "America/Vancouver"
   ];
 
-  const unique = Array.from(new Set([detected, ...fallback]));
-  return [detected, ...unique.filter(tz => tz !== detected)];
+  return {
+    detected,
+    zones: Array.from(new Set([detected, ...curated]))
+  };
 }
 
 //----------
@@ -1088,17 +1122,41 @@ function populateHostTimezoneSelect() {
   const select = document.getElementById("host-timezone");
   if (!select) return;
 
-  const tzs = getTimeZoneListPinned();
+  const { detected, zones } = getTimeZoneListPinned();
   select.innerHTML = "";
 
-  tzs.forEach((tz, idx) => {
+  zones.forEach((tz) => {
     const opt = document.createElement("option");
     opt.value = tz;
-    opt.textContent = idx === 0 ? `${tz} (Detected)` : tz;
+    opt.textContent = formatTimeZoneLabel(tz, { detected: tz === detected });
     select.appendChild(opt);
   });
 
-  select.value = tzs[0];
+  const otherOpt = document.createElement("option");
+  otherOpt.value = "__other__";
+  otherOpt.textContent = "Other…";
+  select.appendChild(otherOpt);
+
+  select.value = detected;
+
+  if (!select.dataset.otherBound) {
+    select.addEventListener("change", () => {
+      if (select.value !== "__other__") return;
+
+      select.value = detected;
+
+      if (typeof showConfirmPopup === "function") {
+        showConfirmPopup(
+          "Full timezone search is coming soon. For now, choose one of the common timezones in the list.",
+          { title: "More timezones" }
+        );
+      } else {
+        alert("Full timezone search is coming soon.");
+      }
+    });
+
+    select.dataset.otherBound = "1";
+  }
 }
 
 //----------
