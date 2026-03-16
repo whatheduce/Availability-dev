@@ -308,42 +308,44 @@
     </div>
 
     <div class="create-layout">
-      <!-- LEFT: Basics -->
-      <div class="create-panel">
-        <div class="create-panel__heading">Calendar Basics</div>
+      
+<!-- LEFT: Basics + Action -->
+<div class="create-left-column">
+  <div class="create-panel create-panel--basics">
+    <div class="create-panel__heading">Calendar Basics</div>
 
-        <div class="create-field">
-          <label for="board-name" class="create-label">Calendar Name</label>
-          <input id="board-name" class="create-input" placeholder="Calendar name" />
-        </div>
-
-        <div class="create-field">
-          <label for="host-timezone" class="create-label">Calendar Timezone</label>
-          <select id="host-timezone" class="create-select">
-            <option>Loading timezones…</option>
-          </select>
-          <div class="create-help">
-            Used for the calendar’s day rollover and date labels.
-          </div>
-        </div>
-
-        <div id="gold-threshold-wrap" class="create-field">
-          <label for="gold-threshold" class="create-label">Gold Threshold</label>
-
-          <select id="gold-threshold" class="create-select">
-            <option value="" selected disabled>Select a number…</option>
-          </select>
-
-          <div class="create-help">
-            Cells turn gold when dots meet or exceed this number.
-          </div>
-        </div>
-        
-        <button id="go-create" class="primary-btn create-submit-btn" style="display:none;">
-      Create Calendar
-        </button>
-        
+    <div class="create-field">
+      <label for="board-name" class="create-label">Calendar Name</label>
+      <input id="board-name" class="create-input" placeholder="Calendar name" />
     </div>
+
+    <div class="create-field">
+      <label for="host-timezone" class="create-label">Calendar Timezone</label>
+      <select id="host-timezone" class="create-select">
+        <option>Loading timezones…</option>
+      </select>
+      <div class="create-help">
+        Used for the calendar’s day rollover and date labels.
+      </div>
+    </div>
+
+    <div id="gold-threshold-wrap" class="create-field">
+      <label for="gold-threshold" class="create-label">Gold Threshold</label>
+
+      <select id="gold-threshold" class="create-select">
+        <option value="" selected disabled>Select a number…</option>
+      </select>
+
+      <div class="create-help">
+        Cells turn gold when dots meet or exceed this number.
+      </div>
+    </div>
+  </div>
+
+  <button id="go-create" class="primary-btn create-submit-btn" style="display:none;">
+    Create Calendar
+  </button>
+</div>
 
       <!-- RIGHT: Structures -->
       <div class="create-panel">
