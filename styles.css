@@ -140,13 +140,13 @@ body.logged-in #landing-bg::after{
   padding-left: 40px;
 }
 
-    .centered-container {
-      width: 100%;
-      max-width: 1180px;
-      margin: 0;
-      padding: 34px;
-      text-align: center;
-    }
+.centered-container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0;
+  padding: 14px 34px;
+  text-align: center;
+  }    
 
     .centered-container input {
       width: 100%;
