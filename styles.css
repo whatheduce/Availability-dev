@@ -664,9 +664,9 @@ td:not(.gold-cell):hover {
 .create-panel__heading::after {
   content: "";
   position: absolute;
-  left: 56%;
+  left: 10%;
   bottom: -6px;
-  width: 140px;
+  width: 280px;
   height: 1.5px;
   background: linear-gradient(
     90deg,
