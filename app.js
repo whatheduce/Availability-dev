@@ -1064,7 +1064,6 @@ function getUtcOffsetLabel(timeZone) {
     const tzName = parts.find(p => p.type === "timeZoneName")?.value || "GMT";
 
     if (tzName === "GMT" || tzName === "UTC") return "GMT+0";
-
     return tzName.replace("UTC", "GMT");
   } catch {
     return "GMT";
@@ -1082,6 +1081,40 @@ function formatTimeZoneLabel(timeZone, { detected = false } = {}) {
   return detected
     ? `${city} (${offset}) — Detected`
     : `${city} (${offset})`;
+}
+
+//----------
+function getAllTimeZones() {
+  const detected = getDetectedTimeZone();
+
+  if (Intl.supportedValuesOf) {
+    const all = Intl.supportedValuesOf("timeZone");
+    return Array.from(new Set([detected, ...all]));
+  }
+
+  return Array.from(new Set([
+    detected,
+    "UTC",
+    "Australia/Brisbane",
+    "Australia/Sydney",
+    "Australia/Melbourne",
+    "Australia/Adelaide",
+    "Australia/Perth",
+    "Pacific/Auckland",
+    "Asia/Singapore",
+    "Asia/Tokyo",
+    "Asia/Bangkok",
+    "Asia/Dubai",
+    "Europe/London",
+    "Europe/Paris",
+    "Europe/Berlin",
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "America/Toronto",
+    "America/Vancouver"
+  ]));
 }
 
 //----------
@@ -1118,7 +1151,7 @@ function getTimeZoneListPinned() {
 }
 
 //----------
-function populateHostTimezoneSelect() {
+function populateHostTimezoneSelect(selectedValue) {
   const select = document.getElementById("host-timezone");
   if (!select) return;
 
@@ -1137,26 +1170,188 @@ function populateHostTimezoneSelect() {
   otherOpt.textContent = "Other…";
   select.appendChild(otherOpt);
 
-  select.value = detected;
+  const finalValue = selectedValue && zones.includes(selectedValue)
+    ? selectedValue
+    : detected;
+
+  select.value = finalValue;
+  select.dataset.lastRealTimezone = finalValue;
 
   if (!select.dataset.otherBound) {
-    select.addEventListener("change", () => {
+    select.addEventListener("change", async () => {
       if (select.value !== "__other__") return;
 
-      select.value = detected;
+      const previousValue =
+        select.dataset.lastRealTimezone ||
+        finalValue ||
+        detected;
 
-      if (typeof showConfirmPopup === "function") {
-        showConfirmPopup(
-          "Full timezone search is coming soon. For now, choose one of the common timezones in the list.",
-          { title: "More timezones" }
-        );
-      } else {
-        alert("Full timezone search is coming soon.");
+      const chosen = await openTimezonePicker({
+        initialQuery: ""
+      });
+
+      if (!chosen) {
+        select.value = previousValue;
+        return;
       }
+
+      ensureTimezoneOption(select, chosen);
+      select.value = chosen;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
     select.dataset.otherBound = "1";
   }
+
+  if (!select.dataset.trackBound) {
+    select.addEventListener("change", () => {
+      if (select.value && select.value !== "__other__") {
+        select.dataset.lastRealTimezone = select.value;
+      }
+    });
+
+    select.dataset.trackBound = "1";
+  }
+}
+
+//----------
+function ensureTimezoneOption(select, timeZone) {
+  if (!select || !timeZone) return;
+
+  let existing = Array.from(select.options).find(opt => opt.value === timeZone);
+  if (existing) return;
+
+  const otherOpt = Array.from(select.options).find(opt => opt.value === "__other__");
+
+  const opt = document.createElement("option");
+  opt.value = timeZone;
+  opt.textContent = formatTimeZoneLabel(timeZone);
+
+  if (otherOpt) {
+    select.insertBefore(opt, otherOpt);
+  } else {
+    select.appendChild(opt);
+  }
+}
+
+//----------
+function getTimeZoneSearchText(timeZone) {
+  const parts = timeZone.split("/");
+  const city = parts[parts.length - 1]?.replaceAll("_", " ") || timeZone;
+  const region = parts[0] || "";
+  const label = formatTimeZoneLabel(timeZone);
+
+  return `${timeZone} ${city} ${region} ${label}`.toLowerCase();
+}
+
+//----------
+function filterTimeZones(query, zones) {
+  const q = (query || "").trim().toLowerCase();
+
+  if (!q) {
+    return zones.slice(0, 80);
+  }
+
+  const starts = [];
+  const includes = [];
+
+  zones.forEach((tz) => {
+    const text = getTimeZoneSearchText(tz);
+
+    if (text.startsWith(q)) starts.push(tz);
+    else if (text.includes(q)) includes.push(tz);
+  });
+
+  return [...starts, ...includes].slice(0, 80);
+}
+
+//----------
+function openTimezonePicker({ initialQuery = "" } = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("timezone-modal");
+    const input = document.getElementById("timezone-search");
+    const results = document.getElementById("timezone-results");
+    const cancelBtn = document.getElementById("timezone-cancel");
+
+    if (!overlay || !input || !results || !cancelBtn) {
+      resolve(null);
+      return;
+    }
+
+    const allZones = getAllTimeZones();
+
+    const render = (query) => {
+      const matches = filterTimeZones(query, allZones);
+
+      if (!matches.length) {
+        results.innerHTML = `<div class="timezone-empty">No matching timezones found.</div>`;
+        return;
+      }
+
+      results.innerHTML = "";
+      matches.forEach((tz) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "timezone-result-btn";
+
+        const city = tz.includes("/") ? tz.split("/").pop().replaceAll("_", " ") : tz;
+        const region = tz.includes("/") ? tz.split("/")[0].replaceAll("_", " ") : "Timezone";
+
+        btn.innerHTML = `
+          <div class="timezone-result-main">${city} (${getUtcOffsetLabel(tz)})</div>
+          <div class="timezone-result-sub">${region} • ${tz}</div>
+        `;
+
+        btn.addEventListener("click", () => {
+          cleanup();
+          resolve(tz);
+        });
+
+        results.appendChild(btn);
+      });
+    };
+
+    const onInput = () => render(input.value);
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cleanup();
+        resolve(null);
+      }
+    };
+
+    const onOverlayClick = (e) => {
+      if (e.target === overlay) {
+        cleanup();
+        resolve(null);
+      }
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    const cleanup = () => {
+      overlay.hidden = true;
+      input.removeEventListener("input", onInput);
+      document.removeEventListener("keydown", onKeyDown, true);
+      overlay.removeEventListener("click", onOverlayClick, true);
+      cancelBtn.removeEventListener("click", onCancel, true);
+    };
+
+    overlay.hidden = false;
+    input.value = initialQuery;
+    render(initialQuery);
+
+    input.addEventListener("input", onInput);
+    document.addEventListener("keydown", onKeyDown, true);
+    overlay.addEventListener("click", onOverlayClick, true);
+    cancelBtn.addEventListener("click", onCancel, true);
+
+    requestAnimationFrame(() => input.focus());
+  });
 }
 
 //----------
