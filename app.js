@@ -435,7 +435,10 @@ function renderCalendarTimezone() {
 
   if (!wrap || !value || !currentTable) return;
 
-  value.textContent = currentTable.host_tz || "—";
+  value.textContent = currentTable.host_tz
+    ? formatTimeZoneLabel(currentTable.host_tz)
+    : "—";
+
   wrap.style.display = "block";
 }
 
