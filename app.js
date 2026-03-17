@@ -2686,11 +2686,8 @@ function showBoardSetup() {
   const goBtn = document.getElementById("go-create");
 
   const boardNameInput = document.getElementById("board-name");
-    if (boardNameInput) boardNameInput.value = "";
-    if (boardNameInput) boardNameInput.classList.remove("is-invalid");
   const tzSelect = document.getElementById("host-timezone");
   const goldSel = document.getElementById("gold-threshold");
-    if (goldSel) goldSel.value = "";
 
   if (nameStep) nameStep.style.display = "block";
   if (detailsStep) detailsStep.style.display = "none";
@@ -2699,14 +2696,15 @@ function showBoardSetup() {
   if (goBtn) goBtn.style.display = "none";
 
   // Reset field values
-  if (nameInput) {
-    nameInput.value = "";
-    nameInput.defaultValue = "";
+  if (boardNameInput) {
+    boardNameInput.value = "";
+    boardNameInput.defaultValue = "";
   }
+  if (tzSelect) tzSelect.value = "";
   if (goldSel) goldSel.value = "";
 
   // Reset invalid styles
-  if (nameInput) nameInput.classList.remove("is-invalid");
+  if (boardNameInput) boardNameInput.classList.remove("is-invalid");
   if (tzSelect) tzSelect.classList.remove("is-invalid");
   if (goldSel) goldSel.classList.remove("is-invalid");
 
