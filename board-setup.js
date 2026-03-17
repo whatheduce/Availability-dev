@@ -1,3 +1,6 @@
+// =========================
+// BOARD SETUP / CREATE CALENDAR
+// =========================
 
 function showBoardSetup() {
   const startBtn = document.getElementById("start-create");
