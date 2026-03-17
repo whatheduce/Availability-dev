@@ -700,7 +700,7 @@ td:not(.gold-cell):hover {
 .create-panel__heading::after {
   content: "";
   position: absolute;
-  left: 10%;
+  left: 20px;
   bottom: -6px;
   width: 280px;
   height: 1.5px;
