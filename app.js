@@ -185,8 +185,8 @@ function showCreateBoard() {
   if (create) create.style.display = "block";
 
   // Initialize the create flow (resets, hides/reveals buttons, timezones, etc.)
-  if (typeof showBoardSetup === "function") {
-    showBoardSetup();
+  if (typeof window.showBoardSetup === "function") {
+    window.showBoardSetup();
   }
 }
 
@@ -2633,7 +2633,7 @@ async function createBoard() {
 
   let timeBlocks = [];
 
-const structureChoice = selectedStructure;
+const structureChoice = window.selectedStructure;
 
 if (!structureChoice) {
   alert("Please choose a calendar structure");
@@ -2641,7 +2641,7 @@ if (!structureChoice) {
 }
 
 if (structureChoice === "custom") {
-  timeBlocks = (customStructureLabels || [])
+  timeBlocks = (window.customStructureLabels || [])
     .map(label => String(label || "").trim())
     .filter(Boolean)
     .map(label => ({ label }));
