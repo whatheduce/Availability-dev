@@ -72,8 +72,8 @@ function showBoardSetup() {
   });
 
   // Populate selects after reset
-  if (typeof populateHostTimezoneSelect === "function") {
-    populateHostTimezoneSelect();
+  if (typeof window.populateHostTimezoneSelect === "function") {
+    window.populateHostTimezoneSelect();
   }
 
   if (typeof populateGoldThresholdSelect === "function") {
@@ -138,7 +138,7 @@ function updateCustomCardPreview() {
   if (!subtitle) return;
 
   if (window.customStructureLabels && window.customStructureLabels.length) {
-    subtitle.textContent = customStructureLabels.join(" • ");
+    subtitle.textContent = window.customStructureLabels.join(" • ");
   } else {
     subtitle.textContent = "Create up to 5 custom row labels";
   }
@@ -196,8 +196,8 @@ function openCustomStructureModal() {
   fieldsWrap.innerHTML = "";
 
   if (window.customStructureLabels.length >= 1 && window.customStructureLabels.length <= 5) {
-    countSelect.value = String(customStructureLabels.length);
-    renderCustomRowInputs(customStructureLabels.length);
+    countSelect.value = String(window.customStructureLabels.length);
+    renderCustomRowInputs(window.customStructureLabels.length);
   } else {
     countSelect.value = "";
   }
@@ -389,3 +389,5 @@ document.getElementById("custom-structure-modal")?.addEventListener("click", (e)
 }
 
 bindBoardSetupUi()
+window.showBoardSetup = showBoardSetup;
+
