@@ -1,3 +1,4 @@
+// Depends on board-setup.js being loaded first
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createAuthModule } from "./auth.js";
 
