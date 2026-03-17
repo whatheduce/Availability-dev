@@ -46,21 +46,36 @@ const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
 // =========================
 
 const PREBUILT_STRUCTURES = {
+  am_pm: [
+    { label: "AM" },
+    { label: "PM" }
+  ],
+
   meals: [
     { label: "Breakfast" },
     { label: "Lunch" },
     { label: "Dinner" }
   ],
-  quick_meetup: [
-    { label: "Morning" },
-    { label: "Afternoon" },
-    { label: "Evening" }
+
+  school_times: [
+    { label: "Before School" },
+    { label: "After School" },
+    { label: "After Dinner" }
   ],
-  dinner_plan: [
-    { label: "Early Dinner" },
-    { label: "Dinner" },
-    { label: "Late Dinner" }
-  ]};
+
+  workday: [
+    { label: "Before Work" },
+    { label: "Lunch Break" },
+    { label: "After Work" }
+  ],
+
+  shifts: [
+    { label: "Morning Shift" },
+    { label: "Day Shift" },
+    { label: "Afternoon Shift" },
+    { label: "Night Shift" }
+  ]
+};
 
 const COLOUR_PRESETS = [
   // Reds
@@ -2809,11 +2824,6 @@ function updateGoCreateVisibility({ showErrors = false } = {}) {
   btn.style.display = isReady ? "inline-block" : "none";
 }
 
-//----------
-function showGoCreate() {
-  updateGoCreateVisibility({ showErrors: true });
-}
-
 //----------  
 async function createBoard() {
     // Gold threshold (now selected on the Name Your Calendar screen)
@@ -2839,7 +2849,7 @@ async function createBoard() {
 
   let timeBlocks = [];
 
-const structureChoice = selectedStructure || "custom";
+const structureChoice = selectedStructure;
 
 if (!structureChoice) {
   alert("Please choose a calendar structure");
