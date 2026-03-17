@@ -806,7 +806,6 @@ td:not(.gold-cell):hover {
 }
 
 .structure-card.active {
-  border-color: rgba(204, 82, 16, 0.16);
   box-shadow: 0 12px 26px rgba(204, 82, 16, 0.10);
   background: rgba(255, 250, 244, 0.98);
 }
@@ -826,14 +825,14 @@ td:not(.gold-cell):hover {
 .structure-card::after {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: 14px;
+  inset: 4px;
+  border-radius: 12px;
   pointer-events: none;
 
   border: 2px solid rgba(204, 82, 16, 0.34);
 
   opacity: 0;
-  transform: scale(0.96);
+  transform: scale(0.78);
   transition:
     opacity 220ms ease,
     transform 320ms cubic-bezier(.22, 1, .36, 1);
