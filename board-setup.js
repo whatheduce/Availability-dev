@@ -53,8 +53,8 @@ function showBoardSetup() {
   });
 
   // Clear structure selection highlight + require click
-  selectedStructure = null;
-  customStructureLabels = [];
+  window.selectedStructure = null;
+  window.customStructureLabels = [];
   updateCustomCardPreview();
   [
     "whole-day-card",
@@ -137,7 +137,7 @@ function updateCustomCardPreview() {
   const subtitle = customCard.querySelector(".structure-subtitle");
   if (!subtitle) return;
 
-  if (customStructureLabels && customStructureLabels.length) {
+  if (window.customStructureLabels && window.customStructureLabels.length) {
     subtitle.textContent = customStructureLabels.join(" • ");
   } else {
     subtitle.textContent = "Create up to 5 custom row labels";
@@ -158,8 +158,8 @@ function renderCustomRowInputs(count) {
     input.placeholder = `Row ${i + 1} name`;
     input.maxLength = 24;
 
-    if (customStructureLabels[i]) {
-      input.value = customStructureLabels[i];
+    if (window.customStructureLabels[i]) {
+      input.value = window.customStructureLabels[i];
     }
 
     input.addEventListener("input", updateCustomStructureSaveState);
@@ -195,7 +195,7 @@ function openCustomStructureModal() {
 
   fieldsWrap.innerHTML = "";
 
-  if (customStructureLabels.length >= 1 && customStructureLabels.length <= 5) {
+  if (window.customStructureLabels.length >= 1 && window.customStructureLabels.length <= 5) {
     countSelect.value = String(customStructureLabels.length);
     renderCustomRowInputs(customStructureLabels.length);
   } else {
@@ -239,7 +239,7 @@ function getCreateCalendarRequirements() {
   const hasName = !!nameInput?.value.trim();
   const hasTimezone = !!tzSelect?.value && tzSelect.value !== "__other__";
   const hasGold = !!goldSelect?.value;
-  const hasStructure = !!selectedStructure;
+  const hasStructure = !!window.selectedStructure;
 
   return {
     nameInput,
@@ -344,7 +344,7 @@ structureCards.forEach(({ id, value }) => {
       return;
     }
 
-    selectedStructure = value;
+    window.selectedStructure = value;
     setActiveStructureCard(id);
     updateGoCreateVisibility({ showErrors: true });
   });
@@ -372,11 +372,11 @@ document.getElementById("custom-structure-save")?.addEventListener("click", () =
     return;
   }
 
-  customStructureLabels = labels;
+  window.customStructureLabels = labels;
   updateCustomCardPreview();
   closeCustomStructureModal();
 
-  selectedStructure = "custom";
+  window.selectedStructure = "custom";
   setActiveStructureCard("custom-card");
   updateGoCreateVisibility({ showErrors: true });
 });
