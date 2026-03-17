@@ -846,11 +846,15 @@ td:not(.gold-cell):hover {
 }
 
 #create-board-btn {
-  width: 220px;
+  width: 180px;
   height: 48px;
   border-radius: 14px;
   border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.72);
+  linear-gradient(
+      180deg,
+      rgba(246, 225, 170, 0.98),
+      rgba(231, 196, 118, 0.98)
+    );
   color: #4b4237;
   font: inherit;
   font-size: 15px;
