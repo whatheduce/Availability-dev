@@ -122,6 +122,7 @@ let noteDraftBeforeEdit = "";
 let setupSelectedColour = "#3b82f6";
 let identitySelectedColour = "#2d7ff9";  
 let selectedStructure = null;
+let customStructureLabels = [];
 let presenceChannel = null;
 let isBoardOwner = false;
 let profilesCache = {};
@@ -2642,6 +2643,7 @@ function showBoardSetup() {
 
   // Clear structure selection highlight + require click
   selectedStructure = null;
+  customStructureLabels = [];
   [
     "whole-day-card",
     "am-pm-card",
@@ -2857,17 +2859,13 @@ if (!structureChoice) {
 }
 
 if (structureChoice === "custom") {
-  const rowInputs = document.querySelectorAll("#rows-container input");
-
-  rowInputs.forEach(input => {
-    const value = input.value.trim();
-    if (value) {
-      timeBlocks.push({ label: value });
-    }
-  });
+  timeBlocks = (customStructureLabels || [])
+    .map(label => String(label || "").trim())
+    .filter(Boolean)
+    .map(label => ({ label }));
 
   if (timeBlocks.length === 0) {
-    alert("Please add at least one time block");
+    alert("Please define your custom rows first.");
     return;
   }
 } else {
