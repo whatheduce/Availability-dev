@@ -878,12 +878,12 @@ td:not(.gold-cell):hover {
 }
 
 #create-board #go-create {
-  width: 100%;
+  width: 60%;
   margin-top: 24px;
 
   flex: 0 0 auto;
-  min-height: 64px;
-  height: 64px;
+  min-height: 124px;
+  height: 124px;
 
   display: flex;
   align-items: center;
