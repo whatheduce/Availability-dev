@@ -880,13 +880,18 @@ td:not(.gold-cell):hover {
 #create-board #go-create {
   width: 100%;
   margin-top: 24px;
-  flex: 1 1 auto;
-  min-height: 120px;
+
+  flex: 0 0 auto;
+  min-height: 64px;
+  height: 64px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  align-self: center;
+
   padding: 18px 24px;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.28);
 
   border-radius: 22px;
   border: 1px solid rgba(191, 145, 74, 0.72);
@@ -900,15 +905,15 @@ td:not(.gold-cell):hover {
 
   color: #4a3520;
   font: inherit;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.28);
 
   box-shadow:
-    inset 0 0 0 2px rgba(255, 244, 214, 0.55),   /* inner border */
-    inset 0 1px 0 rgba(255,255,255,0.72),
-    0 0 0 1px rgba(214,170,96,0.16),
-    0 18px 34px rgba(120,84,41,0.16);
+   inset 0 0 0 1px rgba(255,255,255,0.72),
+   inset 0 0 0 6px rgba(255,244,214,0.48),
+   0 18px 34px rgba(120,84,41,0.16);
 
   cursor: pointer;
 
