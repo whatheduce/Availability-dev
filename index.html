@@ -288,7 +288,36 @@
     </div>
   </div>
 </div>
-  
+
+   <!-- CREATE CALENDAR FROM CUSTOM STRUCTURE -->  
+<div id="custom-structure-modal" class="modal-overlay" hidden>
+  <div class="modal-card custom-structure-card">
+    <div class="modal-title">Custom Structure</div>
+    <div class="modal-message">
+      Choose how many rows you want, then name each one.
+    </div>
+
+    <div class="create-field">
+      <label for="custom-row-count" class="create-label">Number of rows</label>
+      <select id="custom-row-count" class="create-select">
+        <option value="" selected disabled>Select a number…</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+
+    <div id="custom-rows-fields" class="custom-rows-fields"></div>
+
+    <div class="modal-actions">
+      <button id="custom-structure-cancel" class="modal-btn" type="button">Cancel</button>
+      <button id="custom-structure-save" class="modal-btn" type="button" disabled>Use These Rows</button>
+    </div>
+  </div>
+</div>
+
 <div id="create-board" class="centered-container" style="display:none;">
 
   <div id="create-topbar">
