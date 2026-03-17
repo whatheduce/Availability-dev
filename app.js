@@ -2197,6 +2197,80 @@ renderCalendarLastUpdated();
 // BOARD / TABLE DATA LOADING
 // =========================
 
+function renderCustomRowInputs(count) {
+  const wrap = document.getElementById("custom-rows-fields");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "custom-row-input";
+    input.placeholder = `Row ${i + 1} name`;
+    input.maxLength = 24;
+
+    if (customStructureLabels[i]) {
+      input.value = customStructureLabels[i];
+    }
+
+    input.addEventListener("input", updateCustomStructureSaveState);
+    wrap.appendChild(input);
+  }
+
+  updateCustomStructureSaveState();
+}
+
+//----------
+function updateCustomStructureSaveState() {
+  const saveBtn = document.getElementById("custom-structure-save");
+  const inputs = Array.from(document.querySelectorAll("#custom-rows-fields .custom-row-input"));
+
+  if (!saveBtn) return;
+
+  if (!inputs.length) {
+    saveBtn.disabled = true;
+    return;
+  }
+
+  let allFilled = true;
+
+  inputs.forEach(input => {
+    const ok = !!input.value.trim();
+    input.classList.toggle("is-invalid", !ok);
+    if (!ok) allFilled = false;
+  });
+
+  saveBtn.disabled = !allFilled;
+}
+
+//----------
+function openCustomStructureModal() {
+  const overlay = document.getElementById("custom-structure-modal");
+  const countSelect = document.getElementById("custom-row-count");
+  const fieldsWrap = document.getElementById("custom-rows-fields");
+
+  if (!overlay || !countSelect || !fieldsWrap) return;
+
+  fieldsWrap.innerHTML = "";
+
+  if (customStructureLabels.length >= 1 && customStructureLabels.length <= 5) {
+    countSelect.value = String(customStructureLabels.length);
+    renderCustomRowInputs(customStructureLabels.length);
+  } else {
+    countSelect.value = "";
+  }
+
+  overlay.hidden = false;
+}
+
+//----------
+function closeCustomStructureModal() {
+  const overlay = document.getElementById("custom-structure-modal");
+  if (overlay) overlay.hidden = true;
+}
+
+//----------
 async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
     p_table_id: tableId
@@ -4230,6 +4304,11 @@ structureCards.forEach(({ id, value }) => {
   if (!el) return;
 
   el.addEventListener("click", () => {
+    if (value === "custom") {
+      openCustomStructureModal();
+      return;
+    }
+
     selectedStructure = value;
     setActiveStructureCard(id);
     updateGoCreateVisibility({ showErrors: true });
@@ -4755,6 +4834,42 @@ document.getElementById("remove-user-cancel")?.addEventListener("click", () => {
 document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
   if (!e.target.closest(".modal-card")) {
     closeRemoveUserModal();
+  }
+});
+
+const customRowCount = document.getElementById("custom-row-count");
+if (customRowCount) {
+  customRowCount.addEventListener("change", () => {
+    const count = parseInt(customRowCount.value || "", 10);
+    if (!Number.isFinite(count) || count < 1 || count > 5) return;
+    renderCustomRowInputs(count);
+  });
+}
+
+document.getElementById("custom-structure-cancel")?.addEventListener("click", () => {
+  closeCustomStructureModal();
+});
+
+document.getElementById("custom-structure-save")?.addEventListener("click", () => {
+  const inputs = Array.from(document.querySelectorAll("#custom-rows-fields .custom-row-input"));
+  const labels = inputs.map(input => input.value.trim()).filter(Boolean);
+
+  if (!labels.length || labels.length !== inputs.length) {
+    updateCustomStructureSaveState();
+    return;
+  }
+
+  customStructureLabels = labels;
+  closeCustomStructureModal();
+
+  selectedStructure = "custom";
+  setActiveStructureCard("custom-card");
+  updateGoCreateVisibility({ showErrors: true });
+});
+
+document.getElementById("custom-structure-modal")?.addEventListener("click", (e) => {
+  if (!e.target.closest(".modal-card")) {
+    closeCustomStructureModal();
   }
 });
   
