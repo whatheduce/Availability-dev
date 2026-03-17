@@ -2233,14 +2233,7 @@ function updateCustomStructureSaveState() {
     return;
   }
 
-  let allFilled = true;
-
-  inputs.forEach(input => {
-    const ok = !!input.value.trim();
-    input.classList.toggle("is-invalid", !ok);
-    if (!ok) allFilled = false;
-  });
-
+  const allFilled = inputs.every(input => !!input.value.trim());
   saveBtn.disabled = !allFilled;
 }
 
@@ -2262,6 +2255,21 @@ function openCustomStructureModal() {
   }
 
   overlay.hidden = false;
+}
+
+//----------
+function updateCustomCardPreview() {
+  const customCard = document.getElementById("custom-card");
+  if (!customCard) return;
+
+  const subtitle = customCard.querySelector(".structure-subtitle");
+  if (!subtitle) return;
+
+  if (customStructureLabels && customStructureLabels.length) {
+    subtitle.textContent = customStructureLabels.join(" • ");
+  } else {
+    subtitle.textContent = "Create up to 5 custom row labels";
+  }
 }
 
 //----------
@@ -2718,6 +2726,7 @@ function showBoardSetup() {
   // Clear structure selection highlight + require click
   selectedStructure = null;
   customStructureLabels = [];
+  updateCustomCardPreview();
   [
     "whole-day-card",
     "am-pm-card",
@@ -4860,6 +4869,7 @@ document.getElementById("custom-structure-save")?.addEventListener("click", () =
   }
 
   customStructureLabels = labels;
+  updateCustomCardPreview();
   closeCustomStructureModal();
 
   selectedStructure = "custom";
