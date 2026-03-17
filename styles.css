@@ -795,6 +795,8 @@ td:not(.gold-cell):hover {
   user-select: none;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
   min-width: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .structure-card:hover {
@@ -804,8 +806,7 @@ td:not(.gold-cell):hover {
 }
 
 .structure-card.active {
-  outline: 2px solid rgba(204, 82, 16, 0.28);
-  border-color: rgba(204, 82, 16, 0.28);
+  border-color: rgba(204, 82, 16, 0.16);
   box-shadow: 0 12px 26px rgba(204, 82, 16, 0.10);
   background: rgba(255, 250, 244, 0.98);
 }
@@ -820,6 +821,27 @@ td:not(.gold-cell):hover {
   transform: none;
   box-shadow: none;
   border-color: rgba(126, 104, 82, 0.18);
+}
+
+.structure-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  pointer-events: none;
+
+  border: 2px solid rgba(204, 82, 16, 0.34);
+
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 180ms ease,
+    transform 240ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.structure-card.active::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .structure-title {
@@ -1002,12 +1024,6 @@ td:not(.gold-cell):hover {
   outline: none;
   border-color: rgba(204, 82, 16, 0.32);
   box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.08);
-}
-
-.custom-row-input.is-invalid {
-  border-color: rgba(186, 58, 48, 0.72);
-  box-shadow: 0 0 0 3px rgba(186, 58, 48, 0.12);
-  background: rgba(255, 248, 247, 0.96);
 }
 
 .pro-heading {
