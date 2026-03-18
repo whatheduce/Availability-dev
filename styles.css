@@ -224,6 +224,108 @@ th {
   box-shadow: inset -1px 0 0 rgba(255,255,255,0.35);
 }
 
+/* =========================
+   WHOLE DAY / ALL DAY VIEW
+   ========================= */
+
+.whole-day-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(340px, 1fr));
+  gap: 18px;
+  align-items: start;
+  min-width: 760px;
+}
+
+.whole-day-month-card {
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  border-radius: 20px;
+  background: rgba(252, 248, 242, 0.88);
+  box-shadow: 0 10px 24px rgba(96, 72, 48, 0.08);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.whole-day-month-card__title {
+  padding: 16px 18px 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #3f3329;
+}
+
+.whole-day-weekdays,
+.whole-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.whole-day-weekday {
+  padding: 10px 6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b5c4f;
+  background: linear-gradient(180deg, rgba(246, 240, 232, 0.98), rgba(238, 229, 218, 0.98));
+  border-top: 1px solid rgba(126, 104, 82, 0.12);
+  border-bottom: 1px solid rgba(126, 104, 82, 0.12);
+}
+
+.whole-day-cell {
+  position: relative;
+  min-height: 92px;
+  border-right: 1px solid rgba(126, 104, 82, 0.14);
+  border-bottom: 1px solid rgba(126, 104, 82, 0.14);
+  background: linear-gradient(180deg, rgba(252, 249, 244, 0.96), rgba(247, 241, 232, 0.96));
+  transition: box-shadow 0.22s ease, background 0.22s ease, transform 0.22s ease;
+  cursor: pointer;
+}
+
+.whole-day-cell:nth-child(7n) {
+  border-right: none;
+}
+
+.whole-day-cell:hover:not(.whole-day-cell--past):not(.whole-day-cell--empty) {
+  background: linear-gradient(180deg, rgba(255, 250, 242, 0.98), rgba(249, 241, 229, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 0 1px rgba(204, 82, 16, 0.10),
+    0 6px 16px rgba(96, 72, 48, 0.08);
+}
+
+.whole-day-cell--empty {
+  background: transparent;
+  cursor: default;
+}
+
+.whole-day-cell--past {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background:
+    linear-gradient(180deg, rgba(239, 232, 224, 0.9), rgba(233, 224, 214, 0.9));
+}
+
+.whole-day-cell--today {
+  box-shadow:
+    inset 0 0 0 2px rgba(202, 138, 4, 0.45),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.whole-day-cell__number {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4e3f33;
+}
+
+.whole-day-cell__dots {
+  position: absolute;
+  inset: 28px 8px 8px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #legend{
   width: 280px;
   display: block;
