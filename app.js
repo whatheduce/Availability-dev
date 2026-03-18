@@ -2022,8 +2022,18 @@ async function rebuildDotsForCell(cell) {
     dotContainer.appendChild(dot);
   });
 
+  if (isWholeDayBoard()) {
+    const dotsHost = cell.querySelector(".whole-day-cell__dots");
+  if (dotsHost) {
+    dotsHost.appendChild(dotContainer);
+  } else {
+    cell.appendChild(dotContainer);
+  }
+} else {
   cell.appendChild(dotContainer);
-  refreshDotLayout(cell);
+}
+
+refreshDotLayout(cell);
 }
 
 //----------
@@ -2074,7 +2084,11 @@ async function applyGoldStateForCell(cell, day) {
       await rebuildDotsForCell(cell);
     }
   }
-
+  
+if (isWholeDayBoard()) {
+  return;
+}
+  
   // Update day header gold state
   const dayNum = parseInt(day, 10);
   const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
@@ -2769,6 +2783,7 @@ async function loadAvailability() {
       renderWholeDayCalendar();
       bindWholeDayCells();
       renderWholeDayAvailability(rows || []);
+      scheduleWholeDayMidnightRefresh();
       return;
     }
     
