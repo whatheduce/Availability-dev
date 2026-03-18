@@ -5541,6 +5541,8 @@ async function resetBoard() {
 const table = document.getElementById("availabilityTable");
 const legendDiv = document.getElementById("legend");
 const legendList = document.getElementById("legendList");
+const calendarEl = document.getElementById("calendar");
+
 const cellHoverTooltip = document.createElement("div");
 cellHoverTooltip.className = "cell-hover-tooltip";
 cellHoverTooltip.hidden = true;
@@ -5550,9 +5552,9 @@ let hoverTooltipCell = null;
 let hoverTooltipTimer = null;
 const HOVER_TOOLTIP_DELAY = 400;
 
-table?.addEventListener("mouseover", (e) => {
-  const cell = e.target.closest('td[data-day][data-time]');
-  if (!cell || !table.contains(cell)) return;
+calendarEl?.addEventListener("mouseover", (e) => {
+  const cell = e.target.closest('td[data-day][data-time], .whole-day-cell[data-day][data-time]');
+  if (!cell || !calendarEl.contains(cell)) return;
 
   clearTimeout(hoverTooltipTimer);
   hoverTooltipCell = cell;
@@ -5567,10 +5569,10 @@ table?.addEventListener("mouseover", (e) => {
   }, HOVER_TOOLTIP_DELAY);
 });
 
-table?.addEventListener("mousemove", (e) => {
+calendarEl?.addEventListener("mousemove", (e) => {
   if (cellHoverTooltip.hidden) return;
 
-  const cell = e.target.closest('td[data-day][data-time]');
+  const cell = e.target.closest('td[data-day][data-time], .whole-day-cell[data-day][data-time]');
   if (!cell || cell !== hoverTooltipCell) {
     hideCellHoverTooltip();
     return;
@@ -5579,8 +5581,8 @@ table?.addEventListener("mousemove", (e) => {
   positionCellHoverTooltip(cell);
 });
 
-table?.addEventListener("mouseout", (e) => {
-  const fromCell = e.target.closest('td[data-day][data-time]');
+calendarEl?.addEventListener("mouseout", (e) => {
+  const fromCell = e.target.closest('td[data-day][data-time], .whole-day-cell[data-day][data-time]');
   if (!fromCell) return;
 
   const toEl = e.relatedTarget;
