@@ -1427,7 +1427,8 @@ function getWeekdayLabels7(timeZone) {
 // =========================
 
 function isWholeDayBoard() {
-  return currentTable?.structure_type === "whole_day";
+  const rows = currentTable?.row_structure;
+  return Array.isArray(rows) && rows.length === 1 && rows[0]?.label === "All Day";
 }
 
 //----------
