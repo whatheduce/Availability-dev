@@ -2572,6 +2572,8 @@ async function loadAvailability() {
 
     cellTooltipCache.clear();
 
+    console.log("currentTable", currentTable);
+    console.log("whole day check", currentTable?.structure_type, currentTable?.structure, currentTable?.calendar_type);
     if (isWholeDayBoard()) {
       renderWholeDayCalendar();
       return;
