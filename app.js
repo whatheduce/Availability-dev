@@ -1553,7 +1553,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
       isToday ? "whole-day-cell--today" : ""
     ].filter(Boolean).join(" ");
 
-    const dateKey = formatDateKey(year, monthIndex, dayNum);
+    const dateKey = formatDateKey(new Date(year, monthIndex, dayNum));
     const boardDay = getBoardDayFromDateKey(dateKey);
 
     cells.push(`
