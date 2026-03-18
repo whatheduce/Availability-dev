@@ -2716,10 +2716,22 @@ renderCalendarLastUpdated();
 }
 
 //----------  
-function renderWholeDayAvailability(rows) {
+async function renderWholeDayAvailability(rows) {
   const threshold = Number(currentTable?.gold_threshold || 0);
 
+  // Clear previous Whole Day visuals
+  document.querySelectorAll(".whole-day-cell").forEach(cell => {
+    cell.classList.remove("gold-cell");
+    cell.querySelector(".dot-container")?.remove();
+  });
+
+  if (!rows || !rows.length) return;
+
   const countsByDate = new Map();
+
+  const userIds = [...new Set(rows.map(r => r.user_id).filter(Boolean))];
+  const profilesMap = await fetchProfilesMap(userIds);
+  const localColorMap = await fetchBoardLocalColorMap(currentTable.id, userIds);
 
   rows.forEach(row => {
     const dateKey = getWholeDayDateKeyFromRow(row);
@@ -2728,15 +2740,48 @@ function renderWholeDayAvailability(rows) {
     const cell = document.querySelector(`.whole-day-cell[data-date-key="${dateKey}"]`);
     if (!cell) return;
 
-    const dotsWrap = cell.querySelector(".whole-day-cell__dots");
-    if (!dotsWrap) return;
+    let dotContainer = cell.querySelector(".dot-container");
+    if (!dotContainer) {
+      dotContainer = document.createElement("div");
+      dotContainer.className = "dot-container";
 
-    const dot = document.createElement("span");
-    dot.className = "availability-dot";
-    dot.style.background = row.colour || row.color || "#999";
-    dotsWrap.appendChild(dot);
+      const dotsHost = cell.querySelector(".whole-day-cell__dots");
+      if (dotsHost) {
+        dotsHost.appendChild(dotContainer);
+      } else {
+        cell.appendChild(dotContainer);
+      }
+    }
+
+    const prof = row.user_id ? profilesMap[row.user_id] : null;
+    const displayName = prof?.name || row.name || "—";
+    const displayColor =
+      localColorMap[row.user_id] || prof?.color || row.color || "#999";
+
+    const dot = document.createElement("div");
+    dot.className = "dot";
+
+    if (row?.id != null) {
+      dot.dataset.entryId = String(row.id);
+      availabilityMetaByEntryId.set(String(row.id), {
+        day: String(row.day),
+        time: String(row.time)
+      });
+    }
+
+    if (row.user_id) dot.dataset.userId = row.user_id;
+    dot.dataset.name = displayName;
+    dot.style.background = displayColor;
+
+    dotContainer.appendChild(dot);
 
     countsByDate.set(dateKey, (countsByDate.get(dateKey) || 0) + 1);
+
+    ensureLegendUser({ ...row, name: displayName, color: displayColor });
+  });
+
+  document.querySelectorAll(".whole-day-cell").forEach(cell => {
+    refreshDotLayout(cell);
   });
 
   countsByDate.forEach((count, dateKey) => {
@@ -2745,8 +2790,7 @@ function renderWholeDayAvailability(rows) {
       if (!cell) return;
 
       cell.classList.add("gold-cell");
-      const dotsWrap = cell.querySelector(".whole-day-cell__dots");
-      if (dotsWrap) dotsWrap.innerHTML = "";
+      cell.querySelector(".dot-container")?.remove();
     }
   });
 }
