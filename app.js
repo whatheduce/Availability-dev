@@ -3271,46 +3271,78 @@ function buildCalendar() {
 
 //----------  
 async function toggleCell(e) {
-                                                console.log("toggleCell fired");
-  if (await kickOutIfNoBoardAccess()) return;
+  console.log("toggleCell fired");
+
+  const kickedOut = await kickOutIfNoBoardAccess();
+  console.log("kickOutIfNoBoardAccess =", kickedOut);
+  if (kickedOut) return;
+
+  console.log("currentTable exists =", !!currentTable, currentTable?.id, currentTable?.structure_type);
   if (!currentTable) return;
 
-  let k; // ✅ so finally can always see it
+  let k;
 
   try {
     const cell = e.currentTarget;
-    if (isWholeDayBoard() && isWholeDayCellLocked(cell)) {
+    console.log("clicked cell =", cell);
+
+    const locked = isWholeDayBoard() && isWholeDayCellLocked(cell);
+    console.log("whole day locked =", locked);
+    if (locked) return;
+
+    if (!cell) {
+      console.log("no cell");
       return;
     }
-    if (!cell) return;
 
-    // normalize values
     const dayNum = parseInt(cell.dataset.day, 10);
     const timeKey = String(cell.dataset.time || "").trim();
-    if (!Number.isFinite(dayNum) || !timeKey) return;
+    console.log("parsed day/time =", { dayNum, timeKey, rawDay: cell.dataset.day, rawTime: cell.dataset.time });
+
+    if (!Number.isFinite(dayNum) || !timeKey) {
+      console.log("invalid day/time");
+      return;
+    }
 
     const au = await auth.getAuthUser();
-      if (!au) {
-        console.warn("toggleCell: no auth user");
-        return;
-      }
-      const myUid = au.id;
+    console.log("auth user =", au);
+    if (!au) {
+      console.log("no auth user");
+      return;
+    }
 
-      if (!user) {
-        console.warn("toggleCell: global user profile missing", { authUser: au, currentTable });
-        await auth.hydrateUserFromAuth();
-      }
+    const myUid = au.id;
 
-const prof = user || await getProfileCached(myUid);
-if (!prof) {
-  console.warn("toggleCell: no usable profile for click", { authUser: au, currentTable });
-  return;
-}
+    if (!user) {
+      console.log("global user missing, hydrating...");
+      await auth.hydrateUserFromAuth();
+    }
+
+    const prof = user || await getProfileCached(myUid);
+    console.log("resolved profile =", prof);
+
+    if (!prof) {
+      console.log("no usable profile");
+      return;
+    }
 
     k = addKey(currentTable.id, dayNum, timeKey, myUid);
-    if (inFlightCells.has(k)) return;
+    console.log("inFlight key =", k, "already in flight =", inFlightCells.has(k));
+
+    if (inFlightCells.has(k)) {
+      console.log("blocked by inFlightCells");
+      return;
+    }
+
     inFlightCells.add(k);
 
+    console.log("starting delete-first toggle", {
+      tableId: currentTable.id,
+      dayNum,
+      timeKey,
+      myUid
+    });
+    
     // DELETE FIRST (toggle off)
     const { data: deletedRows, error: delErr } = await supabase
       .from("availability_dev")
@@ -3374,9 +3406,15 @@ if (!prof) {
       return;
     }
 
+    console.log("reached INSERT section");
+    
     // INSERT (toggle on) — optimistic first
     const key = addKey(currentTable.id, dayNum, timeKey, myUid);
-    if (pendingAdds.has(key)) return;
+console.log("pendingAdds key =", key, "already pending =", pendingAdds.has(key));
+if (pendingAdds.has(key)) {
+  console.log("blocked by pendingAdds");
+  return;
+}
     pendingAdds.add(key);
 
     const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [myUid]);
