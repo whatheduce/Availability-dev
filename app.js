@@ -1501,6 +1501,14 @@ function renderWholeDayCalendar() {
 }
 
 //----------
+function bindWholeDayCells() {
+  document.querySelectorAll(".whole-day-cell[data-date-key]").forEach(cell => {
+    if (cell.classList.contains("whole-day-cell--past")) return;
+    cell.addEventListener("click", toggleCell);
+  });
+}
+
+//----------
 function renderWholeDayMonth(year, monthIndex, todayInfo) {
   const daysInMonth = getDaysInMonth(year, monthIndex);
   const firstOffset = getFirstWeekdayIndex(year, monthIndex);
@@ -2564,6 +2572,42 @@ renderCalendarLastUpdated();
 }
 
 //----------  
+function renderWholeDayAvailability(rows) {
+  const threshold = Number(currentTable?.gold_threshold || 0);
+
+  const countsByDate = new Map();
+
+  rows.forEach(row => {
+    const dateKey = getWholeDayDateKeyFromRow(row);
+    if (!dateKey) return;
+
+    const cell = document.querySelector(`.whole-day-cell[data-date-key="${dateKey}"]`);
+    if (!cell) return;
+
+    const dotsWrap = cell.querySelector(".whole-day-cell__dots");
+    if (!dotsWrap) return;
+
+    const dot = document.createElement("span");
+    dot.className = "availability-dot";
+    dot.style.background = row.colour || row.color || "#999";
+    dotsWrap.appendChild(dot);
+
+    countsByDate.set(dateKey, (countsByDate.get(dateKey) || 0) + 1);
+  });
+
+  countsByDate.forEach((count, dateKey) => {
+    if (threshold > 0 && count >= threshold) {
+      const cell = document.querySelector(`.whole-day-cell[data-date-key="${dateKey}"]`);
+      if (!cell) return;
+
+      cell.classList.add("gold-cell");
+      const dotsWrap = cell.querySelector(".whole-day-cell__dots");
+      if (dotsWrap) dotsWrap.innerHTML = "";
+    }
+  });
+}
+
+//----------  
 async function loadAvailability() {
   // ✅ prevent overlapping renders that duplicate rows/cells
   if (loadAvailabilityRunning) {
@@ -2579,9 +2623,21 @@ async function loadAvailability() {
     cellTooltipCache.clear();
 
     if (isWholeDayBoard()) {
-      renderWholeDayCalendar();
+      const { data: rows, error } = await supabase
+        .from("availability_dev")
+        .select("*")
+        .eq("table_id", currentTable.id);
+
+    if (error) {
+      console.error("loadAvailability failed:", error);
       return;
     }
+
+  renderWholeDayCalendar();
+  bindWholeDayCells();
+  renderWholeDayAvailability(rows || []);
+  return;
+  }
 
     const { data: rows, error } = await supabase
       .from("availability_dev")
@@ -2734,7 +2790,37 @@ Object.values(users).forEach(({ userId, name, color }) => {
   }
 }
 
+//----------  
+function getBoardStartDate() {
+  return currentTable?.start_date ? new Date(currentTable.start_date + "T00:00:00") : null;
+}
 
+//----------  
+function addDaysLocal(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+//----------  
+function formatDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+//----------  
+function getWholeDayDateKeyFromRow(row) {
+  const start = getBoardStartDate();
+  if (!start) return null;
+
+  const offset = Number(row.day);
+  if (!Number.isFinite(offset)) return null;
+
+  const actualDate = addDaysLocal(start, offset - 1);
+  return formatDateKey(actualDate);
+}
 
 
 
