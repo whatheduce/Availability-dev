@@ -1596,9 +1596,6 @@ function renderWholeDayCalendar() {
 //----------
 function bindWholeDayCells() {
   const cells = document.querySelectorAll(".whole-day-cell[data-date-key][data-day][data-time]");
-
-  console.log("bindWholeDayCells: found cells =", cells.length);
-
   cells.forEach(cell => {
     // Never bind empty placeholders
     if (cell.classList.contains("whole-day-cell--empty")) return;
@@ -1609,13 +1606,6 @@ function bindWholeDayCells() {
     cell.dataset.boundClick = "1";
 
     cell.addEventListener("click", (e) => {
-      console.log("whole day cell clicked", {
-        day: cell.dataset.day,
-        time: cell.dataset.time,
-        dateKey: cell.dataset.dateKey,
-        classes: cell.className
-      });
-
       toggleCell(e);
     });
   });
