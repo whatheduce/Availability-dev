@@ -1563,7 +1563,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
       data-month-index="${monthIndex}"
       data-month-day="${dayNum}"
       data-date-key="${dateKey}"
-      data-day="${dayNum}"
+      data-day="${boardDay ?? ""}"
       data-time="All Day"
     >
       <div class="whole-day-cell__number">${dayNum}</div>
@@ -2024,6 +2024,28 @@ function scheduleFullRefreshIdle(ms = 15000) {
 }
 
 //----------
+function getWholeDayCellFromEntry(entry) {
+  if (!entry || !currentTable?.start_date) return null;
+
+  const dayNum = Number(entry.day);
+  if (!Number.isFinite(dayNum) || dayNum < 1) return null;
+
+  const dateKey = addDaysYMD(currentTable.start_date, dayNum - 1);
+  return document.querySelector(`.whole-day-cell[data-date-key="${dateKey}"]`);
+}
+
+//----------
+function getAvailabilityCellFromEntry(entry) {
+  if (isWholeDayBoard()) {
+    return getWholeDayCellFromEntry(entry);
+  }
+
+  return table.querySelector(
+    `td[data-day="${entry.day}"][data-time="${entry.time}"]`
+  );
+}
+
+//----------
 async function handleAvailabilityChange(payload) {
   const entry = payload.eventType === "DELETE" ? payload.old : payload.new;
 
@@ -2055,9 +2077,9 @@ if (!dot) {
   }
 
   if (knownCell) {
-    const cell = table.querySelector(
-      `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
-    );
+    const cell = isWholeDayBoard()
+  ? getWholeDayCellFromEntry({ day: knownCell.day, time: knownCell.time })
+  : table.querySelector(`td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`);
 
     if (cell) {
       await rebuildDotsForCell(cell);
@@ -2072,7 +2094,9 @@ if (!dot) {
   return;
 }
 
-    const cell = dot.closest('td[data-day][data-time]');
+    const cell = isWholeDayBoard()
+      ? dot.closest(".whole-day-cell[data-day][data-time]")
+      : dot.closest('td[data-day][data-time]');
     if (!cell) {
       await loadAvailability();
       scheduleFullRefreshIdle(15000);
@@ -2091,9 +2115,7 @@ if (!dot) {
     return;
   }
   
-  const cell = table.querySelector(
-    `td[data-day="${entry.day}"][data-time="${entry.time}"]`
-  );
+  const cell = getAvailabilityCellFromEntry(entry);
 
   if (!cell) {
     if (payload.eventType === "DELETE") await loadAvailability();
@@ -2140,11 +2162,22 @@ if (!dot) {
 
   // Ensure dot container exists (only for non-gold cells)
   let dotContainer = cell.querySelector(".dot-container");
-  if (!dotContainer) {
-    dotContainer = document.createElement("div");
-    dotContainer.className = "dot-container";
+
+if (!dotContainer) {
+  dotContainer = document.createElement("div");
+  dotContainer.className = "dot-container";
+
+  if (isWholeDayBoard()) {
+    const dotsHost = cell.querySelector(".whole-day-cell__dots");
+    if (dotsHost) {
+      dotsHost.appendChild(dotContainer);
+    } else {
+      cell.appendChild(dotContainer);
+    }
+  } else {
     cell.appendChild(dotContainer);
   }
+}
 
   // For UPDATE: easiest is remove then add back (rare)
   if (payload.eventType === "UPDATE") {
