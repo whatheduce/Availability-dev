@@ -3273,6 +3273,9 @@ function buildCalendar() {
 async function toggleCell(e) {
   console.log("toggleCell fired");
 
+  const cell = e.currentTarget;
+  console.log("clicked cell =", cell);
+
   const kickedOut = await kickOutIfNoBoardAccess();
   console.log("kickOutIfNoBoardAccess =", kickedOut);
   if (kickedOut) return;
@@ -3283,8 +3286,6 @@ async function toggleCell(e) {
   let k;
 
   try {
-    const cell = e.currentTarget;
-    console.log("clicked cell =", cell);
 
     const locked = isWholeDayBoard() && isWholeDayCellLocked(cell);
     console.log("whole day locked =", locked);
