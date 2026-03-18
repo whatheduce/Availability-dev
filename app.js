@@ -3334,34 +3334,51 @@ async function toggleCell(e) {
     if (pendingAdds.has(key)) return;
     pendingAdds.add(key);
 
+    const prof = await getProfileCached(myUid);
     const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [myUid]);
-    const activeColor = localColorMap[myUid] || user.color;
-    addOptimisticDot(cell, myUid, user.name, activeColor);
-    maybeApplyGoldForCell(cell);
 
-    const { error: insErr } = await supabase
+    const displayName = user?.name || prof?.name || "—";
+    const activeColor = localColorMap[myUid] || user?.color || prof?.color || "#999";
+
+    const insertPayload = {
+      table_id: currentTable.id,
+      day: dayNum,
+      time: timeKey,
+      user_id: myUid,
+      name: displayName,
+      color: activeColor
+    };
+
+console.log("availability insert payload", insertPayload);
+console.log("current user object", user);
+console.log("profile for insert", prof);
+
+addOptimisticDot(cell, myUid, displayName, activeColor);
+maybeApplyGoldForCell(cell);
+
+    const { data: insertedRows, error: insErr } = await supabase
       .from("availability_dev")
-      .insert({
-        table_id: currentTable.id,
-        day: dayNum,
-        time: timeKey,
-        user_id: myUid,
-        name: user.name,
-        color: activeColor
-      });
+      .insert(insertPayload)
+      .select("*");
 
     if (insErr) {
-      console.warn("Insert failed:", insErr);
+  console.warn("Insert failed:", insErr);
+  console.log("failed insert payload:", insertPayload);
+  console.log("failed user object:", user);
+  console.log("failed profile object:", prof);
+  console.log("auth user id:", myUid);
 
-      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+  cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
 
-      const dc = cell.querySelector(".dot-container");
-      if (dc && dc.children.length === 0) dc.remove();
+  const dc = cell.querySelector(".dot-container");
+  if (dc && dc.children.length === 0) dc.remove();
 
-      pendingAdds.delete(key);
-      await loadAvailability();
-      return;
-    }
+  pendingAdds.delete(key);
+  await loadAvailability();
+  return;
+}
+
+console.log("Insert succeeded:", insertedRows);
 
     // success: mark pending dot as real
     cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
