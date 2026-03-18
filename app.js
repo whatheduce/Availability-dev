@@ -1915,7 +1915,17 @@ function ensureDotContainer(cell) {
   if (!dc) {
     dc = document.createElement("div");
     dc.className = "dot-container";
-    cell.appendChild(dc);
+
+    if (isWholeDayBoard()) {
+      const dotsHost = cell.querySelector(".whole-day-cell__dots");
+      if (dotsHost) {
+        dotsHost.appendChild(dc);
+      } else {
+        cell.appendChild(dc);
+      }
+    } else {
+      cell.appendChild(dc);
+    }
   }
 
   refreshDotLayout(cell);
@@ -3242,7 +3252,7 @@ function buildCalendar() {
 //----------  
 async function toggleCell(e) {
   if (await kickOutIfNoBoardAccess()) return;
-  if (!user || !currentTable) return;
+  if (!currentTable) return;
 
   let k; // ✅ so finally can always see it
 
@@ -3259,8 +3269,22 @@ async function toggleCell(e) {
     if (!Number.isFinite(dayNum) || !timeKey) return;
 
     const au = await auth.getAuthUser();
-    if (!au) return;
-    const myUid = au.id;
+      if (!au) {
+        console.warn("toggleCell: no auth user");
+        return;
+      }
+      const myUid = au.id;
+
+      if (!user) {
+        console.warn("toggleCell: global user profile missing", { authUser: au, currentTable });
+        await auth.hydrateUserFromAuth();
+      }
+
+const prof = user || await getProfileCached(myUid);
+if (!prof) {
+  console.warn("toggleCell: no usable profile for click", { authUser: au, currentTable });
+  return;
+}
 
     k = addKey(currentTable.id, dayNum, timeKey, myUid);
     if (inFlightCells.has(k)) return;
@@ -3334,24 +3358,21 @@ async function toggleCell(e) {
     if (pendingAdds.has(key)) return;
     pendingAdds.add(key);
 
-    const prof = await getProfileCached(myUid);
     const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [myUid]);
 
-    const displayName = user?.name || prof?.name || "—";
-    const activeColor = localColorMap[myUid] || user?.color || prof?.color || "#999";
+const displayName = prof?.name || "—";
+const activeColor = localColorMap[myUid] || prof?.color || "#999";
 
-    const insertPayload = {
-      table_id: currentTable.id,
-      day: dayNum,
-      time: timeKey,
-      user_id: myUid,
-      name: displayName,
-      color: activeColor
-    };
+const insertPayload = {
+  table_id: currentTable.id,
+  day: dayNum,
+  time: timeKey,
+  user_id: myUid,
+  name: displayName,
+  color: activeColor
+};
 
 console.log("availability insert payload", insertPayload);
-console.log("current user object", user);
-console.log("profile for insert", prof);
 
 addOptimisticDot(cell, myUid, displayName, activeColor);
 maybeApplyGoldForCell(cell);
