@@ -1426,6 +1426,143 @@ function getWeekdayLabels7(timeZone) {
 // CALENDAR CELL / DOT HELPERS
 // =========================
 
+function isWholeDayBoard() {
+  return currentTable?.structure_type === "whole_day";
+}
+
+//----------
+function getBoardTimeZone() {
+  return currentTable?.host_tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
+//----------
+function getBoardTodayParts() {
+  const tz = getBoardTimeZone();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return {
+    year: Number(map.year),
+    month: Number(map.month),
+    day: Number(map.day)
+  };
+}
+
+//----------
+function getMonthName(year, monthIndex) {
+  return new Intl.DateTimeFormat("en-AU", {
+    month: "long",
+    year: "numeric"
+  }).format(new Date(year, monthIndex, 1));
+}
+
+//----------
+function getDaysInMonth(year, monthIndex) {
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+//----------
+function getFirstWeekdayIndex(year, monthIndex) {
+  const jsDay = new Date(year, monthIndex, 1).getDay(); // 0=Sun
+  return (jsDay + 6) % 7; // convert to Mon-first
+}
+
+//----------
+function getNextMonth(year, monthIndex) {
+  if (monthIndex === 11) return { year: year + 1, monthIndex: 0 };
+  return { year, monthIndex: monthIndex + 1 };
+}
+
+//----------
+function renderWholeDayCalendar() {
+  const calendar = document.getElementById("calendar");
+  if (!calendar) return;
+
+  const { year, month, day } = getBoardTodayParts();
+  const monthA = { year, monthIndex: month - 1 };
+  const monthB = getNextMonth(monthA.year, monthA.monthIndex);
+
+  calendar.innerHTML = `
+    <div class="whole-day-wrap">
+      ${renderWholeDayMonth(monthA.year, monthA.monthIndex, { todayYear: year, todayMonth: month, todayDay: day })}
+      ${renderWholeDayMonth(monthB.year, monthB.monthIndex, { todayYear: year, todayMonth: month, todayDay: day })}
+    </div>
+  `;
+}
+
+//----------
+function renderWholeDayMonth(year, monthIndex, todayInfo) {
+  const daysInMonth = getDaysInMonth(year, monthIndex);
+  const firstOffset = getFirstWeekdayIndex(year, monthIndex);
+  const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const cells = [];
+
+  for (let i = 0; i < firstOffset; i++) {
+    cells.push(`<div class="whole-day-cell whole-day-cell--empty" aria-hidden="true"></div>`);
+  }
+
+  for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+    const isPast =
+      year < todayInfo.todayYear ||
+      (year === todayInfo.todayYear && monthIndex + 1 < todayInfo.todayMonth) ||
+      (
+        year === todayInfo.todayYear &&
+        monthIndex + 1 === todayInfo.todayMonth &&
+        dayNum < todayInfo.todayDay
+      );
+
+    const isToday =
+      year === todayInfo.todayYear &&
+      monthIndex + 1 === todayInfo.todayMonth &&
+      dayNum === todayInfo.todayDay;
+
+    const classNames = [
+      "whole-day-cell",
+      isPast ? "whole-day-cell--past" : "",
+      isToday ? "whole-day-cell--today" : ""
+    ].filter(Boolean).join(" ");
+
+    cells.push(`
+      <div
+        class="${classNames}"
+        data-month-year="${year}"
+        data-month-index="${monthIndex}"
+        data-month-day="${dayNum}"
+        data-day="${dayNum}"
+        data-time="All Day"
+      >
+        <div class="whole-day-cell__number">${dayNum}</div>
+        <div class="whole-day-cell__dots"></div>
+      </div>
+    `);
+  }
+
+  return `
+    <section class="whole-day-month-card">
+      <div class="whole-day-month-card__title">${getMonthName(year, monthIndex)}</div>
+      <div class="whole-day-weekdays">
+        ${weekdayLabels.map(label => `<div class="whole-day-weekday">${label}</div>`).join("")}
+      </div>
+      <div class="whole-day-grid">
+        ${cells.join("")}
+      </div>
+    </section>
+  `;
+}
+
+//----------
+function isWholeDayCellLocked(cell) {
+  if (!cell) return true;
+  return cell.classList.contains("whole-day-cell--past");
+}
+
+//----------
 function refreshDotLayout(cell) {
   if (!cell) return;
 
@@ -2431,7 +2568,15 @@ async function loadAvailability() {
   loadAvailabilityRunning = true;
 
   try {
+    if (!currentTable) return;
+
     cellTooltipCache.clear();
+
+    if (isWholeDayBoard()) {
+      renderWholeDayCalendar();
+      return;
+    }
+
     const { data: rows, error } = await supabase
       .from("availability_dev")
       .select("*")
@@ -2640,7 +2785,9 @@ if (!structureChoice) {
   return;
 }
 
-if (structureChoice === "custom") {
+if (structureChoice === "whole_day") {
+  timeBlocks = [{ label: "All Day" }];
+} else if (structureChoice === "custom") {
   timeBlocks = (window.customStructureLabels || [])
     .map(label => String(label || "").trim())
     .filter(Boolean)
@@ -2816,6 +2963,9 @@ async function toggleCell(e) {
 
   try {
     const cell = e.currentTarget;
+    if (isWholeDayBoard() && isWholeDayCellLocked(cell)) {
+      return;
+    }
     if (!cell) return;
 
     // normalize values
