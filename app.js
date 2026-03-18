@@ -3271,79 +3271,38 @@ function buildCalendar() {
 
 //----------  
 async function toggleCell(e) {
-  console.log("toggleCell fired");
-
   const cell = e.currentTarget;
-  console.log("clicked cell =", cell);
 
   const kickedOut = await kickOutIfNoBoardAccess();
-  console.log("kickOutIfNoBoardAccess =", kickedOut);
   if (kickedOut) return;
-
-  console.log("currentTable exists =", !!currentTable, currentTable?.id, currentTable?.structure_type);
-  if (!currentTable) return;
+  if (!currentTable || !cell) return;
 
   let k;
 
   try {
-
     const locked = isWholeDayBoard() && isWholeDayCellLocked(cell);
-    console.log("whole day locked =", locked);
     if (locked) return;
-
-    if (!cell) {
-      console.log("no cell");
-      return;
-    }
 
     const dayNum = parseInt(cell.dataset.day, 10);
     const timeKey = String(cell.dataset.time || "").trim();
-    console.log("parsed day/time =", { dayNum, timeKey, rawDay: cell.dataset.day, rawTime: cell.dataset.time });
-
-    if (!Number.isFinite(dayNum) || !timeKey) {
-      console.log("invalid day/time");
-      return;
-    }
+    if (!Number.isFinite(dayNum) || !timeKey) return;
 
     const au = await auth.getAuthUser();
-    console.log("auth user =", au);
-    if (!au) {
-      console.log("no auth user");
-      return;
-    }
+    if (!au) return;
 
     const myUid = au.id;
 
     if (!user) {
-      console.log("global user missing, hydrating...");
       await auth.hydrateUserFromAuth();
     }
 
     const prof = user || await getProfileCached(myUid);
-    console.log("resolved profile =", prof);
-
-    if (!prof) {
-      console.log("no usable profile");
-      return;
-    }
+    if (!prof) return;
 
     k = addKey(currentTable.id, dayNum, timeKey, myUid);
-    console.log("inFlight key =", k, "already in flight =", inFlightCells.has(k));
-
-    if (inFlightCells.has(k)) {
-      console.log("blocked by inFlightCells");
-      return;
-    }
-
+    if (inFlightCells.has(k)) return;
     inFlightCells.add(k);
 
-    console.log("starting delete-first toggle", {
-      tableId: currentTable.id,
-      dayNum,
-      timeKey,
-      myUid
-    });
-    
     // DELETE FIRST (toggle off)
     const { data: deletedRows, error: delErr } = await supabase
       .from("availability_dev")
@@ -3362,11 +3321,11 @@ async function toggleCell(e) {
       return;
     }
 
-        // legacy delete if needed
+    // legacy delete if needed
     let legacyDeletedCount = 0;
     let legacyDeletedRows = [];
 
-    if ((deletedCount || 0) === 0) {
+    if (deletedCount === 0) {
       const { data, error: legacyErr } = await supabase
         .from("availability_dev")
         .delete()
@@ -3374,8 +3333,8 @@ async function toggleCell(e) {
         .eq("day", dayNum)
         .eq("time", timeKey)
         .is("user_id", null)
-        .eq("name", user.name)
-        .eq("color", user.color)
+        .eq("name", prof.name)
+        .eq("color", prof.color)
         .select("id");
 
       if (legacyErr) {
@@ -3388,7 +3347,7 @@ async function toggleCell(e) {
       legacyDeletedCount = legacyDeletedRows.length;
     }
 
-    if ((deletedCount || 0) > 0 || legacyDeletedCount > 0) {
+    if (deletedCount > 0 || legacyDeletedCount > 0) {
       const allDeletedRows = [
         ...(deletedRows || []),
         ...legacyDeletedRows
@@ -3407,65 +3366,49 @@ async function toggleCell(e) {
       return;
     }
 
-    console.log("reached INSERT section");
-    
     // INSERT (toggle on) — optimistic first
     const key = addKey(currentTable.id, dayNum, timeKey, myUid);
-console.log("pendingAdds key =", key, "already pending =", pendingAdds.has(key));
-if (pendingAdds.has(key)) {
-  console.log("blocked by pendingAdds");
-  return;
-}
+    if (pendingAdds.has(key)) return;
     pendingAdds.add(key);
 
     const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [myUid]);
+    const displayName = prof?.name || "—";
+    const activeColor = localColorMap[myUid] || prof?.color || "#999";
 
-const displayName = prof?.name || "—";
-const activeColor = localColorMap[myUid] || prof?.color || "#999";
+    const insertPayload = {
+      table_id: currentTable.id,
+      day: dayNum,
+      time: timeKey,
+      user_id: myUid,
+      name: displayName,
+      color: activeColor
+    };
 
-const insertPayload = {
-  table_id: currentTable.id,
-  day: dayNum,
-  time: timeKey,
-  user_id: myUid,
-  name: displayName,
-  color: activeColor
-};
+    addOptimisticDot(cell, myUid, displayName, activeColor);
+    maybeApplyGoldForCell(cell);
 
-console.log("availability insert payload", insertPayload);
-
-addOptimisticDot(cell, myUid, displayName, activeColor);
-maybeApplyGoldForCell(cell);
-
-    const { data: insertedRows, error: insErr } = await supabase
+    const { error: insErr } = await supabase
       .from("availability_dev")
-      .insert(insertPayload)
-      .select("*");
+      .insert(insertPayload);
 
     if (insErr) {
-  console.warn("Insert failed:", insErr);
-  console.log("failed insert payload:", insertPayload);
-  console.log("failed user object:", user);
-  console.log("failed profile object:", prof);
-  console.log("auth user id:", myUid);
+      console.warn("Insert failed:", insErr);
 
-  cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
 
-  const dc = cell.querySelector(".dot-container");
-  if (dc && dc.children.length === 0) dc.remove();
+      const dc = cell.querySelector(".dot-container");
+      if (dc && dc.children.length === 0) dc.remove();
 
-  pendingAdds.delete(key);
-  await loadAvailability();
-  return;
-}
-
-console.log("Insert succeeded:", insertedRows);
+      pendingAdds.delete(key);
+      await loadAvailability();
+      return;
+    }
 
     // success: mark pending dot as real
     cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
       ?.removeAttribute("data-pending");
-      maybeApplyGoldForCell(cell);
 
+    maybeApplyGoldForCell(cell);
     pendingAdds.delete(key);
 
   } finally {
