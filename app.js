@@ -1427,8 +1427,7 @@ function getWeekdayLabels7(timeZone) {
 // =========================
 
 function isWholeDayBoard() {
-  const rows = currentTable?.row_structure;
-  return Array.isArray(rows) && rows.length === 1 && rows[0]?.label === "All Day";
+  return currentTable?.structure_type === "whole_day";
 }
 
 //----------
@@ -2365,6 +2364,7 @@ async function loadBoards() {
         invite_token,
         owner_token,
         row_structure,
+        structure_type,
         start_date,
         host_tz,
         gold_threshold
@@ -2573,8 +2573,6 @@ async function loadAvailability() {
 
     cellTooltipCache.clear();
 
-    console.log("currentTable", currentTable);
-    console.log("whole day check", currentTable?.structure_type, currentTable?.structure, currentTable?.calendar_type);
     if (isWholeDayBoard()) {
       renderWholeDayCalendar();
       return;
@@ -2847,6 +2845,7 @@ if (!isPro && goldThreshold >= 6) {
       owner_token: ownerToken,
       owner_id: au.id,
       row_structure: timeBlocks,
+      structure_type: structureChoice,
       host_tz: tz,
       start_date: startDate,
       gold_threshold: goldThreshold
