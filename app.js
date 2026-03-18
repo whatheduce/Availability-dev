@@ -1426,8 +1426,13 @@ function getWeekdayLabels7(timeZone) {
 // CALENDAR CELL / DOT HELPERS
 // =========================
 
+function getCurrentStructureType() {
+  return currentTable?.structure_type || "";
+}
+
+//----------
 function isWholeDayBoard() {
-  return currentTable?.structure_type === "whole_day";
+  return getCurrentStructureType() === "whole_day";
 }
 
 //----------
