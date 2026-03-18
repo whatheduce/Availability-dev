@@ -1557,19 +1557,19 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
     const boardDay = getBoardDayFromDateKey(dateKey);
 
     cells.push(`
-      <div
-        class="${classNames}"
-        data-month-year="${year}"
-        data-month-index="${monthIndex}"
-        data-month-day="${dayNum}"
-        data-date-key="${dateKey}"
-        data-day="${boardDay ?? ""}"
-        data-time="All Day"
-      >
-        <div class="whole-day-cell__number">${dayNum}</div>
-        <div class="whole-day-cell__dots"></div>
-      </div>
-    `);
+    <div
+      class="${classNames}"
+      data-month-year="${year}"
+      data-month-index="${monthIndex}"
+      data-month-day="${dayNum}"
+      data-date-key="${dateKey}"
+      data-day="${dayNum}"
+      data-time="All Day"
+    >
+      <div class="whole-day-cell__number">${dayNum}</div>
+      <div class="whole-day-cell__dots"></div>
+    </div>
+  `);
   }
 
   return `
