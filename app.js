@@ -134,6 +134,7 @@ let colourModalMode = "profile";   // "profile" | "local"
 let colourModalBoardId = null;
 let cellTooltipCache = new Map(); // key: "day|time" -> [{ name, color }]
 let mustChooseLocalBoardColour = false;
+let wholeDayMidnightTimer = null;
 
 
 
@@ -1459,6 +1460,86 @@ function getBoardTodayParts() {
 }
 
 //----------
+function getTodayBoardDay() {
+  const todayParts = getBoardTodayParts(); // board timezone
+  const todayKey = formatDateKey(new Date(
+    todayParts.year,
+    todayParts.month - 1,
+    todayParts.day
+  ));
+  return getBoardDayFromDateKey(todayKey);
+}
+
+//----------
+async function prunePastWholeDayAvailability() {
+  if (!isWholeDayBoard() || !currentTable?.id) return;
+
+  const todayBoardDay = getTodayBoardDay();
+  if (!Number.isFinite(todayBoardDay) || todayBoardDay <= 1) return;
+
+  const { error } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("table_id", currentTable.id)
+    .lt("day", todayBoardDay)
+    .eq("time", "All Day");
+
+  if (error) {
+    console.error("prunePastWholeDayAvailability failed:", error);
+  }
+}
+
+//----------
+function scheduleWholeDayMidnightRefresh() {
+  if (wholeDayMidnightTimer) {
+    clearTimeout(wholeDayMidnightTimer);
+    wholeDayMidnightTimer = null;
+  }
+
+  if (!isWholeDayBoard()) return;
+
+  const tz = currentTable?.host_tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const now = new Date();
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).formatToParts(now);
+
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+
+  const boardNow = new Date(
+    Number(map.year),
+    Number(map.month) - 1,
+    Number(map.day),
+    Number(map.hour),
+    Number(map.minute),
+    Number(map.second)
+  );
+
+  const nextMidnight = new Date(boardNow);
+  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  nextMidnight.setHours(0, 0, 2, 0); // tiny buffer
+
+  const delay = Math.max(1000, nextMidnight.getTime() - boardNow.getTime());
+
+  wholeDayMidnightTimer = setTimeout(async () => {
+    try {
+      await prunePastWholeDayAvailability();
+      await loadAvailability();
+    } finally {
+      scheduleWholeDayMidnightRefresh();
+    }
+  }, delay);
+}
+
+//----------
 function getBoardDayFromDateKey(dateKey) {
   const startYmd = currentTable?.start_date;
   if (!startYmd || !dateKey) return null;
@@ -2672,22 +2753,25 @@ async function loadAvailability() {
     cellTooltipCache.clear();
 
     if (isWholeDayBoard()) {
+      // WHOLE DAY BRANCH
+      await prunePastWholeDayAvailability();
+
       const { data: rows, error } = await supabase
         .from("availability_dev")
         .select("*")
         .eq("table_id", currentTable.id);
 
-    if (error) {
-      console.error("loadAvailability failed:", error);
+      if (error) {
+        console.error("loadAvailability failed:", error);
+        return;
+      }
+
+      renderWholeDayCalendar();
+      bindWholeDayCells();
+      renderWholeDayAvailability(rows || []);
       return;
     }
-
-  renderWholeDayCalendar();
-  bindWholeDayCells();
-  renderWholeDayAvailability(rows || []);
-  return;
-  }
-
+    
     const { data: rows, error } = await supabase
       .from("availability_dev")
       .select("*")
