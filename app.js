@@ -1459,6 +1459,18 @@ function getBoardTodayParts() {
 }
 
 //----------
+function getBoardDayFromDateKey(dateKey) {
+  const startYmd = currentTable?.start_date;
+  if (!startYmd || !dateKey) return null;
+
+  const start = new Date(`${startYmd}T00:00:00`);
+  const target = new Date(`${dateKey}T00:00:00`);
+
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.round((target - start) / msPerDay) + 1;
+}
+
+//----------
 function getMonthName(year, monthIndex) {
   return new Intl.DateTimeFormat("en-AU", {
     month: "long",
@@ -1541,13 +1553,17 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
       isToday ? "whole-day-cell--today" : ""
     ].filter(Boolean).join(" ");
 
+    const dateKey = formatDateKey(year, monthIndex, dayNum);
+    const boardDay = getBoardDayFromDateKey(dateKey);
+
     cells.push(`
       <div
         class="${classNames}"
         data-month-year="${year}"
         data-month-index="${monthIndex}"
         data-month-day="${dayNum}"
-        data-day="${dayNum}"
+        data-date-key="${dateKey}"
+        data-day="${boardDay ?? ""}"
         data-time="All Day"
       >
         <div class="whole-day-cell__number">${dayNum}</div>
