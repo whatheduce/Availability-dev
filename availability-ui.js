@@ -92,17 +92,17 @@ window.refreshDotLayout = refreshDotLayout;
 
 //----------
 async function rebuildDotsForCell(cell) {
-  if (!currentTable) return;
+  if (!window.currentTable) return;
 
   cell.querySelector(".dot-container")?.remove();
 
   const dayNum = parseInt(cell.dataset.day, 10);
   const timeKey = String(cell.dataset.time || "").trim();
 
-  const { data, error } = await supabase
+  const { data, error } = await window.supabase
     .from("availability_dev")
     .select("*")
-    .eq("table_id", currentTable.id)
+    .eq("table_id", window.currentTable.id)
     .eq("day", dayNum)
     .eq("time", timeKey);
 
@@ -114,9 +114,9 @@ async function rebuildDotsForCell(cell) {
   if (!data || data.length === 0) return;
 
   // ✅ Fetch profiles ONCE
-  const profilesMap = await fetchProfilesMap(data.map(d => d.user_id));
-  profilesCache = { ...profilesCache, ...profilesMap };
-  const localColorMap = await fetchBoardLocalColorMap(currentTable.id, data.map(d => d.user_id));
+  const profilesMap = await window.fetchProfilesMap(data.map(d => d.user_id));
+  window.profilesCache = { ...(window.profilesCache || {}), ...profilesMap };
+  const localColorMap = await window.fetchBoardLocalColorMap(currentTable.id, data.map(d => d.user_id));
 
   const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
@@ -130,7 +130,7 @@ async function rebuildDotsForCell(cell) {
     dot.className = "dot";
 
     if (entry?.id != null) {
-      availabilityMetaByEntryId.set(String(entry.id), {
+      window.availabilityMetaByEntryId.set(String(entry.id), {
         day: String(entry.day),
         time: String(entry.time)
       });
@@ -162,7 +162,7 @@ refreshDotLayout(cell);
 
 //----------
 async function applyGoldStateForCell(cell, day) {
-  const goldThreshold = Number(currentTable?.gold_threshold);
+  const goldThreshold = Number(window.currentTable?.gold_threshold);
   if (!Number.isFinite(goldThreshold)) return;
 
   const wasGold = cell.classList.contains("gold-cell");
@@ -176,7 +176,7 @@ async function applyGoldStateForCell(cell, day) {
     const dayNum = parseInt(cell.dataset.day, 10);
     const timeKey = String(cell.dataset.time || "").trim();
 
-    const { count, error } = await supabase
+    const { count, error } = await window.supabase
       .from("availability_dev")
       .select("id", { count: "exact", head: true })
       .eq("table_id", currentTable.id)
@@ -215,10 +215,10 @@ if (isWholeDayBoard()) {
   
   // Update day header gold state
   const dayNum = parseInt(day, 10);
-  const th = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+  const th = window.table.querySelector(`th.day-header[data-day="${dayNum}"]`);
   if (!th) return;
 
-  const anyGoldInDay = !!table.querySelector(`td[data-day="${dayNum}"].gold-cell`);
+  const anyGoldInDay = !!window.table.querySelector(`td[data-day="${dayNum}"].gold-cell`);
   if (anyGoldInDay) th.classList.add("gold-header");
   else th.classList.remove("gold-header");
 }
@@ -242,7 +242,7 @@ function maybeApplyGoldForCell(cell) {
 
     // immediately reflect gold state in the day header too
     const dayNum = parseInt(cell.dataset.day, 10);
-    const thEl = table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+    const thEl = window.table.querySelector(`th.day-header[data-day="${dayNum}"]`);
     if (thEl) thEl.classList.add("gold-header");
   }
 }
