@@ -21,7 +21,7 @@ function warn(...args) { if (DEBUG) console.warn(...args); }
 const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+window.supabase = supabase;
 
 
 
@@ -37,6 +37,7 @@ const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock
 const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
 const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
+window.availabilityMetaByEntryId = availabilityMetaByEntryId; 
 
 
 
@@ -113,6 +114,7 @@ const COLOUR_PRESETS = [
 // =========================
 
 let currentTable = null;
+window.currentTable = currentTable;
 let availabilityChannel = null;
 let tableChannel = null; 
 let membershipChannel = null;
@@ -430,6 +432,7 @@ async function saveCalendarNote() {
   }
 
   currentTable = { ...currentTable, calendar_note: newVal };
+  window.currentTable = currentTable;
   renderCalendarNote();
   setCalendarNoteEditing(false);
 }
@@ -516,6 +519,7 @@ async function refreshCurrentTableMeta() {
   if (error || !data) return;
 
   currentTable = { ...currentTable, ...data };
+  window.currentTable = currentTable;
 }
 
 //----------
@@ -671,6 +675,7 @@ function ensureLegendUser(entry) {
 
   legendList.appendChild(div);
 }
+window.ensureLegendUser = ensureLegendUser;
 
 //----------
 function buildLegendRowHtml({ userId, name, color, showLocalColourAction = false } = {}) {
@@ -776,6 +781,7 @@ async function fetchProfilesMap(userIds) {
   (data || []).forEach(p => { map[p.user_id] = p; });
   return map;
 }
+window.fetchProfilesMap = fetchProfilesMap;
 
 //----------
 async function getProfileCached(userId) {
@@ -809,6 +815,7 @@ async function fetchBoardLocalColorMap(boardId, userIds) {
   });
   return map;
 }
+window.fetchBoardLocalColorMap = fetchBoardLocalColorMap;
 
 //----------
 async function getBoardColourUsage(boardId) {
@@ -1483,6 +1490,7 @@ function refreshDotLayout(cell) {
   badge.title = `${count} users in this cell`;
   dc.appendChild(badge);
 }
+window.refreshDotLayout = refreshDotLayout;
 
 //----------
 function getCellUsersForTooltip(cell) {
@@ -2229,6 +2237,7 @@ renderCalendarLastUpdated();
       async (payload) => {
         const prevTable = currentTable;
         currentTable = { ...currentTable, ...payload.new };
+        window.currentTable = currentTable;
 
         const structureChanged =
           prevTable?.start_date !== currentTable?.start_date ||
@@ -2407,7 +2416,10 @@ const { data: refreshed, error: refreshErr } = await supabase
   .eq("id", currentTable.id)
   .single();
 
-if (!refreshErr && refreshed) currentTable = refreshed;
+if (!refreshErr && refreshed) {
+  currentTable = refreshed;
+  window.currentTable = currentTable;
+}
   // Always hide board creation when viewing a board
 document.getElementById("create-board").style.display = "none";
 
@@ -2664,11 +2676,13 @@ Object.values(users).forEach(({ userId, name, color }) => {
     }
   }
 }
+window.loadAvailability = loadAvailability;
 
 //----------  
 function getBoardStartDate() {
   return currentTable?.start_date ? new Date(currentTable.start_date + "T00:00:00") : null;
 }
+window.getBoardStartDate = getBoardStartDate;
 
 //----------  
 function addDaysLocal(date, days) {
@@ -2676,6 +2690,7 @@ function addDaysLocal(date, days) {
   d.setDate(d.getDate() + days);
   return d;
 }
+window.addDaysLocal = addDaysLocal;
 
 //----------  
 function formatDateKey(date) {
@@ -2684,6 +2699,7 @@ function formatDateKey(date) {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+window.formatDateKey = formatDateKey;
 
 
 
@@ -3057,6 +3073,7 @@ async function toggleCell(e) {
     if (k) inFlightCells.delete(k);
   }
 }
+window.toggleCell = toggleCell;
 
 //----------  
 function bindCalendarClickDelegation() {
