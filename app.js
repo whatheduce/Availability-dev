@@ -2390,6 +2390,7 @@ if (!data) {
 }
 
 currentTable = data;
+window.currentTable = currentTable;
   
   // ⭐ remember this board for next time
 if (inviteToken) {
