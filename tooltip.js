@@ -185,6 +185,8 @@ function applyLocalColourUpdateInPlace(userId, newColor) {
 
 //---------- EVENT LISTENERS ----------//
 
+const calendarEl = document.getElementById("calendar");
+
 calendarEl?.addEventListener("mouseover", (e) => {
   const cell = e.target.closest('td[data-day][data-time], .whole-day-cell[data-day][data-time]');
   if (!cell || !calendarEl.contains(cell)) return;
