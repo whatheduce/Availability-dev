@@ -3,9 +3,6 @@
 // =========================
 
 
-
-
-
 //----------
 function ensureDotContainer(cell) {
   let dc = cell.querySelector(".dot-container");
