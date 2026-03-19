@@ -1,3 +1,6 @@
+// =========================
+// CELL HOVER TOOLTIP SYSTEMS
+// =========================
 
 const cellHoverTooltip = document.createElement("div");
 let hoverTooltipCell = null;
@@ -181,6 +184,8 @@ function applyLocalColourUpdateInPlace(userId, newColor) {
   // If a tooltip is currently open, close it so it doesn't show stale colours
   hideCellHoverTooltip();
 }
+
+
 
 
 //---------- EVENT LISTENERS ----------//
