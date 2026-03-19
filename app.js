@@ -2,7 +2,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createAuthModule } from "./auth.js";
 
-
 // =========================
 // DEBUG HELPERS
 // =========================
@@ -10,7 +9,6 @@ import { createAuthModule } from "./auth.js";
 const DEBUG = false;
 function log(...args) { if (DEBUG) console.log(...args); }
 function warn(...args) { if (DEBUG) console.warn(...args); }
-
 
 
 
@@ -22,7 +20,6 @@ const SUPABASE_URL = "https://btuuowyvemesakjzkkzv.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0dXVvd3l2ZW1lc2Franpra3p2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0ODIwMDEsImV4cCI6MjA3NzA1ODAwMX0.QsDXg8AigiKUnpBUomprfbhx3RHzu-m12s2t4SKrhgM";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 window.supabase = supabase;
-
 
 
 
@@ -38,8 +35,6 @@ const inFlightCells = new Set(); // per-cell lock
 const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
 const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
 window.availabilityMetaByEntryId = availabilityMetaByEntryId; 
-
-
 
 
 
@@ -82,30 +77,21 @@ const PREBUILT_STRUCTURES = {
 const COLOUR_PRESETS = [
   // Reds
   "#7F1D1D", "#B91C1C", "#DC2626", "#EF4444", "#F87171",
-
   // Rose / pinks
   "#9D174D", "#DB2777", "#EC4899", "#F472B6", "#F9A8D4",
-
   // Oranges / ember
   "#9A3412", "#C2410C", "#EA580C", "#F97316", "#FDBA74",
-
   // Gold / amber / yellow
   "#A16207", "#CA8A04", "#EAB308", "#FACC15", "#FDE68A",
-
   // Greens
   "#166534", "#16A34A", "#22C55E", "#4ADE80", "#86EFAC",
-
   // Teals
   "#115E59", "#0F766E", "#14B8A6", "#2DD4BF", "#99F6E4",
-
   // Blues
   "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD",
-
   // Purples
   "#6D28D9", "#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD"
 ];
-
-
 
 
 
@@ -141,8 +127,6 @@ let mustChooseLocalBoardColour = false;
 
 
 
-
-
 // =========================
 // GLOBAL USER STATE
 // =========================
@@ -151,7 +135,6 @@ let user = null;
 
 const getUser = () => user;
 const setUser = (nextUser) => { user = nextUser; };
-
 
 
 
@@ -218,8 +201,6 @@ function showBoardView() {
 
   document.body.style.visibility = "visible";
 }
-
-
 
 
 
@@ -347,8 +328,6 @@ function addKey(tableId, day, time, userId) {
 function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
-
-
 
 
 
@@ -568,8 +547,6 @@ if (memberErr) {
 
 
 
-
-
 // =========================
 // PRESENCE / LEGEND HELPERS
 // =========================
@@ -706,8 +683,6 @@ function buildLegendRowHtml({ userId, name, color, showLocalColourAction = false
     </div>
   `;
 }
-
-
 
 
 
@@ -1002,8 +977,6 @@ async function getBoardColorMap(boardId) {
 
 
 
-
-
 // =========================
 // TIMEZONE / DATE HELPERS
 // =========================
@@ -1150,7 +1123,6 @@ function getAllTimeZones() {
 //----------
 function getTimeZoneListPinned() {
   const detected = getDetectedTimeZone();
-
   const curated = [
     "UTC",
     "Australia/Brisbane",
@@ -1429,9 +1401,6 @@ function getWeekdayLabels7(timeZone) {
 
 
 
-
-
-
 // =========================
 // REALTIME / REFRESH
 // =========================
@@ -1652,10 +1621,9 @@ if (!dotContainer) {
     }
   }
 
-   refreshDotLayout(cell);
-
+  refreshDotLayout(cell);
   ensureLegendUser({ ...entry, name: displayName, color: displayColor });
-
+  
   // Now that dot is present, see if we should flip to gold (this will remove dots container if needed)
   await applyGoldStateForCell(cell, entry.day);
 
@@ -1820,8 +1788,6 @@ renderCalendarLastUpdated();
       log("table channel:", status);
     });
 }
-
-
 
 
 
@@ -2268,7 +2234,6 @@ window.formatDateKey = formatDateKey;
 
 
 
-
 // =========================
 // BOARD CREATION / CONFIG
 // =========================
@@ -2276,12 +2241,12 @@ window.formatDateKey = formatDateKey;
 function addRowInput(name = "") {
   const container = document.getElementById("rows-container");
 
-  if (!container) return; // Prevent crash
+    if (!container) return; // Prevent crash
 
-  if (container.children.length >= 4) {
-    alert("Free version allows up to 4 time blocks.");
-    return;
-  }
+    if (container.children.length >= 4) {
+      alert("Free version allows up to 4 time blocks.");
+      return;
+    }
 
   const input = document.createElement("input");
   input.placeholder = "Time block (e.g. Dinner)";
@@ -2427,9 +2392,6 @@ localStorage.setItem("lastBoardManageToken", ownerToken);
 // ✅ open as owner after create
 window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
 }
-
-
-
 
 
 
@@ -2657,9 +2619,6 @@ function bindCalendarClickDelegation() {
 
 
 
-
-
-
 // =========================
 // ACCOUNT / DASHBOARD PANELS
 // =========================
@@ -2708,8 +2667,6 @@ async function hydrateAccountPanel() {
     console.error("hydrateAccountPanel failed", e);
   }
 }
-
-
 
 
 
@@ -2793,8 +2750,6 @@ async function deleteAccountFlow() {
     showDeleteAccountOverlay("Network error while deleting account.");
   }
 }
-
-
 
 
 
@@ -3026,7 +2981,6 @@ function updateNameCount() {
     nameCount.style.fontWeight = "";
   }
 };
-
   
 //----------  
 function renderSwatchGrid(containerEl, currentHex, onPick){
@@ -3054,8 +3008,6 @@ function renderSwatchGrid(containerEl, currentHex, onPick){
     containerEl.appendChild(b);
   });
 }
-
-
 
 
 
@@ -3225,8 +3177,6 @@ try {
   // focus the email field
   setTimeout(() => emailEl.focus(), 0);
 }
-
-
 
 
 
@@ -3608,8 +3558,6 @@ const legendHtml = shown.length
 
 
 
-
-
 // =========================
 // MODULE INITIALISATION
 // =========================
@@ -3627,8 +3575,6 @@ const auth = createAuthModule({
   getSetupSelectedColour: () => setupSelectedColour,
   possessive,
 });
-
-
 
 
 
@@ -4551,8 +4497,6 @@ await loadTable();
 }
 }
 
-  
-
 
   
 // =========================
@@ -4766,8 +4710,6 @@ async function resetBoard() {
 
   await loadAvailability();
 }
-
-
 
 
 
