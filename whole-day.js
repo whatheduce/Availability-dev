@@ -1,9 +1,7 @@
-
 let wholeDayMidnightTimer = null;
 
-
 function getCurrentStructureType() {
-  return currentTable?.structure_type || "";
+  return window.currentTable?.structure_type || "";
 }
 
 //----------
@@ -13,7 +11,11 @@ function isWholeDayBoard() {
 
 //----------
 function getBoardTimeZone() {
-  return currentTable?.host_tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  return (
+    window.currentTable?.host_tz ||
+    Intl.DateTimeFormat().resolvedOptions().timeZone ||
+    "UTC"
+  );
 }
 
 //----------
@@ -36,26 +38,24 @@ function getBoardTodayParts() {
 
 //----------
 function getTodayBoardDay() {
-  const todayParts = getBoardTodayParts(); // board timezone
-  const todayKey = formatDateKey(new Date(
-    todayParts.year,
-    todayParts.month - 1,
-    todayParts.day
-  ));
+  const todayParts = getBoardTodayParts();
+  const todayKey = window.formatDateKey(
+    new Date(todayParts.year, todayParts.month - 1, todayParts.day)
+  );
   return getBoardDayFromDateKey(todayKey);
 }
 
 //----------
 async function prunePastWholeDayAvailability() {
-  if (!isWholeDayBoard() || !currentTable?.id) return;
+  if (!isWholeDayBoard() || !window.currentTable?.id) return;
 
   const todayBoardDay = getTodayBoardDay();
   if (!Number.isFinite(todayBoardDay) || todayBoardDay <= 1) return;
 
-  const { error } = await supabase
+  const { error } = await window.supabase
     .from("availability_dev")
     .delete()
-    .eq("table_id", currentTable.id)
+    .eq("table_id", window.currentTable.id)
     .lt("day", todayBoardDay)
     .eq("time", "All Day");
 
@@ -73,7 +73,10 @@ function scheduleWholeDayMidnightRefresh() {
 
   if (!isWholeDayBoard()) return;
 
-  const tz = currentTable?.host_tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const tz =
+    window.currentTable?.host_tz ||
+    Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   const now = new Date();
 
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -100,14 +103,14 @@ function scheduleWholeDayMidnightRefresh() {
 
   const nextMidnight = new Date(boardNow);
   nextMidnight.setDate(nextMidnight.getDate() + 1);
-  nextMidnight.setHours(0, 0, 2, 0); // tiny buffer
+  nextMidnight.setHours(0, 0, 2, 0);
 
   const delay = Math.max(1000, nextMidnight.getTime() - boardNow.getTime());
 
   wholeDayMidnightTimer = setTimeout(async () => {
     try {
       await prunePastWholeDayAvailability();
-      await loadAvailability();
+      await window.loadAvailability();
     } finally {
       scheduleWholeDayMidnightRefresh();
     }
@@ -116,7 +119,7 @@ function scheduleWholeDayMidnightRefresh() {
 
 //----------
 function getBoardDayFromDateKey(dateKey) {
-  const startYmd = currentTable?.start_date;
+  const startYmd = window.currentTable?.start_date;
   if (!startYmd || !dateKey) return null;
 
   const start = new Date(`${startYmd}T00:00:00`);
@@ -141,8 +144,8 @@ function getDaysInMonth(year, monthIndex) {
 
 //----------
 function getFirstWeekdayIndex(year, monthIndex) {
-  const jsDay = new Date(year, monthIndex, 1).getDay(); // 0=Sun
-  return (jsDay + 6) % 7; // convert to Mon-first
+  const jsDay = new Date(year, monthIndex, 1).getDay();
+  return (jsDay + 6) % 7;
 }
 
 //----------
@@ -162,26 +165,33 @@ function renderWholeDayCalendar() {
 
   calendar.innerHTML = `
     <div class="whole-day-wrap">
-      ${renderWholeDayMonth(monthA.year, monthA.monthIndex, { todayYear: year, todayMonth: month, todayDay: day })}
-      ${renderWholeDayMonth(monthB.year, monthB.monthIndex, { todayYear: year, todayMonth: month, todayDay: day })}
+      ${renderWholeDayMonth(monthA.year, monthA.monthIndex, {
+        todayYear: year,
+        todayMonth: month,
+        todayDay: day
+      })}
+      ${renderWholeDayMonth(monthB.year, monthB.monthIndex, {
+        todayYear: year,
+        todayMonth: month,
+        todayDay: day
+      })}
     </div>
   `;
 }
 
 //----------
 function bindWholeDayCells() {
-  const cells = document.querySelectorAll(".whole-day-cell[data-date-key][data-day][data-time]");
-  cells.forEach(cell => {
-    // Never bind empty placeholders
-    if (cell.classList.contains("whole-day-cell--empty")) return;
+  const cells = document.querySelectorAll(
+    ".whole-day-cell[data-date-key][data-day][data-time]"
+  );
 
-    // Avoid stacking duplicate listeners on repeated renders
+  cells.forEach(cell => {
+    if (cell.classList.contains("whole-day-cell--empty")) return;
     if (cell.dataset.boundClick === "1") return;
 
     cell.dataset.boundClick = "1";
-
     cell.addEventListener("click", (e) => {
-      toggleCell(e);
+      window.toggleCell(e);
     });
   });
 }
@@ -195,7 +205,9 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
   const cells = [];
 
   for (let i = 0; i < firstOffset; i++) {
-    cells.push(`<div class="whole-day-cell whole-day-cell--empty" aria-hidden="true"></div>`);
+    cells.push(
+      `<div class="whole-day-cell whole-day-cell--empty" aria-hidden="true"></div>`
+    );
   }
 
   for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
@@ -219,23 +231,23 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
       isToday ? "whole-day-cell--today" : ""
     ].filter(Boolean).join(" ");
 
-    const dateKey = formatDateKey(new Date(year, monthIndex, dayNum));
+    const dateKey = window.formatDateKey(new Date(year, monthIndex, dayNum));
     const boardDay = getBoardDayFromDateKey(dateKey);
 
     cells.push(`
-    <div
-      class="${classNames}"
-      data-month-year="${year}"
-      data-month-index="${monthIndex}"
-      data-month-day="${dayNum}"
-      data-date-key="${dateKey}"
-      data-day="${boardDay ?? ""}"
-      data-time="All Day"
-    >
-      <div class="whole-day-cell__number">${dayNum}</div>
-      <div class="whole-day-cell__dots"></div>
-    </div>
-  `);
+      <div
+        class="${classNames}"
+        data-month-year="${year}"
+        data-month-index="${monthIndex}"
+        data-month-day="${dayNum}"
+        data-date-key="${dateKey}"
+        data-day="${boardDay ?? ""}"
+        data-time="All Day"
+      >
+        <div class="whole-day-cell__number">${dayNum}</div>
+        <div class="whole-day-cell__dots"></div>
+      </div>
+    `);
   }
 
   return `
@@ -257,11 +269,10 @@ function isWholeDayCellLocked(cell) {
   return cell.classList.contains("whole-day-cell--past");
 }
 
-//----------  
+//----------
 async function renderWholeDayAvailability(rows) {
-  const threshold = Number(currentTable?.gold_threshold || 0);
+  const threshold = Number(window.currentTable?.gold_threshold || 0);
 
-  // Clear previous Whole Day visuals
   document.querySelectorAll(".whole-day-cell").forEach(cell => {
     cell.classList.remove("gold-cell");
     cell.querySelector(".dot-container")?.remove();
@@ -272,8 +283,8 @@ async function renderWholeDayAvailability(rows) {
   const countsByDate = new Map();
 
   const userIds = [...new Set(rows.map(r => r.user_id).filter(Boolean))];
-  const profilesMap = await fetchProfilesMap(userIds);
-  const localColorMap = await fetchBoardLocalColorMap(currentTable.id, userIds);
+  const profilesMap = await window.fetchProfilesMap(userIds);
+  const localColorMap = await window.fetchBoardLocalColorMap(window.currentTable.id, userIds);
 
   rows.forEach(row => {
     const dateKey = getWholeDayDateKeyFromRow(row);
@@ -305,7 +316,7 @@ async function renderWholeDayAvailability(rows) {
 
     if (row?.id != null) {
       dot.dataset.entryId = String(row.id);
-      availabilityMetaByEntryId.set(String(row.id), {
+      window.availabilityMetaByEntryId.set(String(row.id), {
         day: String(row.day),
         time: String(row.time)
       });
@@ -319,11 +330,11 @@ async function renderWholeDayAvailability(rows) {
 
     countsByDate.set(dateKey, (countsByDate.get(dateKey) || 0) + 1);
 
-    ensureLegendUser({ ...row, name: displayName, color: displayColor });
+    window.ensureLegendUser({ ...row, name: displayName, color: displayColor });
   });
 
   document.querySelectorAll(".whole-day-cell").forEach(cell => {
-    refreshDotLayout(cell);
+    window.refreshDotLayout(cell);
   });
 
   countsByDate.forEach((count, dateKey) => {
@@ -337,20 +348,17 @@ async function renderWholeDayAvailability(rows) {
   });
 }
 
-//----------  
+//----------
 function getWholeDayDateKeyFromRow(row) {
-  const start = getBoardStartDate();
+  const start = window.getBoardStartDate();
   if (!start) return null;
 
   const offset = Number(row.day);
   if (!Number.isFinite(offset)) return null;
 
-  const actualDate = addDaysLocal(start, offset - 1);
-  return formatDateKey(actualDate);
+  const actualDate = window.addDaysLocal(start, offset - 1);
+  return window.formatDateKey(actualDate);
 }
-
-
-
 
 window.getCurrentStructureType = getCurrentStructureType;
 window.isWholeDayBoard = isWholeDayBoard;
