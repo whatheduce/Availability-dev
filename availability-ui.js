@@ -116,7 +116,7 @@ async function rebuildDotsForCell(cell) {
   // ✅ Fetch profiles ONCE
   const profilesMap = await window.fetchProfilesMap(data.map(d => d.user_id));
   window.profilesCache = { ...(window.profilesCache || {}), ...profilesMap };
-  const localColorMap = await window.fetchBoardLocalColorMap(currentTable.id, data.map(d => d.user_id));
+  const localColorMap = await window.fetchBoardLocalColorMap(window.currentTable.id, data.map(d => d.user_id));
 
   const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
@@ -179,7 +179,7 @@ async function applyGoldStateForCell(cell, day) {
     const { count, error } = await window.supabase
       .from("availability_dev")
       .select("id", { count: "exact", head: true })
-      .eq("table_id", currentTable.id)
+      .eq("table_id", window.currentTable.id)
       .eq("day", dayNum)
       .eq("time", timeKey);
 
@@ -225,7 +225,7 @@ if (isWholeDayBoard()) {
 
 //----------
 function maybeApplyGoldForCell(cell) {
-  const th = Number(currentTable?.gold_threshold || 0);
+  const th = Number(window.currentTable?.gold_threshold || 0);
   if (!th || th <= 0) return;
 
   // If already gold, nothing to do
@@ -265,3 +265,10 @@ function addOptimisticDot(cell, userId, name, color) {
   dc.appendChild(dot);
   refreshDotLayout(cell);
 }
+
+
+window.ensureDotContainer = ensureDotContainer;
+window.rebuildDotsForCell = rebuildDotsForCell;
+window.applyGoldStateForCell = applyGoldStateForCell;
+window.maybeApplyGoldForCell = maybeApplyGoldForCell;
+window.addOptimisticDot = addOptimisticDot;
