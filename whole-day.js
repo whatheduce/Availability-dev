@@ -1,4 +1,6 @@
 
+let wholeDayMidnightTimer = null;
+
 
 function getCurrentStructureType() {
   return currentTable?.structure_type || "";
