@@ -773,6 +773,7 @@ async function getProfileCached(userId) {
 
   const map = await fetchProfilesMap([userId]);
   profilesCache = { ...profilesCache, ...map };
+  window.profilesCache = profilesCache;
   return profilesCache[userId] || null;
 }  
 window.getProfileCached = getProfileCached;
@@ -843,6 +844,7 @@ async function getBoardColourUsage(boardId) {
   const userIds = (members || []).map(m => m.user_id).filter(Boolean);
   const profilesMap = await fetchProfilesMap(userIds);
   profilesCache = { ...profilesCache, ...profilesMap };
+  window.profilesCache = profilesCache;
 
   const resolvedMembers = (members || []).map(m => {
     const prof = m.user_id ? profilesMap[m.user_id] : null;
