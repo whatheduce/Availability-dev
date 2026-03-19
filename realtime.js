@@ -288,9 +288,7 @@ function subscribeRealtime() {
         await handleAvailabilityChange(payload);
       }
     )
-    .subscribe((status) => {
-      log("availability channel:", status);
-    });
+    .subscribe();
 
   const auId = window.getUser?.()?.id;
 
@@ -347,9 +345,7 @@ function subscribeRealtime() {
           window.renderCalendarLastUpdated();
         }
       )
-      .subscribe((status) => {
-        log("membership channel:", status);
-      });
+      .subscribe();
   }
 
   tableChannel = window.supabase
@@ -378,9 +374,7 @@ function subscribeRealtime() {
         }
       }
     )
-    .subscribe((status) => {
-      log("table channel:", status);
-    });
+    .subscribe();
 }
 
 window.scheduleFullRefreshIdle = scheduleFullRefreshIdle;
