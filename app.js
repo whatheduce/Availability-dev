@@ -130,6 +130,7 @@ window.populateHostTimezoneSelect = populateHostTimezoneSelect;
 let presenceChannel = null;
 let isBoardOwner = false;
 let profilesCache = {};
+window.profilesCache = profilesCache;
 let uiListenersBound = false;
 let inviteContext = { inviteToken: null, boardName: "" };
 let colourModalMode = "profile";   // "profile" | "local"
@@ -2642,6 +2643,7 @@ window.toggleCell = toggleCell;
 //----------  
 function bindCalendarClickDelegation() {
   const table = document.getElementById("availabilityTable");
+  window.table = table;
   if (!table || table.dataset.bound === "1") return;
 
   table.dataset.bound = "1";
