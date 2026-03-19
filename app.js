@@ -134,8 +134,6 @@ let colourModalMode = "profile";   // "profile" | "local"
 let colourModalBoardId = null;
 let cellTooltipCache = new Map(); // key: "day|time" -> [{ name, color }]
 let mustChooseLocalBoardColour = false;
-let wholeDayMidnightTimer = null;
-
 
 
 
