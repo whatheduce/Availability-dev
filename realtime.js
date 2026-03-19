@@ -394,3 +394,12 @@ renderCalendarLastUpdated();
       log("table channel:", status);
     });
 }
+
+
+window.scheduleFullRefreshIdle = scheduleFullRefreshIdle;
+window.getWholeDayCellFromEntry = getWholeDayCellFromEntry;
+window.getAvailabilityCellFromEntry = getAvailabilityCellFromEntry;
+window.handleAvailabilityChange = handleAvailabilityChange;
+window.userStillHasBoardAccess = userStillHasBoardAccess;
+window.kickOutIfNoBoardAccess = kickOutIfNoBoardAccess;
+window.subscribeRealtime = subscribeRealtime;
