@@ -135,6 +135,7 @@ let inviteContext = { inviteToken: null, boardName: "" };
 let colourModalMode = "profile";   // "profile" | "local"
 let colourModalBoardId = null;
 let cellTooltipCache = new Map(); // key: "day|time" -> [{ name, color }]
+window.cellTooltipCache = cellTooltipCache;
 let mustChooseLocalBoardColour = false;
 
 
@@ -321,6 +322,7 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+window.escapeHtml = escapeHtml;
 
 //----------
 function possessive(name) {
@@ -512,7 +514,7 @@ async function refreshCurrentTableMeta() {
 
   const { data, error } = await supabase
     .from("tables")
-    .select("id, last_activity_at, gold_threshold, host_tz, name")
+    .select("id, last_activity_at, gold_threshold, host_tz, name, structure_type")
     .eq("id", currentTable.id)
     .single();
 
@@ -1842,11 +1844,17 @@ if (!dot) {
   // INSERT/UPDATE should never override gold visuals by adding dots
   // If it IS gold, dots are intentionally hidden.
   if (cell.classList.contains("gold-cell")) {
-    // Still keep legend/gold state correct in case thresholds changed
-    await applyGoldStateForCell(cell, entry.day);
-    scheduleFullRefreshIdle(15000);
-    return;
-  }
+    const prof = entry.user_id ? await getProfileCached(entry.user_id) : null;
+    const displayName = prof?.name || entry.name || "—";
+    const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [entry.user_id]);
+    const displayColor = localColorMap[entry.user_id] || prof?.color || entry.color || "#999";
+
+  ensureLegendUser({ ...entry, name: displayName, color: displayColor });
+
+  await applyGoldStateForCell(cell, entry.day);
+  scheduleFullRefreshIdle(15000);
+  return;
+}
 
   // Ensure dot container exists (only for non-gold cells)
   let dotContainer = cell.querySelector(".dot-container");
@@ -5032,8 +5040,10 @@ async function resetBoard() {
 // SHARED DOM REFERENCES / APP STATE
 // =========================
 const table = document.getElementById("availabilityTable");
+window.table = table;
 const legendDiv = document.getElementById("legend");
 const legendList = document.getElementById("legendList");
+window.legendList = legendList;
 const calendarEl = document.getElementById("calendar");
 
 cellHoverTooltip.className = "cell-hover-tooltip";
