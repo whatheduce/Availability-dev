@@ -164,8 +164,25 @@ function showDashboard() {
 }
 
 //----------
-function showCreateBoard() {
+async function showCreateBoard() {
   document.body.style.visibility = "visible";
+
+  const au = await auth.getAuthUser();
+  if (!au) {
+    auth.showAuthOverlay("Please sign in before creating a calendar.");
+    return;
+  }
+
+  const hostedCount = await getHostedBoardCount();
+  const isPro = false; // TEMP: until you implement real Pro accounts
+
+  if (!isPro && hostedCount >= 2) {
+    showConfirmPopup(
+      "The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.",
+      { title: "Hosted Calendar Limit" }
+    );
+    return;
+  }
 
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "none";
@@ -173,7 +190,6 @@ function showCreateBoard() {
   const create = document.getElementById("create-board");
   if (create) create.style.display = "block";
 
-  // Initialize the create flow (resets, hides/reveals buttons, timezones, etc.)
   if (typeof window.showBoardSetup === "function") {
     window.showBoardSetup();
   }
@@ -1427,6 +1443,24 @@ async function rollForwardIfNeeded(tableId) {
   return data || 0;
 }
 
+async function getHostedBoardCount() {
+  const au = await auth.getAuthUser();
+  if (!au) return 0;
+
+  const { count, error } = await supabase
+    .from("board_members")
+    .select("board_id", { count: "exact", head: true })
+    .eq("user_id", au.id)
+    .eq("role", "owner");
+
+  if (error) {
+    console.error("Failed to count hosted boards:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
 //----------  
 async function loadBoards() {
   const au = await auth.getAuthUser();
@@ -1889,6 +1923,15 @@ async function createBoard() {
       auth.showAuthOverlay("Please sign in before creating a calendar.");
       return;
     }
+  
+  const hostedCount = await getHostedBoardCount();
+  const isPro = false; // TEMP: until you implement real Pro accounts
+
+  if (!isPro && hostedCount >= 2) {
+    alert("The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.");
+    return;
+  }
+  
   const nameInput = document.getElementById("board-name");
   const name = nameInput.value.trim();
 
