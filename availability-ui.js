@@ -246,21 +246,25 @@ function maybeApplyGoldForCell(cell) {
 
 function addOptimisticDot(cell, userId, name, color) {
   const dc = ensureDotContainer(cell);
+  if (!dc) return;
 
   if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
 
   const dot = document.createElement("div");
   dot.className = "dot";
-  dot.dataset.userId = userId;
+  dot.dataset.userId = String(userId);
   dot.dataset.name = name || "—";
+  dot.dataset.pending = "1";
   dot.title = "";
   dot.style.background = color || "#999";
 
-  // mark as pending so we can remove if DB fails
-  dot.dataset.pending = "1";
-
   dc.appendChild(dot);
-  refreshDotLayout(cell);
+
+  requestAnimationFrame(() => {
+    if (cell.isConnected) {
+      refreshDotLayout(cell);
+    }
+  });
 }
 
 
