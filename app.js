@@ -2803,6 +2803,34 @@ try {
 // DASHBOARD PREVIEWS
 // =========================
 
+function getPreviewBoardTodayParts(timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timeZone || undefined,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  return {
+    year: Number(map.year),
+    month: Number(map.month),
+    day: Number(map.day)
+  };
+}
+
+//----------   
+function getMiniMonthDaysInMonth(year, monthIndex) {
+  return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+//----------   
+function getMiniMonthFirstWeekdayIndex(year, monthIndex) {
+  const jsDay = new Date(year, monthIndex, 1).getDay();
+  return (jsDay + 6) % 7; // Monday-first
+}
+
+//----------   
 async function renderBoardPreviews(owned) {
   try {
     if (!owned || owned.length === 0) return;
@@ -2820,6 +2848,7 @@ async function renderBoardPreviews(owned) {
     const startDateByBoard = new Map(); // boardId -> start_date
     const tzByBoard = new Map(); // boardId -> host_tz
     const goldByBoard = new Map(); // boardId -> threshold number
+    const structureByBoard = new Map(); // boardId -> structure_type
 
     for (const t of boards) {
       let rows = t.row_structure;
@@ -2829,15 +2858,16 @@ async function renderBoardPreviews(owned) {
       }
       if (!Array.isArray(rows)) rows = [];
 
-      const normalized = rows
-        .map(r => (typeof r === "string" ? r : (r?.key || r?.name || r?.label || "")))
-        .filter(Boolean);
+  const normalized = rows
+    .map(r => (typeof r === "string" ? r : (r?.key || r?.name || r?.label || "")))
+    .filter(Boolean);
 
-      rowsByBoard.set(String(t.id), normalized);
-      startDateByBoard.set(String(t.id), t.start_date || null);
-      tzByBoard.set(String(t.id), t.host_tz || null);
-      goldByBoard.set(String(t.id), Number(t.gold_threshold || 2));
-    }
+  rowsByBoard.set(String(t.id), normalized);
+  startDateByBoard.set(String(t.id), t.start_date || null);
+  tzByBoard.set(String(t.id), t.host_tz || null);
+  goldByBoard.set(String(t.id), Number(t.gold_threshold || 2));
+  structureByBoard.set(String(t.id), t.structure_type || "");
+}
 
     // Pull availability for 7 days (0..6) for all hosted boards
     const { data: avail, error: availErr } = await supabase
@@ -2848,6 +2878,24 @@ async function renderBoardPreviews(owned) {
       .lte("day", 7);
 
     if (availErr) throw availErr;
+
+    const wholeDayBoardIds = boards
+  .filter(t => (t.structure_type || "") === "whole_day")
+  .map(t => t.id);
+
+let wholeDayAvail = [];
+
+if (wholeDayBoardIds.length) {
+  const { data: wholeDayData, error: wholeDayErr } = await supabase
+    .from("availability_dev")
+    .select("table_id, day, user_id, name, color")
+    .in("table_id", wholeDayBoardIds)
+    .gte("day", 1)
+    .lte("day", 30);
+
+  if (wholeDayErr) throw wholeDayErr;
+  wholeDayAvail = wholeDayData || [];
+}
 
     // Extra availability fallback for legend (not limited to first 7 days)
     const { data: legendAvail, error: legendAvailErr } = await supabase
@@ -2946,45 +2994,135 @@ if (memberUserIds.length > 0) {
         if (!arr.includes(uid)) arr.push(uid);
         }
 
-    // Render each preview
-    for (const t of boards) {
-      const boardId = String(t.id);
-      const previewEl = document.querySelector(`.board-preview[data-board-id="${boardId}"]`);
-      if (!previewEl) continue;
+    const byDate = new Map(); // `${boardId}|${dateKey}` -> [userId...]
 
-      const rows = rowsByBoard.get(boardId) || [];
-      const days = 7;
+    for (const r of wholeDayAvail) {
+      const boardId = String(r.table_id);
+      const startYmd = startDateByBoard.get(boardId);
+      if (!startYmd || !r.user_id) continue;
 
-      // Day labels must match the board (day 0 = today, in the board's host_tz)
-      const dayNames = getWeekdayLabels7(tzByBoard.get(boardId));
+      const offset = Number(r.day);
+      if (!Number.isFinite(offset)) continue;
 
-      // Build header row
-      const headerCells = [`<div class="mini-corner"></div>`]
-        .concat(dayNames.slice(0, days).map(d => `<div class="mini-colhead">${d}</div>`))
-        .join("");
+      const start = new Date(`${startYmd}T00:00:00`);
+      const actualDate = addDaysLocal(start, offset - 1);
+      const dateKey = formatDateKey(actualDate);
 
-      // Build body rows
-      const bodyRows = rows.map((rowLabel) => {
-        const rowHead = `<div class="mini-rowhead">${escapeHtml(rowLabel)}</div>`;
+      const key = `${boardId}|${dateKey}`;
+      if (!byDate.has(key)) byDate.set(key, []);
 
-        const cells = [];
-        for (let d = 0; d < days; d++) {
-          const dayValue = d + 1; // ✅ your DB uses 1-based days (today = 1)
-          const users = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
-          const threshold = goldByBoard.get(boardId) || 2;
-          const isGold = users.length >= threshold;
+      const arr = byDate.get(key);
+      const uid = String(r.user_id);
+      if (!arr.includes(uid)) arr.push(uid);
+    }
+    
+// Render each preview
+for (const t of boards) {
+  const boardId = String(t.id);
+  const previewEl = document.querySelector(`.board-preview[data-board-id="${boardId}"]`);
+  if (!previewEl) continue;
 
-        // If the cell is gold, we hide dots entirely (match main board behavior)
-                // If the cell is gold, we hide dots entirely (match main board behavior)
+  const rows = rowsByBoard.get(boardId) || [];
+  const days = 7;
+  const structureType = structureByBoard.get(boardId) || "";
+
+  let previewHtml = "";
+
+  if (structureType === "whole_day") {
+    const tz = tzByBoard.get(boardId);
+    const { year, month } = getPreviewBoardTodayParts(tz);
+    const monthIndex = month - 1;
+
+    const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const daysInMonth = getMiniMonthDaysInMonth(year, monthIndex);
+    const firstOffset = getMiniMonthFirstWeekdayIndex(year, monthIndex);
+
+    const monthCells = [];
+
+    for (let i = 0; i < firstOffset; i++) {
+      monthCells.push(`<div class="mini-whole-day-cell mini-whole-day-cell--empty"></div>`);
+    }
+
+    for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+      const dateKey = formatDateKey(new Date(year, monthIndex, dayNum));
+      const users = byDate.get(`${boardId}|${dateKey}`) || [];
+      const threshold = goldByBoard.get(boardId) || 2;
+      const isGold = users.length >= threshold;
+
+      let dotsHtml = "";
+
+      if (!isGold && users.length) {
+        const visible = users.slice(0, 4);
+
+        dotsHtml = `
+          <div class="mini-whole-day-dots ${visible.length <= 2 ? "mini-whole-day-dots--1-2" : "mini-whole-day-dots--3-4"}">
+            ${visible.map(uid => {
+              const key = `${boardId}|${String(uid)}`;
+              const p = profilesByUser.get(String(uid));
+              const f = fallbackByUser.get(String(uid));
+
+              const col =
+                localColorByBoardUser.get(key) ||
+                p?.color ||
+                f?.color ||
+                "rgba(0,0,0,0.35)";
+
+              const name = (p?.name || f?.name || "").trim();
+
+              return `<span class="mini-whole-day-dot" style="background:${col}" title="${escapeHtml(name)}"></span>`;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      monthCells.push(`
+        <div class="mini-whole-day-cell ${isGold ? "mini-whole-day-cell--gold" : ""}">
+          <div class="mini-whole-day-number">${dayNum}</div>
+          <div class="mini-whole-day-dots-wrap">${dotsHtml}</div>
+        </div>
+      `);
+    }
+
+    previewEl.style.setProperty("--mini-scale", "1");
+
+    previewHtml = `
+      <div class="mini-whole-day">
+        <div class="mini-whole-day-title">
+          ${new Intl.DateTimeFormat("en-AU", { month: "long", year: "numeric" }).format(new Date(year, monthIndex, 1))}
+        </div>
+        <div class="mini-whole-day-weekdays">
+          ${weekdayLabels.map(label => `<div class="mini-whole-day-weekday">${label}</div>`).join("")}
+        </div>
+        <div class="mini-whole-day-grid">
+          ${monthCells.join("")}
+        </div>
+      </div>
+    `;
+  } else {
+    // Day labels must match the board (day 0 = today, in the board's host_tz)
+    const dayNames = getWeekdayLabels7(tzByBoard.get(boardId));
+
+    // Build header row
+    const headerCells = [`<div class="mini-corner"></div>`]
+      .concat(dayNames.slice(0, days).map(d => `<div class="mini-colhead">${d}</div>`))
+      .join("");
+
+    // Build body rows
+    const bodyRows = rows.map((rowLabel) => {
+      const rowHead = `<div class="mini-rowhead">${escapeHtml(rowLabel)}</div>`;
+
+      const cells = [];
+      for (let d = 0; d < days; d++) {
+        const dayValue = d + 1;
+        const users = byCell.get(`${boardId}|${dayValue}|${rowLabel}`) || [];
+        const threshold = goldByBoard.get(boardId) || 2;
+        const isGold = users.length >= threshold;
+
         let dotsHtml = "";
         let extraHtml = "";
         let miniDotsClass = "mini-dots mini-dots--1-2";
 
         if (!isGold) {
-          // Dashboard preview rules:
-          // 1-2 dots = one row
-          // 3-4 dots = 2 rows, smaller
-          // 5+ dots = show 4 dots + +N badge
           const maxDots = 4;
           const visible = users.slice(0, maxDots);
           const extra = Math.max(0, users.length - maxDots);
@@ -3013,66 +3151,74 @@ if (memberUserIds.length > 0) {
           extraHtml = extra > 0 ? `<span class="mini-more">+${extra}</span>` : "";
         }
 
-          cells.push(`
-            <div class="mini-cell ${isGold ? "mini-gold" : ""}">
-              <div class="${miniDotsClass}">${dotsHtml}${extraHtml}</div>
-            </div>
-          `);
-        }
+        cells.push(`
+          <div class="mini-cell ${isGold ? "mini-gold" : ""}">
+            <div class="${miniDotsClass}">${dotsHtml}${extraHtml}</div>
+          </div>
+        `);
+      }
 
-        return `<div class="mini-row">${rowHead}${cells.join("")}</div>`;
-      }).join("");
+      return `<div class="mini-row">${rowHead}${cells.join("")}</div>`;
+    }).join("");
 
-      // Auto-scale: fewer rows = bigger preview; more rows = smaller
-      const rowCount = Math.max(rows.length, 1);
-      const scale = Math.max(0.55, Math.min(1.05, 10 / (rowCount + 2)));
-      previewEl.style.setProperty("--mini-scale", String(scale));
+    // Auto-scale: fewer rows = bigger preview; more rows = smaller
+    const rowCount = Math.max(rows.length, 1);
+    const scale = Math.max(0.55, Math.min(1.05, 10 / (rowCount + 2)));
+    previewEl.style.setProperty("--mini-scale", String(scale));
 
-      // Legend: show EVERY user who has availability on this board (across the full window)
-      const legendUserIds = Array.from(new Set(
-        (legendAvail || [])
-          .filter(r => String(r.table_id) === boardId && r.user_id)
-          .map(r => String(r.user_id))
-      ));
-      
-const MAX_LEGEND = 9;
-const totalUsers = legendUserIds.length;
+    previewHtml = `
+      <div class="mini-board">
+        <div class="mini-head">${headerCells}</div>
+        <div class="mini-body">${bodyRows}</div>
+      </div>
+    `;
+  }
 
-let shown = legendUserIds.slice(0, MAX_LEGEND);
-let overflow = 0;
+  // Legend: show EVERY user who has availability on this board (across the full window)
+  const legendUserIds = Array.from(new Set(
+    (legendAvail || [])
+      .filter(r => String(r.table_id) === boardId && r.user_id)
+      .map(r => String(r.user_id))
+  ));
+  
+  const MAX_LEGEND = 9;
+  const totalUsers = legendUserIds.length;
 
-// If more than 9 users, reserve the 9th slot for "+N"
-if (totalUsers > MAX_LEGEND) {
-  shown = legendUserIds.slice(0, 8);
-  overflow = totalUsers - 8;
-}
+  let shown = legendUserIds.slice(0, MAX_LEGEND);
+  let overflow = 0;
 
-const n = shown.length + (overflow ? 1 : 0);
+  // If more than 9 users, reserve the 9th slot for "+N"
+  if (totalUsers > MAX_LEGEND) {
+    shown = legendUserIds.slice(0, 8);
+    overflow = totalUsers - 8;
+  }
 
-// Presets (your requested behaviour)
-let legendRows = 1;
-let legendCols = 2;
-let font = 13;
-let dot = 9;
+  const n = shown.length + (overflow ? 1 : 0);
 
-// Keep HEIGHT fixed always
-const legendHeight = 34;
+  // Presets (your requested behaviour)
+  let legendRows = 1;
+  let legendCols = 2;
+  let font = 13;
+  let dot = 9;
 
-// Control how wide each name can be before ellipsis (keeps legend from getting too wide)
-let itemMax = 120;
+  // Keep HEIGHT fixed always
+  const legendHeight = 34;
 
-if (n <= 2) {
-  legendRows = 1; legendCols = 2; font = 11; dot = 9; itemMax = 130;
-} else if (n <= 4) {
-  legendRows = 2; legendCols = 2; font = 10; dot = 8; itemMax = 110;
-} else if (n <= 6) {
-  legendRows = 2; legendCols = 3; font = 8; dot = 7; itemMax = 85;
-} else {
-  legendRows = 3; legendCols = 3; font = 6; dot = 5; itemMax = 75;
-}
+  // Control how wide each name can be before ellipsis (keeps legend from getting too wide)
+  let itemMax = 120;
 
-const legendHtml = shown.length
-  ? `
+  if (n <= 2) {
+    legendRows = 1; legendCols = 2; font = 11; dot = 9; itemMax = 130;
+  } else if (n <= 4) {
+    legendRows = 2; legendCols = 2; font = 10; dot = 8; itemMax = 110;
+  } else if (n <= 6) {
+    legendRows = 2; legendCols = 3; font = 8; dot = 7; itemMax = 85;
+  } else {
+    legendRows = 3; legendCols = 3; font = 6; dot = 5; itemMax = 75;
+  }
+
+  const legendHtml = shown.length
+    ? `
 <div class="mini-legend" style="
   height:${legendHeight}px;
   overflow:hidden;
@@ -3080,7 +3226,6 @@ const legendHtml = shown.length
   padding:0 10px 0 8px;
   box-sizing:border-box;
 ">
-  <!-- This wrapper SHRINKS to content width -->
   <div class="mini-legend-wrap" style="
     display:inline-block;
     width:fit-content;
@@ -3098,78 +3243,74 @@ const legendHtml = shown.length
       justify-items:start;
     ">
       ${[
-  ...shown.map(uid => {
-    const key = `${boardId}|${String(uid)}`;
-    const p = profilesByUser.get(String(uid));
-    const f = fallbackByBoardUser.get(key);
+        ...shown.map(uid => {
+          const key = `${boardId}|${String(uid)}`;
+          const p = profilesByUser.get(String(uid));
+          const f = fallbackByBoardUser.get(key);
 
-    const col =
-      localColorByBoardUser.get(key) ||
-      p?.color ||
-      f?.color ||
-      "rgba(0,0,0,0.35)";
+          const col =
+            localColorByBoardUser.get(key) ||
+            p?.color ||
+            f?.color ||
+            "rgba(0,0,0,0.35)";
 
-    const nm = (p?.name || f?.name || "").trim() || "User";
+          const nm = (p?.name || f?.name || "").trim() || "User";
 
-    return `
-      <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
-        display:flex;
-        align-items:center;
-        gap:4px;
-        font-size:${font}px;
-        line-height:1;
-        max-width:${itemMax}px;
-        min-width:0;
-        overflow:hidden;
-        white-space:nowrap;
-        text-overflow:ellipsis;
-      ">
-        <span style="
-          width:${dot}px;
-          height:${dot}px;
-          border-radius:999px;
-          background:${col};
-          flex:0 0 auto;
-        "></span>
-        <span style="
-          opacity:0.85;
-          min-width:0;
-          overflow:hidden;
-          text-overflow:ellipsis;
-        ">${escapeHtml(nm)}</span>
-      </div>
-    `;
-  }),
-  ...(overflow ? [`
-    <div class="mini-legend-item" title="${overflow} more" style="
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:${font}px;
-      line-height:0.5;
-      opacity:0.8;
-      border:1px solid rgba(0,0,0,0.10);
-      border-radius:999px;
-      padding:2px 6px;
-      white-space:nowrap;
-    ">+${overflow}</div>
-  `] : [])
-].join("")}
+          return `
+            <div class="mini-legend-item" title="${escapeHtml(nm)}" style="
+              display:flex;
+              align-items:center;
+              gap:4px;
+              font-size:${font}px;
+              line-height:1;
+              max-width:${itemMax}px;
+              min-width:0;
+              overflow:hidden;
+              white-space:nowrap;
+              text-overflow:ellipsis;
+            ">
+              <span style="
+                width:${dot}px;
+                height:${dot}px;
+                border-radius:999px;
+                background:${col};
+                flex:0 0 auto;
+              "></span>
+              <span style="
+                opacity:0.85;
+                min-width:0;
+                overflow:hidden;
+                text-overflow:ellipsis;
+              ">${escapeHtml(nm)}</span>
+            </div>
+          `;
+        }),
+        ...(overflow ? [`
+          <div class="mini-legend-item" title="${overflow} more" style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:${font}px;
+            line-height:0.5;
+            opacity:0.8;
+            border:1px solid rgba(0,0,0,0.10);
+            border-radius:999px;
+            padding:2px 6px;
+            white-space:nowrap;
+          ">+${overflow}</div>
+        `] : [])
+      ].join("")}
     </div>
   </div>
 </div>
 `
-  : "";
-      
-      previewEl.innerHTML = `
-        <div class="mini-board">
-          <div class="mini-head">${headerCells}</div>
-          <div class="mini-body">${bodyRows}</div>
-        </div>
-        ${legendHtml}
-      `;
-      
-    }
+    : "";
+    
+  previewEl.innerHTML = `
+    ${previewHtml}
+    ${legendHtml}
+  `;
+}
   } catch (err) {
     console.error("Preview render failed:", err);
   }
