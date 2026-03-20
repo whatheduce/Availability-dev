@@ -330,7 +330,6 @@ th {
 }
 
 .whole-day-cell__dots {
-  position: absolute;
   inset: 28px 8px 8px 8px;
   display: flex;
   align-items: center;
