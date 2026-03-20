@@ -2150,7 +2150,7 @@ async function toggleCell(e) {
 
     if (isTogglingOff) {
       // optimistic remove first
-      const removedSnapshot = removeMyDotFromCell(cell, myUid);
+      const removedSnapshot = removeOptimisticDot(cell, myUid);
       maybeApplyGoldForCell(cell);
 
       const { data: deletedRows, error: delErr } = await supabase
@@ -2166,7 +2166,7 @@ async function toggleCell(e) {
 
       if (delErr) {
         console.warn("Delete failed:", delErr);
-        restoreDotToCell(cell, removedSnapshot);
+        restoreOptimisticDot(cell, removedSnapshot);
         maybeApplyGoldForCell(cell);
         return;
       }
@@ -2188,7 +2188,7 @@ async function toggleCell(e) {
 
         if (legacyErr) {
           console.warn("Legacy delete failed:", legacyErr);
-          restoreDotToCell(cell, removedSnapshot);
+          restoreOptimisticDot(cell, removedSnapshot);
           maybeApplyGoldForCell(cell);
           return;
         }
@@ -2199,7 +2199,7 @@ async function toggleCell(e) {
 
       // if nothing deleted, revert
       if (deletedCount === 0 && legacyDeletedCount === 0) {
-        restoreDotToCell(cell, removedSnapshot);
+        restoreOptimisticDot(cell, removedSnapshot);
         maybeApplyGoldForCell(cell);
         return;
       }
