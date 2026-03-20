@@ -1948,7 +1948,7 @@ const startDate = yyyyMmDdInTimeZone(new Date(), tz);
     // TEMP: until you implement real Pro accounts
     const isPro = false;
 
-    if (!Number.isFinite(goldThreshold) || goldThreshold < 1 || goldThreshold > 30) {
+    if (!Number.isFinite(goldThreshold) || goldThreshold < 2 || goldThreshold > 30) {
       alert("Gold threshold must be between 1 and 30.");
       return;
     }
