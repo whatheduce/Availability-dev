@@ -244,6 +244,7 @@ function maybeApplyGoldForCell(cell) {
   }
 }
 
+//----------
 function addOptimisticDot(cell, userId, name, color) {
   const dc = ensureDotContainer(cell);
   if (!dc) return;
@@ -263,6 +264,55 @@ function addOptimisticDot(cell, userId, name, color) {
   requestAnimationFrame(() => {
     if (cell.isConnected) {
       refreshDotLayout(cell);
+    }
+  });
+}
+
+//----------
+function removeOptimisticDot(cell, userId) {
+  if (!cell || !userId) return null;
+
+  const dot = cell.querySelector(`.dot[data-user-id="${userId}"]`);
+  if (!dot) return null;
+
+  const snapshot = {
+    userId: String(userId),
+    name: dot.dataset.name || "—",
+    color: dot.style.background || "#999",
+    pending: dot.dataset.pending || ""
+  };
+
+  dot.remove();
+
+  const dc = cell.querySelector(".dot-container");
+  if (dc && dc.children.length === 0) {
+    dc.remove();
+  } else {
+    requestAnimationFrame(() => {
+      if (cell.isConnected) {
+        refreshDotLayout(cell);
+      }
+    });
+  }
+
+  return snapshot;
+}
+
+//----------
+function restoreOptimisticDot(cell, snapshot) {
+  if (!cell || !snapshot) return;
+
+  addOptimisticDot(
+    cell,
+    snapshot.userId,
+    snapshot.name || "—",
+    snapshot.color || "#999"
+  );
+
+  requestAnimationFrame(() => {
+    const dot = cell.querySelector(`.dot[data-user-id="${snapshot.userId}"]`);
+    if (dot && snapshot.pending) {
+      dot.dataset.pending = snapshot.pending;
     }
   });
 }
