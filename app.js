@@ -2284,17 +2284,32 @@ async function toggleCell(e) {
       .insert(insertPayload);
 
     if (insErr) {
-      console.warn("Insert failed:", insErr);
+  // Already exists in DB -> UI was just slightly behind. Re-sync instead of treating as a real failure.
+    if (insErr.code === "23505") {
+      console.warn("Insert skipped: slot already exists, re-syncing cell.");
 
-      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
+        ?.removeAttribute("data-pending");
 
-      const dc = cell.querySelector(".dot-container");
-      if (dc && dc.children.length === 0) dc.remove();
+    maybeApplyGoldForCell(cell);
+    pendingAdds.delete(k);
 
-      maybeApplyGoldForCell(cell);
-      pendingAdds.delete(k);
-      return;
-    }
+    // Optional: reload to ensure UI matches DB
+    await loadAvailability();
+    return;
+  }
+
+  console.warn("Insert failed:", insErr);
+
+  cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+
+  const dc = cell.querySelector(".dot-container");
+  if (dc && dc.children.length === 0) dc.remove();
+
+  maybeApplyGoldForCell(cell);
+  pendingAdds.delete(k);
+  return;
+}
 
     cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
       ?.removeAttribute("data-pending");
