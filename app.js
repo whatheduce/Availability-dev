@@ -3044,10 +3044,27 @@ for (const t of boards) {
     }
 
     for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
-      const dateKey = formatDateKey(new Date(year, monthIndex, dayNum));
+      const dateObj = new Date(year, monthIndex, dayNum);
+      const dateKey = formatDateKey(dateObj);
       const users = byDate.get(`${boardId}|${dateKey}`) || [];
       const threshold = goldByBoard.get(boardId) || 2;
       const isGold = users.length >= threshold;
+
+      const todayInfo = getPreviewBoardTodayParts(tz);
+
+      const isPast =
+        year < todayInfo.year ||
+        (year === todayInfo.year && monthIndex + 1 < todayInfo.month) ||
+        (
+          year === todayInfo.year &&
+          monthIndex + 1 === todayInfo.month &&
+          dayNum < todayInfo.day
+        );
+
+      const isToday =
+        year === todayInfo.year &&
+        monthIndex + 1 === todayInfo.month &&
+        dayNum === todayInfo.day;
 
       let dotsHtml = "";
 
@@ -3076,9 +3093,12 @@ for (const t of boards) {
       }
 
       monthCells.push(`
-        <div class="mini-whole-day-cell ${isGold ? "mini-whole-day-cell--gold" : ""}">
+        <div class="mini-whole-day-cell
+              ${isGold ? "mini-whole-day-cell--gold" : ""}
+              ${isPast ? "mini-whole-day-cell--past" : ""}
+              ${isToday ? "mini-whole-day-cell--today" : ""}">
           <div class="mini-whole-day-number">${dayNum}</div>
-          <div class="mini-whole-day-dots-wrap">${dotsHtml}</div>
+        <div class="mini-whole-day-dots-wrap">${dotsHtml}</div>
         </div>
       `);
     }
