@@ -2074,6 +2074,38 @@ function buildCalendar() {
 }
 
 //----------  
+function removeMyDotFromCell(cell, userId) {
+  if (!cell || !userId) return null;
+
+  const dot = cell.querySelector(`.dot[data-user-id="${userId}"]`);
+  if (!dot) return null;
+
+  const snapshot = {
+    userId,
+    name: dot.getAttribute("title") || "",
+    color: dot.style.background || "",
+    pending: dot.getAttribute("data-pending") || ""
+  };
+
+  dot.remove();
+
+  const dc = cell.querySelector(".dot-container");
+  if (dc && dc.children.length === 0) dc.remove();
+
+  return snapshot;
+}
+
+function restoreDotToCell(cell, snapshot) {
+  if (!cell || !snapshot) return;
+  addOptimisticDot(cell, snapshot.userId, snapshot.name, snapshot.color || "#999");
+
+  const dot = cell.querySelector(`.dot[data-user-id="${snapshot.userId}"]`);
+  if (dot && snapshot.pending) {
+    dot.setAttribute("data-pending", snapshot.pending);
+  }
+}
+
+//----------  
 async function toggleCell(e) {
   const cell = e.currentTarget;
 
@@ -2107,51 +2139,71 @@ async function toggleCell(e) {
     if (inFlightCells.has(k)) return;
     inFlightCells.add(k);
 
-    // DELETE FIRST (toggle off)
-    const { data: deletedRows, error: delErr } = await supabase
-      .from("availability_dev")
-      .delete()
-      .eq("table_id", currentTable.id)
-      .eq("day", dayNum)
-      .eq("time", timeKey)
-      .eq("user_id", myUid)
-      .select("id");
+    const displayName = prof?.name || "—";
+    const activeColor =
+      (typeof getLocalBoardColor === "function" && getLocalBoardColor(currentTable.id, myUid)) ||
+      prof?.color ||
+      "#999";
 
-    const deletedCount = deletedRows?.length || 0;
+    const existingMyDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
+    const isTogglingOff = !!existingMyDot;
 
-    if (delErr) {
-      console.warn("Delete failed:", delErr);
-      await loadAvailability();
-      return;
-    }
+    if (isTogglingOff) {
+      // optimistic remove first
+      const removedSnapshot = removeMyDotFromCell(cell, myUid);
+      maybeApplyGoldForCell(cell);
 
-    // legacy delete if needed
-    let legacyDeletedCount = 0;
-    let legacyDeletedRows = [];
-
-    if (deletedCount === 0) {
-      const { data, error: legacyErr } = await supabase
+      const { data: deletedRows, error: delErr } = await supabase
         .from("availability_dev")
         .delete()
         .eq("table_id", currentTable.id)
         .eq("day", dayNum)
         .eq("time", timeKey)
-        .is("user_id", null)
-        .eq("name", prof.name)
-        .eq("color", prof.color)
+        .eq("user_id", myUid)
         .select("id");
 
-      if (legacyErr) {
-        console.warn("Legacy delete failed:", legacyErr);
-        await loadAvailability();
+      const deletedCount = deletedRows?.length || 0;
+
+      if (delErr) {
+        console.warn("Delete failed:", delErr);
+        restoreDotToCell(cell, removedSnapshot);
+        maybeApplyGoldForCell(cell);
         return;
       }
 
-      legacyDeletedRows = data || [];
-      legacyDeletedCount = legacyDeletedRows.length;
-    }
+      let legacyDeletedCount = 0;
+      let legacyDeletedRows = [];
 
-    if (deletedCount > 0 || legacyDeletedCount > 0) {
+      if (deletedCount === 0) {
+        const { data, error: legacyErr } = await supabase
+          .from("availability_dev")
+          .delete()
+          .eq("table_id", currentTable.id)
+          .eq("day", dayNum)
+          .eq("time", timeKey)
+          .is("user_id", null)
+          .eq("name", prof.name)
+          .eq("color", prof.color)
+          .select("id");
+
+        if (legacyErr) {
+          console.warn("Legacy delete failed:", legacyErr);
+          restoreDotToCell(cell, removedSnapshot);
+          maybeApplyGoldForCell(cell);
+          return;
+        }
+
+        legacyDeletedRows = data || [];
+        legacyDeletedCount = legacyDeletedRows.length;
+      }
+
+      // if nothing deleted, revert
+      if (deletedCount === 0 && legacyDeletedCount === 0) {
+        restoreDotToCell(cell, removedSnapshot);
+        maybeApplyGoldForCell(cell);
+        return;
+      }
+
       const allDeletedRows = [
         ...(deletedRows || []),
         ...legacyDeletedRows
@@ -2166,18 +2218,18 @@ async function toggleCell(e) {
         }
       }
 
-      // Let realtime own delete rendering, including gold -> non-gold transitions
       return;
     }
 
-    // INSERT (toggle on) — optimistic first
-    const key = addKey(currentTable.id, dayNum, timeKey, myUid);
-    if (pendingAdds.has(key)) return;
-    pendingAdds.add(key);
+    // optimistic add first
+    if (pendingAdds.has(k)) return;
+    pendingAdds.add(k);
 
-    const localColorMap = await fetchBoardLocalColorMap(currentTable.id, [myUid]);
-    const displayName = prof?.name || "—";
-    const activeColor = localColorMap[myUid] || prof?.color || "#999";
+    addOptimisticDot(cell, myUid, displayName, activeColor);
+    maybeApplyGoldForCell(cell);
+
+    // let browser paint before network work
+    await new Promise(requestAnimationFrame);
 
     const insertPayload = {
       table_id: currentTable.id,
@@ -2187,9 +2239,6 @@ async function toggleCell(e) {
       name: displayName,
       color: activeColor
     };
-
-    addOptimisticDot(cell, myUid, displayName, activeColor);
-    maybeApplyGoldForCell(cell);
 
     const { error: insErr } = await supabase
       .from("availability_dev")
@@ -2203,20 +2252,22 @@ async function toggleCell(e) {
       const dc = cell.querySelector(".dot-container");
       if (dc && dc.children.length === 0) dc.remove();
 
-      pendingAdds.delete(key);
-      await loadAvailability();
+      maybeApplyGoldForCell(cell);
+      pendingAdds.delete(k);
       return;
     }
 
-    // success: mark pending dot as real
     cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
       ?.removeAttribute("data-pending");
 
     maybeApplyGoldForCell(cell);
-    pendingAdds.delete(key);
+    pendingAdds.delete(k);
 
   } finally {
-    if (k) inFlightCells.delete(k);
+    if (k) {
+      inFlightCells.delete(k);
+      pendingAdds.delete(k);
+    }
   }
 }
 window.toggleCell = toggleCell;
