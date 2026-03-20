@@ -2182,7 +2182,8 @@ body.account-view #dash-account {
   padding: 4px 5px 2px;
   box-sizing: border-box;
   pointer-events: none;
-  opacity: 0.96;
+  filter: blur(0.6px);
+  opacity: 0.95;
 }
 
 .mini-whole-day-title {
