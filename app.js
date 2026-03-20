@@ -3030,7 +3030,7 @@ for (const t of boards) {
 
   if (structureType === "whole_day") {
     const tz = tzByBoard.get(boardId);
-    const { year, month } = getPreviewBoardTodayParts(tz);
+    const { year, month } = todayInfo;
     const monthIndex = month - 1;
 
     const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
