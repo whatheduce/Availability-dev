@@ -3307,9 +3307,13 @@ for (const t of boards) {
     : "";
     
   previewEl.innerHTML = `
+  <div class="mini-preview-main">
     ${previewHtml}
+  </div>
+  <div class="mini-preview-legend">
     ${legendHtml}
-  `;
+  </div>
+`;
 }
   } catch (err) {
     console.error("Preview render failed:", err);
