@@ -177,7 +177,7 @@ async function showCreateBoard() {
   const hostedCount = await getHostedBoardCount();
     if (!IS_PRO && hostedCount >= 2){
       showConfirmPopup(
-        "The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.",
+        "The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro (Coming Soon!).",
         { title: "Hosted Calendar Limit" }
       );
       return;
