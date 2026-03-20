@@ -2504,6 +2504,49 @@ body.account-view #dash-account {
   width: min(520px, 100%);
 }
 
+#notice-ok {
+  appearance: none;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: linear-gradient(180deg, #ffffff 0%, #f7f1ea 100%);
+  color: #5f4634;
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 6px 18px rgba(95, 70, 52, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+#notice-ok:hover {
+  transform: translateY(-1px);
+  border-color: rgba(126, 104, 82, 0.28);
+  box-shadow:
+    0 10px 22px rgba(95, 70, 52, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+#notice-ok:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px rgba(95, 70, 52, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+#notice-ok:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(202, 138, 4, 0.18),
+    0 10px 22px rgba(95, 70, 52, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
 #timezone-search {
   width: 100%;
   box-sizing: border-box;
