@@ -2175,7 +2175,123 @@ body.account-view #dash-account {
   text-overflow: ellipsis;
   max-width: 70px;
 }
-    
+
+.mini-whole-day {
+  width: 100%;
+  height: 100%;
+  padding: 6px 6px 44px;
+  box-sizing: border-box;
+  pointer-events: none;
+  opacity: 0.96;
+}
+
+.mini-whole-day-title {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.82;
+  margin-bottom: 4px;
+  padding-left: 2px;
+}
+
+.mini-whole-day-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.mini-whole-day-weekday {
+  height: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  font-weight: 600;
+  opacity: 0.72;
+}
+
+.mini-whole-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mini-whole-day-cell {
+  min-height: 18px;
+  border-radius: 5px;
+  border: 1px solid rgba(126, 104, 82, 0.10);
+  background: rgba(126, 104, 82, 0.035);
+  padding: 2px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mini-whole-day-cell--empty {
+  border-color: transparent;
+  background: transparent;
+}
+
+.mini-whole-day-cell--gold {
+  background: linear-gradient(
+    145deg,
+    #f7d84a 0%,
+    #edbc34 58%,
+    #d8921e 100%
+  );
+  border-color: rgba(247, 216, 74, 0.34);
+  box-shadow:
+    0 0 6px rgba(216, 146, 30, 0.18),
+    inset 0 0 0 1px rgba(255, 238, 176, 0.14);
+}
+
+.mini-whole-day-number {
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0.78;
+}
+
+.mini-whole-day-dots-wrap {
+  min-height: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.mini-whole-day-dots {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mini-whole-day-dots--1-2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.mini-whole-day-dots--3-4 {
+  display: grid;
+  grid-template-columns: repeat(2, 3px);
+  grid-auto-rows: 3px;
+  justify-content: center;
+  align-content: center;
+  gap: 1px;
+}
+
+.mini-whole-day-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  display: block;
+}
+
+.mini-whole-day-dots--3-4 .mini-whole-day-dot {
+  width: 3px;
+  height: 3px;
+}
+
 /* Modal (Apple-ish) */
 .modal-overlay[hidden] { display: none; }
 
