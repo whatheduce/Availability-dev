@@ -3222,7 +3222,7 @@ for (const t of boards) {
 <div class="mini-legend" style="
   height:${legendHeight}px;
   overflow:hidden;
-  margin-top:6px;
+  margin-top:0;
   padding:0 10px 0 8px;
   box-sizing:border-box;
 ">
