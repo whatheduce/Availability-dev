@@ -37,6 +37,7 @@ const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
 window.pendingDeleteCellByEntryId = pendingDeleteCellByEntryId;
 const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
 window.availabilityMetaByEntryId = availabilityMetaByEntryId; 
+const IS_PRO = false;
 
 
 
@@ -174,15 +175,13 @@ async function showCreateBoard() {
   }
 
   const hostedCount = await getHostedBoardCount();
-  const isPro = false; // TEMP: until you implement real Pro accounts
-
-  if (!isPro && hostedCount >= 2) {
-    showConfirmPopup(
-      "The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.",
-      { title: "Hosted Calendar Limit" }
-    );
-    return;
-  }
+    if (!IS_PRO && hostedCount >= 2){
+      showConfirmPopup(
+        "The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.",
+        { title: "Hosted Calendar Limit" }
+      );
+      return;
+    }
 
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "none";
