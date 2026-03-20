@@ -1924,7 +1924,6 @@ async function createBoard() {
     }
   
   const hostedCount = await getHostedBoardCount();
-  const isPro = false; // TEMP: until you implement real Pro accounts
 
   if (!isPro && hostedCount >= 2) {
     alert("The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.");
@@ -1987,17 +1986,15 @@ const startDate = yyyyMmDdInTimeZone(new Date(), tz);
     return;
   }
 
-    // TEMP: until you implement real Pro accounts
-    const isPro = false;
-
     if (!Number.isFinite(goldThreshold) || goldThreshold < 2 || goldThreshold > 30) {
       alert("Gold threshold must be between 1 and 30.");
       return;
     }
-if (!isPro && goldThreshold >= 6) {
-  alert("Free version allows gold threshold up to 5.");
-  return;
-}
+  
+    if (!isPro && goldThreshold >= 6) {
+      alert("Free version allows gold threshold up to 5.");
+      return;
+    }
 
   const { error } = await supabase
     .from("tables")
