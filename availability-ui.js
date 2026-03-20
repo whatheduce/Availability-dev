@@ -323,3 +323,5 @@ window.rebuildDotsForCell = rebuildDotsForCell;
 window.applyGoldStateForCell = applyGoldStateForCell;
 window.maybeApplyGoldForCell = maybeApplyGoldForCell;
 window.addOptimisticDot = addOptimisticDot;
+window.removeOptimisticDot = removeOptimisticDot;
+window.restoreOptimisticDot = restoreOptimisticDot;
