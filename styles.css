@@ -2179,7 +2179,7 @@ body.account-view #dash-account {
 .mini-whole-day {
   width: 100%;
   height: auto;
-  padding: 5px 5px 6px;
+  padding: 4px 5px 2px;
   box-sizing: border-box;
   pointer-events: none;
   opacity: 0.96;
@@ -2294,6 +2294,27 @@ body.account-view #dash-account {
 
 .board-preview .mini-whole-day + .mini-legend {
   margin-top: 8px !important;
+}
+
+.board-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 148px;
+  box-sizing: border-box;
+}
+
+.mini-preview-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: stretch;
+}
+
+.mini-preview-legend {
+  flex: 0 0 auto;
+  margin-top: 4px;
 }
 
 /* Modal (Apple-ish) */
