@@ -95,7 +95,7 @@ function populateGoldThresholdSelect() {
   const freeGroup = document.createElement("optgroup");
   freeGroup.label = "Free";
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 2; i <= 5; i++) {
     const opt = document.createElement("option");
     opt.value = String(i);
     opt.textContent = String(i);
