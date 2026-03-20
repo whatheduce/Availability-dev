@@ -2245,6 +2245,18 @@ body.account-view #dash-account {
     inset 0 0 0 1px rgba(255, 238, 176, 0.14);
 }
 
+.mini-whole-day-cell--past {
+  opacity: 0.5;
+  background:
+    linear-gradient(180deg, rgba(239, 232, 224, 0.9), rgba(233, 224, 214, 0.9));
+}
+
+.mini-whole-day-cell--today {
+  box-shadow:
+    inset 0 0 0 1px rgba(202, 138, 4, 0.45),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
 .mini-whole-day-number {
   font-size: 7px;
   font-weight: 600;
