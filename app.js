@@ -2924,7 +2924,7 @@ if (wholeDayBoardIds.length) {
 
     // Fallback (important if profiles RLS blocks reading other users)
     const fallbackByUser = new Map(); // user_id -> { name, color }
-    for (const r of (avail || [])) {
+    for (const r of ([...(avail || []), ...(wholeDayAvail || [])])) {
       const uid = r.user_id ? String(r.user_id) : null;
       if (!uid) continue;
 
@@ -3030,6 +3030,7 @@ for (const t of boards) {
 
   if (structureType === "whole_day") {
     const tz = tzByBoard.get(boardId);
+    const todayInfo = getPreviewBoardTodayParts(tz);
     const { year, month } = todayInfo;
     const monthIndex = month - 1;
 
@@ -3049,8 +3050,6 @@ for (const t of boards) {
       const users = byDate.get(`${boardId}|${dateKey}`) || [];
       const threshold = goldByBoard.get(boardId) || 2;
       const isGold = users.length >= threshold;
-
-      const todayInfo = getPreviewBoardTodayParts(tz);
 
       const isPast =
         year < todayInfo.year ||
