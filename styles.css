@@ -1958,7 +1958,7 @@ body.account-view #dash-account {
 /* Square hosted cards */
 .board-pill--square {
   width: 200px;
-  height: 200px;
+  height: 240px;
   display: flex;
   flex-direction: column;
   gap: 8px;
