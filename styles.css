@@ -2257,10 +2257,9 @@ body.account-view #dash-account {
 }
 
 .board-pill:hover {
-  transform: translateY(-2px);
+  transform: none;
   box-shadow:
-    0 14px 28px rgba(70, 56, 44, 0.12),
-    inset 0 1px 0 rgba(255,255,255,0.6);
+    0 16px 30px rgba(70, 56, 44, 0.18);
 }
 
 .board-actions-btn:hover {
