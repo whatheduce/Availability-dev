@@ -2061,6 +2061,7 @@ body.account-view #dash-account {
   background:
     linear-gradient(180deg, rgba(120, 109, 98, 0.12), rgba(97, 86, 76, 0.08)),
     linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+ margin-top: 5px;
 }
 
 .board-pill--slot-locked .board-slot-well {
