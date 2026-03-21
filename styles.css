@@ -1972,6 +1972,8 @@ body.account-view #dash-account {
 }
 
 .board-pill--slot {
+  display: grid;
+  grid-template-rows: 34px 1fr 28px;
   padding: 0;
   overflow: hidden;
   background:
@@ -1983,12 +1985,10 @@ body.account-view #dash-account {
 }
 
 .board-slot-shell {
+  grid-row: 2;
   width: 100%;
-  height: auto;
-  margin-top: 44px;
-  margin-left: 12px;
-  margin-right: 12px;
-  margin-bottom: 34px;
+  height: 100%;
+  padding: 8px 12px 6px;
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
@@ -1998,7 +1998,7 @@ body.account-view #dash-account {
 .board-slot-well {
   position: relative;
   width: 100%;
-  min-height: 162px;
+  height: 100%;
   border-radius: 18px;
   overflow: hidden;
   background:
