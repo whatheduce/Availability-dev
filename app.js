@@ -1494,11 +1494,18 @@ async function loadBoards() {
   const ownedEl = document.getElementById("owned-boards");
   const joinedEl = document.getElementById("joined-boards");
 
-  // Hosted
-  if (!owned.length) {
-    ownedEl.innerHTML = `<div class="empty-boards">No hosted calendars</div>`;
-  } else {
-    ownedEl.innerHTML = owned.map(b => `
+// Hosted
+const isPro = IS_PRO;
+const maxHostedSlots = 10;
+const openHostedSlots = isPro ? 10 : 2;
+
+const hostedSlotsHtml = [];
+
+for (let i = 0; i < maxHostedSlots; i++) {
+  const b = owned[i];
+
+  if (b?.tables) {
+    hostedSlotsHtml.push(`
       <div
         class="board-pill board-pill--square"
         data-kind="hosted"
@@ -1517,8 +1524,39 @@ async function loadBoards() {
         <div class="board-preview" data-board-id="${b.tables.id}"></div>
         <div class="board-pill-meta">Hosted</div>
       </div>
-    `).join("");
+    `);
+    continue;
   }
+
+  if (i < openHostedSlots) {
+    hostedSlotsHtml.push(`
+      <div class="board-pill board-pill--square board-pill--empty-hosted" data-kind="hosted-empty">
+        <div class="board-pill-title board-pill-title--top board-pill-title--empty">Empty Slot</div>
+        <div class="board-preview board-preview--empty">
+          <div class="board-preview-placeholder">
+            <div class="board-preview-placeholder-grid"></div>
+          </div>
+        </div>
+        <div class="board-pill-meta">Available</div>
+      </div>
+    `);
+  } else {
+    hostedSlotsHtml.push(`
+      <div class="board-pill board-pill--square board-pill--locked-hosted" data-kind="hosted-locked">
+        <div class="board-pill-title board-pill-title--top board-pill-title--locked">Locked Slot</div>
+        <div class="board-preview board-preview--locked">
+          <div class="board-preview-placeholder board-preview-placeholder--locked">
+            <div class="board-preview-lock">🔒</div>
+            <div class="board-preview-lock-text">Pro</div>
+          </div>
+        </div>
+        <div class="board-pill-meta">Upgrade required</div>
+      </div>
+    `);
+  }
+}
+
+ownedEl.innerHTML = hostedSlotsHtml.join("");
 
   // Joined (same look as hosted, no actions menu)
   if (!joined.length) {
