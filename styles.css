@@ -205,6 +205,31 @@ th {
   letter-spacing: -0.01em;
 }
 
+/* Month divider line */
+th.day-header.month-break,
+td.month-break {
+  border-left: 2px solid rgba(126, 104, 82, 0.26);
+}
+
+/* Slight highlight so it feels intentional */
+th.day-header.month-break {
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.35);
+}
+
+td.month-break {
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.18);
+}
+
+.month-break-label {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(95, 70, 52, 0.72);
+  margin-bottom: 4px;
+}
+
 .monthday {
   font-size: 13px;
   color: #6b5c4f;
