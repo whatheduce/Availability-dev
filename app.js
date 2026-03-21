@@ -1531,21 +1531,25 @@ for (let i = 0; i < maxHostedSlots; i++) {
   if (i < openHostedSlots) {
     hostedSlotsHtml.push(`
   <div class="board-pill board-pill--square board-pill--slot board-pill--slot-open" data-kind="hosted-empty">
+    <div class="board-pill-title board-pill-title--top board-slot-spacer" aria-hidden="true">&nbsp;</div>
     <div class="board-slot-shell">
       <div class="board-slot-well">
         <div class="board-slot-ghost"></div>
       </div>
     </div>
+    <div class="board-pill-meta board-slot-spacer" aria-hidden="true">&nbsp;</div>
   </div>
 `);
   } else {
     hostedSlotsHtml.push(`
   <div class="board-pill board-pill--square board-pill--slot board-pill--slot-locked" data-kind="hosted-locked">
+    <div class="board-pill-title board-pill-title--top board-slot-spacer" aria-hidden="true">&nbsp;</div>
     <div class="board-slot-shell">
       <div class="board-slot-well">
         <div class="board-slot-lock">🔒</div>
       </div>
     </div>
+    <div class="board-pill-meta board-slot-spacer" aria-hidden="true">&nbsp;</div>
   </div>
 `);
   }
