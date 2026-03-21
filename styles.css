@@ -1949,6 +1949,27 @@ body.account-view #dash-account {
   padding-bottom: 8px;
 }
 
+.board-strip-fade {
+  position: relative;
+  overflow: hidden;
+}
+
+.board-strip-fade::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 56px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(247, 244, 236, 0) 0%,
+    rgba(247, 244, 236, 0.72) 45%,
+    rgba(247, 244, 236, 0.96) 100%
+  );
+}
+
 .board-pill {
     position: relative;
     flex: 0 0 auto;
