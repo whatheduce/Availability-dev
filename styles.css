@@ -1954,28 +1954,12 @@ body.account-view #dash-account {
   overflow: hidden;
 }
 
-.board-strip-fade::before,
 .board-strip-fade::after {
   content: "";
   position: absolute;
   top: 0;
   height: 100%;
   pointer-events: none;
-  z-index: 2;
-}
-
-.board-strip-fade::before {
-  left: 0;
-  width: 52px;
-  background: linear-gradient(
-    to left,
-    rgba(247, 244, 236, 0) 0%,
-    rgba(247, 244, 236, 0.72) 45%,
-    rgba(247, 244, 236, 0.96) 100%
-  );
-}
-
-.board-strip-fade::after {
   right: 0;
   width: 124px;
   background: linear-gradient(
