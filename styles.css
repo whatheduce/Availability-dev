@@ -1971,6 +1971,136 @@ body.account-view #dash-account {
   opacity: 0.55;
 }
 
+.board-pill--slot {
+  padding: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(109, 97, 84, 0.07), rgba(109, 97, 84, 0.03));
+  border: 1px solid rgba(110, 97, 82, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 10px 26px rgba(70, 56, 44, 0.05);
+}
+
+.board-slot-shell {
+  width: 100%;
+  height: 100%;
+  padding: 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.board-slot-well {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(116, 105, 94, 0.11), rgba(93, 82, 72, 0.08)),
+    linear-gradient(135deg, rgba(255,255,255,0.04), rgba(0,0,0,0.03));
+  border: 1px solid rgba(105, 92, 79, 0.16);
+  box-shadow:
+    inset 0 8px 18px rgba(56, 45, 35, 0.14),
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -10px 18px rgba(255,255,255,0.04);
+}
+
+.board-slot-well::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255,255,255,0.08), transparent 35%),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.06), transparent 38%);
+  opacity: 0.9;
+}
+
+.board-slot-well::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.05);
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.04);
+}
+
+.board-pill--slot-open .board-slot-well {
+  background:
+    linear-gradient(180deg, rgba(120, 109, 98, 0.12), rgba(97, 86, 76, 0.08)),
+    linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+}
+
+.board-pill--slot-locked .board-slot-well {
+  background:
+    linear-gradient(180deg, rgba(98, 92, 87, 0.10), rgba(84, 76, 70, 0.08)),
+    linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+  filter: saturate(0.82);
+}
+
+.board-slot-ghost {
+  position: absolute;
+  inset: 18px;
+  border-radius: 14px;
+  border: 1px dashed rgba(229, 220, 204, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.03);
+  opacity: 0.5;
+}
+
+.board-slot-ghost::before,
+.board-slot-ghost::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: rgba(236, 225, 206, 0.13);
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+}
+
+.board-slot-ghost::before {
+  width: 34px;
+  height: 2px;
+}
+
+.board-slot-ghost::after {
+  width: 2px;
+  height: 34px;
+}
+
+.board-slot-lock {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.42;
+  filter: grayscale(0.2);
+}
+
+.board-pill--slot .board-pill-title,
+.board-pill--slot .board-pill-meta,
+.board-pill--slot .board-actions-btn,
+.board-pill--slot .board-actions-menu {
+  display: none !important;
+}
+
+.board-pill--slot-locked .board-slot-well::before {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255,255,255,0.05), transparent 35%),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.09), transparent 38%);
+}
+
 .board-preview--empty,
 .board-preview--locked {
   display: flex;
