@@ -1495,9 +1495,8 @@ async function loadBoards() {
   const joinedEl = document.getElementById("joined-boards");
 
 // Hosted
-const isPro = IS_PRO;
 const maxHostedSlots = 10;
-const openHostedSlots = isPro ? 10 : 2;
+const openHostedSlots = IS_PRO ? 10 : 2;
 
 const hostedSlotsHtml = [];
 
@@ -1962,7 +1961,7 @@ async function createBoard() {
   
   const hostedCount = await getHostedBoardCount();
 
-  if (!isPro && hostedCount >= 2) {
+  if (!IS_PRO && hostedCount >= 2) {
     alert("The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.");
     return;
   }
@@ -2028,7 +2027,7 @@ const startDate = yyyyMmDdInTimeZone(new Date(), tz);
       return;
     }
   
-    if (!isPro && goldThreshold >= 6) {
+    if (!IS_PRO && goldThreshold >= 6) {
       alert("Free version allows gold threshold up to 5.");
       return;
     }
