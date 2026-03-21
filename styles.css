@@ -1947,7 +1947,6 @@ body.account-view #dash-account {
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 8px;
-  height: 240px;
 }
 
 .board-pill {
