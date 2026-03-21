@@ -1988,6 +1988,21 @@ body.account-view #dash-account {
     0 8px 20px rgba(82, 68, 52, 0.05);
 }
 
+.board-pill--slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image:
+    radial-gradient(circle at 12% 24%, rgba(90,78,64,0.16) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 68% 34%, rgba(255,255,255,0.14) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 38% 72%, rgba(92,80,66,0.12) 0 1.2px, transparent 1.9px),
+    radial-gradient(circle at 82% 78%, rgba(255,255,255,0.10) 0 1px, transparent 1.6px);
+  background-size: 120px 120px, 140px 140px, 110px 110px, 130px 130px;
+  mix-blend-mode: multiply;
+}
+
 .board-slot-shell {
   grid-row: 2;
   width: 100%;
