@@ -1530,29 +1530,24 @@ for (let i = 0; i < maxHostedSlots; i++) {
 
   if (i < openHostedSlots) {
     hostedSlotsHtml.push(`
-      <div class="board-pill board-pill--square board-pill--empty-hosted" data-kind="hosted-empty">
-        <div class="board-pill-title board-pill-title--top board-pill-title--empty">Empty Slot</div>
-        <div class="board-preview board-preview--empty">
-          <div class="board-preview-placeholder">
-            <div class="board-preview-placeholder-grid"></div>
-          </div>
-        </div>
-        <div class="board-pill-meta">Available</div>
+  <div class="board-pill board-pill--square board-pill--slot board-pill--slot-open" data-kind="hosted-empty">
+    <div class="board-slot-shell">
+      <div class="board-slot-well">
+        <div class="board-slot-ghost"></div>
       </div>
-    `);
+    </div>
+  </div>
+`);
   } else {
     hostedSlotsHtml.push(`
-      <div class="board-pill board-pill--square board-pill--locked-hosted" data-kind="hosted-locked">
-        <div class="board-pill-title board-pill-title--top board-pill-title--locked">Locked Slot</div>
-        <div class="board-preview board-preview--locked">
-          <div class="board-preview-placeholder board-preview-placeholder--locked">
-            <div class="board-preview-lock">🔒</div>
-            <div class="board-preview-lock-text">Pro</div>
-          </div>
-        </div>
-        <div class="board-pill-meta">Upgrade required</div>
+  <div class="board-pill board-pill--square board-pill--slot board-pill--slot-locked" data-kind="hosted-locked">
+    <div class="board-slot-shell">
+      <div class="board-slot-well">
+        <div class="board-slot-lock">🔒</div>
       </div>
-    `);
+    </div>
+  </div>
+`);
   }
 }
 
