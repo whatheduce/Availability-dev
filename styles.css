@@ -1946,7 +1946,7 @@ body.account-view #dash-account {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 24px;
 }
 
 .board-strip-fade {
