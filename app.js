@@ -2114,16 +2114,24 @@ function buildCalendar() {
   for (let dayNum = 1; dayNum <= days; dayNum++) {
     const ymd = addDaysYMD(startYmd, dayNum - 1);
     const { weekday, monthDay } = formatHeaderLabel(ymd);
+    const { d, m } = parseYMD(ymd);
+
+    const isMonthBreak = dayNum !== 1 && d === 1;
+    const monthLabel = new Date(Date.UTC(parseYMD(ymd).y, m - 1, d))
+      .toLocaleDateString("en-AU", { month: "short", timeZone: "UTC" });
 
     const th = document.createElement("th");
     th.classList.add("day-header");
+    if (isMonthBreak) th.classList.add("month-break");
     th.dataset.day = String(dayNum);
-    th.innerHTML = `
-      <div style="font-weight:700;">${weekday}</div>
-      <span class="monthday">${monthDay}</span>
-    `;
-    headerRow.appendChild(th);
-  }
+
+  th.innerHTML = `
+    ${isMonthBreak ? `<div class="month-break-label">${monthLabel}</div>` : ""}
+    <div class="day-header-weekday">${weekday}</div>
+    <span class="monthday">${monthDay}</span>
+  `;
+  headerRow.appendChild(th);
+}
 
   table.appendChild(headerRow);
 
@@ -2137,10 +2145,15 @@ function buildCalendar() {
     row.appendChild(labelCell);
 
     for (let dayNum = 1; dayNum <= days; dayNum++) {
+      const ymd = addDaysYMD(startYmd, dayNum - 1);
+      const { d } = parseYMD(ymd);
+      const isMonthBreak = dayNum !== 1 && d === 1;
+
       const cell = document.createElement("td");
-      cell.dataset.day = String(dayNum);
-      cell.dataset.time = timeObj.label;
-      row.appendChild(cell);
+      if (isMonthBreak) cell.classList.add("month-break");
+        cell.dataset.day = String(dayNum);
+        cell.dataset.time = timeObj.label;
+        row.appendChild(cell);
     }
 
     table.appendChild(row);
