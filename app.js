@@ -2126,10 +2126,9 @@ function buildCalendar() {
     th.dataset.day = String(dayNum);
 
   th.innerHTML = `
-    ${isMonthBreak ? `<div class="month-break-label">${monthLabel}</div>` : ""}
-    <div class="day-header-weekday">${weekday}</div>
-    <span class="monthday">${monthDay}</span>
-  `;
+  <div style="font-weight:700;">${weekday}</div>
+  <span class="monthday">${monthDay}</span>
+`;
   headerRow.appendChild(th);
 }
 
