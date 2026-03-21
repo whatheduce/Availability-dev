@@ -2092,17 +2092,19 @@ body.account-view #dash-account {
   filter: grayscale(0.2);
 }
 
-.board-pill--slot .board-pill-title,
-.board-pill--slot .board-pill-meta,
+.board-pill--slot-locked .board-slot-well::before {
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255,255,255,0.05), transparent 35%),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.09), transparent 38%);
+}
+
 .board-pill--slot .board-actions-btn,
 .board-pill--slot .board-actions-menu {
   display: none !important;
 }
 
-.board-pill--slot-locked .board-slot-well::before {
-  background:
-    radial-gradient(circle at 25% 20%, rgba(255,255,255,0.05), transparent 35%),
-    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.09), transparent 38%);
+.board-slot-spacer {
+  visibility: hidden;
 }
 
 .board-preview--empty,
