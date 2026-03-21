@@ -1999,14 +1999,15 @@ body.account-view #dash-account {
   overflow: hidden;
   position: relative;
   background:
-    radial-gradient(circle at 18% 14%, rgba(255,255,255,0.16), transparent 22%),
-    radial-gradient(circle at 78% 76%, rgba(0,0,0,0.06), transparent 28%),
-    linear-gradient(145deg, #d6d0c4 0%, #c7c0b3 38%, #b8b0a2 100%);
-  border: 1px solid rgba(120, 106, 90, 0.22);
+    radial-gradient(circle at 18% 14%, rgba(255,255,255,0.35), transparent 22%),
+    radial-gradient(circle at 78% 76%, rgba(0,0,0,0.04), transparent 28%),
+    linear-gradient(145deg, #f3eee6 0%, #e8e1d6 40%, #ddd4c6 100%);
+  border: 1px solid rgba(140, 125, 105, 0.18);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.25),
-    inset 0 -10px 18px rgba(92, 79, 63, 0.06),
-    0 8px 20px rgba(82, 68, 52, 0.05);
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -10px 18px rgba(120, 105, 85, 0.05),
+    0 8px 20px rgba(82, 68, 52, 0.04);
+}
 }
 
 .board-pill--slot::before {
@@ -2042,14 +2043,14 @@ body.account-view #dash-account {
   border-radius: 18px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 20% 18%, rgba(255,255,255,0.10), transparent 26%),
-    radial-gradient(circle at 76% 78%, rgba(0,0,0,0.08), transparent 30%),
-    linear-gradient(180deg, #c8c1b5 0%, #b8b0a2 55%, #aca395 100%);
-  border: 1px solid rgba(108, 95, 79, 0.16);
+    radial-gradient(circle at 20% 18%, rgba(255,255,255,0.25), transparent 26%),
+    radial-gradient(circle at 76% 78%, rgba(0,0,0,0.06), transparent 30%),
+    linear-gradient(180deg, #e9e2d7 0%, #ddd4c6 55%, #d2c8b9 100%);
+  border: 1px solid rgba(135, 120, 100, 0.14);
   box-shadow:
-    inset 0 10px 18px rgba(86, 72, 57, 0.10),
-    inset 0 1px 0 rgba(255,255,255,0.14),
-    inset 0 -14px 20px rgba(255,255,255,0.05);
+    inset 0 10px 18px rgba(110, 95, 75, 0.08),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -14px 20px rgba(255,255,255,0.08);
 }
 
 .board-slot-well::before {
