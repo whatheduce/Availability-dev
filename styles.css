@@ -2001,7 +2001,7 @@ body.account-view #dash-account {
   background:
     radial-gradient(circle at 18% 14%, rgba(255,255,255,0.35), transparent 22%),
     radial-gradient(circle at 78% 76%, rgba(0,0,0,0.04), transparent 28%),
-    linear-gradient(145deg, #f3eee6 0%, #e8e1d6 40%, #ddd4c6 100%);
+    linear-gradient(145deg, #f6efe4 0%, #ece3d3 40%, #e2d7c3 100%);
   border: 1px solid rgba(140, 125, 105, 0.18);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.6),
