@@ -38,6 +38,9 @@ window.pendingDeleteCellByEntryId = pendingDeleteCellByEntryId;
 const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
 window.availabilityMetaByEntryId = availabilityMetaByEntryId; 
 const IS_PRO = false;
+const FREE_BOARD_MEMBER_LIMIT = 5;
+const PRO_BOARD_MEMBER_LIMIT = 30;
+
 
 
 
@@ -347,6 +350,10 @@ function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
 
+function getBoardMemberLimit() {
+  return IS_PRO ? PRO_BOARD_MEMBER_LIMIT : FREE_BOARD_MEMBER_LIMIT;
+}
+
 
 
 // =========================
@@ -532,36 +539,11 @@ async function renderCalendarInviteStats() {
 
   if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
 
-// x = accepted invites + owner
-const { count: acceptedCount, error: memberErr } = await supabase
-  .from("board_invites")
-  .select("id", { count: "exact", head: true })
-  .eq("board_id", currentTable.id)
-  .not("accepted_at", "is", null);
+  const memberCount = await getBoardMemberCount(currentTable.id);
+  const memberLimit = getBoardMemberLimit();
 
-if (memberErr) {
-  console.warn("Failed to load current member count:", memberErr);
-  wrap.style.display = "none";
-  return;
-}
-
-  // y = emails invited + owner
-  const { count: inviteCount, error: inviteErr } = await supabase
-    .from("board_invites")
-    .select("id", { count: "exact", head: true })
-    .eq("board_id", currentTable.id);
-
-  if (inviteErr) {
-    console.warn("Failed to load invite count:", inviteErr);
-    wrap.style.display = "none";
-    return;
-  }
-
-  const joined = (acceptedCount || 0) + 1;
-  const total = (inviteCount || 0) + 1;
-
-  joinedEl.textContent = String(joined);
-  totalEl.textContent = String(total);
+  joinedEl.textContent = String(memberCount);
+  totalEl.textContent = String(memberLimit);
   wrap.style.display = "block";
 }
 
@@ -929,7 +911,35 @@ async function enforceUniqueBoardColourIfNeeded(boardId) {
 async function ensureMembership(boardId) {
   const au = await auth.getAuthUser();
 
-  if (!au || !boardId) return;
+  if (!au || !boardId) return false;
+
+  // Already a member? allow through
+  const { data: existingMember, error: existingErr } = await supabase
+    .from("board_members")
+    .select("board_id")
+    .eq("board_id", boardId)
+    .eq("user_id", au.id)
+    .maybeSingle();
+
+  if (existingErr) {
+    console.error("ensureMembership existing-member check failed:", existingErr);
+    return false;
+  }
+
+  if (!existingMember) {
+    const memberCount = await getBoardMemberCount(boardId);
+    const memberLimit = getBoardMemberLimit();
+
+    if (memberCount >= memberLimit) {
+      await confirmModal({
+        title: "Calendar full",
+        message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
+        okText: "OK",
+        showCancel: false
+      });
+      return false;
+    }
+  }
 
   const payload = {
     board_id: boardId,
@@ -943,24 +953,26 @@ async function ensureMembership(boardId) {
 
   if (error) {
     console.error("ensureMembership failed:", error);
-    return;
+    return false;
   }
 
   if (au.email) {
-  const { error: acceptErr } = await supabase
-    .from("board_invites")
-    .update({
-      accepted_at: new Date().toISOString(),
-      accepted_by_user_id: au.id
-    })
-    .eq("board_id", boardId)
-    .eq("email", au.email.toLowerCase().trim())
-    .is("accepted_at", null);
+    const { error: acceptErr } = await supabase
+      .from("board_invites")
+      .update({
+        accepted_at: new Date().toISOString(),
+        accepted_by_user_id: au.id
+      })
+      .eq("board_id", boardId)
+      .eq("email", au.email.toLowerCase().trim())
+      .is("accepted_at", null);
 
-  if (acceptErr) {
-    console.warn("Failed to mark invite accepted:", acceptErr);
+    if (acceptErr) {
+      console.warn("Failed to mark invite accepted:", acceptErr);
+    }
   }
-}
+
+  return true;
 }
 
 //----------
@@ -1429,6 +1441,24 @@ function getWeekdayLabels7(timeZone) {
 // BOARD / TABLE DATA LOADING
 // =========================
 
+
+async function getBoardMemberCount(boardId) {
+  if (!boardId) return 0;
+
+  const { count, error } = await supabase
+    .from("board_members")
+    .select("user_id", { count: "exact", head: true })
+    .eq("board_id", boardId);
+
+  if (error) {
+    console.warn("Failed to load board member count:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+//----------  
 async function rollForwardIfNeeded(tableId) {
   const { data, error } = await supabase.rpc("roll_board_if_needed_rpc", {
     p_table_id: tableId
@@ -1442,6 +1472,7 @@ async function rollForwardIfNeeded(tableId) {
   return data || 0;
 }
 
+//----------  
 async function getHostedBoardCount() {
   const au = await auth.getAuthUser();
   if (!au) return 0;
@@ -1679,8 +1710,15 @@ if (!hydrated) {
   return;
 }
 
-  await ensureMembership(currentTable.id);
-  await enforceUniqueBoardColourIfNeeded(currentTable.id);
+const membershipOk = await ensureMembership(currentTable.id);
+  if (!membershipOk) {
+    document.getElementById("calendar").style.display = "none";
+    document.getElementById("calendar-topbar").style.display = "none";
+    document.getElementById("dashboard").style.display = "block";
+    return;
+  }
+
+await enforceUniqueBoardColourIfNeeded(currentTable.id);
 
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
@@ -2831,7 +2869,7 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
   };
 
   const onSend = async (e) => {
-    const email = (emailEl.value || "").trim();
+  const email = (emailEl.value || "").trim();
 
     if (!email) {
       errEl.style.display = "block";
@@ -2868,6 +2906,15 @@ try {
     return;
   }
 
+  const memberLimit = getBoardMemberLimit();
+  const memberCount = await getBoardMemberCount(boardId);
+
+  if (memberCount >= memberLimit) {
+    errEl.style.display = "block";
+    errEl.textContent = `This calendar is full. The ${IS_PRO ? "Pro" : "free"} version allows up to ${memberLimit} total users.`;
+    return;
+  }
+  
   const inviteLink = buildInviteLink(inviteToken);
   const boardName = inviteContext?.boardName || "Availability Calendar";
 
@@ -4199,22 +4246,36 @@ return;
   return;
 }
 
-    if (action === "add-user") {
-      const inviteTok = card.dataset.inviteToken;
-      const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
+if (action === "add-user") {
+  const inviteTok = card.dataset.inviteToken;
+  const boardId = card.dataset.boardId;
+  const boardName = card.querySelector(".board-pill-title")?.textContent?.trim() || "Availability Calendar";
 
-      if (!inviteTok) {
-        console.error("No invite token found on hosted board card.");
-        return;
-      }
+  if (!inviteTok || !boardId) {
+    console.error("Missing invite token or boardId on hosted board card.");
+    return;
+  }
 
-      openInviteModal({
-        boardId: card.dataset.boardId,
-        inviteToken: inviteTok,
-        boardName
-      });
-      return;
-    }
+  const memberCount = await getBoardMemberCount(boardId);
+  const memberLimit = getBoardMemberLimit();
+
+  if (memberCount >= memberLimit) {
+    await confirmModal({
+      title: "Calendar full",
+      message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
+      okText: "OK",
+      showCancel: false
+    });
+    return;
+  }
+
+  openInviteModal({
+    boardId,
+    inviteToken: inviteTok,
+    boardName
+  });
+  return;
+}
     
     if (action === "delete") {
       // Confirm (no alert UI yet — we can swap to a custom modal next)
@@ -4394,18 +4455,33 @@ if (manageToken && topbarLeft) {
 }
 
 if (addUsersBtn) {
-  addUsersBtn.addEventListener("click", (e) => {
+  addUsersBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!manageToken) return;
-    if (!currentTable?.invite_token) {
-      console.error("Invite token missing on currentTable");
+
+    const boardId = currentTable?.id;
+    if (!boardId || !currentTable?.invite_token) {
+      console.error("Invite token or boardId missing on currentTable");
+      return;
+    }
+
+    const memberCount = await getBoardMemberCount(boardId);
+    const memberLimit = getBoardMemberLimit();
+
+    if (memberCount >= memberLimit) {
+      await confirmModal({
+        title: "Calendar full",
+        message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
+        okText: "OK",
+        showCancel: false
+      });
       return;
     }
 
     openInviteModal({
-      boardId: currentTable.id,
+      boardId,
       inviteToken: currentTable.invite_token,
       boardName: currentTable.name || "Availability Calendar"
     });
