@@ -113,19 +113,28 @@ body.logged-in #landing-bg::after{
   );
 }
 
+.calendar-meta-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
 .calendar-meta-line{
   color: #6b5c4f;
   font-size: 14px;
   margin-top: 2px;
 }
 
-.calendar-meta-subtext{
-  font-size: 10px;
-  font-style: italic;
-  opacity: 0.7;
-  padding-right: 4px;
-  max-width: 220px;
-  padding-left: 10px;
+.calendar-meta-main {
+  white-space: nowrap;
+}
+
+.calendar-meta-subtext {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-top: 2px;
+  white-space: nowrap;
 }
 
 @media (max-width: 720px){
