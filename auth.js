@@ -25,6 +25,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   const titleEl = document.getElementById("auth-title");
   const forgotBtn = document.getElementById("auth-forgot");
   const passwordInput = document.getElementById("auth-password");
+  const confirmInput = document.getElementById("auth-password-confirm");
 
   if (!overlay || !toggle || !subtitle) return;
 
@@ -46,28 +47,41 @@ function showAuthOverlay(msg = "", opts = {}) {
   if (lockSignin) {
     if (titleEl) titleEl.textContent = "Sign in as the calendar owner";
     subtitle.textContent = "This link is owner-only. Sign in to continue.";
-  } else {
-    if (titleEl) titleEl.textContent = "Sign in to access your Hearth Account";
+
+    if (forgotBtn) forgotBtn.style.display = "";
+    if (passwordInput) passwordInput.placeholder = "Password";
+    if (confirmInput) {
+      confirmInput.style.display = "none";
+      confirmInput.value = "";
+    }
   }
 
   // Normal mode switching (only when NOT locked)
   if (!lockSignin) {
-  if (authMode === "signin") {
-    if (titleEl) titleEl.textContent = "Sign in to your Hearth account";
-    toggle.textContent = "Create account";
-    subtitle.textContent = "Sign in to continue.";
+    if (authMode === "signin") {
+      if (titleEl) titleEl.textContent = "Sign in to your Hearth account";
+      toggle.textContent = "Create account";
+      subtitle.textContent = "Sign in to continue.";
 
-    if (forgotBtn) forgotBtn.style.display = "";
-    if (passwordInput) passwordInput.placeholder = "Password";
-  } else {
-    if (titleEl) titleEl.textContent = "Sign up for your Hearth account";
-    toggle.textContent = "I already have an account";
-    subtitle.textContent = "Create your account and confirm your email to get started.";
+      if (forgotBtn) forgotBtn.style.display = "";
+      if (passwordInput) passwordInput.placeholder = "Password";
+      if (confirmInput) {
+        confirmInput.style.display = "none";
+        confirmInput.value = "";
+      }
+    } else {
+      if (titleEl) titleEl.textContent = "Sign up for your Hearth account";
+      toggle.textContent = "I already have an account";
+      subtitle.textContent = "Create your account and confirm your email to get started.";
 
-    if (forgotBtn) forgotBtn.style.display = "none";
-    if (passwordInput) passwordInput.placeholder = "Password (8+ characters)";
+      if (forgotBtn) forgotBtn.style.display = "none";
+      if (passwordInput) passwordInput.placeholder = "Password (8+ characters)";
+      if (confirmInput) {
+        confirmInput.style.display = "";
+        confirmInput.placeholder = "Confirm password";
+      }
+    }
   }
-}
 
   // Message block
   if (message) {
