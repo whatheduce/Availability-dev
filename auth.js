@@ -179,16 +179,21 @@ async function handleAuthSubmit() {
   if (msgEl) { msgEl.style.display = "none"; msgEl.textContent = ""; }
 
   if (authMode === "signup") {
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      showAuthOverlay(error.message || "Sign up failed.");
-      return;
-    }
-    // Confirm email is ON: user must confirm before sign-in session works reliably
-    showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
-    authMode = "signin";
+  if (password.length < 8) {
+    showAuthOverlay("Password must be at least 8 characters. We recommend using a mix of letters and numbers.");
     return;
   }
+
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) {
+    showAuthOverlay(error.message || "Sign up failed.");
+    return;
+  }
+
+  showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
+  authMode = "signin";
+  return;
+}
 
   // signin
   const { error } = await supabase.auth.signInWithPassword({ email, password });
