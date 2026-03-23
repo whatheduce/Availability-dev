@@ -24,6 +24,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   const subtitle = document.getElementById("auth-subtitle");
   const titleEl = document.getElementById("auth-title");
   const forgotBtn = document.getElementById("auth-forgot");
+  const passwordInput = document.getElementById("auth-password");
 
   if (!overlay || !toggle || !subtitle) return;
 
@@ -57,12 +58,14 @@ function showAuthOverlay(msg = "", opts = {}) {
     subtitle.textContent = "Sign in to continue.";
 
     if (forgotBtn) forgotBtn.style.display = "";
+    if (passwordInput) passwordInput.placeholder = "Password";
   } else {
     if (titleEl) titleEl.textContent = "Sign up for your Hearth account";
     toggle.textContent = "I already have an account";
     subtitle.textContent = "Create your account and confirm your email to get started.";
 
     if (forgotBtn) forgotBtn.style.display = "none";
+    if (passwordInput) passwordInput.placeholder = "Password (8+ characters)";
   }
 }
 
