@@ -23,6 +23,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   const toggle = document.getElementById("auth-toggle-mode");
   const subtitle = document.getElementById("auth-subtitle");
   const titleEl = document.getElementById("auth-title");
+  const forgotBtn = document.getElementById("auth-forgot");
 
   if (!overlay || !toggle || !subtitle) return;
 
@@ -50,14 +51,20 @@ function showAuthOverlay(msg = "", opts = {}) {
 
   // Normal mode switching (only when NOT locked)
   if (!lockSignin) {
-    if (authMode === "signin") {
-      toggle.textContent = "Create account";
-      subtitle.textContent = "Sign in to continue.";
-    } else {
-      toggle.textContent = "I already have an account";
-      subtitle.textContent = "Create your account (you must confirm your email).";
-    }
+  if (authMode === "signin") {
+    if (titleEl) titleEl.textContent = "Sign in to your Hearth account";
+    toggle.textContent = "Create account";
+    subtitle.textContent = "Sign in to continue.";
+
+    if (forgotBtn) forgotBtn.style.display = "";
+  } else {
+    if (titleEl) titleEl.textContent = "Sign up for your Hearth account";
+    toggle.textContent = "I already have an account";
+    subtitle.textContent = "Create your account and confirm your email to get started.";
+
+    if (forgotBtn) forgotBtn.style.display = "none";
   }
+}
 
   // Message block
   if (message) {
