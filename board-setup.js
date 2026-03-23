@@ -2,6 +2,11 @@
 // BOARD SETUP / CREATE CALENDAR
 // =========================
 
+const MAX_BOARD_NAME_LENGTH = 50;
+
+
+
+
 function showBoardSetup() {
   const startBtn = document.getElementById("start-create");
   if (startBtn) startBtn.style.display = "none";
@@ -304,6 +309,10 @@ if (showErrors && !hasStructure) {
 
 function bindBoardSetupUi() {
   const boardNameInput = document.getElementById("board-name");
+
+if (boardNameInput) {
+  boardNameInput.maxLength = MAX_BOARD_NAME_LENGTH;
+}
 if (boardNameInput) {
   boardNameInput.addEventListener("input", () => {
     updateGoCreateVisibility();
