@@ -40,6 +40,8 @@ window.availabilityMetaByEntryId = availabilityMetaByEntryId;
 const IS_PRO = false;
 const FREE_BOARD_MEMBER_LIMIT = 5;
 const PRO_BOARD_MEMBER_LIMIT = 30;
+const MAX_BOARD_NAME_LENGTH = 50;
+
 
 
 
@@ -2012,8 +2014,8 @@ async function createBoard() {
     return;
   }
 
-  if (name.length > 50) {
-  alert("Calendar name must be 50 characters or less.");
+  if (name.length > MAX_BOARD_NAME_LENGTH) {
+  alert(`Calendar name must be ${MAX_BOARD_NAME_LENGTH} characters or less.`);
   return;
 }
 
