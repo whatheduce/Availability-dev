@@ -3960,6 +3960,7 @@ pwSave?.addEventListener("click", async () => {
     if (!current) return setPwError("Please enter your current password.");
     if (!next) return setPwError("Please enter a new password.");
     if (next.length < 8) return setPwError("New password must be at least 8 characters.");
+    if (next.length > 72) return setPwError("New password must be 72 characters or less.");
     if (next !== confirm) return setPwError("New passwords do not match.");
     if (next === current) return setPwError("New password must be different from the current password.");
 
