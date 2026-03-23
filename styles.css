@@ -1579,7 +1579,7 @@ body.account-view #dash-account {
 }
 
 #acct-back-dashboard{
-  margin-top: auto;  /* pushes it to the bottom */
+  margin-top: 46px;
 }
 
 .pro-upsell-card {
@@ -1603,15 +1603,16 @@ body.account-view #dash-account {
 }
 
 .acct-upgrade-lock {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.045);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 15px;
+  font-size: 24px;
+  margin: 12px 0 0 22px;
 }
 
 .pro-upsell-title {
