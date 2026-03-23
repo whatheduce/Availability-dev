@@ -208,6 +208,11 @@ async function handleAuthSubmit() {
     return;
   }
 
+  if (password.length > 72) {
+  showAuthOverlay("Password must be 72 characters or less.");
+  return;
+}  
+
   const { error } = await supabase.auth.signUp({ email, password });
   if (error) {
     showAuthOverlay(error.message || "Sign up failed.");
