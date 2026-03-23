@@ -1575,11 +1575,63 @@ body.account-view #dash-account {
 .settings-cta-left{
   display: flex;
   flex-direction: column;
-  min-height: 260px; /* tweak if you want */
+  min-height: 220px;
 }
 
 #acct-back-dashboard{
   margin-top: auto;  /* pushes it to the bottom */
+}
+
+.pro-upsell-card {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.035);
+  box-sizing: border-box;
+}
+
+.pro-upsell-card.is-disabled {
+  opacity: 0.78;
+}
+
+.pro-upsell-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.acct-upgrade-lock {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.045);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 15px;
+}
+
+.pro-upsell-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.pro-upsell-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pro-upsell-list li {
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.78;
 }
 
 /* Override the default full-width button */
