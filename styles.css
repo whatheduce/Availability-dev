@@ -1801,10 +1801,10 @@ body.account-view #dash-account {
 #acct-upgrade-pro::after{
   content: "COMING SOON";
   position: absolute;
-  top: 7px;
-  right: -22px;
+  top: 0px;
+  right: -30px;
   transform: rotate(24deg);
-  padding: 2px 20px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: linear-gradient(135deg, #fff7ed, #fde7bf);
   color: #9a3412;
