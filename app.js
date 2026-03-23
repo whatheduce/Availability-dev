@@ -2012,6 +2012,11 @@ async function createBoard() {
     return;
   }
 
+  if (name.length > 50) {
+  alert("Calendar name must be 50 characters or less.");
+  return;
+}
+
   let timeBlocks = [];
 
 const structureChoice = window.selectedStructure;
