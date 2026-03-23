@@ -2270,22 +2270,32 @@ async function toggleCell(e) {
       prof?.color ||
       "#999";
 
-    const existingMyDot = cell.querySelector(`.dot[data-user-id="${myUid}"]`);
-    const isTogglingOff = !!existingMyDot;
+    const { data: existingRow, error: existingErr } = await supabase
+      .from("availability_dev")
+      .select("id")
+      .eq("table_id", currentTable.id)
+      .eq("day", dayNum)
+      .eq("time", timeKey)
+      .eq("user_id", myUid)
+      .maybeSingle();
 
+if (existingErr) {
+  console.warn("Existing row check failed:", existingErr);
+  return;
+}
+
+const isTogglingOff = !!existingRow;
+    
     if (isTogglingOff) {
       // optimistic remove first
       const removedSnapshot = removeOptimisticDot(cell, myUid);
       maybeApplyGoldForCell(cell);
 
       const { data: deletedRows, error: delErr } = await supabase
-        .from("availability_dev")
-        .delete()
-        .eq("table_id", currentTable.id)
-        .eq("day", dayNum)
-        .eq("time", timeKey)
-        .eq("user_id", myUid)
-        .select("id");
+      .from("availability_dev")
+      .delete()
+      .eq("id", existingRow.id)
+      .select("id");
 
       const deletedCount = deletedRows?.length || 0;
 
