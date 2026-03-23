@@ -310,93 +310,90 @@ if (showErrors && !hasStructure) {
 function bindBoardSetupUi() {
   const boardNameInput = document.getElementById("board-name");
 
-if (boardNameInput) {
-  boardNameInput.maxLength = MAX_BOARD_NAME_LENGTH;
-}
-if (boardNameInput) {
-  boardNameInput.addEventListener("input", () => {
-    updateGoCreateVisibility();
+  if (boardNameInput) {
+    boardNameInput.maxLength = MAX_BOARD_NAME_LENGTH;
+    boardNameInput.addEventListener("input", () => {
+      updateGoCreateVisibility();
+    });
+  }
+
+  const timezoneSelect = document.getElementById("host-timezone");
+  if (timezoneSelect) {
+    timezoneSelect.addEventListener("change", () => {
+      updateGoCreateVisibility();
+    });
+  }
+
+  const goldThresholdSelect = document.getElementById("gold-threshold");
+  if (goldThresholdSelect) {
+    goldThresholdSelect.addEventListener("change", () => {
+      updateGoCreateVisibility();
+    });
+  }
+
+  const structureCards = [
+    { id: "whole-day-card", value: "whole_day" },
+    { id: "am-pm-card", value: "am_pm" },
+    { id: "meals-card", value: "meals" },
+    { id: "school-times-card", value: "school_times" },
+    { id: "workday-card", value: "workday" },
+    { id: "shifts-card", value: "shifts" },
+    { id: "custom-card", value: "custom" }
+  ];
+
+  structureCards.forEach(({ id, value }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("click", () => {
+      if (value === "custom") {
+        openCustomStructureModal();
+        return;
+      }
+
+      window.selectedStructure = value;
+      setActiveStructureCard(id);
+      updateGoCreateVisibility({ showErrors: true });
+    });
   });
-}
 
-const timezoneSelect = document.getElementById("host-timezone");
-if (timezoneSelect) {
-  timezoneSelect.addEventListener("change", () => {
-    updateGoCreateVisibility();
+  const customRowCount = document.getElementById("custom-row-count");
+  if (customRowCount) {
+    customRowCount.addEventListener("change", () => {
+      const count = parseInt(customRowCount.value || "", 10);
+      if (!Number.isFinite(count) || count < 1 || count > 5) return;
+      renderCustomRowInputs(count);
+    });
+  }
+
+  document.getElementById("custom-structure-cancel")?.addEventListener("click", () => {
+    closeCustomStructureModal();
   });
-}
 
-const goldThresholdSelect = document.getElementById("gold-threshold");
-if (goldThresholdSelect) {
-  goldThresholdSelect.addEventListener("change", () => {
-    updateGoCreateVisibility();
-  });
-}  
+  document.getElementById("custom-structure-save")?.addEventListener("click", () => {
+    const inputs = Array.from(document.querySelectorAll("#custom-rows-fields .custom-row-input"));
+    const labels = inputs.map(input => input.value.trim()).filter(Boolean);
 
-const structureCards = [
-  { id: "whole-day-card", value: "whole_day" },
-  { id: "am-pm-card", value: "am_pm" },
-  { id: "meals-card", value: "meals" },
-  { id: "school-times-card", value: "school_times" },
-  { id: "workday-card", value: "workday" },
-  { id: "shifts-card", value: "shifts" },
-  { id: "custom-card", value: "custom" }
-];
-
-structureCards.forEach(({ id, value }) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-
-  el.addEventListener("click", () => {
-    if (value === "custom") {
-      openCustomStructureModal();
+    if (!labels.length || labels.length !== inputs.length) {
+      updateCustomStructureSaveState();
       return;
     }
 
-    window.selectedStructure = value;
-    setActiveStructureCard(id);
+    window.customStructureLabels = labels;
+    updateCustomCardPreview();
+    closeCustomStructureModal();
+
+    window.selectedStructure = "custom";
+    setActiveStructureCard("custom-card");
     updateGoCreateVisibility({ showErrors: true });
   });
-});
 
-const customRowCount = document.getElementById("custom-row-count");
-if (customRowCount) {
-  customRowCount.addEventListener("change", () => {
-    const count = parseInt(customRowCount.value || "", 10);
-    if (!Number.isFinite(count) || count < 1 || count > 5) return;
-    renderCustomRowInputs(count);
+  document.getElementById("custom-structure-modal")?.addEventListener("click", (e) => {
+    if (!e.target.closest(".modal-card")) {
+      closeCustomStructureModal();
+    }
   });
 }
 
-document.getElementById("custom-structure-cancel")?.addEventListener("click", () => {
-  closeCustomStructureModal();
-});
-
-document.getElementById("custom-structure-save")?.addEventListener("click", () => {
-  const inputs = Array.from(document.querySelectorAll("#custom-rows-fields .custom-row-input"));
-  const labels = inputs.map(input => input.value.trim()).filter(Boolean);
-
-  if (!labels.length || labels.length !== inputs.length) {
-    updateCustomStructureSaveState();
-    return;
-  }
-
-  window.customStructureLabels = labels;
-  updateCustomCardPreview();
-  closeCustomStructureModal();
-
-  window.selectedStructure = "custom";
-  setActiveStructureCard("custom-card");
-  updateGoCreateVisibility({ showErrors: true });
-});
-
-document.getElementById("custom-structure-modal")?.addEventListener("click", (e) => {
-  if (!e.target.closest(".modal-card")) {
-    closeCustomStructureModal();
-  }
-});
-}
-
-bindBoardSetupUi()
+bindBoardSetupUi();
 window.showBoardSetup = showBoardSetup;
-
