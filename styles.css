@@ -275,7 +275,11 @@ th.day-header.month-break {
       rgba(196, 176, 126, 0.08) 10px,
       transparent 22px
     ),
-    inherit;
+    linear-gradient(
+      180deg,
+      rgba(252, 249, 244, 0.96),
+      rgba(247, 241, 232, 0.96)
+    );
 }
 
 td.month-break {
