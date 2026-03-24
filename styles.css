@@ -224,11 +224,12 @@ body.logged-in #landing-bg::after{
 /* Alternate day columns (warmer tone) */
 #availabilityTable td:nth-child(odd),
 #availabilityTable th:nth-child(odd) {
-  background: linear-gradient(
-    180deg,
-    #f3e7d8,
-    #ead9c4
-  );
+  background:
+    linear-gradient(
+      180deg,
+      rgba(246, 236, 222, 0.8),
+      rgba(236, 222, 204, 0.2)
+    );
 }
 
 /* Slight vertical separation boost */
