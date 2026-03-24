@@ -1914,7 +1914,7 @@ Object.values(users).forEach(({ userId, name, color }) => {
   });
 
   cell.appendChild(dotContainer);
-  refreshDotLayout(cell);
+  window.refreshDotLayout(cell);
 }
     });
 
