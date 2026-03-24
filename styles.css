@@ -2541,16 +2541,16 @@ body.account-view #dash-account {
 
 .mini-more {
   position: absolute;
-  right: 1px;
-  bottom: 0px;
-  min-width: 9px;
-  height: 9px;
-  padding: 0 2px;
+  right: -2px;
+  bottom: -2px;
+  min-width: 6px;
+  height: 6px;
+  padding: 0 1px;
   border-radius: 999px;
   background: rgba(88, 64, 42, 0.92);
   color: #fff;
-  font-size: 6px;
-  line-height: 9px;
+  font-size: 5px;
+  line-height: 5px;
   text-align: center;
   font-weight: 700;
   letter-spacing: -0.01em;
