@@ -250,7 +250,7 @@ th {
   position: sticky;
   top: 0;
   z-index: 5;
-  background: linear-gradient(180deg, rgba(246, 240, 232, 0.98), rgba(238, 229, 218, 0.98));
+  background: linear-gradient(180deg, rgba(252, 249, 244, 0.96), rgba(247, 241, 232, 0.96))
   box-shadow: inset 0 -1px 0 rgba(126, 104, 82, 0.12);
 }
     
