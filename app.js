@@ -1886,36 +1886,36 @@ Object.values(users).forEach(({ userId, name, color }) => {
         const dotContainer = document.createElement("div");
         dotContainer.className = "dot-container";
 
-        entries.forEach(entry => {
-          const dot = document.createElement("div");
-          dot.className = "dot";
+  entries.forEach(entry => {
+    const dot = document.createElement("div");
+    dot.className = "dot";
 
-          if (entry?.id != null) {
-            availabilityMetaByEntryId.set(String(entry.id), {
-              day: String(entry.day),
-              time: String(entry.time)
-            });
-          }
-          if (entry?.id != null) dot.dataset.entryId = String(entry.id);
-          if (entry.user_id) dot.dataset.userId = entry.user_id;
+    if (entry?.id != null) {
+      availabilityMetaByEntryId.set(String(entry.id), {
+        day: String(entry.day),
+        time: String(entry.time)
+      });
+    }
+    if (entry?.id != null) dot.dataset.entryId = String(entry.id);
+    if (entry.user_id) dot.dataset.userId = entry.user_id;
 
-          const prof = entry.user_id ? profilesMap[entry.user_id] : null;
-          const displayName = prof?.name || entry.name || "—";
-          const displayColor = localColorMap[entry.user_id] || prof?.color || entry.color || "#999";
+    const prof = entry.user_id ? profilesMap[entry.user_id] : null;
+    const displayName = prof?.name || entry.name || "—";
+    const displayColor = localColorMap[entry.user_id] || prof?.color || entry.color || "#999";
 
-          dot.style.background = displayColor;
-          dot.dataset.name = displayName;
+    dot.style.background = displayColor;
+    dot.dataset.name = displayName;
 
-          // Animate only the current user's dot
-          if (user && entry.user_id === user.id) {
-            dot.classList.add("pop-in");
-          }
+    if (user && entry.user_id === user.id) {
+      dot.classList.add("pop-in");
+    }
 
-          dotContainer.appendChild(dot);
-        });
+    dotContainer.appendChild(dot);
+  });
 
-        cell.appendChild(dotContainer);
-      }
+  cell.appendChild(dotContainer);
+  refreshDotLayout(cell);
+}
     });
 
     // Gold header highlighting
