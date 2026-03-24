@@ -72,24 +72,27 @@ async function handleAvailabilityChange(payload) {
       const pendingCell = window.pendingDeleteCellByEntryId.get(String(entryId));
       const knownCell = pendingCell || window.availabilityMetaByEntryId.get(String(entryId));
 
-      if (pendingCell) {
-        window.pendingDeleteCellByEntryId.delete(String(entryId));
-      }
+    if (pendingCell) {
+      window.pendingDeleteCellByEntryId.delete(String(entryId));
+    }
 
-      if (knownCell) {
-        const cell = window.isWholeDayBoard()
-          ? getWholeDayCellFromEntry({ day: knownCell.day, time: knownCell.time })
-          : window.table.querySelector(
-              `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
-            );
+    if (knownCell) {
+      const cell = window.isWholeDayBoard()
+        ? getWholeDayCellFromEntry({ day: knownCell.day, time: knownCell.time })
+        : window.table.querySelector(
+          `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
+        );
 
-        if (cell) {
-          await window.rebuildDotsForCell(cell);
-          await window.applyGoldStateForCell(cell, knownCell.day);
-          window.availabilityMetaByEntryId.delete(String(entryId));
-          return;
-        }
-      }
+    if (cell) {
+      const dc = cell.querySelector(".dot-container");
+      if (dc && dc.querySelectorAll(".dot").length === 0) dc.remove();
+
+      window.refreshDotLayout(cell);
+      await window.applyGoldStateForCell(cell, knownCell.day);
+      window.availabilityMetaByEntryId.delete(String(entryId));
+      return;
+    }
+  }
 
       await window.loadAvailability();
       scheduleFullRefreshIdle(15000);
