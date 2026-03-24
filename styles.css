@@ -242,6 +242,18 @@ th, td {
   padding: 10px;
 }
 
+#availabilityTable td[data-day] {
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+td > .dot-container {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 th {
   position: sticky;
   top: 0;
@@ -538,10 +550,6 @@ td {
   border-radius: 0;
   background: linear-gradient(180deg, rgba(252, 249, 244, 0.96), rgba(247, 241, 232, 0.96));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.28);
-}
-
-td > .dot-container {
- width: 100%;
 }
 
     .gold-header {
