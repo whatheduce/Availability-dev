@@ -562,7 +562,6 @@ td:not(.gold-cell):hover {
     inset 0 1px 0 rgba(255,255,255,0.48),
     0 0 0 1px rgba(204, 82, 16, 0.24),
     0 10px 22px rgba(96, 72, 48, 0.14);
-  transform: translateY(-1px);
   cursor: pointer;
 }
 
