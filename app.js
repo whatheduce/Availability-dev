@@ -912,27 +912,22 @@ async function enforceUniqueBoardColourIfNeeded(boardId) {
 //----------
 async function ensureMembership(boardId) {
   const au = await auth.getAuthUser();
-
   if (!au || !boardId) return false;
 
-  // Already a member? allow through
-  const { data: existingMember, error: existingErr } = await supabase
-    .from("board_members")
-    .select("board_id")
-    .eq("board_id", boardId)
-    .eq("user_id", au.id)
-    .maybeSingle();
+  const memberLimit = getBoardMemberLimit();
 
-  if (existingErr) {
-    console.error("ensureMembership existing-member check failed:", existingErr);
+  const { data, error } = await supabase.rpc("join_board_if_space", {
+    p_board_id: boardId,
+    p_max_members: memberLimit
+  });
+
+  if (error) {
+    console.error("ensureMembership RPC failed:", error);
     return false;
   }
 
-  if (!existingMember) {
-    const memberCount = await getBoardMemberCount(boardId);
-    const memberLimit = getBoardMemberLimit();
-
-    if (memberCount >= memberLimit) {
+  if (!data?.ok) {
+    if (data?.reason === "board_full") {
       await confirmModal({
         title: "Calendar full",
         message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
@@ -941,20 +936,8 @@ async function ensureMembership(boardId) {
       });
       return false;
     }
-  }
 
-  const payload = {
-    board_id: boardId,
-    user_id: au.id
-  };
-
-  const { error } = await supabase
-    .from("board_members")
-    .upsert(payload, { onConflict: "board_id,user_id" })
-    .select();
-
-  if (error) {
-    console.error("ensureMembership failed:", error);
+    console.error("ensureMembership rejected:", data);
     return false;
   }
 
