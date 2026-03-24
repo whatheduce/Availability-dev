@@ -224,12 +224,11 @@ body.logged-in #landing-bg::after{
 /* Alternate day columns (warmer tone) */
 #availabilityTable td:nth-child(odd),
 #availabilityTable th:nth-child(odd) {
-  background:
-    linear-gradient(
-      180deg,
-      rgba(246, 236, 222, 0.8),
-      rgba(236, 222, 204, 0.2)
-    );
+  background: linear-gradient(
+    180deg,
+    #f3e7d8,
+    #ead9c4
+  );
 }
 
 /* Slight vertical separation boost */
@@ -551,6 +550,7 @@ td {
       font-weight: 700;
     }
 
+/* Normal cells */
 td:not(.gold-cell):hover {
   background: linear-gradient(
     180deg,
@@ -561,7 +561,17 @@ td:not(.gold-cell):hover {
     inset 0 1px 0 rgba(255,255,255,0.48),
     0 0 0 1px rgba(204, 82, 16, 0.24),
     0 10px 22px rgba(96, 72, 48, 0.14);
+  transform: translateY(-1px);
   cursor: pointer;
+}
+
+/* Zebra cells (slightly darker hover so it still contrasts) */
+#availabilityTable td:nth-child(odd):not(.gold-cell):hover {
+  background: linear-gradient(
+    180deg,
+    rgba(250, 242, 230, 1),
+    rgba(240, 228, 210, 1)
+  );
 }
 
 .gold-cell:hover {
