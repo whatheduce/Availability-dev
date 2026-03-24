@@ -222,13 +222,13 @@ body.logged-in #landing-bg::after{
 }
 
 /* Alternate day columns (warmer tone) */
-#availabilityTable td:nth-child(even),
-#availabilityTable th:nth-child(even) {
+#availabilityTable td:nth-child(odd),
+#availabilityTable th:nth-child(odd) {
   background:
     linear-gradient(
       180deg,
-      rgba(246, 236, 222, 0.98),
-      rgba(236, 222, 204, 0.98)
+      rgba(246, 236, 222, 0.8),
+      rgba(236, 222, 204, 0.2)
     );
 }
 
