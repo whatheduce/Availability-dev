@@ -3549,7 +3549,22 @@ body.account-view #dash-account {
 .board-slot-well {
   height: 120px;
 }
+ 
+.board-slot-well .availability-preview td {
+  height: 18px;     /* was ~22–26 */
+  min-width: 18px;
+  padding: 0;
+}
 
+.board-slot-well .availability-preview .dot-container {
+  gap: 2px;         /* tighter dot spacing */
+}
+
+.board-slot-well .availability-preview .dot {
+  width: 8px;
+  height: 8px;
+}
+ 
   .settings-card {
     padding: 0 12px;
   }
@@ -3650,6 +3665,16 @@ body.account-view #dash-account {
 .board-slot-well {
   height: 120px;
 }
+
+.board-slot-well .availability-preview td {
+  height: 16px;
+  min-width: 16px;
+}
+
+.board-slot-well .availability-preview .dot {
+  width: 7px;
+  height: 7px;
+} 
  
   .settings-action,
   .settings-action.compact {
