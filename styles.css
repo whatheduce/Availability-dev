@@ -3520,7 +3520,7 @@ body.account-view #dash-account {
   }
 
   .board-pill {
-    min-width: 120px;
+    min-width: 100px;
     border-radius: 12px;
   }
 
@@ -3539,7 +3539,7 @@ body.account-view #dash-account {
 }
 
 .board-slot-well {
-  height: 126px;
+  height: 100px;
 }
 
   .settings-card {
@@ -3631,12 +3631,12 @@ body.account-view #dash-account {
   }
 
 .board-slot-shell {
-  height: 124px;   /* was 136 */
+  height: 124px;
   padding: 5px 7px 4px;
 }
 
 .board-slot-well {
-  height: 112px;   /* was 124 */
+  height: 120px;
 }
  
   .settings-action,
