@@ -3486,6 +3486,10 @@ body.account-view #dash-account {
 }
 
 @media (max-width: 720px) {
+ .board-preview {
+  --mini-scale: 0.85;
+}
+ 
   #dash-topbar {
     padding: 10px 14px 8px;
     gap: 10px;
@@ -3642,6 +3646,10 @@ body.account-view #dash-account {
 }
 
 @media (max-width: 480px) {
+ .board-preview {
+  --mini-scale: 0.7;
+}
+ 
   #dash-topbar {
     padding: 8px 12px 6px;
   }
