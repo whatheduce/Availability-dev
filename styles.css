@@ -3442,3 +3442,184 @@ body.account-view #dash-account {
 }
 
 [hidden] { display: none !important; }
+
+
+
+/* =========================
+   MOBILE RESPONSIVE
+   DASHBOARD / ACCOUNT / MODALS
+   ========================= */
+
+/* =========================
+   MOBILE RESPONSIVE
+   DASHBOARD / ACCOUNT / MODALS
+   ========================= */
+
+@media (max-width: 900px) {
+  #dash-topbar,
+  #dash-body,
+  #dash-account {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .settings-split #dashboard {
+    margin-left: 280px;
+  }
+
+  .settings-split #dash-topbar,
+  .settings-split #dash-body,
+  .settings-split #dash-account {
+    max-width: 900px;
+  }
+
+  .drawer {
+    width: 280px;
+  }
+
+  .settings-row-3 {
+    grid-template-columns: 120px 1fr auto;
+  }
+
+  .create-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  #dash-topbar {
+    padding: 14px 18px;
+    gap: 12px;
+    align-items: center;
+  }
+
+  #dash-body,
+  #dash-account {
+    padding: 10px 18px 22px;
+  }
+
+  .dashboard-section-title {
+    font-size: 16px;
+    margin: 16px 0 8px;
+  }
+
+  .dash-main {
+    font-size: 19px;
+  }
+
+  .dash-subtitle {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .board-strip {
+    gap: 10px;
+    padding-bottom: 18px;
+  }
+
+  .board-pill {
+    min-width: 145px;
+  }
+
+  .board-strip-fade::after {
+    width: 68px;
+  }
+
+  .settings-card {
+    padding: 0 12px;
+  }
+
+  .settings-row-3 {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    align-items: start;
+    padding: 12px 2px;
+  }
+
+  .settings-row-3 .settings-label,
+  .settings-row-3 .settings-value,
+  .settings-row-3 .settings-colour {
+    justify-self: start;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .settings-row-3 .settings-value {
+    margin-right: 0;
+  }
+
+  .settings-mini-btn {
+    justify-self: start;
+  }
+
+  .settings-cta-left {
+    min-height: 0;
+    width: 100%;
+  }
+
+  .pro-upsell-card {
+    width: 100%;
+  }
+
+  #acct-back-dashboard {
+    margin-top: 18px;
+  }
+
+  .drawer {
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  #dash-topbar {
+    padding: 12px 14px;
+  }
+
+  #dash-body,
+  #dash-account {
+    padding: 8px 14px 20px;
+  }
+
+  #dash-settings {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .dash-main {
+    font-size: 18px;
+  }
+
+  .dashboard-section-title {
+    font-size: 15px;
+  }
+
+  .board-pill {
+    min-width: 136px;
+  }
+
+  .settings-action,
+  .settings-action.compact {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .settings-actions-row {
+    width: 100%;
+  }
+
+  .pro-upsell-top {
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .acct-upgrade-lock {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    margin: 10px 0 0 8px;
+  }
+}
+
+
