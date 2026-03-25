@@ -3647,7 +3647,7 @@ body.account-view #dash-account {
 
 @media (max-width: 480px) {
  .board-preview {
-  --mini-scale: 0.7;
+  --mini-scale: 0.62;
 }
  
   #dash-topbar {
@@ -3683,26 +3683,34 @@ body.account-view #dash-account {
   }
 
   .board-strip {
-    gap: 8px;
-    padding-bottom: 10px;
+    padding-bottom: 6px;
+    gap: 6px;
   }
 
   .board-pill {
-    min-width: 120px;
+    min-width: 104px;
+    padding: 10px 10px;
+    border-radius: 10px;
+  }
+
+  .board-pill--slot {
+    grid-template-rows: 22px 1fr 18px;
+    padding: 0 0 12px 0;
+  }
+
+  .board-slot-shell {
+    height: 96px;
+    padding: 4px 5px 3px;
   }
  
  .board-pill--square {
   gap: 2px;
 }
- 
-.board-slot-shell {
-  height: 124px;
-  padding: 5px 7px 4px;
-}
 
-.board-slot-well {
-  height: 120px;
-}
+  .board-slot-well {
+    height: 88px;
+    border-radius: 10px;
+  }
 
 .mini-row {
   grid-template-columns: 42px repeat(7, 1fr);
