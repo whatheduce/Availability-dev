@@ -3534,7 +3534,7 @@ body.account-view #dash-account {
   }
 
   .board-pill--square {
-  gap: 0px;
+  gap: 2px;
 }
  
 .board-strip-fade::after {
@@ -3639,7 +3639,7 @@ body.account-view #dash-account {
   }
  
  .board-pill--square {
-  gap: 0px;
+  gap: 2px;
 }
  
 .board-slot-shell {
