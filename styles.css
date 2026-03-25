@@ -3703,9 +3703,9 @@ body.account-view #dash-account {
   }
 
   .board-pill--square {
-    width: 96px;
-    height: 122px;
-    gap: 2px;
+    width: 112px;
+    height: 140px;
+    gap: 3px;
   }
 
   .board-pill--slot {
