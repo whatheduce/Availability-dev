@@ -3479,6 +3479,10 @@ body.account-view #dash-account {
   .create-layout {
     grid-template-columns: 1fr;
   }
+
+  .board-pill--square {
+  gap: 4px;
+}
 }
 
 @media (max-width: 720px) {
@@ -3520,7 +3524,7 @@ body.account-view #dash-account {
   }
 
   .board-pill {
-    min-width: 100px;
+    min-width: 120px;
     border-radius: 12px;
   }
 
@@ -3529,6 +3533,10 @@ body.account-view #dash-account {
     padding: 0 0 18px 0;
   }
 
+  .board-pill--square {
+  gap: 0px;
+}
+ 
 .board-strip-fade::after {
   width: 36px;
 }
@@ -3539,7 +3547,7 @@ body.account-view #dash-account {
 }
 
 .board-slot-well {
-  height: 100px;
+  height: 120px;
 }
 
   .settings-card {
@@ -3629,7 +3637,11 @@ body.account-view #dash-account {
   .board-pill {
     min-width: 120px;
   }
-
+ 
+ .board-pill--square {
+  gap: 0px;
+}
+ 
 .board-slot-shell {
   height: 124px;
   padding: 5px 7px 4px;
