@@ -3652,7 +3652,7 @@ body.account-view #dash-account {
 
 @media (max-width: 480px) {
   .board-preview {
-    --mini-scale: 0.68;
+    --mini-scale: 0.52;
   }
 
   #dash-topbar {
@@ -3759,6 +3759,17 @@ body.account-view #dash-account {
     height: 4px;
   }
 
+ .mini-preview-main {
+  flex: 0 0 auto;
+  height: 74px;
+  overflow: hidden;
+}
+ 
+.mini-board,
+.mini-whole-day {
+  transform-origin: top left;
+}
+ 
   .mini-whole-day-cell {
     min-height: 9px;
     border-radius: 2px;
