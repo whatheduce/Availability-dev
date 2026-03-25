@@ -4528,54 +4528,35 @@ function closeRemoveUserModal() {
 async function getCurrentBoardMembersForRemoval() {
   if (!currentTable?.id) return [];
 
-  const { data: invites, error: inviteErr } = await supabase
-    .from("board_invites")
-    .select("id, email, accepted_at, accepted_by_user_id")
-    .eq("board_id", currentTable.id)
-    .not("accepted_at", "is", null);
+  const { data: members, error: memberErr } = await supabase
+    .from("board_members")
+    .select("user_id, role, local_color")
+    .eq("board_id", currentTable.id);
 
-  if (inviteErr) throw inviteErr;
+  if (memberErr) throw memberErr;
 
-  const rows = invites || [];
+  const rows = (members || []).filter(row => {
+    if (!row?.user_id) return false;
+    if (String(row.user_id) === String(currentTable.owner_id)) return false;
+    if (row.role === "owner") return false;
+    return true;
+  });
+
   if (!rows.length) return [];
 
-  const acceptedUserIds = [...new Set(
-    rows
-      .map(row => row.accepted_by_user_id ? String(row.accepted_by_user_id) : null)
-      .filter(Boolean)
-      .filter(id => String(id) !== String(currentTable.owner_id))
-  )];
+  const userIds = [...new Set(rows.map(row => String(row.user_id)).filter(Boolean))];
+  const profiles = userIds.length ? await fetchProfilesMap(userIds) : {};
 
-  const profiles = acceptedUserIds.length
-    ? await fetchProfilesMap(acceptedUserIds)
-    : {};
+  const removable = rows.map((row) => {
+    const uid = String(row.user_id);
+    const profile = profiles[uid] || {};
 
-  const seen = new Set();
-  const removable = [];
-
-  rows.forEach((row) => {
-    const acceptedUserId = row.accepted_by_user_id
-      ? String(row.accepted_by_user_id)
-      : null;
-
-    if (acceptedUserId && acceptedUserId === String(currentTable.owner_id)) return;
-
-    const key = acceptedUserId || `email:${(row.email || "").toLowerCase().trim()}`;
-    if (!key || seen.has(key)) return;
-    seen.add(key);
-
-    const profile = acceptedUserId ? (profiles[acceptedUserId] || {}) : {};
-
-    removable.push({
-      invite_id: row.id,
-      user_id: acceptedUserId,
-      email: (row.email || "").trim(),
-      name:
-        (profile.name || "").trim() ||
-        (row.email || "").trim() ||
-        "Unknown user",
-      color: profile.color || "#8E8E93"
-    });
+    return {
+      user_id: uid,
+      role: row.role || "member",
+      name: (profile.name || "").trim() || "Unknown user",
+      color: row.local_color || profile.color || "#8E8E93"
+    };
   });
 
   return removable.sort((a, b) => a.name.localeCompare(b.name));
