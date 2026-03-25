@@ -3514,7 +3514,7 @@ body.account-view #dash-account {
   }
 
   .board-strip {
-    gap: 8px;
+    gap: 6px;
     padding-bottom: 12px;
   }
 
@@ -3530,6 +3530,10 @@ body.account-view #dash-account {
   .board-pill {
     min-width: 120px;
     border-radius: 12px;
+   transform: scale(0.66666);
+   transform-origin: top left;
+
+   width: 150%
   }
 
   .board-pill--slot {
@@ -3684,13 +3688,17 @@ body.account-view #dash-account {
 
   .board-strip {
     padding-bottom: 6px;
-    gap: 6px;
+    gap: 4px;
   }
 
   .board-pill {
     min-width: 104px;
     padding: 10px 10px;
     border-radius: 10px;
+    transform: scale(0.5);
+    transform-origin: top left;
+
+    width: 200%;   /* compensate for scale */
   }
 
   .board-pill--slot {
