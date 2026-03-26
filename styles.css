@@ -3670,7 +3670,7 @@ body.account-view #dash-account {
   }
 
   .board-strip {
-    gap: 6px;
+    gap: 14px;
     padding-bottom: 8px;
     height: auto;
     align-items: flex-start;
