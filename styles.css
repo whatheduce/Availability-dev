@@ -3679,10 +3679,13 @@ body.account-view #dash-account {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
+    min-height: 0;
   }
  
 .dashboard-dev-note {
   margin-top: auto;
+  margin-bottom: 0;
+  padding-top: 18px;
 }
  
   .board-strip {
