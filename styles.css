@@ -2559,7 +2559,7 @@ body.account-view #dash-account {
 .mini-cell {
   border-radius: 6px;
   background: rgba(126, 104, 82, 0.035);
-  border: 1px solid rgba(126, 104, 82, 0.10);
+  border: 1px solid rgba(126, 104, 82, 0.15);
   height: 18px;
   display: flex;
   align-items: center;
@@ -3659,6 +3659,7 @@ body.account-view #dash-account {
   .board-strip {
     padding-bottom: 6px;
     gap: 4px;
+    height: 126px;
   }
 
   .board-pill {
