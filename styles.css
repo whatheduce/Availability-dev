@@ -3668,12 +3668,17 @@ body.account-view #dash-account {
   .dashboard-section-divider {
     margin: 4px 0 8px;
   }
-
+ 
+.dashboard-dev-note {
+  margin-top: 0;
+}
+ 
   .board-strip {
     gap: 14px;
     padding-bottom: 8px;
     height: auto;
     align-items: flex-start;
+    min-height: 156px;
   }
 
   .board-pill-shell {
