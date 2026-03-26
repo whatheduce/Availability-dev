@@ -3552,7 +3552,6 @@ body.account-view #dash-account {
   .board-pill {
     min-width: 120px;
     border-radius: 12px;
-   transform: scale(0.66666);
    transform-origin: top left;
   }
 
@@ -3700,7 +3699,6 @@ body.account-view #dash-account {
     min-width: 104px;
     padding: 10px 10px;
     border-radius: 10px;
-    transform: scale(0.5);
     transform-origin: top left;
   }
 
