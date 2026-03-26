@@ -2160,7 +2160,7 @@ body.account-view #dash-account {
 
 .board-pill-shell {
   flex: 0 0 auto;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .board-pill {
@@ -3520,25 +3520,25 @@ body.account-view #dash-account {
     margin: 4px 0 10px;
   }
 
-.board-strip {
-  gap: 8px;
-  padding-bottom: 10px;
-  height: auto;
-  align-items: flex-start;
-}
+  .board-strip {
+    gap: 8px;
+    padding-bottom: 10px;
+    height: auto;
+    align-items: flex-start;
+  }
 
-.board-pill-shell {
-  width: 136px;
-  height: 168px;
-}
+  .board-pill-shell {
+    width: 144px;
+    height: 176px;
+  }
 
-.board-pill-shell > .board-pill {
-  width: 200px;
-  height: 240px;
-  transform: scale(0.68);
-  transform-origin: top left;
-  margin: 0;
-}
+  .board-pill-shell > .board-pill {
+    width: 200px;
+    height: 240px;
+    transform: scale(0.68);
+    transform-origin: top left;
+    margin: 0;
+  }
  
   .dash-main {
     font-size: 19px;
@@ -3547,12 +3547,6 @@ body.account-view #dash-account {
   .dash-subtitle {
     font-size: 11px;
     letter-spacing: 0.1em;
-  }
-
-  .board-pill {
-    min-width: 120px;
-    border-radius: 12px;
-   transform-origin: top left;
   }
 
   .board-pill--slot {
@@ -3675,31 +3669,24 @@ body.account-view #dash-account {
     margin: 4px 0 8px;
   }
 
-.board-strip {
-  gap: 6px;
-  padding-bottom: 8px;
-  height: auto;
-  align-items: flex-start;
-}
+  .board-strip {
+    gap: 6px;
+    padding-bottom: 8px;
+    height: auto;
+    align-items: flex-start;
+  }
 
-.board-pill-shell {
-  width: 112px;
-  height: 144px;
-}
+  .board-pill-shell {
+    width: 120px;
+    height: 146px;
+  }
 
-.board-pill-shell > .board-pill {
-  width: 200px;
-  height: 240px;
-  transform: scale(0.56);
-  transform-origin: top left;
-  margin: 0;
-}
-
-  .board-pill {
-    min-width: 104px;
-    padding: 10px 10px;
-    border-radius: 10px;
+  .board-pill-shell > .board-pill {
+    width: 200px;
+    height: 240px;
+    transform: scale(0.56);
     transform-origin: top left;
+    margin: 0;
   }
 
   .board-pill--slot {
