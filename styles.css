@@ -3555,26 +3555,6 @@ body.account-view #dash-account {
 .board-slot-well {
   height: 120px;
 }
-
-.mini-row {
-  grid-template-columns: 48px repeat(7, 1fr);
-  gap: 1px;
-}
-
-.mini-label {
-  font-size: 9px;
-  padding-right: 4px;
-}
-
-.mini-cell {
-  min-height: 14px;
-  border-radius: 4px;
-}
-
-.mini-preview .dot {
-  width: 6px;
-  height: 6px;
-}
  
 .board-slot-well .availability-preview td {
   height: 18px;     /* was ~22–26 */
@@ -3589,16 +3569,6 @@ body.account-view #dash-account {
 .board-slot-well .availability-preview .dot {
   width: 8px;
   height: 8px;
-}
-
-.mini-whole-day-cell {
-  min-height: 13px;
-  border-radius: 3px;
-  padding: 1px;
-}
-
-.mini-whole-day-grid {
-  gap: 1px;
 }
  
   .settings-card {
