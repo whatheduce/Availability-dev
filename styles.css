@@ -2527,6 +2527,7 @@ body.account-view #dash-account {
   place-items: center;
   border-radius: 6px;
   background: rgba(126, 104, 82, 0.06);
+  width: 17px;
 }
 
 .mini-body {
@@ -2563,6 +2564,7 @@ body.account-view #dash-account {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 15px;
 }
 
 .mini-cell.mini-gold {
