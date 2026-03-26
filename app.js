@@ -1520,51 +1520,57 @@ for (let i = 0; i < maxHostedSlots; i++) {
   const b = owned[i];
 
   if (b?.tables) {
-    hostedSlotsHtml.push(`
-      <div
-        class="board-pill board-pill--square"
-        data-kind="hosted"
-        data-board-id="${b.tables.id}"
-        data-invite-token="${b.tables.invite_token}"
-        data-owner-token="${b.tables.owner_token}"
-      >
-        <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+  hostedSlotsHtml.push(`
+  <div class="board-pill-shell">
+    <div
+      class="board-pill board-pill--square"
+      data-kind="hosted"
+      data-board-id="${b.tables.id}"
+      data-invite-token="${b.tables.invite_token}"
+      data-owner-token="${b.tables.owner_token}"
+    >
+      <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
-        <div class="board-actions-menu" hidden>
-          <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
-          <button class="board-actions-item" type="button" data-action="delete">Delete</button>
-        </div>
-
-        <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
-        <div class="board-preview" data-board-id="${b.tables.id}"></div>
-        <div class="board-pill-meta">Hosted</div>
+      <div class="board-actions-menu" hidden>
+        <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
+        <button class="board-actions-item" type="button" data-action="delete">Delete</button>
       </div>
-    `);
+
+      <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
+      <div class="board-preview" data-board-id="${b.tables.id}"></div>
+      <div class="board-pill-meta">Hosted</div>
+    </div>
+  </div>
+`);
     continue;
   }
 
   if (i < openHostedSlots) {
     hostedSlotsHtml.push(`
-  <div class="board-pill board-pill--square board-pill--slot board-pill--slot-open" data-kind="hosted-empty">
-    <div class="board-pill-title board-pill-title--top board-slot-spacer" aria-hidden="true">&nbsp;</div>
-    <div class="board-slot-shell">
-      <div class="board-slot-well">
-        <div class="board-slot-ghost"></div>
+  <div class="board-pill-shell">
+    <div class="board-pill board-pill--square board-pill--slot board-pill--slot-open" data-kind="hosted-empty">
+      <div class="board-pill-title board-pill-title--top board-slot-spacer" aria-hidden="true">&nbsp;</div>
+      <div class="board-slot-shell">
+        <div class="board-slot-well">
+          <div class="board-slot-ghost"></div>
+        </div>
       </div>
+      <div class="board-pill-meta board-slot-spacer" aria-hidden="true">&nbsp;</div>
     </div>
-    <div class="board-pill-meta board-slot-spacer" aria-hidden="true">&nbsp;</div>
   </div>
 `);
   } else {
     hostedSlotsHtml.push(`
-  <div class="board-pill board-pill--square board-pill--slot board-pill--slot-locked" data-kind="hosted-locked">
-    <div class="board-pill-title board-pill-title--top board-slot-spacer" aria-hidden="true">&nbsp;</div>
-    <div class="board-slot-shell">
-      <div class="board-slot-well">
-        <div class="board-slot-lock">🔒</div>
+  <div class="board-pill-shell">
+    <div class="board-pill board-pill--square board-pill--slot board-pill--slot-locked" data-kind="hosted-locked">
+      <div class="board-pill-title board-pill-title--top board-slot-spacer" aria-hidden="true">&nbsp;</div>
+      <div class="board-slot-shell">
+        <div class="board-slot-well">
+          <div class="board-slot-lock">🔒</div>
+        </div>
       </div>
+      <div class="board-pill-meta board-slot-spacer" aria-hidden="true">&nbsp;</div>
     </div>
-    <div class="board-pill-meta board-slot-spacer" aria-hidden="true">&nbsp;</div>
   </div>
 `);
   }
@@ -1577,21 +1583,23 @@ ownedEl.innerHTML = hostedSlotsHtml.join("");
     joinedEl.innerHTML = `<div class="empty-boards">No joined calendars</div>`;
   } else {
     joinedEl.innerHTML = joined.map(b => `
-        <div 
-        class="board-pill board-pill--square"
-        data-kind="joined"
-        data-board-id="${b.tables.id}"
-        data-invite-token="${b.tables.invite_token}"
-      >
-    <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
+  <div class="board-pill-shell">
+    <div 
+      class="board-pill board-pill--square"
+      data-kind="joined"
+      data-board-id="${b.tables.id}"
+      data-invite-token="${b.tables.invite_token}"
+    >
+      <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
-    <div class="board-actions-menu" hidden>
-      <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
+      <div class="board-actions-menu" hidden>
+        <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
+      </div>
+
+      <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
+      <div class="board-preview" data-board-id="${b.tables.id}"></div>
+      <div class="board-pill-meta">Joined</div>
     </div>
-
-    <div class="board-pill-title board-pill-title--top">${escapeHtml(b.tables.name)}</div>
-    <div class="board-preview" data-board-id="${b.tables.id}"></div>
-    <div class="board-pill-meta">Joined</div>
   </div>
 `).join("");
   }
