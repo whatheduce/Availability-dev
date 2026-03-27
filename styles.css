@@ -3496,6 +3496,24 @@ body.account-view #dash-account {
  .board-preview {
   --mini-scale: 0.85;
 }
+
+#dashboard {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+#dash-body {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-dev-note {
+  margin-top: auto !important;
+  margin-bottom: 0;
+  padding-top: 18px;
+}
  
   #dash-topbar {
     padding: 10px 14px 8px;
@@ -3668,25 +3686,6 @@ body.account-view #dash-account {
   .dashboard-section-divider {
     margin: 4px 0 8px;
   }
-
-  #dashboard {
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  #dash-body {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
- 
-.dashboard-dev-note {
-  margin-top: auto;
-  margin-bottom: 0;
-  padding-top: 18px;
-}
  
   .board-strip {
     gap: 14px;
