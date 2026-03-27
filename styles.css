@@ -3549,10 +3549,11 @@ body.account-view #dash-account {
   }
 
   .board-strip {
-    gap: 8px;
+    gap: 18px;
     padding-bottom: 10px;
     height: auto;
     align-items: flex-start;
+    min-height: 176px;
   }
 
   .board-pill-shell {
@@ -3702,7 +3703,7 @@ body.account-view #dash-account {
     padding-bottom: 8px;
     height: auto;
     align-items: flex-start;
-    min-height: 156px;
+    min-height: 176px;
   }
 
   .board-pill-shell {
