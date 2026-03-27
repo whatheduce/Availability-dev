@@ -3517,10 +3517,10 @@ body.account-view #dash-account {
 
   .dashboard-dev-note {
     margin-top: auto;
-    position: static;
+    position: fixed;
     left: auto;
     right: auto;
-    bottom: auto;
+    bottom: 1%;
     padding: 18px 14px calc(24px + env(safe-area-inset-bottom));
   }
 
