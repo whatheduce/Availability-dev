@@ -3497,23 +3497,24 @@ body.account-view #dash-account {
   --mini-scale: 0.85;
 }
 
-#dashboard {
-  min-height: 100dvh;
-  display: grid;
-  grid-template-rows: auto 1fr;
-}
+  #dashboard {
+    position: relative;
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+  }
 
-#dash-body {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
+  #dash-body {
+    height: 100%;
+    overflow: hidden;
+  }
 
-.dashboard-dev-note {
-  margin-top: auto !important;
-  margin-bottom: 0;
-  padding-top: 18px;
-}
+  .dashboard-dev-note {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 6%;
+  }
  
   #dash-topbar {
     padding: 10px 14px 8px;
