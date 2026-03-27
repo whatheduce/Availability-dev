@@ -3495,6 +3495,12 @@ body.account-view #dash-account {
 }
 
 @media (max-width: 720px) {
+ body{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+ }
+ 
  .board-preview {
   --mini-scale: 0.85;
 }
@@ -3507,6 +3513,7 @@ body.account-view #dash-account {
   }
 
   #dash-body {
+    height: 100%
     overflow: hidden;
   }
 
