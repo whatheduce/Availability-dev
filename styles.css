@@ -3499,31 +3499,29 @@ body.account-view #dash-account {
   --mini-scale: 0.85;
 }
 
-#dashboard {
-  position: relative;
-  min-height: 100dvh;
-  height: auto;
-  overflow: clip;
-  display: flex;
-  flex-direction: column;
-}
+  #dashboard {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 
-#dash-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
-  min-height: 0;
-}
+  #dash-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
 
-.dashboard-dev-note {
-  position: static;
-  left: auto;
-  right: auto;
-  bottom: auto;
-  margin-top: auto;
-  padding-top: 22px;
-}
+  .dashboard-main-content {
+    flex: 0 0 auto;
+  }
+
+  .dashboard-dev-note {
+    position: static;
+    margin-top: auto;
+    padding: 24px 14px calc(24px + env(safe-area-inset-bottom));
+  }
  
   #dash-topbar {
     padding: 10px 14px 8px;
