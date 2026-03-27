@@ -3521,7 +3521,8 @@ body.account-view #dash-account {
     left: auto;
     right: auto;
     bottom: auto;
-    padding: 24px 14px calc(24px + env(safe-area-inset-bottom));
+    padding: 18px 14px calc(24px + env(safe-area-inset-bottom));
+    font-size: 10px;
   }
 }
  
