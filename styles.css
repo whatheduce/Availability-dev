@@ -21,7 +21,7 @@ body {
       transparent 40%
     ),
     linear-gradient(180deg, #fbf8f4, #f1ebe3);
-  min-height: 100vh;
+  min-height: 100dvh;
   visibility: hidden;
 }
 
@@ -3499,23 +3499,31 @@ body.account-view #dash-account {
   --mini-scale: 0.85;
 }
 
-  #dashboard {
-    position: relative;
-    min-height: 100dvh;
-    height: 100dvh;
-    overflow: hidden;
-  }
+#dashboard {
+  position: relative;
+  min-height: 100dvh;
+  height: auto;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+}
 
-  #dash-body {
-    overflow: hidden;
-  }
+#dash-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  min-height: 0;
+}
 
-  .dashboard-dev-note {
-    position: absolute;
-    left: 14px;
-    right: 14px;
-    bottom: 6%;
-  }
+.dashboard-dev-note {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  margin-top: auto;
+  padding-top: 22px;
+}
  
   #dash-topbar {
     padding: 10px 14px 8px;
