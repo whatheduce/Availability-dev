@@ -3500,28 +3500,30 @@ body.account-view #dash-account {
 }
 
   #dashboard {
-    min-height: 100dvh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
 
   #dash-body {
-    flex: 1 1 auto;
+    flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
-  }
-
-  .dashboard-main-content {
-    flex: 0 0 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .dashboard-dev-note {
-    position: static;
     margin-top: auto;
+    position: static;
+    left: auto;
+    right: auto;
+    bottom: auto;
     padding: 24px 14px calc(24px + env(safe-area-inset-bottom));
   }
+}
  
   #dash-topbar {
     padding: 10px 14px 8px;
