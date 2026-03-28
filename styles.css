@@ -3618,7 +3618,8 @@ body.account-view #dash-account {
 }
 
 .board-slot-well {
-  height: 120px;
+  height: 200px;
+  border-radiums: 10px;
 }
  
 .board-slot-well .availability-preview td {
@@ -3763,10 +3764,6 @@ body.account-view #dash-account {
  .board-pill--square {
   gap: 2px;
 }
-
-  .board-slot-well {
-    border-radius: 10px;
-  }
  
 .board-slot-well .availability-preview td {
   height: 16px;
