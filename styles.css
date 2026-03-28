@@ -2713,6 +2713,7 @@ body.account-view #dash-account {
   grid-template-columns: repeat(7, 1fr);
   gap: 1px;
   margin-bottom: 1px;
+  place-items: center;
 }
 
 .mini-whole-day-weekday {
