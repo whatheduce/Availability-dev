@@ -3537,9 +3537,20 @@ body.account-view #dash-account {
  
   #dash-topbar {
     padding: 10px 14px 8px;
+    align-items: center;
     gap: 10px;
   }
 
+#create-board-btn {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+  .dashboard-title {
+    font-size: 18px;
+  } 
+ 
   #dash-body,
   #dash-account {
     padding: 0 14px 16px;
