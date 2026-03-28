@@ -1971,6 +1971,7 @@ body.account-view #dash-account {
   background: rgba(126, 104, 82, 0.04);
   font-size: 13px;
   opacity: 0.78;
+  height: 13px;
 }
     
 .back-btn {
@@ -2137,6 +2138,7 @@ body.account-view #dash-account {
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 24px;
+ min-height: 285px;
 }
 
 .board-strip-fade {
