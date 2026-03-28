@@ -3536,7 +3536,7 @@ body.account-view #dash-account {
  }
  
   #dash-topbar {
-    padding: 10px 14px 8px;
+    padding: 12px 12px 8px;
     align-items: center;
     gap: 10px;
   }
@@ -3698,7 +3698,7 @@ body.account-view #dash-account {
     padding: 8px 12px;
     font-size: 12px;
     min-height: 34px;
-    max-width: 160px;
+    max-width: 100px;
   }
 
   #dash-body,
