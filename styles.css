@@ -3688,7 +3688,17 @@ body.account-view #dash-account {
 }
  
   #dash-topbar {
-    padding: 8px 12px 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #create-board-btn {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    font-size: 12px;
+    min-height: 34px;
+    max-width: 160px;
   }
 
   #dash-body,
