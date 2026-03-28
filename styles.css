@@ -3752,12 +3752,12 @@ body.account-view #dash-account {
 
   .board-pill--slot {
     grid-template-rows: 22px 1fr 18px;
-    padding: 0 0 12px 0;
+    padding: 0 0 26px 0;
   }
 
   .board-slot-shell {
     height: 96px;
-    padding: 4px 5px 3px;
+    padding: 8px 5px 3px;
   }
  
  .board-pill--square {
@@ -3765,7 +3765,6 @@ body.account-view #dash-account {
 }
 
   .board-slot-well {
-    height: 88px;
     border-radius: 10px;
   }
  
