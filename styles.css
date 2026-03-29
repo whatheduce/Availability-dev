@@ -3678,7 +3678,7 @@ body.account-view #dash-account {
   }
 
   .drawer {
-    width: min(320px, calc(100vw - 24px));
+    width: calc(100vw - 35%);
     max-width: calc(100vw - 24px);
   }
 }
