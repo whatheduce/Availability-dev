@@ -3827,5 +3827,57 @@ body.account-view #dash-account {
   .board-strip-fade::after {
     width: 24px;
   }
- 
 }
+
+  #dash-account .acct-row,
+  #dash-account .account-row {
+    display: grid;
+    grid-template-columns: 110px 1fr auto;
+    align-items: center;
+    column-gap: 14px;
+  }
+
+  #dash-account .acct-row > *,
+  #dash-account .account-row > * {
+    margin: 0 !important;
+  }
+
+  /* label */
+  #dash-account .acct-label,
+  #dash-account .account-label {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  /* value */
+  #dash-account .acct-value,
+  #dash-account .account-value {
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* button */
+  #dash-account button {
+    justify-self: end;
+  }
+}
+
+/* ONLY small phones stack */
+@media (max-width: 520px) {
+  #dash-account .acct-row,
+  #dash-account .account-row {
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+  }
+
+  #dash-account .acct-label,
+  #dash-account .account-label {
+    grid-column: 1 / -1;
+  }
+
+  #dash-account .acct-value,
+  #dash-account .account-value {
+    justify-self: start;
+    text-align: left;
+  }
