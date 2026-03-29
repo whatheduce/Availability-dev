@@ -3648,26 +3648,34 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
     closeBtn?.focus();
   }
 
-  function closeDrawer() {
-    document.body.classList.remove("drawer-open");
-    document.body.classList.remove("settings-split");
-    document.body.classList.remove("account-view");
-    showDashboardPanel();
+function closeDrawer() {
+  document.body.classList.remove("drawer-open");
+  document.body.classList.remove("settings-split");
+  document.body.classList.remove("account-view");
+  showDashboardPanel();
 
-    drawer?.setAttribute("aria-hidden", "true");
-    backdrop?.setAttribute("aria-hidden", "true");
-    settingsBtn?.focus();
+  drawer?.setAttribute("aria-hidden", "true");
+  backdrop?.setAttribute("aria-hidden", "true");
+  settingsBtn?.focus();
+}
+
+function hideDrawerOnly() {
+  document.body.classList.remove("drawer-open");
+  document.body.classList.remove("settings-split");
+
+  drawer?.setAttribute("aria-hidden", "true");
+  backdrop?.setAttribute("aria-hidden", "true");
+}
+
+settingsBtn?.addEventListener("click", openDrawer);
+closeBtn?.addEventListener("click", closeDrawer);
+backdrop?.addEventListener("click", closeDrawer);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
+    closeDrawer();
   }
-
-  settingsBtn?.addEventListener("click", openDrawer);
-  closeBtn?.addEventListener("click", closeDrawer);
-  backdrop?.addEventListener("click", closeDrawer);
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.classList.contains("drawer-open")) {
-      closeDrawer();
-    }
-  });
+});
  
 const signOutBtn = document.getElementById("drawer-signout");
 
@@ -3764,11 +3772,20 @@ drawer?.addEventListener("click", async (e) => {
   if (!btn) return;
 
   if (btn.id === "drawer-account") {
-    // Keep drawer open, but make right side usable
+    if (window.innerWidth < 900) {
+      hideDrawerOnly();
+      document.body.classList.add("account-view");
+
+      showAccountPanel();
+      await hydrateAccountPanel();
+      return;
+    }
+
+    // 900px and up = keep split view
     document.body.classList.add("drawer-open");
     document.body.classList.add("settings-split");
+    document.body.classList.add("account-view");
 
-    // On wide screens, CSS kills pointer-events; aria-hidden alone doesn't
     drawer?.setAttribute("aria-hidden", "false");
     backdrop?.setAttribute("aria-hidden", "true");
 
