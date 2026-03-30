@@ -174,15 +174,15 @@ function showDashboard() {
 }
 
 //----------
-function showCreateBoard() {
+async function showCreateBoard() {
   document.body.classList.add("create-view");
+  document.body.style.visibility = "visible";
 
-  const dash = document.getElementById("dashboard");
-  const createBoard = document.getElementById("create-board");
-
-  if (dash) dash.style.display = "none";
-  if (createBoard) createBoard.style.display = "block";
-}
+  const au = await auth.getAuthUser();
+  if (!au) {
+    auth.showAuthOverlay("Please sign in before creating a calendar.");
+    return;
+  }
 
   const hostedCount = await getHostedBoardCount();
     if (!IS_PRO && hostedCount >= 2){
@@ -203,6 +203,7 @@ function showCreateBoard() {
     window.showBoardSetup();
   }
 }
+
 
 //----------
 function showRouteError() {
