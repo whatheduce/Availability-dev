@@ -174,7 +174,6 @@ body.logged-in #landing-bg::after{
 }
 
 .centered-container {
-  width: 100%;
   max-width: 1180px;
   margin: 0;
   padding: 14px 34px;
@@ -3906,6 +3905,14 @@ body.account-view #dash-account {
   #dash-account button {
     justify-self: end;
   }
+
+ .centered-container {
+   padding: 14px 14px;
+  }
+
+ .ghost-btn{
+  padding: 6px 0 44px;
+ }
 }
 
 /* ONLY small phones stack */
@@ -3926,3 +3933,5 @@ body.account-view #dash-account {
     justify-self: start;
     text-align: left;
   }
+
+ 
