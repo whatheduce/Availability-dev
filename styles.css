@@ -1123,8 +1123,8 @@ td:not(.gold-cell):hover {
   border: 1px solid rgba(0,0,0,0.08);
   background: linear-gradient(
       180deg,
-      rgba(246, 225, 170, 0.67),
-      rgba(231, 196, 118, 0.30)
+      rgba(246, 225, 170, 0.98),
+      rgba(231, 196, 118, 0.90)
     );
   color: #4b4237;
   font: inherit;
