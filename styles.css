@@ -3854,6 +3854,10 @@ body.account-view #dash-account {
     grid-template-columns: 62px minmax(0, 1fr) 68px;
   }
 
+  .settings-colour {
+   display: block;
+  }
+ 
   .acct-upgrade-lock {
     width: 40px;
     height: 40px;
