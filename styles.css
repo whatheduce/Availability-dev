@@ -1152,6 +1152,16 @@ td:not(.gold-cell):hover {
   transform: translateY(0);
 }
 
+/* hidden by default */
+#go-create {
+  display: none;
+}
+
+/* only visible on create screen */
+body.create-view #go-create {
+  display: block;
+}
+
 #create-board #go-create {
   width: 60%;
   margin-top: 15%;
