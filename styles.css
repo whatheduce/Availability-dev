@@ -3522,6 +3522,44 @@ body.account-view #dash-account {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
+
+  .settings-card {
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  .settings-row-3 {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr) 88px;
+    column-gap: 12px;
+    align-items: center;
+    padding: 14px 0;
+  }
+
+  .settings-label {
+    min-width: 0;
+  }
+
+  .settings-value,
+  .settings-colour {
+    min-width: 0;
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .settings-mini-btn {
+    width: 88px;
+    min-width: 88px;
+    justify-self: end;
+  }
+
+  #acct-delete-account {
+    width: 88px;
+    min-width: 88px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -3663,33 +3701,6 @@ body.account-view #dash-account {
   width: 8px;
   height: 8px;
 }
- 
-  .settings-card {
-    padding: 0 12px;
-  }
-
-  .settings-row-3 {
-    grid-template-columns: 1fr;
-    row-gap: 6px;
-    align-items: start;
-    padding: 12px 2px;
-  }
-
-  .settings-row-3 .settings-label,
-  .settings-row-3 .settings-value,
-  .settings-row-3 .settings-colour {
-    justify-self: start;
-    text-align: left;
-    white-space: normal;
-  }
-
-  .settings-row-3 .settings-value {
-    margin-right: 0;
-  }
-
-  .settings-mini-btn {
-    justify-self: start;
-  }
 
   .settings-cta-left {
     min-height: 0;
