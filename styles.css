@@ -3561,6 +3561,10 @@ body.account-view #dash-account {
     width: 88px;
     min-width: 88px;
   }
+ 
+ .modal-card {
+  max-width: 90%;
+ }
 }
 
 @media (max-width: 720px) {
