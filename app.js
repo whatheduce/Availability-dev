@@ -162,6 +162,7 @@ window.openManageBoard = function (manageToken) {
 
 //----------
 function showDashboard() {
+  document.body.classList.remove("create-view");
   document.body.style.visibility = "visible";
   document.body.classList.remove("show-landing-bg");
   
@@ -171,6 +172,7 @@ function showDashboard() {
 
 //----------
 async function showCreateBoard() {
+  document.body.classList.add("create-view");
   document.body.style.visibility = "visible";
 
   const au = await auth.getAuthUser();
@@ -2442,7 +2444,7 @@ function bindCalendarClickDelegation() {
 // =========================
 
 function showAccountPanel() {
-  document.body.classList.add("account-view");   // 👈 add this
+  document.body.classList.add("account-view");
 
   const dashBody = document.getElementById("dash-body");
   const acct = document.getElementById("dash-account");
@@ -2453,7 +2455,8 @@ function showAccountPanel() {
 
 //----------  
 function showDashboardPanel() {
-  document.body.classList.remove("account-view");  // 👈 add this
+  document.body.classList.remove("create-view");
+  document.body.classList.remove("account-view"); 
 
   const dashBody = document.getElementById("dash-body");
   const acct = document.getElementById("dash-account");
