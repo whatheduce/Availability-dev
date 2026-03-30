@@ -3531,7 +3531,6 @@ body.account-view #dash-account {
 
   .settings-row-3 {
     display: grid;
-    grid-template-columns: 92px minmax(0, 1fr) 88px;
     column-gap: 12px;
     align-items: center;
     padding: 14px 0;
@@ -3549,6 +3548,7 @@ body.account-view #dash-account {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-right: 2px;
   }
 
   .settings-mini-btn {
