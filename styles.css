@@ -3460,7 +3460,20 @@ body.account-view #dash-account {
    MOBILE RESPONSIVE
    DASHBOARD / ACCOUNT / MODALS
    ========================= */
-
+@media (max-width: 1200px) {
+ #create-board #go-create{
+  width: 35%;
+  min-height: 0px;
+  height: 80px;
+  padding: 0 0;
+  font-size: 20px;
+  position: fixed;
+  right: 6%;
+  top: 88%;
+  z-index: 2;
+ {
+}
+ 
 @media (max-width: 900px) {
   #dash-topbar,
   #dash-body,
