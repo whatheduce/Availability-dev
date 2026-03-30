@@ -3526,6 +3526,7 @@ body.account-view #dash-account {
   .settings-card {
     padding: 0 16px;
     box-sizing: border-box;
+    margin-right: 7%;
   }
 
   .settings-row-3 {
