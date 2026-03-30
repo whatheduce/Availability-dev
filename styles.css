@@ -3885,7 +3885,6 @@ body.account-view #dash-account {
   .board-strip-fade::after {
     width: 24px;
   }
-}
 
   #dash-account .acct-row,
   #dash-account .account-row {
@@ -3925,7 +3924,7 @@ body.account-view #dash-account {
   }
 
  .ghost-btn {
-  padding: 6px 0 44px;
+   padding: 6px 0 44px;
  }
 }
 
