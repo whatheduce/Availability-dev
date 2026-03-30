@@ -1112,10 +1112,6 @@ td:not(.gold-cell):hover {
   opacity: 0.8;
 }
 
-.create-pro-hint {
-  margin-top: 12px;
-}
-
 #create-board-btn {
   width: 180px;
   height: 48px;
@@ -1303,12 +1299,6 @@ body.create-view #go-create {
     .pro-select:disabled {
       opacity: 0.8;
     }
-
-.pro-hint {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #7a6857;
-}
 
     @keyframes dotPopIn {
       from { transform: scale(0.5); opacity: 0; }
