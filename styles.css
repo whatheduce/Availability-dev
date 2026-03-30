@@ -3709,11 +3709,12 @@ body.account-view #dash-account {
   }
 
   .pro-upsell-card {
-    width: 100%;
+    width: 92%;
   }
 
   #acct-back-dashboard {
     margin-top: 18px;
+   width: 50%;
   }
 
   .drawer {
@@ -3816,7 +3817,6 @@ body.account-view #dash-account {
  
   .settings-action,
   .settings-action.compact {
-    width: 100%;
     justify-content: center;
   }
 
