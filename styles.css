@@ -3473,6 +3473,8 @@ body.account-view #dash-account {
   z-index: 2;
   margin-top: 0;
   font-weight: 600;
+  padding: 15px;
+  max-width: 150px;
  }
 }
  
