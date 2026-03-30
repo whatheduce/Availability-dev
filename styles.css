@@ -3472,7 +3472,7 @@ body.account-view #dash-account {
   top: 88%;
   z-index: 2;
   margin-top: 0;
- {
+ }
 }
  
 @media (max-width: 900px) {
@@ -3882,6 +3882,10 @@ body.account-view #dash-account {
     margin: 10px 0 0 8px;
   }
 
+ .create-input, .create-select {
+  font-size: 14px;
+ }
+ 
   .board-strip-fade::after {
     width: 24px;
   }
