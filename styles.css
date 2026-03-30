@@ -3824,10 +3824,30 @@ body.account-view #dash-account {
     width: 100%;
   }
 
-  .pro-upsell-top {
-    align-items: flex-start;
-    gap: 8px;
+  .settings-value {
+   margin-right: 0px;
+   font-size: 12px;
+   font-weight: 500;
   }
+
+  #acct-delete-account {
+    width: 64px;
+    min-width: 64px;
+  }
+
+ .settings-mini-btn.danger {
+   font-size: 9px;
+   padding: 4px 6px;
+ }
+
+  .settings-mini-btn {
+    width: 64px;
+    min-width: 64px;
+    font-size: 9px;
+    padding: 4px 6px;
+    min-height: 36px;
+  }
+      
 
   .acct-upgrade-lock {
     width: 40px;
