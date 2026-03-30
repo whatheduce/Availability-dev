@@ -162,24 +162,27 @@ window.openManageBoard = function (manageToken) {
 
 //----------
 function showDashboard() {
-  document.body.classList.remove("create-view");
   document.body.style.visibility = "visible";
   document.body.classList.remove("show-landing-bg");
-  
+  document.body.classList.remove("create-view");
+
   const dash = document.getElementById("dashboard");
+  const createBoard = document.getElementById("create-board");
+
+  if (createBoard) createBoard.style.display = "none";
   if (dash) dash.style.display = "block";
 }
 
 //----------
-async function showCreateBoard() {
+function showCreateBoard() {
   document.body.classList.add("create-view");
-  document.body.style.visibility = "visible";
 
-  const au = await auth.getAuthUser();
-  if (!au) {
-    auth.showAuthOverlay("Please sign in before creating a calendar.");
-    return;
-  }
+  const dash = document.getElementById("dashboard");
+  const createBoard = document.getElementById("create-board");
+
+  if (dash) dash.style.display = "none";
+  if (createBoard) createBoard.style.display = "block";
+}
 
   const hostedCount = await getHostedBoardCount();
     if (!IS_PRO && hostedCount >= 2){
