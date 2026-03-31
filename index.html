@@ -223,62 +223,74 @@
 </div>
 
 <!-- AUTH OVERLAY (blur + single form) -->
-<div id="auth-overlay" style="
-  position:fixed; inset:0; display:none; z-index:9999;
-  background:rgba(255,255,255,0.01);
-">
-  <div id="auth-modal" style="
-    max-width:420px; margin:80px auto; background:rgba(255,255,255,0.92);
-    border:1px solid rgba(0,0,0,0.12); border-radius:16px; padding:18px;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.18); width: 80%;
-    text-align:left;
-  ">
-    <div id="auth-title" style="font-weight:800; font-size:18px; margin-bottom:6px;">
+<div id="auth-overlay" class="auth-overlay" hidden>
+  <div id="auth-modal" class="auth-modal">
+    <div id="auth-title" class="auth-title">
       Sign in to access your Hearth Account
     </div>
-    <div id="auth-subtitle" style="font-size:13px; color:#666; margin-bottom:12px;">
+
+    <div id="auth-subtitle" class="auth-subtitle">
       Create an account or sign in to continue.
     </div>
 
     <form id="auth-form">
-      <input id="auth-email" placeholder="Email" type="email"
-        style="box-sizing: border-box; width:100%; padding:10px; padding-left: 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
-      <input id="auth-password" placeholder="Password" type="password"
-        style="box-sizing: border-box; width:100%; padding:10px; padding-left: 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:5px;" />
-      <input id="auth-password-confirm" placeholder="Confirm password" type="password"
-        style="box-sizing: border-box; width:100%; padding:10px; padding-left: 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px; "display: none;"/>
+      <input id="auth-email" class="auth-input" placeholder="Email" type="email" />
 
-      <button id="auth-submit" class="primary-btn" style="width:100%;" type="button">Continue</button>
+      <input id="auth-password" class="auth-input auth-input--tight" placeholder="Password" type="password" />
+
+      <input
+        id="auth-password-confirm"
+        class="auth-input"
+        placeholder="Confirm password"
+        type="password"
+        hidden
+      />
+
+      <button id="auth-submit" class="primary-btn auth-submit-btn" type="button">
+        Continue
+      </button>
     </form>
 
-    <!-- PASSWORD RECOVERY (shown only when user comes from reset email link) -->
-    <div id="auth-recovery" style="display:none;">
-      <input id="auth-new-password" placeholder="New password" type="password"
-        style="box-sizing:border-box; width:100%; padding:10px; padding-left:14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:10px;" />
+    <div id="auth-recovery" class="auth-recovery" hidden>
+      <input
+        id="auth-new-password"
+        class="auth-input auth-input--recovery"
+        placeholder="New password"
+        type="password"
+      />
 
-      <input id="auth-new-password-confirm" placeholder="Confirm new password" type="password"
-        style="box-sizing:border-box; width:100%; padding:10px; padding-left:14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+      <input
+        id="auth-new-password-confirm"
+        class="auth-input"
+        placeholder="Confirm new password"
+        type="password"
+      />
 
-      <button id="auth-set-password" class="primary-btn" style="width:100%;" type="button">
+      <button id="auth-set-password" class="primary-btn auth-submit-btn" type="button">
         Update password
       </button>
 
-      <button id="auth-recovery-cancel" class="primary-btn secondary-btn"
-        style="width:100%; margin-top:10px;" type="button">
+      <button
+        id="auth-recovery-cancel"
+        class="primary-btn secondary-btn auth-secondary-btn"
+        type="button"
+      >
         Back to sign in
       </button>
     </div>
-    
-    <div style="display:flex; justify-content:space-between; margin-top:10px; gap:10px;">
-      <button id="auth-toggle-mode" class="primary-btn" style="flex:1; background:#f3f4f6;">
+
+    <div class="auth-actions-row">
+      <button id="auth-toggle-mode" class="primary-btn auth-inline-btn auth-inline-btn--secondary" type="button">
         Create account
       </button>
-      <button id="auth-forgot" class="primary-btn" style="flex:1; background:#f3f4f6;">
+
+      <button id="auth-forgot" class="primary-btn auth-inline-btn auth-inline-btn--secondary" type="button">
         Forgot password
       </button>
     </div>
 
-    <div id="auth-msg" style="margin-top:10px; font-size:13px; color:#b00020; display:none;"></div>
+    <div id="auth-msg" class="auth-msg" hidden></div>
+
     <div class="auth-privacy-note">
       Hearth will never sell or share your personal information. Ever.
     </div>
