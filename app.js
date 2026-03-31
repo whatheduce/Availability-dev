@@ -3728,7 +3728,10 @@ document.addEventListener("keydown", (e) => {
     closeDrawer();
   }
 });
- 
+
+document.getElementById("delete-account-password")?.addEventListener("input", clearDeleteAccountError);
+document.getElementById("delete-account-confirm")?.addEventListener("input", clearDeleteAccountError);
+  
 const signOutBtn = document.getElementById("drawer-signout");
 
 if (signOutBtn) {
