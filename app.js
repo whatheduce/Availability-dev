@@ -2530,12 +2530,27 @@ async function deleteAccountFlow() {
   const pass = (document.getElementById("delete-account-password")?.value || "").trim();
   const conf = (document.getElementById("delete-account-confirm")?.value || "").trim();
 
-  if (!pass) return showDeleteAccountOverlay("Please enter your password.");
-  if (conf !== "DELETE") return showDeleteAccountOverlay('Type DELETE to confirm.');
+  clearDeleteAccountError();
+
+  if (!pass) {
+    setDeleteAccountError("Please enter your password.");
+    highlightDeleteField("delete-account-password");
+    return;
+  }
+
+  if (conf !== "DELETE") {
+    setDeleteAccountError('You must type DELETE exactly.');
+    highlightDeleteField("delete-account-confirm");
+    return;
+  }
 
   // 1) Re-authenticate (proves password)
   const { error: reauthErr } = await supabase.auth.signInWithPassword({ email, password: pass });
-  if (reauthErr) return showDeleteAccountOverlay(reauthErr.message || "Password incorrect.");
+    if (reauthErr) {
+    setDeleteAccountError("Incorrect password.");
+    highlightDeleteField("delete-account-password");
+    return;
+  }
 
   // 2) Call Edge Function that performs deletions + auth user delete (service role)
   const { data: sessionData } = await supabase.auth.getSession();
@@ -2574,6 +2589,36 @@ async function deleteAccountFlow() {
     console.error(err);
     showDeleteAccountOverlay("Network error while deleting account.");
   }
+}
+
+//---------- 
+function setDeleteAccountError(msg) {
+  const el = document.getElementById("delete-account-msg");
+  if (!el) return;
+
+  el.textContent = msg;
+  el.style.display = "block";
+}
+
+//---------- 
+function clearDeleteAccountError() {
+  const el = document.getElementById("delete-account-msg");
+  if (!el) return;
+
+  el.textContent = "";
+  el.style.display = "none";
+}
+
+//---------- 
+function highlightDeleteField(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.classList.add("input-error");
+
+  setTimeout(() => {
+    el.classList.remove("input-error");
+  }, 1500);
 }
 
 
