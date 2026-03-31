@@ -2522,40 +2522,50 @@ function hideDeleteAccountOverlay() {
 async function deleteAccountFlow() {
   const au = await auth.getAuthUser();
   if (!au) {
-    showDeleteAccountOverlay("You must be signed in.");
+    setDeleteAccountError("You must be signed in.");
     return;
   }
 
   const email = (document.getElementById("acct-email")?.textContent || "").trim();
-  const pass = (document.getElementById("delete-account-password")?.value || "").trim();
-  const conf = (document.getElementById("delete-account-confirm")?.value || "").trim();
+  const passEl = document.getElementById("delete-account-password");
+  const confEl = document.getElementById("delete-account-confirm");
+
+  const pass = (passEl?.value || "").trim();
+  const conf = (confEl?.value || "").trim();
 
   clearDeleteAccountError();
+  passEl?.classList.remove("input-error");
+  confEl?.classList.remove("input-error");
 
   if (!pass) {
     setDeleteAccountError("Please enter your password.");
-    highlightDeleteField("delete-account-password");
+    passEl?.classList.add("input-error");
     return;
   }
 
   if (conf !== "DELETE") {
     setDeleteAccountError('You must type DELETE exactly.');
-    highlightDeleteField("delete-account-confirm");
+    confEl?.classList.add("input-error");
     return;
   }
 
-  // 1) Re-authenticate (proves password)
-  const { error: reauthErr } = await supabase.auth.signInWithPassword({ email, password: pass });
-    if (reauthErr) {
+  const { error: reauthErr } = await supabase.auth.signInWithPassword({
+    email,
+    password: pass
+  });
+
+  if (reauthErr) {
     setDeleteAccountError("Incorrect password.");
-    highlightDeleteField("delete-account-password");
+    passEl?.classList.add("input-error");
     return;
   }
 
-  // 2) Call Edge Function that performs deletions + auth user delete (service role)
   const { data: sessionData } = await supabase.auth.getSession();
   const accessToken = sessionData?.session?.access_token;
-  if (!accessToken) return showDeleteAccountOverlay("Session error. Please sign in again.");
+  if (!accessToken) {
+    setDeleteAccountError("Session error. Please sign in again.");
+    return;
+  }
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
@@ -2570,24 +2580,23 @@ async function deleteAccountFlow() {
     const out = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      return showDeleteAccountOverlay(out?.error || "Delete failed.");
+      setDeleteAccountError(out?.error || "Delete failed.");
+      return;
     }
 
-    // 3) Sign out + reset UI
     await supabase.auth.signOut();
     hideDeleteAccountOverlay();
 
-    // clear your local remembered stuff
     localStorage.removeItem("lastBoardToken");
     localStorage.removeItem("lastBoardManageToken");
     localStorage.removeItem("globalUserId");
     localStorage.removeItem("globalUserName");
     localStorage.removeItem("globalUserColor");
 
-    window.location.href = window.location.pathname; // fresh state
+    window.location.href = window.location.pathname;
   } catch (err) {
     console.error(err);
-    showDeleteAccountOverlay("Network error while deleting account.");
+    setDeleteAccountError("Network error while deleting account.");
   }
 }
 
