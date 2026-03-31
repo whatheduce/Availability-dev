@@ -3441,17 +3441,48 @@ body.account-view #dash-account {
 
 /* --- AUTH OVERLAY OVERRIDES (ensure clickable + visible) --- */
 #auth-overlay {
-  display: none;            
-  pointer-events: auto;     /* allow interaction */
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.01);
+  pointer-events: auto;
 }
 
 #auth-overlay[style*="display: block"] {
-  display: block !important; /* respect your JS showAuthOverlay() */
+  display: block !important;
 }
 
 /* =========================
    AUTH OVERLAY POLISH
    ========================= */
+
+#auth-modal {
+  position: relative;
+  z-index: 10000;
+  width: min(80%, 420px);
+  max-width: 420px;
+  margin: 80px auto;
+  padding: 18px;
+  box-sizing: border-box;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+#auth-title {
+  font-weight: 800;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+#auth-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+}
 
 #auth-overlay input {
   transition: box-shadow 120ms ease, border-color 120ms ease, background 120ms ease;
@@ -3465,20 +3496,56 @@ body.account-view #dash-account {
   background: rgba(253, 249, 244, 1);
 }
 
+.auth-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px;
+  padding-left: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  margin-bottom: 12px;
+}
+
+#auth-password {
+  margin-bottom: 5px;
+}
+
+#auth-new-password {
+  margin-bottom: 10px;
+}
+
+.auth-submit-btn {
+  width: 100%;
+}
+
+.auth-secondary-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.auth-actions-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.auth-inline-btn {
+  flex: 1;
+}
+
 /* Make buttons in auth overlay feel clickable without changing global buttons */
 #auth-overlay .primary-btn {
   border-radius: 12px;
   border: 1px solid rgba(126, 104, 82, 0.18);
   background: rgba(0,0,0,0.92);
   color: #fff;
-
   transition:
     transform 120ms ease,
     box-shadow 120ms ease,
     background 120ms ease,
     border-color 120ms ease,
     opacity 120ms ease;
-
   box-shadow: 0 2px 8px rgba(96, 72, 48, 0.14);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -3515,8 +3582,6 @@ body.account-view #dash-account {
   box-shadow: none;
 }
 
-/* The two grey buttons (Create account / Forgot password) currently set inline bg.
-   This keeps their text readable + gives them the same interactions. */
 #auth-overlay #auth-toggle-mode.primary-btn,
 #auth-overlay #auth-forgot.primary-btn {
   color: rgba(47, 36, 27, 0.90);
@@ -3530,6 +3595,23 @@ body.account-view #dash-account {
   box-shadow: 0 8px 22px rgba(126, 104, 82, 0.18);
 }
 
+#auth-overlay .primary-btn.secondary-btn {
+  background: #f3ede6;
+  color: #2f241b;
+  border: 1px solid rgba(126, 104, 82, 0.16);
+}
+
+#auth-overlay .primary-btn.secondary-btn:hover {
+  background: rgba(253, 249, 244, 0.96);
+}
+
+#auth-msg {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #b00020;
+  display: none;
+}
+
 .auth-privacy-note {
   margin-top: 18px;
   padding-top: 12px;
@@ -3538,21 +3620,6 @@ body.account-view #dash-account {
   line-height: 1.5;
   color: rgba(92, 72, 56, 0.62);
   text-align: center;
-}
-
-#auth-modal{
-  position: relative;
-  z-index: 10000; /* above overlay backdrop */
-}
-
-#auth-overlay .primary-btn.secondary-btn{
-  background: #f3ede6;
-  color: #2f241b;
-  border: 1px solid rgba(126, 104, 82, 0.16);
-}
-
-#auth-overlay .primary-btn.secondary-btn:hover{
-  background: rgba(253, 249, 244, 0.96);
 }
 
 [hidden] { display: none !important; }
