@@ -285,36 +285,37 @@
   </div>
 </div>
 
-<div id="delete-account-overlay" style="
-  position:fixed; inset:0; display:none; z-index:9999;
-  background:rgba(255,255,255,0.35); backdrop-filter: blur(8px);
-">
-  <div style="
-    max-width:460px; margin:80px auto; background:rgba(255,255,255,0.92);
-    border:1px solid rgba(0,0,0,0.12); border-radius:16px; padding:18px;
-    box-shadow: 0 18px 50px rgba(0,0,0,0.18);
-    text-align:left;
-  ">
-    <div style="font-weight:900; font-size:18px; margin-bottom:6px;">Delete your Hearth account</div>
-    <div style="font-size:13px; color:#666; margin-bottom:12px;">
+<div id="delete-account-overlay" class="modal-overlay delete-account-overlay" hidden>
+  <div class="modal-card delete-account-card">
+    <div class="delete-account-title">Delete your Hearth account</div>
+
+    <div class="delete-account-subtext">
       This permanently deletes your account, profile, all your dots, and any calendars you host.
     </div>
 
-    <label style="display:block; font-weight:700; font-size:12px; margin-bottom:6px;">Password</label>
-    <input id="delete-account-password" type="password" placeholder="Enter your password"
-      style="box-sizing:border-box; width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+    <label class="delete-account-label" for="delete-account-password">Password</label>
+    <input
+      id="delete-account-password"
+      class="delete-account-input"
+      type="password"
+      placeholder="Enter your password"
+    />
 
-    <label style="display:block; font-weight:700; font-size:12px; margin-bottom:6px;">Type DELETE to confirm</label>
-    <input id="delete-account-confirm" type="text" placeholder="DELETE"
-      style="box-sizing:border-box; width:100%; padding:10px 14px; border-radius:12px; border:1px solid rgba(0,0,0,0.12); margin-bottom:12px;" />
+    <label class="delete-account-label" for="delete-account-confirm">Type DELETE to confirm</label>
+    <input
+      id="delete-account-confirm"
+      class="delete-account-input"
+      type="text"
+      placeholder="DELETE"
+    />
 
-    <div id="delete-account-msg" style="margin-top:6px; font-size:13px; color:#b00020; display:none;"></div>
+    <div id="delete-account-msg" class="delete-account-msg" hidden></div>
 
-    <div style="display:flex; gap:10px; margin-top:14px;">
-      <button id="delete-account-cancel" class="primary-btn" style="flex:1; background:#f3f4f6;">
+    <div class="delete-account-actions">
+      <button id="delete-account-cancel" class="modal-btn" type="button">
         Cancel
       </button>
-      <button id="delete-account-confirm-btn" class="primary-btn" style="flex:1; background:#ff3b30;">
+      <button id="delete-account-confirm-btn" class="modal-btn modal-btn-danger" type="button">
         Delete account
       </button>
     </div>
