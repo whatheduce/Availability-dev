@@ -2214,12 +2214,6 @@ body.account-view #dash-account {
   margin-top: 14px;
 }
 
-delete-account-confirm-btn {
-  color: #d11a2a;
-  background: rgba(255, 59, 48, 0.12);
-  border-color: rgba(255, 59, 48, 0.28);
-}
-
 @media (max-width: 520px) {
   .delete-account-overlay {
     padding: 56px 14px 20px;
@@ -3047,7 +3041,9 @@ delete-account-confirm-btn {
 }
 
 .modal-btn-danger {
-  border-color: rgba(255,0,0,0.20);
+  color: #d11a2a;
+  background: rgba(255, 59, 48, 0.12);
+  border-color: rgba(255, 59, 48, 0.28);
 }
 
 .modal-btn-danger:hover {
