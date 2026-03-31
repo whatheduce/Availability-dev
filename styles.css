@@ -3605,6 +3605,19 @@ body.account-view #dash-account {
   background: rgba(253, 249, 244, 0.96);
 }
 
+#auth-overlay .auth-inline-btn--secondary {
+  background: #f3ede6;
+  color: #2f241b;
+  border: 1px solid rgba(126, 104, 82, 0.16);
+  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.08);
+}
+
+#auth-overlay .auth-inline-btn--secondary:hover {
+  background: rgba(253, 249, 244, 0.96);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(126, 104, 82, 0.18);
+}
+
 #auth-msg {
   margin-top: 10px;
   font-size: 13px;
