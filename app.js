@@ -2504,7 +2504,7 @@ function showDeleteAccountOverlay(msg = "") {
   const m = document.getElementById("delete-account-msg");
   if (!ov) return;
 
-  ov.style.display = "block";
+  ov.hidden = false;
 
   if (m) {
     if (msg) { m.style.display = "block"; m.textContent = msg; }
@@ -2515,7 +2515,7 @@ function showDeleteAccountOverlay(msg = "") {
 //---------- 
 function hideDeleteAccountOverlay() {
   const ov = document.getElementById("delete-account-overlay");
-  if (ov) ov.style.display = "none";
+  if (ov) ov.hidden = true;
 }
 
 //---------- 
