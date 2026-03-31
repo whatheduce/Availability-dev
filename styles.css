@@ -3535,20 +3535,20 @@ body.account-view #dash-account {
 }
 
 /* Make buttons in auth overlay feel clickable without changing global buttons */
+/* Default auth buttons (keep your normal primary-btn style) */
 #auth-overlay .primary-btn {
-  border-radius: 12px;
-  border: 1px solid rgba(126, 104, 82, 0.18);
-  background: rgba(0,0,0,0.92);
-  color: #fff;
-  transition:
-    transform 120ms ease,
-    box-shadow 120ms ease,
-    background 120ms ease,
-    border-color 120ms ease,
-    opacity 120ms ease;
-  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.14);
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+}
+
+/* Secondary buttons (Create account / Forgot password) */
+#auth-overlay .auth-inline-btn {
+  background: #f3ede6;
+  color: #2f241b;
+  border: 1px solid rgba(126, 104, 82, 0.16);
+}
+
+#auth-overlay .auth-inline-btn:hover {
+  background: rgba(253, 249, 244, 0.96);
 }
 
 #auth-overlay .primary-btn:hover {
