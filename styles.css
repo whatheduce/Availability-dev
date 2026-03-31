@@ -2205,13 +2205,19 @@ body.account-view #dash-account {
 .delete-account-msg {
   margin-top: 6px;
   font-size: 13px;
-  color: #b00020;
+  color: #d11a2a;
+  display: none;
 }
 
 .delete-account-actions {
   display: flex;
   gap: 10px;
   margin-top: 14px;
+}
+
+.input-error {
+  border: 1px solid rgba(255,59,48,0.7) !important;
+  box-shadow: 0 0 0 2px rgba(255,59,48,0.15);
 }
 
 @media (max-width: 520px) {
