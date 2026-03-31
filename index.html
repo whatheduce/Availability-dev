@@ -236,7 +236,7 @@
     <form id="auth-form">
       <input id="auth-email" class="auth-input" placeholder="Email" type="email" />
 
-      <input id="auth-password" class="auth-input auth-input--tight" placeholder="Password" type="password" />
+      <input id="auth-password" class="auth-input" placeholder="Password" type="password" />
 
       <input
         id="auth-password-confirm"
@@ -254,7 +254,7 @@
     <div id="auth-recovery" class="auth-recovery" hidden>
       <input
         id="auth-new-password"
-        class="auth-input auth-input--recovery"
+        class="auth-input"
         placeholder="New password"
         type="password"
       />
@@ -280,11 +280,19 @@
     </div>
 
     <div class="auth-actions-row">
-      <button id="auth-toggle-mode" class="primary-btn auth-inline-btn auth-inline-btn--secondary">
+      <button
+        id="auth-toggle-mode"
+        class="primary-btn auth-inline-btn auth-inline-btn--secondary"
+        type="button"
+      >
         Create account
       </button>
 
-      <button id="auth-forgot" class="primary-btn auth-inline-btn auth-inline-btn--secondary" type="button">
+      <button
+        id="auth-forgot"
+        class="primary-btn auth-inline-btn auth-inline-btn--secondary"
+        type="button"
+      >
         Forgot password
       </button>
     </div>
