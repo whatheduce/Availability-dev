@@ -3439,13 +3439,17 @@ body.account-view #dash-account {
 
 
 
-/* --- AUTH OVERLAY OVERRIDES (ensure clickable + visible) --- */
+/* =========================
+   AUTH OVERLAY
+   ========================= */
+
 #auth-overlay {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
   pointer-events: auto;
 }
 
@@ -3454,34 +3458,62 @@ body.account-view #dash-account {
 }
 
 /* =========================
-   AUTH OVERLAY POLISH
+   AUTH MODAL
    ========================= */
 
 #auth-modal {
   position: relative;
   z-index: 10000;
-  width: min(80%, 420px);
-  max-width: 420px;
+  width: min(84%, 440px);
+  max-width: 440px;
   margin: 80px auto;
-  padding: 18px;
+  padding: 18px 18px 16px;
   box-sizing: border-box;
   text-align: left;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 16px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  background: rgba(252, 248, 242, 0.96);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(96, 72, 48, 0.18);
+  backdrop-filter: blur(12px);
 }
 
 #auth-title {
   font-weight: 800;
   font-size: 18px;
-  margin-bottom: 6px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #2f241a;
+  margin-bottom: 8px;
 }
 
 #auth-subtitle {
   font-size: 13px;
-  color: #666;
+  line-height: 1.35;
+  color: #6b5c4f;
+  margin-bottom: 14px;
+}
+
+/* =========================
+   AUTH INPUTS
+   ========================= */
+
+.auth-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(255, 255, 255, 0.92);
+  color: #332920;
   margin-bottom: 12px;
+}
+
+#auth-password {
+  margin-bottom: 12px;
+}
+
+#auth-new-password {
+  margin-bottom: 10px;
 }
 
 #auth-overlay input {
@@ -3492,27 +3524,13 @@ body.account-view #dash-account {
 #auth-overlay input:focus-visible {
   outline: none;
   border-color: rgba(204, 82, 16, 0.32);
-  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.16);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.10);
   background: rgba(253, 249, 244, 1);
 }
 
-.auth-input {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 10px;
-  padding-left: 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  margin-bottom: 12px;
-}
-
-#auth-password {
-  margin-bottom: 5px;
-}
-
-#auth-new-password {
-  margin-bottom: 10px;
-}
+/* =========================
+   AUTH BUTTON LAYOUT
+   ========================= */
 
 .auth-submit-btn {
   width: 100%;
@@ -3534,44 +3552,34 @@ body.account-view #dash-account {
   flex: 1;
 }
 
-/* Make buttons in auth overlay feel clickable without changing global buttons */
-/* Default auth buttons (keep your normal primary-btn style) */
+/* =========================
+   AUTH BUTTON STYLES
+   ========================= */
+
 #auth-overlay .primary-btn {
-  width: 100%;
-}
-
-/* Secondary buttons (Create account / Forgot password) */
-#auth-overlay .auth-inline-btn {
-  background: #f3ede6;
-  color: #2f241b;
-  border: 1px solid rgba(126, 104, 82, 0.16);
-}
-
-#auth-overlay .auth-inline-btn:hover {
-  background: rgba(253, 249, 244, 0.96);
-}
-
-#auth-overlay .primary-btn:hover {
-  background: rgba(0,0,0,1);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(96, 72, 48, 0.18);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease,
+    opacity 120ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #auth-overlay .primary-btn:active {
   transform: translateY(0px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.16), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
 #auth-overlay .primary-btn.is-pressed {
   transform: translateY(1px) scale(0.98);
-  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.16), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
 #auth-overlay .primary-btn:focus-visible {
   outline: none;
   box-shadow:
-    0 0 0 3px rgba(204, 82, 16, 0.20),
-    0 8px 22px rgba(96, 72, 48, 0.18);
+    0 0 0 3px rgba(204, 82, 16, 0.16),
+    0 8px 18px rgba(96, 72, 48, 0.12);
 }
 
 #auth-overlay .primary-btn:disabled,
@@ -3582,41 +3590,47 @@ body.account-view #dash-account {
   box-shadow: none;
 }
 
-#auth-overlay #auth-toggle-mode.primary-btn,
-#auth-overlay #auth-forgot.primary-btn {
-  color: rgba(47, 36, 27, 0.90);
-  border-color: rgba(126, 104, 82, 0.16);
+/* Main CTA */
+#auth-submit.primary-btn,
+#auth-set-password.primary-btn {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(252, 248, 242, 0.92);
+  color: #2f241b;
   box-shadow: 0 2px 8px rgba(96, 72, 48, 0.08);
 }
 
-#auth-overlay #auth-toggle-mode.primary-btn:hover,
-#auth-overlay #auth-forgot.primary-btn:hover {
+#auth-submit.primary-btn:hover,
+#auth-set-password.primary-btn:hover {
+  background: rgba(253, 249, 244, 1);
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(126, 104, 82, 0.18);
+  box-shadow: 0 8px 18px rgba(96, 72, 48, 0.10);
 }
 
-#auth-overlay .primary-btn.secondary-btn {
-  background: #f3ede6;
-  color: #2f241b;
-  border: 1px solid rgba(126, 104, 82, 0.16);
-}
-
-#auth-overlay .primary-btn.secondary-btn:hover {
-  background: rgba(253, 249, 244, 0.96);
-}
-
+/* Secondary actions */
+#auth-toggle-mode.primary-btn,
+#auth-forgot.primary-btn,
+#auth-recovery-cancel.primary-btn.secondary-btn,
 #auth-overlay .auth-inline-btn--secondary {
-  background: #f3ede6;
-  color: #2f241b;
+  background: rgba(243, 237, 230, 0.9);
+  color: #4b4237;
   border: 1px solid rgba(126, 104, 82, 0.16);
-  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.08);
+  box-shadow: 0 2px 8px rgba(96, 72, 48, 0.06);
 }
 
+#auth-toggle-mode.primary-btn:hover,
+#auth-forgot.primary-btn:hover,
+#auth-recovery-cancel.primary-btn.secondary-btn:hover,
 #auth-overlay .auth-inline-btn--secondary:hover {
   background: rgba(253, 249, 244, 0.96);
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(126, 104, 82, 0.18);
+  box-shadow: 0 8px 18px rgba(96, 72, 48, 0.10);
 }
+
+/* =========================
+   AUTH MESSAGES / NOTE
+   ========================= */
 
 #auth-msg {
   margin-top: 10px;
