@@ -3851,7 +3851,7 @@ body.account-view #dash-account {
   --mini-scale: 0.62;
 }
 
- .auth-title {
+ #auth-title {
   font-size: 17px;
  }
  
