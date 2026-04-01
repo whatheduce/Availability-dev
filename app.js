@@ -237,6 +237,19 @@ function showBoardView() {
 // GENERAL UI HELPERS
 // =========================
 
+function renderDashboardSubtitle(nameOverride = "") {
+  const dashUser = document.getElementById("dash-username");
+  if (!dashUser) return;
+
+  const name = nameOverride || user?.name || "";
+
+  dashUser.textContent = name
+    ? possessive(name).toUpperCase()
+    : "";
+}
+window.renderDashboardSubtitle = renderDashboardSubtitle;
+
+//----------
 function showConfirmPopup(message, { title = "Notice", onOk, showOk = true } = {}) {
   const overlay = document.getElementById("notice-overlay");
   const msgEl = document.getElementById("notice-message");
@@ -4160,11 +4173,7 @@ nameSave?.addEventListener("click", async () => {
     const acctNameEl = document.getElementById("acct-name");
     if (acctNameEl) acctNameEl.textContent = newName;
 
-    const dashUser = document.getElementById("dash-username");
-    if (dashUser && user?.name) {
-      dashUser.textContent = possessive(user.name).toUpperCase();
-    }
-
+    renderDashboardSubtitle();
     closeNameModal();
 
     await confirmModal({
@@ -4496,7 +4505,7 @@ async function startApp() {
     }
 
     showDashboard();
-    auth.setDashboardSubtitle();
+    renderDashboardSubtitle();
     await loadBoards();
     return;
   }
