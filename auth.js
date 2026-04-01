@@ -302,43 +302,6 @@ function hideProfileSetup() {
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "block"; // ✅ bring dashboard back
 }
-  
-
-
-
-  
-// CHECK IF WE NEED THIS
-async function getOrCreateProfile({ name, color }) {
-  const user = await getAuthUser();
-  if (!user) return null;
-
-  // try fetch
-  const { data: existing } = await supabase
-    .from("profiles")
-    .select("user_id, name, color")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existing) return existing;
-
-  // create
-  const { data: created, error } = await supabase
-    .from("profiles")
-    .insert({ user_id: user.id, name, color })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Profile create failed:", error);
-    return null;
-  }
-  return created;
-}
-// CHECK IF WE NEED THIS
-
-
-
-
 
 function bindAuthUi() {
     const authForm = document.getElementById("auth-form");
