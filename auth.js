@@ -268,23 +268,21 @@ async function saveProfileSetup() {
 
   if (error) return alert(error.message);
 
-  // update in-memory user immediately
   setUser({ id: au.id, name, color });
 
+  const params = new URLSearchParams(window.location.search);
+  const inviteToken = params.get("t");
+  const manageToken = params.get("m");
+
+  if (inviteToken || manageToken) {
+    hideProfileSetup();
+    await loadTable();
+    return;
+  }
+
   hideProfileSetup();
-
-    const params = new URLSearchParams(window.location.search);
-    const inviteToken = params.get("t");
-    const manageToken = params.get("m"); // if you use this
-
-    if (inviteToken || manageToken) {
-      await loadTable();
-      return;
-    }
-
-showDashboard();
-await loadBoards();
-}  
+  await loadBoards();
+}
   
 function showProfileSetup() {
   document.body.style.visibility = "visible";
