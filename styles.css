@@ -76,6 +76,74 @@ body.show-landing-bg #landing-bg{
   z-index: 1;
 }
 
+/* =========================
+   PROFILE SETUP
+   ========================= */
+
+.profile-setup {
+  display: none;
+  padding: 20px;
+}
+
+.profile-card {
+  max-width: 520px;
+  margin: 60px auto;
+  padding: 18px;
+  box-sizing: border-box;
+
+  background: rgba(252, 248, 242, 0.96);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(96, 72, 48, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.profile-title {
+  font-weight: 800;
+  font-size: 20px;
+  color: #2f241a;
+}
+
+.profile-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b5c4f;
+  opacity: 0.8;
+}
+
+.profile-field {
+  margin-top: 18px;
+}
+
+.profile-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #3a2f25;
+}
+
+.profile-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  background: rgba(255, 255, 255, 0.92);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+/* match your input focus style */
+.profile-input:focus {
+  outline: none;
+  border-color: rgba(204, 82, 16, 0.32);
+  box-shadow: 0 0 0 3px rgba(204, 82, 16, 0.10);
+}
+
+.profile-submit-btn {
+  margin-top: 18px;
+  width: 100%;
+}
+
 body.logged-in #landing-bg{
  opacity:0;
  animation: none;
