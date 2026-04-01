@@ -293,12 +293,15 @@ function showProfileSetup() {
   if (dash) dash.style.display = "none";
 
   const setup = document.getElementById("profile-setup");
-  if (setup) setup.style.display = "block";
+  if (setup) setup.hidden = false; // ✅ show
 }
 
 function hideProfileSetup() {
   const setup = document.getElementById("profile-setup");
-  if (setup) setup.style.display = "none";
+  if (setup) setup.hidden = true; // ✅ hide
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "block"; // ✅ bring dashboard back
 }
   
 
