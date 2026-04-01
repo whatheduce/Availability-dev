@@ -14,27 +14,39 @@
   
 <div id="landing-bg"></div>
 
-<div id="profile-setup" style="display:none; padding:20px; max-width:520px; margin:60px auto;">
-  <h2>Set up your profile</h2>
-  <p style="opacity:0.7; margin-top:-8px;">Your name and colour will show on every calendar you join.</p>
+<div id="profile-setup" class="profile-setup" hidden>
+  <div class="profile-card">
+    <div class="profile-title">Set up your profile</div>
 
-  <div style="margin-top:18px;">
-    <label style="display:block; font-weight:600; margin-bottom:6px;">Username</label>
-    <input id="setup-name" placeholder="e.g. Scott" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(0,0,0,0.15);">
+    <div class="profile-subtitle">
+      Your name and colour will show on every calendar you join.
+    </div>
+
+    <div class="profile-field">
+      <label class="profile-label" for="setup-name">Username</label>
+      <input
+        id="setup-name"
+        class="profile-input"
+        placeholder="e.g. Scott"
+        type="text"
+      />
+    </div>
+
+    <div class="profile-field">
+      <label class="profile-label">Dot colour</label>
+
+      <div
+        id="setup-colour-grid"
+        class="colour-grid"
+        role="listbox"
+        aria-label="Choose a dot colour"
+      ></div>
+    </div>
+
+    <button id="setup-save" class="primary-btn profile-submit-btn" type="button">
+      Continue
+    </button>
   </div>
-
-  <div style="margin-top:14px;">
-    <label style="display:block; font-weight:600; margin-bottom:6px;">Dot colour</label>
-
-    <div id="setup-colour-grid"
-     class="colour-grid"
-     role="listbox"
-     aria-label="Choose a dot colour"></div>
-  </div>
-
-  <button id="setup-save" style="margin-top:18px; padding:12px 16px; border-radius:10px; border:none; font-weight:700; cursor:pointer;">
-    Continue
-  </button>
 </div>
   
 <div id="dashboard" style="display:none;">
