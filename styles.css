@@ -4201,8 +4201,20 @@ body.account-view #dash-account {
  .ghost-btn {
    padding: 6px 0 44px;
  }
+
+ .profile-card { 
+   margin: auto;
+   padding: 12px;
 }
 
+.profile-subtitle {
+    margin-top: 3px; 
+}
+
+.profile-field {
+    margin-top: 10px;
+}
+ 
 /* ONLY small phones stack */
 @media (max-width: 520px) {
   #dash-account .acct-row,
@@ -4221,5 +4233,5 @@ body.account-view #dash-account {
     justify-self: start;
     text-align: left;
   }
-
+}
  
