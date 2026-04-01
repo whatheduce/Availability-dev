@@ -232,7 +232,7 @@ async function handleAuthSubmit() {
   }
 
   const hydrated = await hydrateUserFromAuth();
-  setDashboardSubtitle();
+  window.renderDashboardSubtitle();
   hideAuthOverlay();
 
     if (!hydrated) {
@@ -476,6 +476,5 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
     hideProfileSetup,
     saveProfileSetup,
     bindAuthUi,
-    setDashboardSubtitle,
   };
 }
