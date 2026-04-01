@@ -269,6 +269,7 @@ async function saveProfileSetup() {
   if (error) return alert(error.message);
 
   setUser({ id: au.id, name, color });
+  window.renderDashboardSubtitle(name);
 
   const params = new URLSearchParams(window.location.search);
   const inviteToken = params.get("t");
@@ -337,15 +338,6 @@ async function getOrCreateProfile({ name, color }) {
 
 
 
-
-function setDashboardSubtitle() {
-  const dashUser = document.getElementById("dash-username");
-  const user = getUser();
-
-  if (dashUser && user?.name) {
-    dashUser.textContent = possessive(user.name).toUpperCase();
-  }
-}
 
 
 function bindAuthUi() {
