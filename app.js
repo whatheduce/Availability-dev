@@ -508,8 +508,8 @@ function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }
   // remove (GMT+10) etc
   const cleanTimezone = timezone?.split(" (")[0] || "";
 
-  line1.textContent = `Users: ${users}/${maxUsers} - Gold Threshold: ${threshold}`;
-  line2.textContent = `Timezone: ${cleanTimezone} - Updated: ${lastUpdated}`;
+  line1.textContent = `• Users: ${users}/${maxUsers} • Gold Threshold: ${threshold}`;
+  line2.textContent = `• Timezone: ${cleanTimezone} • Last Updated: ${lastUpdated}`;
 }
 
 //----------
