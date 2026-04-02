@@ -4073,6 +4073,11 @@ body.account-view #dash-account {
   padding-top: 0;
  } 
 
+ .calendar-topbar-right {
+   align-items: flex-start;
+   text-align: left;
+   justify-self: start;
+  
 }
 @media (max-width: 480px) {
  .board-preview {
