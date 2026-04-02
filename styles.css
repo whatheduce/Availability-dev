@@ -1416,6 +1416,7 @@ body.create-view #go-create {
   font-weight: 600;
   font-size: 13px;
   height: 45px;
+  width: 114px;
 }
 
 .topbar-btn:hover {
@@ -2080,6 +2081,7 @@ body.account-view #dash-account {
   border-radius: 12px;
   border: 1px solid rgba(126, 104, 82, 0.18);
   height: 45px;
+  width: 114px;
 }
 
 .back-btn:hover {
