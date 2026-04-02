@@ -3797,7 +3797,16 @@ body.account-view #dash-account {
   .board-pill--square {
   gap: 4px;
 }
-}
+
+ #board-footer.side-card {
+   min-width: 350px;
+   height: 280px;
+ }
+
+ .footer-note__textarea {
+   height: 240px;
+ }
+} 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 899px) {
   #settings-drawer,
