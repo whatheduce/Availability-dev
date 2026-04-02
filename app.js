@@ -500,16 +500,19 @@ function renderCalendarTitle() {
 
 //----------
 function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }) {
-  const line1 = document.getElementById("calendar-meta-line-1");
-  const line2 = document.getElementById("calendar-meta-line-2");
+  const usersEl = document.getElementById("calendar-meta-users");
+  const thresholdEl = document.getElementById("calendar-meta-threshold");
+  const timezoneEl = document.getElementById("calendar-meta-timezone");
+  const updatedEl = document.getElementById("calendar-meta-updated");
 
-  if (!line1 || !line2) return;
+  if (!usersEl || !thresholdEl || !timezoneEl || !updatedEl) return;
 
-  // remove (GMT+10) etc
   const cleanTimezone = timezone?.split(" (")[0] || "";
 
-  line1.textContent = `• Users: ${users}/${maxUsers} • Gold Threshold: ${threshold}`;
-  line2.textContent = `• Timezone: ${cleanTimezone} • Last Updated: ${lastUpdated}`;
+  usersEl.textContent = `• Users: ${users}/${maxUsers}`;
+  thresholdEl.textContent = `• Gold Threshold: ${threshold}`;
+  timezoneEl.textContent = `• Timezone: ${cleanTimezone}`;
+  updatedEl.textContent = `• Last Updated: ${lastUpdated}`;
 }
 
 //----------
