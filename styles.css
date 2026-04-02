@@ -3908,7 +3908,7 @@ body.account-view #dash-account {
 
   #calendar-title {
     padding-top: 6px;
-    padding-left: 0;
+    padding-left: 24px;
     text-align: left;
   }
 
