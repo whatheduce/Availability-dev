@@ -3877,7 +3877,7 @@ body.account-view #dash-account {
  }
 
   .calendar-topbar {
-    display: grid;
+    display: grid !important;
     grid-template-columns: auto 1fr;
     grid-template-areas:
       "left right"
