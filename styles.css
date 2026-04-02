@@ -270,6 +270,23 @@ body.logged-in #landing-bg::after{
   padding-left: 40px;
 }
 
+.calendar-topbar{
+  width: 100%;
+  margin-top: 14px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.calendar-topbar-left {
+  display: flex;
+  flex-direction: column;    /* stack on the left */
+  align-items: flex-start;
+  gap: 10px;
+}
+
 .centered-container {
   max-width: 1180px;
   margin: 0;
@@ -3375,27 +3392,7 @@ body.account-view #dash-account {
   }
 }
 
-/* ===========================
-   CALENDAR TOP BAR POLISH
-=========================== */
 
-.calendar-topbar{
-  width: 100%;
-  margin-top: 14px;
-  padding: 0 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.calendar-topbar-left {
-  display: flex;
-  flex-direction: column;    /* stack on the left */
-  align-items: flex-start;
-  gap: 10px;
-  margin-left: 20px;
-}
 
 @media (max-width: 520px) {
   .calendar-topbar { padding: 0 16px; }
@@ -3752,10 +3749,10 @@ body.account-view #dash-account {
 
 
 
-/* =========================
+/* =================================================================================================================================================================================================================
    MOBILE RESPONSIVE
    DASHBOARD / ACCOUNT / MODALS
-   ========================= */
+   ================================================================================================================================================================================================================= */
 @media (max-width: 1200px) {
  #create-board #go-create{
   width: 35%;
