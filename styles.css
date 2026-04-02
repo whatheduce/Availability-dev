@@ -3486,9 +3486,7 @@ body.account-view #dash-account {
   #calendar-side{
     grid-template-columns: 1fr;
   }
-  .presence-side, #legend{
-    width: 100%;
-  }
+
   #calendar-side-right{
     justify-content: flex-start;
   }
