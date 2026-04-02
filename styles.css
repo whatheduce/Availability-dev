@@ -4291,11 +4291,44 @@ body.account-view #dash-account {
   width: 10%;
 } 
 
+ .calendar-topbar {
+   display: grid;
+   grid-template-columns: 1fr;
+   grid-template-areas:
+     "left"
+     "right"
+     "title";
+   gap: 10px;
+ }
+ 
  .calendar-topbar-left {
   flex-direction: row;
   gap: 8px;
+  grid-area: left;
  } 
 
+.calendar-topbar-right {
+  grid-area: right;
+  align-items: flex-start;
+  text-align: left;
+  justify-self: start;
+  font-size: 13px;
+  gap: 2px;
+ }
+
+  .calendar-meta-subtext {
+    font-size: 10px;
+  }
+ 
+  #calendar-title-wrap {
+    grid-area: title;
+  }
+
+  #calendar-title {
+    text-align: left;
+    padding-top: 4px;
+  } 
+ 
   .back-btn {
   font-size: 10.5px;
   width: 94px;
