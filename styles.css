@@ -2078,7 +2078,6 @@ body.account-view #dash-account {
   padding: 8px 10px;
   border-radius: 12px;
   border: 1px solid rgba(126, 104, 82, 0.18);
-  width: 30%;
   height: 45px;
 }
 
@@ -4046,7 +4045,7 @@ body.account-view #dash-account {
  } 
 
  .back-btn {
-
+  width: 30%;
  }
 }
 @media (max-width: 480px) {
