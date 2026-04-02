@@ -4317,19 +4317,33 @@ body.account-view #dash-account {
   } 
 
   .calendar-meta-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 13px;
-    opacity: 0.8;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 14px;
+    width: 100%;
+    font-size: 12.5px;
     line-height: 1.3;
+    color: #6b5c4f;
   }
 
-  /* hide old stacked meta */
+  .calendar-meta-compact > div {
+    min-width: 0;
+  }
+
+  #calendar-meta-users,
+  #calendar-meta-timezone {
+    text-align: left;
+  }
+
+  #calendar-meta-threshold,
+  #calendar-meta-updated {
+    text-align: right;
+  }
+
   .calendar-meta-line,
   .calendar-meta-subtext {
     display: none !important;
-  } 
+  }
  
   .back-btn {
   font-size: 10.5px;
