@@ -250,9 +250,10 @@ body.logged-in #landing-bg::after{
 .calendar-topbar-right{
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 4px;
-  margin-right: 25%;
+  text-align: right;
+  margin-right: 60px;
 }
 
 #calendar-title-wrap{
@@ -267,7 +268,7 @@ body.logged-in #landing-bg::after{
   letter-spacing: -0.02em;
   color: #1f2937;
   padding-top: 24px;
-  padding-left: 40px;
+  padding-left: 24px;
 }
 
 .calendar-topbar{
