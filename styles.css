@@ -183,7 +183,7 @@ body.logged-in #landing-bg::after{
 }
 
 #calendar {
-  margin: 18px 0 40px;
+  margin: 10px 0 40px;
   overflow-x: auto;
   display: block;
   min-height: 200px;
