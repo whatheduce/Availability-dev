@@ -237,11 +237,6 @@ body.logged-in #landing-bg::after{
 }
 
 @media (max-width: 720px){
-  .calendar-topbar{
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .footer-note--top{
     width: 100%;
   }
