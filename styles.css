@@ -4076,7 +4076,7 @@ body.account-view #dash-account {
   margin-left: 0;
  }
 
- .calendar-title {
+ #calendar-title {
   padding-left: 0;
   padding-top: 0;
  } 
