@@ -3907,6 +3907,14 @@ body.account-view #dash-account {
     text-align: left;
   }
 
+  .calendar-topbar-right {
+    align-items: flex-start;
+    text-align: left;
+    justify-self: start;
+    grid-area: right;
+    margin-left: 0;
+   }
+ 
 }
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 720px) {
@@ -4073,11 +4081,6 @@ body.account-view #dash-account {
   padding-top: 0;
  } 
 
- .calendar-topbar-right {
-  align-items: flex-start;
-  text-align: left;
-  justify-self: start;
- }
 }
 @media (max-width: 480px) {
  .board-preview {
