@@ -3365,6 +3365,8 @@ body.account-view #dash-account {
   box-shadow: none;
 }
 
+
+
 @media (max-width: 520px){
   .colour-grid{ grid-template-columns: repeat(6, 1fr); }
 }
@@ -3388,11 +3390,6 @@ body.account-view #dash-account {
   }
 }
 
-
-
-@media (max-width: 520px) {
-  .calendar-topbar { padding: 0 16px; }
-}
 
 #calendar-side{
   width: 100%;
