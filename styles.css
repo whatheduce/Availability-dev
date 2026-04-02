@@ -4319,25 +4319,16 @@ body.account-view #dash-account {
   .calendar-meta-compact {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 4px 14px;
+    gap: 4px 4px;
     width: 100%;
-    font-size: 12.5px;
+    font-size: 11.5px;
     line-height: 1.3;
     color: #6b5c4f;
+    width: 296px;
   }
 
   .calendar-meta-compact > div {
     min-width: 0;
-  }
-
-  #calendar-meta-users,
-  #calendar-meta-timezone {
-    text-align: left;
-  }
-
-  #calendar-meta-threshold,
-  #calendar-meta-updated {
-    text-align: right;
   }
 
   .calendar-meta-line,
