@@ -4073,13 +4073,6 @@ body.account-view #dash-account {
   padding-top: 0;
  } 
 
- .back-btn {
-  font-size: 12px;
- }
-
- .topbar-btn {
-  font-size: 12px;
- }
 }
 @media (max-width: 480px) {
  .board-preview {
@@ -4301,6 +4294,19 @@ body.account-view #dash-account {
   flex-direction: row;
   gap: 8px;
  } 
+
+  .back-btn {
+  font-size: 10.5px;
+  width: 94px;
+  height: 40px;
+ }
+
+ .topbar-btn {
+  font-size: 10.5px;
+  width: 94px;
+  height: 40px;
+ }
+ 
 } 
 /* ONLY small phones stack */
 @media (max-width: 520px) {
