@@ -2071,18 +2071,18 @@ body.account-view #dash-account {
 }
     
 .back-btn {
-  border: none;
-  background: transparent;
+  background: rgba(252, 248, 242, 0.92);
   font-weight: 600;
   cursor: pointer;
   font-size: 14px;
-  opacity: 0.75;
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  width: 30%;
+  height: 45px;
 }
 
 .back-btn:hover {
-  opacity: 1;
   background: rgba(126, 104, 82, 0.08);
 }
 
@@ -4035,8 +4035,20 @@ body.account-view #dash-account {
     width: calc(100vw - 35%);
     max-width: calc(100vw - 24px);
   }
-}
 
+ .calendar-topbar-left {
+  margin-left: 0;
+ }
+
+ .calendar-title {
+  padding-left: 0;
+  padding-top: 0;
+ } 
+
+ .back-btn {
+
+ }
+}
 @media (max-width: 480px) {
  .board-preview {
   --mini-scale: 0.62;
@@ -4248,7 +4260,16 @@ body.account-view #dash-account {
 .profile-setup {
    padding: 12px;
 } 
- 
+
+ .calendar-fade:after {
+  width: 10%;
+} 
+
+ .calendar-topbar-left {
+  flex-direction: row;
+  gap: 8px;
+ } 
+} 
 /* ONLY small phones stack */
 @media (max-width: 520px) {
   #dash-account .acct-row,
