@@ -499,6 +499,20 @@ function renderCalendarTitle() {
 }
 
 //----------
+function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }) {
+  const line1 = document.getElementById("calendar-meta-line-1");
+  const line2 = document.getElementById("calendar-meta-line-2");
+
+  if (!line1 || !line2) return;
+
+  // remove (GMT+10) etc
+  const cleanTimezone = timezone?.split(" (")[0] || "";
+
+  line1.textContent = `Users: ${users}/${maxUsers} - Gold Threshold: ${threshold}`;
+  line2.textContent = `Timezone: ${cleanTimezone} - Updated: ${lastUpdated}`;
+}
+
+//----------
 function getLastUpdatedLabel(isoString) {
   if (!isoString) return "—";
 
