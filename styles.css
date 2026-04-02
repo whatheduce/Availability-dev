@@ -3875,8 +3875,44 @@ body.account-view #dash-account {
  .modal-card {
   max-width: 90%;
  }
-}
 
+  .calendar-topbar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "left right"
+      "title title";
+    align-items: start;
+    gap: 10px 16px;
+  }
+
+  .calendar-topbar-left {
+    grid-area: left;
+    align-self: start;
+  }
+
+  .calendar-topbar-right {
+    grid-area: right;
+    margin-left: 0;
+    align-items: flex-end;
+    text-align: right;
+    justify-self: end;
+  }
+
+  #calendar-title-wrap {
+    grid-area: title;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  #calendar-title {
+    padding-top: 6px;
+    padding-left: 0;
+    text-align: left;
+  }
+
+}
 @media (max-width: 720px) {
  .board-preview {
   --mini-scale: 0.85;
