@@ -1771,6 +1771,20 @@ renderGoldThreshold();
 renderCalendarTimezone();
 renderCalendarTitle(); 
 renderCalendarLastUpdated();
+const users = document.getElementById("calendar-invite-joined")?.textContent || 0;
+const maxUsers = document.getElementById("calendar-invite-total")?.textContent || 0;
+
+const threshold = currentTable?.gold_threshold || 0;
+const timezone = formatTimeZoneLabel(currentTable?.host_tz || "");
+const lastUpdated = getLastUpdatedLabel(currentTable?.last_activity_at);
+
+renderCompactMeta({
+  users,
+  maxUsers,
+  threshold,
+  timezone,
+  lastUpdated
+});  
 }
 
 //----------  
