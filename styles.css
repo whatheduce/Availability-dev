@@ -4300,8 +4300,12 @@ body.account-view #dash-account {
   gap: 2px;
  }
 
+ .calendar-meta-line {
+    font-size: 12px;
+ }
+ 
   .calendar-meta-subtext {
-    font-size: 10px;
+    font-size: 9px;
   }
  
   #calendar-title-wrap {
