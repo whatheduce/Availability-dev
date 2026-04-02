@@ -3886,13 +3886,11 @@ body.account-view #dash-account {
     align-self: start;
   }
 
-  .calendar-topbar-right {
-    grid-area: right;
-    margin-left: 0;
-    align-items: flex-end;
-    text-align: right;
-    justify-self: end;
-  }
+ .calendar-topbar-right {
+   align-items: flex-start;
+   text-align: left;
+   justify-self: start;
+  {
 
   #calendar-title-wrap {
     grid-area: title;
@@ -4072,12 +4070,6 @@ body.account-view #dash-account {
   padding-left: 0;
   padding-top: 0;
  } 
-
- .calendar-topbar-right {
-   align-items: flex-start;
-   text-align: left;
-   justify-self: start;
-  
 }
 @media (max-width: 480px) {
  .board-preview {
