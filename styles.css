@@ -269,7 +269,7 @@ body.logged-in #landing-bg::after{
 #calendar-title::after {
   content: "";
   display: block;
-  width: 36px;
+  width: 16px;
   height: 3px;
   border-radius: 2px;
   background: linear-gradient(90deg, #e58a1f, #f3b24a);
