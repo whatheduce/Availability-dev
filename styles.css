@@ -598,7 +598,7 @@ td.month-break:not(.gold-cell):hover {
 
 .footer-note{
   max-width: 980px;
-  margin: 8px 30px 30px;
+  margin: 8px 30px 8px;
   margin-left: 20px;
   padding: 12px 14px;
   border-radius: 16px;
@@ -3430,7 +3430,7 @@ body.account-view #dash-account {
 #calendar-side-right{
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   align-items: flex-start;
 }
 
@@ -4087,6 +4087,10 @@ body.account-view #dash-account {
     margin-top: 12px;
     align-items: center;
   }
+
+  .calendar-fade:after {
+     width: 10%;
+ }
 } 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 480px) {
