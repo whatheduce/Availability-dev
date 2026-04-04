@@ -660,14 +660,13 @@ td.month-break:not(.gold-cell):hover {
   overflow: auto;
 }
 
-.footer-edit-btn {
+.footer-note .footer-edit-btn {
   background: rgba(252, 248, 242, 0.88);
   border: 1px solid rgba(126, 104, 82, 0.18);
   font-weight: 600;
 }
 
-/* optional hover */
-.footer-edit-btn:hover {
+.footer-note .footer-edit-btn:hover {
   background: rgba(253, 249, 244, 1);
 }
 
