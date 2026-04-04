@@ -4448,7 +4448,6 @@ body.account-view #dash-account {
   #legend {
     position: relative;
     margin-top: 0;
-    padding-top: 34px; /* room for Viewing now text */
   }
 
   #presence {
