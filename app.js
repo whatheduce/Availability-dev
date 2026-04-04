@@ -512,11 +512,8 @@ function renderCalendarTitle() {
 
 //----------
 function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }) {
-  const usersEl = document.getElementById("calendar-meta-users");
-  const thresholdEl = document.getElementById("calendar-meta-threshold");
-  const timezoneEl = document.getElementById("calendar-meta-timezone");
-  const updatedEl = document.getElementById("calendar-meta-updated");
   const cornerEl = document.getElementById("calendar-meta-corner");
+  if (!cornerEl) return;
 
   const cleanTimezone = timezone?.split(" (")[0] || "";
   const shortUpdated = String(lastUpdated || "")
@@ -527,30 +524,12 @@ function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }
     .replace(" days ago", "d ago")
     .replace(" day ago", "d ago");
 
-  if (usersEl) {
-    usersEl.textContent = `• Users: ${users}/${maxUsers}`;
-  }
-
-  if (thresholdEl) {
-    thresholdEl.textContent = `• Gold Threshold: ${threshold}`;
-  }
-
-  if (timezoneEl) {
-    timezoneEl.textContent = `• Timezone: ${cleanTimezone}`;
-  }
-
-  if (updatedEl) {
-    updatedEl.textContent = `• Last Updated: ${lastUpdated}`;
-  }
-
-  if (cornerEl) {
-    cornerEl.innerHTML = `
-      <div>• Users: ${users}/${maxUsers}</div>
-      <div>• Threshold: ${threshold}</div>
-      <div>• TZ: ${cleanTimezone}</div>
-      <div>• Updated: ${shortUpdated}</div>
-    `;
-  }
+  cornerEl.innerHTML = `
+    <div>Users: ${users}/${maxUsers}</div>
+    <div>Threshold: ${threshold}</div>
+    <div>${cleanTimezone}</div>
+    <div>${shortUpdated}</div>
+  `;
 }
 
 //----------
