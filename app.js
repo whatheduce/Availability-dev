@@ -525,10 +525,10 @@ function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }
     .replace(" day ago", "d ago");
 
   cornerEl.innerHTML = `
-    <div>Users: ${users}/${maxUsers}</div>
-    <div>Threshold: ${threshold}</div>
-    <div>${cleanTimezone}</div>
-    <div>${shortUpdated}</div>
+    <div>• Users: ${users}/${maxUsers}</div>
+    <div>• Threshold: ${threshold}</div>
+    <div>• TZ: ${cleanTimezone}</div>
+    <div>• Updated: ${shortUpdated}</div>
   `;
 }
 
