@@ -3871,6 +3871,11 @@ body.account-view #dash-account {
     justify-self: end;
   }
 
+ .footer-note .footer-edit-btn {
+   width: auto;
+   min-width: auto;
+ }
+ 
   #acct-delete-account {
     width: 88px;
     min-width: 88px;
