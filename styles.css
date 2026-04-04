@@ -1441,7 +1441,7 @@ body.create-view #go-create {
     }
 
 .topbar-btn {
-  padding: 8px 12px;
+  padding: 8px 8px;
   border-radius: 12px;
   border: 1px solid rgba(126, 104, 82, 0.18);
   background: rgba(252, 248, 242, 0.92);
