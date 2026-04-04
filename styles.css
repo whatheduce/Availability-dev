@@ -3755,6 +3755,11 @@ body.account-view #dash-account {
   text-align: center;
 }
 
+/* Hide compact corner metadata by default (desktop) */
+.calendar-meta-corner__inner {
+  display: none;
+}
+
 [hidden] { display: none !important; }
 
 
