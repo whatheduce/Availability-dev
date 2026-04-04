@@ -516,15 +516,41 @@ function renderCompactMeta({ users, maxUsers, threshold, timezone, lastUpdated }
   const thresholdEl = document.getElementById("calendar-meta-threshold");
   const timezoneEl = document.getElementById("calendar-meta-timezone");
   const updatedEl = document.getElementById("calendar-meta-updated");
-
-  if (!usersEl || !thresholdEl || !timezoneEl || !updatedEl) return;
+  const cornerEl = document.getElementById("calendar-meta-corner");
 
   const cleanTimezone = timezone?.split(" (")[0] || "";
+  const shortUpdated = String(lastUpdated || "")
+    .replace(" minutes ago", "m ago")
+    .replace(" minute ago", "m ago")
+    .replace(" hours ago", "h ago")
+    .replace(" hour ago", "h ago")
+    .replace(" days ago", "d ago")
+    .replace(" day ago", "d ago");
 
-  usersEl.textContent = `• Users: ${users}/${maxUsers}`;
-  thresholdEl.textContent = `• Gold Threshold: ${threshold}`;
-  timezoneEl.textContent = `• Timezone: ${cleanTimezone}`;
-  updatedEl.textContent = `• Last Updated: ${lastUpdated}`;
+  if (usersEl) {
+    usersEl.textContent = `• Users: ${users}/${maxUsers}`;
+  }
+
+  if (thresholdEl) {
+    thresholdEl.textContent = `• Gold Threshold: ${threshold}`;
+  }
+
+  if (timezoneEl) {
+    timezoneEl.textContent = `• Timezone: ${cleanTimezone}`;
+  }
+
+  if (updatedEl) {
+    updatedEl.textContent = `• Last Updated: ${lastUpdated}`;
+  }
+
+  if (cornerEl) {
+    cornerEl.innerHTML = `
+      <div>Users: ${users}/${maxUsers}</div>
+      <div>Threshold: ${threshold}</div>
+      <div>${cleanTimezone}</div>
+      <div>${shortUpdated}</div>
+    `;
+  }
 }
 
 //----------
@@ -2202,7 +2228,11 @@ function buildCalendar() {
 
   // --- Header row (ONE time only) ---
   const headerRow = document.createElement("tr");
-  headerRow.appendChild(document.createElement("th")); // top-left blank corner
+
+  const cornerTh = document.createElement("th");
+    cornerTh.classList.add("calendar-meta-corner");
+    cornerTh.innerHTML = `<div id="calendar-meta-corner" class="calendar-meta-corner__inner"></div>`;
+    headerRow.appendChild(cornerTh);
 
   const startYmd =
     currentTable.start_date ||
