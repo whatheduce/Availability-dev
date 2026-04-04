@@ -260,7 +260,7 @@ body.logged-in #landing-bg::after{
 #calendar-title{
   font-size: 24px;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
   color: #2f241b;
   padding-top: 24px;
   padding-left: 24px;
@@ -271,8 +271,6 @@ body.logged-in #landing-bg::after{
   display: block;
   width: 36px;
   height: 3px;
-  margin-top: 6px;
-
   border-radius: 2px;
   background: linear-gradient(90deg, #e58a1f, #f3b24a);
   opacity: 0.9;
@@ -4359,7 +4357,7 @@ body.account-view #dash-account {
 
   #calendar-title {
     text-align: left;
-    padding-top: 20px;
+    padding: 14px 20px 6px;
   } 
 
   .calendar-meta-compact {
