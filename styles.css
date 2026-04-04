@@ -4323,6 +4323,7 @@ body.account-view #dash-account {
      "right"
      "title";
    gap: 10px;
+   padding: 0 10px;
  }
  
  .calendar-topbar-left {
