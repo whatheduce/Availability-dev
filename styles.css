@@ -4390,7 +4390,20 @@ body.account-view #dash-account {
   width: 94px;
   height: 40px;
  }
- 
+
+ #calendar {
+  margin: 4px 0 4px;
+  padding: 0 8px;
+ }
+
+ #calendar-side {
+  margin: 4px 0 0;
+ }
+
+ .time-label {
+  font-size: 14px;
+  width: 80px;
+ }
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
