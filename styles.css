@@ -4440,6 +4440,31 @@ body.account-view #dash-account {
   .calendar-topbar-right {
     display: none !important;
   }
+
+  #calendar-side-right {
+    position: relative;
+  }
+
+  #legend {
+    position: relative;
+    margin-top: 0;
+    padding-top: 34px; /* room for Viewing now text */
+  }
+
+  #presence {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 2;
+
+    font-size: 12px;
+    line-height: 1;
+    color: rgba(92, 72, 56, 0.72);
+    white-space: nowrap;
+    text-align: center;
+  } 
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
