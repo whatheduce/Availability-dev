@@ -643,9 +643,6 @@ td.month-break:not(.gold-cell):hover {
   background: rgba(252, 248, 242, 0.92);
   font-size: 13px;
   line-height: 1.4;
-  min-height: 60px;
-  max-height: 130px;
-  overflow-y: auto;
 }
 
 .footer-note__actions{
@@ -3467,6 +3464,9 @@ body.account-view #dash-account {
   font-size: 13px;
   line-height: 1.4;
   white-space: pre-wrap;
+  min-height: 60px;
+  max-height: 130px;
+  overflow-y: auto;
 }
 
 .footer-note__textarea[readonly]{
