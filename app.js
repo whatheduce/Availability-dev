@@ -237,6 +237,15 @@ function showBoardView() {
 // GENERAL UI HELPERS
 // =========================
 
+function autoResizeFooterNote() {
+  const el = document.getElementById("footer-note-input");
+  if (!el) return;
+
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 350) + "px";
+}
+
+//----------
 function renderDashboardSubtitle(nameOverride = "") {
   const dashUser = document.getElementById("dash-username");
   if (!dashUser) return;
@@ -412,6 +421,7 @@ function renderCalendarNote() {
   if (!ta) return;
 
   ta.value = String(currentTable?.calendar_note || "");
+  autoResizeFooterNote();
 }
 
 //----------
@@ -3699,6 +3709,8 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
   document.getElementById("delete-account-confirm-btn")?.addEventListener("click", async () => {
     await deleteAccountFlow();
   });
+
+  document.getElementById("footer-note-input")?.addEventListener("input", autoResizeFooterNote);
 
   auth.bindAuthUi();
   
