@@ -4374,7 +4374,8 @@ body.account-view #dash-account {
  }
 
  #board-footer.side-card {
-  min-width: 280px;
+  min-width: 278px;
+  margin-left: 8px;
  }
  
  .back-btn {
