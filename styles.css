@@ -643,8 +643,8 @@ td.month-break:not(.gold-cell):hover {
   background: rgba(252, 248, 242, 0.92);
   font-size: 13px;
   line-height: 1.4;
-  min-height: 150px;
-  max-height: 350px;
+  min-height: 60px;
+  max-height: 130px;
   overflow-y: auto;
 }
 
@@ -3438,11 +3438,7 @@ body.account-view #dash-account {
   width: 100%;
   max-width: none;
   min-width: 420px;
-}
-
-.footer-note__textarea{
-  min-height: 180px;
-  max-height: 420px;
+  height: 100%;
 }
 
 /* Note box tweaks */
@@ -3801,12 +3797,8 @@ body.account-view #dash-account {
 
  #board-footer.side-card {
    min-width: 350px;
-   height: 280px;
  }
 
- .footer-note__textarea {
-   height: 240px;
- }
 } 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 899px) {
