@@ -4406,9 +4406,6 @@ body.account-view #dash-account {
  }
 
  .calendar-meta-corner {
-    width: 82px;
-    min-width: 82px;
-    max-width: 82px;
     vertical-align: top;
     padding: 6px 6px 4px;
   }
@@ -4416,8 +4413,8 @@ body.account-view #dash-account {
   .calendar-meta-corner__inner {
     display: grid;
     gap: 2px;
-    font-size: 9px;
-    line-height: 1.15;
+    font-size: 8.5px;
+    line-height: 1.4;
     color: #6b5c4f;
     text-align: left;
     white-space: normal;
