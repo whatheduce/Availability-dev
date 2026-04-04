@@ -4206,6 +4206,12 @@ body.account-view #dash-account {
     min-height: 36px;
   }
 
+  .footer-note .footer-edit-btn {
+    padding: 4px 6px;
+    font-size: 9px;
+    min-height: auto:
+  }
+
   .settings-row-3 {
     grid-template-columns: 62px minmax(0, 1fr) 68px;
   }
