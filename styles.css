@@ -598,7 +598,7 @@ td.month-break:not(.gold-cell):hover {
 
 .footer-note{
   max-width: 980px;
-  margin: 8px 30px 8px;
+  margin: 8px 10px 8px;
   margin-left: 20px;
   padding: 12px 14px;
   border-radius: 16px;
@@ -4371,10 +4371,6 @@ body.account-view #dash-account {
 
   #calendar-side-left {
    align-items: center;
- }
-
- .footer-note {
-  margin: 8px 10px 8px;
  }
 
  #board-footer.side-card {
