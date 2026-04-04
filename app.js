@@ -242,7 +242,7 @@ function autoResizeFooterNote() {
   if (!el) return;
 
   el.style.height = "auto";
-  el.style.height = Math.min(el.scrollHeight, 350) + "px";
+  el.style.height = Math.min(el.scrollHeight, 180) + "px";
 }
 
 //----------
