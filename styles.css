@@ -660,6 +660,17 @@ td.month-break:not(.gold-cell):hover {
   overflow: auto;
 }
 
+.footer-edit-btn {
+  background: rgba(252, 248, 242, 0.88);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  font-weight: 600;
+}
+
+/* optional hover */
+.footer-edit-btn:hover {
+  background: rgba(253, 249, 244, 1);
+}
+
 @media (max-width: 720px){
   .footer-note--top{
     width: 100%;
@@ -4058,10 +4069,6 @@ body.account-view #dash-account {
     width: calc(100vw - 35%);
     max-width: calc(100vw - 24px);
   }
-
- .footer-edit-btn {
-  width: auto;
- }
 } 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 480px) {
