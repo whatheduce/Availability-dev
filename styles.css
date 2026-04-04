@@ -3465,7 +3465,7 @@ body.account-view #dash-account {
   line-height: 1.4;
   white-space: pre-wrap;
   min-height: 60px;
-  max-height: 130px;
+  max-height: 180px;
   overflow-y: auto;
 }
 
