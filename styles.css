@@ -4322,7 +4322,7 @@ body.account-view #dash-account {
      "left"
      "right"
      "title";
-   gap: 10px;
+   gap: 0px;
    padding: 0 10px;
  }
  
@@ -4347,7 +4347,7 @@ body.account-view #dash-account {
 
   #calendar-title {
     text-align: left;
-    padding-top: 4px;
+    padding-top: 10px;
   } 
 
   .calendar-meta-compact {
