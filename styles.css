@@ -2421,8 +2421,11 @@ body.account-view #dash-account {
 }
 
 /* only show fades when JS says this strip actually overflows */
-.board-scroll-wrap.has-scroll::before,
-.board-scroll-wrap.has-scroll::after {
+.board-scroll-wrap.can-scroll-left::before {
+  opacity: 1;
+}
+
+.board-scroll-wrap.can-scroll-right::after {
   opacity: 1;
 }
 
