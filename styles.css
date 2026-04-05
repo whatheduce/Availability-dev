@@ -2372,7 +2372,8 @@ body.account-view #dash-account {
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 24px;
- min-height: 285px;
+  min-height: 285px;
+  scroll-behavior: smooth;
 }
 
 .board-strip-fade {
@@ -2394,6 +2395,60 @@ body.account-view #dash-account {
     rgba(247, 244, 236, 0.72) 45%,
     rgba(247, 244, 236, 0.96) 100%
   );
+}
+
+.board-scroll-wrap {
+  position: relative;
+}
+
+/* arrows */
+.scroll-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+
+  background: rgba(252, 248, 242, 0.9);
+  border: 1px solid rgba(126, 104, 82, 0.18);
+
+  box-shadow: 0 4px 12px rgba(96, 72, 48, 0.12);
+
+  font-size: 18px;
+  font-weight: 700;
+  color: #2f241b;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+/* positioning */
+.scroll-left {
+  left: -6px;
+}
+
+.scroll-right {
+  right: -6px;
+}
+
+.scroll-arrow.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-arrow:hover {
+  transform: translateY(-50%) scale(1.06);
 }
 
 .board-pill-shell {
