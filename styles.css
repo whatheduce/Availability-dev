@@ -2381,45 +2381,49 @@ body.account-view #dash-account {
   overflow: hidden;
 }
 
-.board-strip-fade::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  height: 100%;
-  pointer-events: none;
-  right: 0;
-  width: 124px;
-  background: linear-gradient(
-    to right,
-    rgba(247, 244, 236, 0) 0%,
-    rgba(247, 244, 236, 0.72) 45%,
-    rgba(247, 244, 236, 0.96) 100%
-  );
-}
-
 .board-scroll-wrap {
   position: relative;
+  overflow: visible;
 }
 
+/* fades exist, but are hidden by default */
 .board-scroll-wrap::before,
 .board-scroll-wrap::after {
   content: "";
   position: absolute;
   top: 0;
-  bottom: 0;
-  width: 20px;
+  bottom: 24px; /* stop before scrollbar area */
+  width: 36px;
   z-index: 4;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
 }
 
 .board-scroll-wrap::before {
   left: 0;
-  background: linear-gradient(to right, rgba(255,255,255,0.8), transparent);
+  background: linear-gradient(
+    to right,
+    rgba(247, 244, 236, 0.92) 0%,
+    rgba(247, 244, 236, 0.55) 42%,
+    rgba(247, 244, 236, 0) 100%
+  );
 }
 
 .board-scroll-wrap::after {
   right: 0;
-  background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+  background: linear-gradient(
+    to left,
+    rgba(247, 244, 236, 0.92) 0%,
+    rgba(247, 244, 236, 0.55) 42%,
+    rgba(247, 244, 236, 0) 100%
+  );
+}
+
+/* only show fades when JS says this strip actually overflows */
+.board-scroll-wrap.has-scroll::before,
+.board-scroll-wrap.has-scroll::after {
+  opacity: 1;
 }
 
 /* arrows */
