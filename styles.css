@@ -2425,10 +2425,10 @@ body.account-view #dash-account {
 /* arrows */
 .scroll-arrow {
   position: absolute;
-  top: 50%;
+  top: 45%;
   transform: translateY(-50%);
   z-index: 5;
-  margin: 0 20px;
+  margin: 0 24px;
 
   width: 32px;
   height: 32px;
