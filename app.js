@@ -1814,29 +1814,24 @@ function setupScrollArrows(containerId, leftId, rightId) {
   const container = document.getElementById(containerId);
   const left = document.getElementById(leftId);
   const right = document.getElementById(rightId);
+  const wrap = container?.closest(".board-scroll-wrap");
 
-  if (!container || !left || !right) return;
+  if (!container || !left || !right || !wrap) return;
 
   function updateArrows() {
     const maxScroll = container.scrollWidth - container.clientWidth;
+    const hasOverflow = maxScroll > 0;
 
-    if (maxScroll <= 0) {
+    wrap.classList.toggle("has-scroll", hasOverflow);
+
+    if (!hasOverflow) {
       left.classList.remove("visible");
       right.classList.remove("visible");
       return;
     }
 
-    if (container.scrollLeft > 10) {
-      left.classList.add("visible");
-    } else {
-      left.classList.remove("visible");
-    }
-
-    if (container.scrollLeft < maxScroll - 10) {
-      right.classList.add("visible");
-    } else {
-      right.classList.remove("visible");
-    }
+    left.classList.toggle("visible", container.scrollLeft > 10);
+    right.classList.toggle("visible", container.scrollLeft < maxScroll - 10);
   }
 
   left.onclick = () => {
@@ -1850,7 +1845,6 @@ function setupScrollArrows(containerId, leftId, rightId) {
   container.addEventListener("scroll", updateArrows);
   window.addEventListener("resize", updateArrows);
 
-  // initial check
   setTimeout(updateArrows, 50);
 }
 
