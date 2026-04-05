@@ -1660,6 +1660,7 @@ ownedEl.innerHTML = hostedSlotsHtml.join("");
   // Render previews for both hosted + joined
   const allBoards = [...owned, ...joined];
   if (allBoards.length) renderBoardPreviews(allBoards);
+  setupScrollArrows("owned-boards", "scroll-left", "scroll-right");
 }
 
 //----------  
@@ -1805,6 +1806,51 @@ renderCompactMeta({
   timezone,
   lastUpdated
 });  
+}
+
+//----------  
+function setupScrollArrows(containerId, leftId, rightId) {
+  const container = document.getElementById(containerId);
+  const left = document.getElementById(leftId);
+  const right = document.getElementById(rightId);
+
+  if (!container || !left || !right) return;
+
+  function updateArrows() {
+    const maxScroll = container.scrollWidth - container.clientWidth;
+
+    if (maxScroll <= 0) {
+      left.classList.remove("visible");
+      right.classList.remove("visible");
+      return;
+    }
+
+    if (container.scrollLeft > 10) {
+      left.classList.add("visible");
+    } else {
+      left.classList.remove("visible");
+    }
+
+    if (container.scrollLeft < maxScroll - 10) {
+      right.classList.add("visible");
+    } else {
+      right.classList.remove("visible");
+    }
+  }
+
+  left.onclick = () => {
+    container.scrollBy({ left: -260, behavior: "smooth" });
+  };
+
+  right.onclick = () => {
+    container.scrollBy({ left: 260, behavior: "smooth" });
+  };
+
+  container.addEventListener("scroll", updateArrows);
+  window.addEventListener("resize", updateArrows);
+
+  // initial check
+  setTimeout(updateArrows, 50);
 }
 
 //----------  
