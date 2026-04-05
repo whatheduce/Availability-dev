@@ -1661,6 +1661,7 @@ ownedEl.innerHTML = hostedSlotsHtml.join("");
   const allBoards = [...owned, ...joined];
   if (allBoards.length) renderBoardPreviews(allBoards);
   setupScrollArrows("owned-boards", "owned-scroll-left", "owned-scroll-right");
+  setupScrollArrows("joined-boards", "joined-scroll-left", "joined-scroll-right");
 }
 
 //----------  
