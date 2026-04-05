@@ -80,7 +80,13 @@
     <div class="dash-section">
       <div class="dash-section-title">Joined Calendars</div>
       <div class="dashboard-section-divider"></div>
-      <div id="joined-boards" class="board-strip"></div>
+      <div class="board-strip-fade board-scroll-wrap">
+        <button class="scroll-arrow scroll-left" id="joined-scroll-left" type="button" aria-label="Scroll joined calendars left">‹</button>
+
+        <div id="joined-boards" class="board-strip"></div>
+
+        <button class="scroll-arrow scroll-right" id="joined-scroll-right" type="button" aria-label="Scroll joined calendars right">›</button>
+      </div>
     </div>
 
     <div class="dashboard-dev-note">
