@@ -2428,6 +2428,7 @@ body.account-view #dash-account {
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
+  margin: 0 20px;
 
   width: 32px;
   height: 32px;
@@ -2464,12 +2465,13 @@ body.account-view #dash-account {
 }
 
 .scroll-arrow.visible {
-  opacity: 1;
+  opacity: 0.6;
   pointer-events: auto;
 }
 
 .scroll-arrow:hover {
   transform: translateY(-50%) scale(1.06);
+  opacity: 0.9;
 }
 
 .board-pill-shell {
