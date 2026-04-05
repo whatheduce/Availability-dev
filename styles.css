@@ -2465,7 +2465,7 @@ body.account-view #dash-account {
 }
 
 .scroll-arrow.visible {
-  opacity: 0.6;
+  opacity: 0.4;
   pointer-events: auto;
 }
 
