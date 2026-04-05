@@ -1821,17 +1821,15 @@ function setupScrollArrows(containerId, leftId, rightId) {
   function updateArrows() {
     const maxScroll = container.scrollWidth - container.clientWidth;
     const hasOverflow = maxScroll > 0;
+    const canScrollLeft = hasOverflow && container.scrollLeft > 10;
+    const canScrollRight = hasOverflow && container.scrollLeft < maxScroll - 10;
 
     wrap.classList.toggle("has-scroll", hasOverflow);
+    wrap.classList.toggle("can-scroll-left", canScrollLeft);
+    wrap.classList.toggle("can-scroll-right", canScrollRight);
 
-    if (!hasOverflow) {
-      left.classList.remove("visible");
-      right.classList.remove("visible");
-      return;
-    }
-
-    left.classList.toggle("visible", container.scrollLeft > 10);
-    right.classList.toggle("visible", container.scrollLeft < maxScroll - 10);
+    left.classList.toggle("visible", canScrollLeft);
+    right.classList.toggle("visible", canScrollRight);
   }
 
   left.onclick = () => {
