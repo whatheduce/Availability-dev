@@ -2636,6 +2636,19 @@ function bindCalendarClickDelegation() {
     if (isMobileLikeViewport() && mobileInspectDay) {
       e.preventDefault();
       e.stopPropagation();
+
+      const tappedDay = String(cell.dataset.day || "");
+
+      if (tappedDay === String(mobileInspectDay)) {
+        window.hideCellHoverTooltip?.();
+
+        Promise.resolve(window.renderCellHoverTooltip?.(cell)).then(() => {
+          window.positionCellHoverTooltip?.(cell);
+        });
+      } else {
+        window.hideCellHoverTooltip?.();
+      }
+
       return;
     }
 
