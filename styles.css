@@ -375,6 +375,28 @@ th {
   font-weight: 700;
   color: #4e3f33;
   letter-spacing: -0.01em;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    color 180ms ease;
+}
+
+.day-header:active {
+  transform: translateY(1px);
+}
+
+.day-header.inspect-column-active {
+  color: #9a3412;
+  background:
+    linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(248, 232, 214, 0.98));
+  box-shadow:
+    inset 0 0 0 1px rgba(204, 82, 16, 0.26),
+    inset 0 -2px 0 rgba(204, 82, 16, 0.55),
+    0 6px 18px rgba(96, 72, 48, 0.10);
 }
 
 /* Month divider line */
