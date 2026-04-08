@@ -396,13 +396,9 @@ th {
     linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(248, 232, 214, 0.98));
 }
 
-#availabilityTable.inspect-column-mode th.day-header:not(.inspect-column-active) {
-  opacity: 0.44;
-}
-
 #availabilityTable.inspect-column-mode th.day-header:not(.inspect-column-active),
 #availabilityTable.inspect-column-mode td[data-day][data-time]:not(.inspect-column-cell) {
-  opacity: 0.34;
+  opacity: 0.35;
 }
 
 #availabilityTable.inspect-column-mode td[data-day][data-time] {
@@ -419,7 +415,7 @@ th {
   background:
     linear-gradient(180deg, rgba(255, 248, 240, 0.98), rgba(248, 236, 220, 0.98)) !important;
 
-  /* left + right border on every selected cell */
+  /* ONLY left + right borders */
   box-shadow:
     inset 1px 0 0 rgba(204, 82, 16, 0.55),
     inset -1px 0 0 rgba(204, 82, 16, 0.55);
@@ -431,6 +427,8 @@ th {
   color: #9a3412;
   background:
     linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(248, 232, 214, 0.98));
+
+  /* ONLY vertical borders + top */
   box-shadow:
     inset 1px 0 0 rgba(204, 82, 16, 0.55),
     inset -1px 0 0 rgba(204, 82, 16, 0.55),
