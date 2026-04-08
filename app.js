@@ -2146,7 +2146,11 @@ async function createBoard() {
     document.getElementById("goldThreshold") ||
     document.querySelector('select[data-gold-threshold]');
 
-  const goldThreshold = parseInt(goldSelect?.value || "", 10);
+  const rawGoldThreshold = String(goldSelect?.value || "").trim();
+  const goldThreshold =
+    rawGoldThreshold === "" || rawGoldThreshold === "off"
+      ? null
+      : parseInt(rawGoldThreshold, 10);
   const au = await auth.getAuthUser();
     if (!au) {
       auth.showAuthOverlay("Please sign in before creating a calendar.");
@@ -2215,21 +2219,18 @@ if (!tz || tz === "__other__") {
 
 const startDate = yyyyMmDdInTimeZone(new Date(), tz);
   
-  // --- Gold threshold (required) ---
-  if (!Number.isFinite(goldThreshold)) {
-    alert("Please choose a gold threshold");
-    return;
-  }
-
+  // --- Gold threshold (optional) ---
+  if (goldThreshold !== null) {
     if (!Number.isFinite(goldThreshold) || goldThreshold < 2 || goldThreshold > 30) {
-      alert("Gold threshold must be between 1 and 30.");
+      alert("Gold threshold must be between 2 and 30.");
       return;
     }
-  
+
     if (!IS_PRO && goldThreshold >= 6) {
       alert("Free version allows gold threshold up to 5.");
       return;
     }
+  }
 
   const { error } = await supabase
     .from("tables")
