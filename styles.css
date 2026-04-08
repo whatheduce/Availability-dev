@@ -433,15 +433,23 @@ th {
 /* top of the full column */
 #availabilityTable.inspect-column-mode th.day-header.inspect-column-active {
   opacity: 1;
-  color: #9a3412;
-  background:
-    linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(248, 232, 214, 0.98));
+  color: #e58a1f;
 
-  /* ONLY vertical borders + top */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 247, 237, 0.98),
+      rgba(248, 232, 214, 0.98)
+    );
+
   box-shadow:
     inset 1px 0 0 rgba(229, 138, 31, 0.65),
     inset -1px 0 0 rgba(229, 138, 31, 0.65),
     inset 0 1px 0 rgba(229, 138, 31, 0.65);
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.5),
+    0 0 6px rgba(243, 178, 74, 0.25);
 }
 
 /* bottom of the full column */
