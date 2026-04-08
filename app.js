@@ -2366,6 +2366,7 @@ function buildCalendar() {
   clearMobileInspectDay();
   bindCalendarHeaderDelegation();
   bindCalendarClickDelegation();
+  bindMobileInspectDismiss();
 }
 
 //----------  
@@ -2633,20 +2634,21 @@ function bindCalendarClickDelegation() {
     const cell = e.target.closest("td[data-day][data-time]");
     if (!cell) return;
 
-    if (isMobileLikeViewport() && mobileInspectDay) {
+        if (isMobileLikeViewport() && mobileInspectDay) {
       e.preventDefault();
       e.stopPropagation();
 
       const tappedDay = String(cell.dataset.day || "");
+      const activeDay = String(mobileInspectDay || "");
 
-      if (tappedDay === String(mobileInspectDay)) {
+      if (tappedDay === activeDay) {
         window.hideCellHoverTooltip?.();
 
         Promise.resolve(window.renderCellHoverTooltip?.(cell)).then(() => {
           window.positionCellHoverTooltip?.(cell);
         });
       } else {
-        window.hideCellHoverTooltip?.();
+        clearMobileInspectDay();
       }
 
       return;
@@ -2655,6 +2657,23 @@ function bindCalendarClickDelegation() {
     toggleCell({ currentTarget: cell }); // reuse your existing toggleCell
   });
 }
+
+//----------
+function bindMobileInspectDismiss() {
+  if (document.body.dataset.inspectDismissBound === "1") return;
+  document.body.dataset.inspectDismissBound = "1";
+
+  document.addEventListener("click", (e) => {
+    if (!isMobileLikeViewport()) return;
+    if (!mobileInspectDay) return;
+
+    const insideTable = e.target.closest("#availabilityTable");
+    if (insideTable) return;
+
+    clearMobileInspectDay();
+  });
+}
+
 
 
 
