@@ -2091,6 +2091,9 @@ window.setMobileInspectDay = setMobileInspectDay;
 //----------
 function clearMobileInspectDay() {
   setMobileInspectDay(null);
+  if (typeof hideCellHoverTooltip === "function") {
+    hideCellHoverTooltip();
+  }
 }
 window.clearMobileInspectDay = clearMobileInspectDay;
 
