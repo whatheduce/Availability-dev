@@ -127,6 +127,8 @@ let colourModalBoardId = null;
 let cellTooltipCache = new Map(); // key: "day|time" -> [{ name, color }]
 window.cellTooltipCache = cellTooltipCache;
 let mustChooseLocalBoardColour = false;
+let mobileInspectDay = null; // string day number, e.g. "1", "2", ...
+window.mobileInspectDay = mobileInspectDay;
 
 
 
@@ -2057,6 +2059,48 @@ function formatDateKey(date) {
 }
 window.formatDateKey = formatDateKey;
 
+function isMobileLikeViewport() {
+  return window.matchMedia("(hover: none), (pointer: coarse), (max-width: 900px)").matches;
+}
+
+//----------
+function setMobileInspectDay(day) {
+  mobileInspectDay = day ? String(day) : null;
+  window.mobileInspectDay = mobileInspectDay;
+
+  const table = document.getElementById("availabilityTable");
+  if (!table) return;
+
+  table.classList.toggle("inspect-column-mode", !!mobileInspectDay);
+
+  table.querySelectorAll("th.day-header").forEach(th => {
+    const isActive = !!mobileInspectDay && th.dataset.day === mobileInspectDay;
+    th.classList.toggle("inspect-column-active", isActive);
+    th.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
+//----------
+function clearMobileInspectDay() {
+  setMobileInspectDay(null);
+}
+
+//----------
+function toggleMobileInspectDay(day) {
+  const nextDay = String(day || "");
+  if (!nextDay) {
+    clearMobileInspectDay();
+    return;
+  }
+
+  if (mobileInspectDay === nextDay) {
+    clearMobileInspectDay();
+    return;
+  }
+
+  setMobileInspectDay(nextDay);
+}
+
 
 
 // =========================
@@ -2269,6 +2313,9 @@ function buildCalendar() {
     th.classList.add("day-header");
     if (isMonthBreak) th.classList.add("month-break");
     th.dataset.day = String(dayNum);
+    th.setAttribute("role", "button");
+    th.setAttribute("tabindex", "0");
+    th.setAttribute("aria-pressed", "false");
 
   th.innerHTML = `
   <div style="font-weight:700;">${weekday}</div>
@@ -2302,7 +2349,9 @@ function buildCalendar() {
 
     table.appendChild(row);
   });
-
+  
+  clearMobileInspectDay();
+  bindCalendarHeaderDelegation();
   bindCalendarClickDelegation();
 }
 
@@ -2529,6 +2578,35 @@ const isTogglingOff = !!existingRow;
   }
 }
 window.toggleCell = toggleCell;
+
+//---------- 
+function bindCalendarHeaderDelegation() {
+  const table = document.getElementById("availabilityTable");
+  if (!table || table.dataset.headerBound === "1") return;
+
+  table.dataset.headerBound = "1";
+
+  table.addEventListener("click", (e) => {
+    const header = e.target.closest("th.day-header");
+    if (!header) return;
+    if (!isMobileLikeViewport()) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    toggleMobileInspectDay(header.dataset.day);
+  });
+
+  table.addEventListener("keydown", (e) => {
+    const header = e.target.closest("th.day-header");
+    if (!header) return;
+    if (!isMobileLikeViewport()) return;
+    if (e.key !== "Enter" && e.key !== " ") return;
+
+    e.preventDefault();
+    toggleMobileInspectDay(header.dataset.day);
+  });
+}
 
 //----------  
 function bindCalendarClickDelegation() {
