@@ -2059,15 +2059,10 @@ function formatDateKey(date) {
 }
 window.formatDateKey = formatDateKey;
 
-//----------
-let mobileInspectDay = null;
-window.mobileInspectDay = mobileInspectDay;
-
-//----------
+//----------  
 function isMobileLikeViewport() {
   return window.matchMedia("(hover: none), (pointer: coarse), (max-width: 900px)").matches;
 }
-window.isMobileLikeViewport = isMobileLikeViewport;
 
 //----------
 function setMobileInspectDay(day) {
@@ -2084,19 +2079,12 @@ function setMobileInspectDay(day) {
     th.classList.toggle("inspect-column-active", isActive);
     th.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
-
-  table.querySelectorAll("td[data-day][data-time]").forEach(td => {
-    const isActive = !!mobileInspectDay && td.dataset.day === mobileInspectDay;
-    td.classList.toggle("inspect-column-cell", isActive);
-  });
 }
-window.setMobileInspectDay = setMobileInspectDay;
 
 //----------
 function clearMobileInspectDay() {
   setMobileInspectDay(null);
 }
-window.clearMobileInspectDay = clearMobileInspectDay;
 
 //----------
 function toggleMobileInspectDay(day) {
@@ -2114,49 +2102,6 @@ function toggleMobileInspectDay(day) {
   setMobileInspectDay(nextDay);
 }
 window.toggleMobileInspectDay = toggleMobileInspectDay;
-
-function isMobileLikeViewport() {
-  return window.matchMedia("(hover: none), (pointer: coarse), (max-width: 900px)").matches;
-}
-
-//----------
-function setMobileInspectDay(day) {
-  mobileInspectDay = day ? String(day) : null;
-  window.mobileInspectDay = mobileInspectDay;
-
-  const table = document.getElementById("availabilityTable");
-  if (!table) return;
-
-  table.classList.toggle("inspect-column-mode", !!mobileInspectDay);
-
-  table.querySelectorAll("th.day-header").forEach(th => {
-    const isActive = !!mobileInspectDay && th.dataset.day === mobileInspectDay;
-    th.classList.toggle("inspect-column-active", isActive);
-    th.setAttribute("aria-pressed", isActive ? "true" : "false");
-  });
-}
-
-//----------
-function clearMobileInspectDay() {
-  setMobileInspectDay(null);
-}
-
-//----------
-function toggleMobileInspectDay(day) {
-  const nextDay = String(day || "");
-  if (!nextDay) {
-    clearMobileInspectDay();
-    return;
-  }
-
-  if (mobileInspectDay === nextDay) {
-    clearMobileInspectDay();
-    return;
-  }
-
-  setMobileInspectDay(nextDay);
-}
-
 
 
 // =========================
