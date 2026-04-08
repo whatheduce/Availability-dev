@@ -95,7 +95,12 @@ function populateGoldThresholdSelect() {
   const select = document.getElementById("gold-threshold");
   if (!select) return;
 
-  select.innerHTML = `<option value="" selected disabled>Select a number…</option>`;
+  select.innerHTML = `<option value="" selected disabled>Select an option…</option>`;
+
+  const offOption = document.createElement("option");
+  offOption.value = "off";
+  offOption.textContent = "No gold threshold feature";
+  select.appendChild(offOption);
 
   const freeGroup = document.createElement("optgroup");
   freeGroup.label = "Free";
