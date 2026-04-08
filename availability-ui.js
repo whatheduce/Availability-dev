@@ -159,8 +159,28 @@ refreshDotLayout(cell);
 
 //----------
 async function applyGoldStateForCell(cell, day) {
-  const goldThreshold = Number(window.currentTable?.gold_threshold);
-  if (!Number.isFinite(goldThreshold)) return;
+  const rawGoldThreshold = window.currentTable?.gold_threshold;
+  const goldThreshold =
+    Number.isFinite(rawGoldThreshold) && rawGoldThreshold >= 2
+      ? rawGoldThreshold
+      : null;
+
+  if (goldThreshold === null) {
+    const wasGold = cell.classList.contains("gold-cell");
+    cell.classList.remove("gold-cell");
+
+    if (wasGold) {
+      await rebuildDotsForCell(cell);
+    }
+
+    if (!isWholeDayBoard()) {
+      const dayNum = parseInt(day, 10);
+      const th = window.table?.querySelector(`th.day-header[data-day="${dayNum}"]`);
+      if (th) th.classList.remove("gold-header");
+    }
+
+    return;
+  }
 
   const wasGold = cell.classList.contains("gold-cell");
 
@@ -222,8 +242,18 @@ if (isWholeDayBoard()) {
 
 //----------
 function maybeApplyGoldForCell(cell) {
-  const th = Number(window.currentTable?.gold_threshold || 0);
-  if (!th || th <= 0) return;
+  if (!cell || !window.currentTable) return;
+
+  const rawGoldThreshold = window.currentTable?.gold_threshold;
+  const th =
+    Number.isFinite(rawGoldThreshold) && rawGoldThreshold >= 2
+      ? rawGoldThreshold
+      : null;
+
+  if (th === null) {
+    cell.classList.remove("gold-cell");
+    return;
+  }
 
   // If already gold, nothing to do
   if (cell.classList.contains("gold-cell")) return;
