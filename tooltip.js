@@ -253,3 +253,5 @@ window.renderCellHoverTooltip = renderCellHoverTooltip;
 window.positionCellHoverTooltip = positionCellHoverTooltip;
 window.hideCellHoverTooltip = hideCellHoverTooltip;
 window.applyLocalColourUpdateInPlace = applyLocalColourUpdateInPlace;
+window.cellHoverTooltip = cellHoverTooltip;
+window.hoverTooltipTimer = hoverTooltipTimer;
