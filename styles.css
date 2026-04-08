@@ -417,8 +417,8 @@ th {
 
   /* ONLY left + right borders */
   box-shadow:
-    inset 1px 0 0 rgba(204, 82, 16, 0.55),
-    inset -1px 0 0 rgba(204, 82, 16, 0.55);
+    inset 1px 0 0 rgba(229, 138, 31, 0.65),
+    inset -1px 0 0 rgba(229, 138, 31, 0.65);
 }
 
 /* top of the full column */
@@ -430,17 +430,17 @@ th {
 
   /* ONLY vertical borders + top */
   box-shadow:
-    inset 1px 0 0 rgba(204, 82, 16, 0.55),
-    inset -1px 0 0 rgba(204, 82, 16, 0.55),
-    inset 0 1px 0 rgba(204, 82, 16, 0.55);
+    inset 1px 0 0 rgba(229, 138, 31, 0.65),
+    inset -1px 0 0 rgba(229, 138, 31, 0.65),
+    inset 0 1px 0 rgba(229, 138, 31, 0.65);
 }
 
 /* bottom of the full column */
 #availabilityTable.inspect-column-mode tr:last-child td.inspect-column-cell {
   box-shadow:
-    inset 1px 0 0 rgba(204, 82, 16, 0.55),
-    inset -1px 0 0 rgba(204, 82, 16, 0.55),
-    inset 0 -1px 0 rgba(204, 82, 16, 0.55);
+    inset 1px 0 0 rgba(229, 138, 31, 0.65),
+    inset -1px 0 0 rgba(229, 138, 31, 0.65),
+    inset 0 -1px 0 rgba(229, 138, 31, 0.65);
 }
 
 #availabilityTable.inspect-column-mode td.inspect-column-cell:hover {
