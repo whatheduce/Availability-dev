@@ -382,7 +382,8 @@ th {
     background 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease,
-    color 180ms ease;
+    color 180ms ease,
+    opacity 180ms ease;
 }
 
 .day-header:active {
@@ -397,6 +398,38 @@ th {
     inset 0 0 0 1px rgba(204, 82, 16, 0.26),
     inset 0 -2px 0 rgba(204, 82, 16, 0.55),
     0 6px 18px rgba(96, 72, 48, 0.10);
+}
+
+#availabilityTable.inspect-column-mode th.day-header:not(.inspect-column-active) {
+  opacity: 0.44;
+}
+
+#availabilityTable.inspect-column-mode td[data-day][data-time] {
+  opacity: 0.38;
+  transition:
+    opacity 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+#availabilityTable.inspect-column-mode td.inspect-column-cell {
+  opacity: 1;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 240, 0.98), rgba(248, 236, 220, 0.98)) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(204, 82, 16, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.45),
+    0 0 0 1px rgba(204, 82, 16, 0.08);
+}
+
+#availabilityTable.inspect-column-mode td.inspect-column-cell:hover {
+  transform: none;
+}
+
+#availabilityTable.inspect-column-mode .time-label,
+#availabilityTable.inspect-column-mode .calendar-meta-corner {
+  opacity: 1;
 }
 
 /* Month divider line */
