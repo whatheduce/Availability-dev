@@ -391,9 +391,17 @@ th {
 }
 
 .day-header.inspect-column-active {
-  color: #9a3412;
+  color: #e58a1f;
   background:
-    linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(248, 232, 214, 0.98));
+    linear-gradient(
+      180deg,
+      rgba(255, 247, 237, 0.98),
+      rgba(248, 232, 214, 0.98)
+    );
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.5),
+    0 0 6px rgba(243, 178, 74, 0.25);
 }
 
 #availabilityTable.inspect-column-mode th.day-header:not(.inspect-column-active),
