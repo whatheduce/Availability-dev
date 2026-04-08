@@ -486,7 +486,10 @@ function renderGoldThreshold() {
 
   if (!wrap || !value || !currentTable) return;
 
-  value.textContent = currentTable.gold_threshold || 0;
+  const threshold = currentTable?.gold_threshold;
+  const goldEnabled = Number.isFinite(threshold) && threshold >= 2;
+
+  value.textContent = goldEnabled ? String(threshold) : "Off";
   wrap.style.display = "block";
 }
 
@@ -1798,7 +1801,11 @@ renderCalendarLastUpdated();
 const users = document.getElementById("calendar-invite-joined")?.textContent || 0;
 const maxUsers = document.getElementById("calendar-invite-total")?.textContent || 0;
 
-const threshold = currentTable?.gold_threshold || 0;
+const rawThreshold = currentTable?.gold_threshold;
+const threshold =
+  Number.isFinite(rawThreshold) && rawThreshold >= 2
+    ? String(rawThreshold)
+    : "Off";
 const timezone = formatTimeZoneLabel(currentTable?.host_tz || "");
 const lastUpdated = getLastUpdatedLabel(currentTable?.last_activity_at);
 
@@ -1965,8 +1972,12 @@ Object.values(users).forEach(({ userId, name, color }) => {
     });
 
     const goldDays = new Set();
-    const goldThreshold = Number(currentTable?.gold_threshold);
-    const enableGold = Number.isFinite(goldThreshold);
+    const rawGoldThreshold = currentTable?.gold_threshold;
+    const goldThreshold =
+      Number.isFinite(rawGoldThreshold) && rawGoldThreshold >= 2
+        ? rawGoldThreshold
+        : null;
+    const enableGold = goldThreshold !== null;
 
     /* Render cells */
     table.querySelectorAll('td[data-day]').forEach(cell => {
