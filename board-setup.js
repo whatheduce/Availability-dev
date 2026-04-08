@@ -98,7 +98,7 @@ function populateGoldThresholdSelect() {
   select.innerHTML = `<option value="" selected disabled>Select an option…</option>`;
 
   const freeGroup = document.createElement("optgroup");
-  freeGroup.label = "Free";
+  freeGroup.label = "Free Version";
   
   const offOption = document.createElement("option");
   offOption.value = "off";
