@@ -86,8 +86,10 @@ async function renderCellHoverTooltip(cell) {
     return;
   }
 
-  // On mobile-like viewports, only allow tooltip in inspect/view mode
-  if (isMobileLikeViewport()) {
+  // On true touch / non-hover devices, only allow tooltip in inspect/view mode
+  const isTouchLikeInput = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+
+  if (isTouchLikeInput) {
     const activeDay = String(window.mobileInspectDay || "");
     const cellDay = String(cell.dataset.day || "");
 
