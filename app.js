@@ -2059,10 +2059,11 @@ function formatDateKey(date) {
 }
 window.formatDateKey = formatDateKey;
 
-//----------  
+//----------
 function isMobileLikeViewport() {
   return window.matchMedia("(hover: none), (pointer: coarse), (max-width: 900px)").matches;
 }
+window.isMobileLikeViewport = isMobileLikeViewport;
 
 //----------
 function setMobileInspectDay(day) {
@@ -2079,12 +2080,19 @@ function setMobileInspectDay(day) {
     th.classList.toggle("inspect-column-active", isActive);
     th.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
+
+  table.querySelectorAll("td[data-day][data-time]").forEach(td => {
+    const isActive = !!mobileInspectDay && td.dataset.day === mobileInspectDay;
+    td.classList.toggle("inspect-column-cell", isActive);
+  });
 }
+window.setMobileInspectDay = setMobileInspectDay;
 
 //----------
 function clearMobileInspectDay() {
   setMobileInspectDay(null);
 }
+window.clearMobileInspectDay = clearMobileInspectDay;
 
 //----------
 function toggleMobileInspectDay(day) {
@@ -2102,6 +2110,7 @@ function toggleMobileInspectDay(day) {
   setMobileInspectDay(nextDay);
 }
 window.toggleMobileInspectDay = toggleMobileInspectDay;
+
 
 
 // =========================
