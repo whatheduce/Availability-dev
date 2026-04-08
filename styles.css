@@ -1921,6 +1921,7 @@ body.account-view #dash-account {
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 .pro-upsell-list {
@@ -2174,9 +2175,12 @@ body.account-view #dash-account {
 }
 
 .pro-pricing {
-  margin-top: 10px;
-  padding: 6px 10px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
   border-radius: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
   background: linear-gradient(
     180deg,
     rgba(255, 248, 240, 0.6),
@@ -2185,9 +2189,9 @@ body.account-view #dash-account {
 }
 
 .pro-price-main {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  color: #9a3412; /* warm hearth tone */
+  color: #9a3412;
   letter-spacing: -0.01em;
 }
 
