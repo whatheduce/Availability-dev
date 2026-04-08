@@ -2173,6 +2173,42 @@ body.account-view #dash-account {
   white-space: nowrap;
 }
 
+.pro-pricing {
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 240, 0.6),
+    rgba(248, 236, 220, 0.4)
+  );
+}
+
+.pro-price-main {
+  font-size: 18px;
+  font-weight: 600;
+  color: #9a3412; /* warm hearth tone */
+  letter-spacing: -0.01em;
+}
+
+.pro-price-main span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #7c6a58;
+  margin-left: 2px;
+}
+
+.pro-price-alt {
+  font-size: 12px;
+  color: #8b7a66;
+  margin-top: 2px;
+}
+
+.pro-price-alt span {
+  color: #e58a1f;
+  font-weight: 500;
+}
+
 .colour-dot{
   display:inline-block;
   width: 12px;
