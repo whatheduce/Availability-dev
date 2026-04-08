@@ -86,6 +86,17 @@ async function renderCellHoverTooltip(cell) {
     return;
   }
 
+  // On mobile-like viewports, only allow tooltip in inspect/view mode
+  if (isMobileLikeViewport()) {
+    const activeDay = String(window.mobileInspectDay || "");
+    const cellDay = String(cell.dataset.day || "");
+
+    if (!activeDay || cellDay !== activeDay) {
+      hideCellHoverTooltip();
+      return;
+    }
+  }
+
   let users = [];
 
   if (cell.classList.contains("gold-cell")) {
