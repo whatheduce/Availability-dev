@@ -2539,6 +2539,12 @@ const isTogglingOff = !!existingRow;
       return;
     }
 
+     // Before adding, re-confirm membership in case first-load auth/RLS is still catching up
+    const membershipOk = await ensureMembership(currentTable.id);
+    if (!membershipOk) {
+      return;
+    }
+    
     // optimistic add first
     if (pendingAdds.has(k)) return;
     pendingAdds.add(k);
