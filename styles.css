@@ -3922,8 +3922,8 @@ body.account-view #dash-account {
   border-radius: 12px;
   border: 1px solid rgba(191, 117, 24, 0.28);
   background: linear-gradient(180deg,
-  rgba(229, 138, 31, 0.82),
-  rgba(204, 82, 16, 0.82)
+  rgba(229, 138, 31, 0.72),
+  rgba(204, 82, 16, 0.72)
 );
   color: #fff;
   font-weight: 700;
@@ -3937,8 +3937,8 @@ body.account-view #dash-account {
 #auth-submit.primary-btn:hover,
 #auth-set-password.primary-btn:hover {
   background: linear-gradient(180deg,
-    rgba(235, 149, 44, 0.95),
-    rgba(213, 91, 22, 0.95)
+    rgba(235, 149, 44, 0.85),
+    rgba(213, 91, 22, 0.85)
   );
   transform: translateY(-1px);
   box-shadow:
