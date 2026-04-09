@@ -3920,22 +3920,29 @@ body.account-view #dash-account {
 #auth-set-password.primary-btn {
   width: 100%;
   border-radius: 12px;
-  border: 1px solid rgba(191, 117, 24, 0.36);
-  background: linear-gradient(180deg, #e58a1f, #cc5210);
+  border: 1px solid rgba(191, 117, 24, 0.28);
+  background: linear-gradient(180deg,
+  rgba(229, 138, 31, 0.82),
+  rgba(204, 82, 16, 0.82)
+);
   color: #fff;
   font-weight: 700;
   letter-spacing: -0.01em;
   box-shadow:
     0 4px 12px rgba(204, 82, 16, 0.24),
     inset 0 1px 0 rgba(255,255,255,0.24);
+  backdrop-filter: blur(2px);
 }
 
 #auth-submit.primary-btn:hover,
 #auth-set-password.primary-btn:hover {
-  background: linear-gradient(180deg, #eb952c, #d55b16);
+  background: linear-gradient(180deg,
+    rgba(235, 149, 44, 0.95),
+    rgba(213, 91, 22, 0.95)
+  );
   transform: translateY(-1px);
   box-shadow:
-    0 8px 18px rgba(204, 82, 16, 0.30),
+    0 8px 18px rgba(204, 82, 16, 0.22),
     inset 0 1px 0 rgba(255,255,255,0.24);
 }
 
