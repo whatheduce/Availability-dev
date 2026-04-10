@@ -298,23 +298,22 @@ body.logged-in #landing-bg::after{
    ========================= */
 
 .calendar-loading {
-  position: relative;
-  width: 100%;
-  min-height: 320px;
+  position: fixed;
+  inset: 0;
+  z-index: 25000;
 
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
 
-  /* soft blur layer */
-  background: rgba(252, 248, 242, 0.55);
-  backdrop-filter: blur(10px);
-
-  border-radius: 18px;
-  border: 1px solid rgba(126, 104, 82, 0.14);
-  box-shadow: 0 18px 50px rgba(96, 72, 48, 0.10);
-
-  margin-top: 10px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(251, 248, 244, 0.58),
+      rgba(241, 235, 227, 0.64)
+    );
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .calendar-loading__inner {
@@ -323,39 +322,34 @@ body.logged-in #landing-bg::after{
   flex-direction: column;
   align-items: center;
   gap: 10px;
+  padding: 20px 24px;
 }
 
-/* reuse your existing spinner but scale it */
 .calendar-loading__spinner {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
 }
 
-/* main text */
 .calendar-loading__title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #2f241a;
   letter-spacing: -0.01em;
 }
 
-/* subtext */
 .calendar-loading__subtext {
   font-size: 12px;
   color: #6b5c4f;
-  opacity: 0.75;
+  opacity: 0.78;
 }
 
-/* optional soft fade-in */
 .calendar-loading {
   opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition: opacity 180ms ease;
 }
 
 .calendar-loading.is-visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .centered-container {
