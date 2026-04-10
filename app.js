@@ -247,18 +247,20 @@ function showBoardView() {
 //----------
 function showCalendarLoading() {
   const loading = document.getElementById("calendar-loading");
+  const topbar = document.getElementById("calendar-topbar");
   const calendar = document.getElementById("calendar");
   const side = document.getElementById("calendar-side");
   const footer = document.getElementById("board-footer");
+
+  if (topbar) topbar.style.display = "none";
+  if (calendar) calendar.style.display = "none";
+  if (side) side.style.display = "none";
+  if (footer) footer.style.display = "none";
 
   if (loading) {
     loading.style.display = "flex";
     requestAnimationFrame(() => loading.classList.add("is-visible"));
   }
-
-  if (calendar) calendar.style.display = "none";
-  if (side) side.style.display = "none";
-  if (footer) footer.style.display = "none";
 }
 
 //----------
@@ -1714,10 +1716,6 @@ async function loadTable() {
   if (!inviteToken && !manageToken) return;
 
   showBoardView();
-
-  const topbar = document.getElementById("calendar-topbar");
-  if (topbar) topbar.style.display = "flex";
-
   showCalendarLoading();
   
   const queryField = inviteToken ? "invite_token" : "owner_token";
@@ -1822,7 +1820,6 @@ await enforceUniqueBoardColourIfNeeded(currentTable.id);
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
 document.getElementById("dashboard").style.display = "none";
-document.getElementById("calendar-topbar").style.display = "flex";
 showCalendarLoading();
 
 // Now that UI is visible, start realtime + render
@@ -1858,6 +1855,7 @@ renderCompactMeta({
   timezone,
   lastUpdated
 });  
+document.getElementById("calendar-topbar").style.display = "flex";  
 document.getElementById("calendar").style.display = "block";
 
 const side = document.getElementById("calendar-side");
