@@ -2480,17 +2480,15 @@ async function toggleCell(e) {
     const timeKey = String(cell.dataset.time || "").trim();
     if (!Number.isFinite(dayNum) || !timeKey) return;
 
-    const au = await auth.getAuthUser();
-    if (!au) return;
+    const myUid = user?.id || (await auth.getAuthUser())?.id;
+      if (!myUid) return;
 
-    const myUid = au.id;
-
-    if (!user) {
-      await auth.hydrateUserFromAuth();
+    let prof = user;
+      if (!prof?.name) {
+    await auth.hydrateUserFromAuth();
+      prof = user || await getProfileCached(myUid);
     }
-
-    const prof = user || await getProfileCached(myUid);
-    if (!prof) return;
+    if (!prof?.name) return;
 
     k = addKey(currentTable.id, dayNum, timeKey, myUid);
     if (inFlightCells.has(k)) return;
