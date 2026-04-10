@@ -2502,93 +2502,99 @@ async function toggleCell(e) {
       prof?.color ||
       "#999";
 
-    const { data: existingRow, error: existingErr } = await supabase
+const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
+const isTogglingOff = !!existingDot;
+
+if (isTogglingOff) {
+  const { data: existingRow, error: existingErr } = await supabase
+    .from("availability_dev")
+    .select("id")
+    .eq("table_id", currentTable.id)
+    .eq("day", dayNum)
+    .eq("time", timeKey)
+    .eq("user_id", myUid)
+    .maybeSingle();
+
+  if (existingErr) {
+    console.warn("Existing row check failed:", existingErr);
+    return;
+  }
+
+  // If the DOM says I have a dot but the DB row isn't there, re-sync and stop
+  if (!existingRow?.id) {
+    await loadAvailability();
+    return;
+  }
+
+  // optimistic remove first
+  const removedSnapshot = removeOptimisticDot(cell, myUid);
+  maybeApplyGoldForCell(cell);
+
+  const { data: deletedRows, error: delErr } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("id", existingRow.id)
+    .select("id");
+
+  const deletedCount = deletedRows?.length || 0;
+
+  if (delErr) {
+    console.warn("Delete failed:", delErr);
+    restoreOptimisticDot(cell, removedSnapshot);
+    maybeApplyGoldForCell(cell);
+    return;
+  }
+
+  let legacyDeletedCount = 0;
+  let legacyDeletedRows = [];
+
+  if (deletedCount === 0) {
+    const { data, error: legacyErr } = await supabase
       .from("availability_dev")
-      .select("id")
+      .delete()
       .eq("table_id", currentTable.id)
       .eq("day", dayNum)
       .eq("time", timeKey)
-      .eq("user_id", myUid)
-      .maybeSingle();
-
-if (existingErr) {
-  console.warn("Existing row check failed:", existingErr);
-  return;
-}
-
-const isTogglingOff = !!existingRow;
-    
-    if (isTogglingOff) {
-      // optimistic remove first
-      const removedSnapshot = removeOptimisticDot(cell, myUid);
-      maybeApplyGoldForCell(cell);
-
-      const { data: deletedRows, error: delErr } = await supabase
-      .from("availability_dev")
-      .delete()
-      .eq("id", existingRow.id)
+      .is("user_id", null)
+      .eq("name", prof.name)
+      .eq("color", prof.color)
       .select("id");
 
-      const deletedCount = deletedRows?.length || 0;
-
-      if (delErr) {
-        console.warn("Delete failed:", delErr);
-        restoreOptimisticDot(cell, removedSnapshot);
-        maybeApplyGoldForCell(cell);
-        return;
-      }
-
-      let legacyDeletedCount = 0;
-      let legacyDeletedRows = [];
-
-      if (deletedCount === 0) {
-        const { data, error: legacyErr } = await supabase
-          .from("availability_dev")
-          .delete()
-          .eq("table_id", currentTable.id)
-          .eq("day", dayNum)
-          .eq("time", timeKey)
-          .is("user_id", null)
-          .eq("name", prof.name)
-          .eq("color", prof.color)
-          .select("id");
-
-        if (legacyErr) {
-          console.warn("Legacy delete failed:", legacyErr);
-          restoreOptimisticDot(cell, removedSnapshot);
-          maybeApplyGoldForCell(cell);
-          return;
-        }
-
-        legacyDeletedRows = data || [];
-        legacyDeletedCount = legacyDeletedRows.length;
-      }
-
-      // if nothing deleted, revert
-      if (deletedCount === 0 && legacyDeletedCount === 0) {
-        restoreOptimisticDot(cell, removedSnapshot);
-        maybeApplyGoldForCell(cell);
-        return;
-      }
-
-      const allDeletedRows = [
-        ...(deletedRows || []),
-        ...legacyDeletedRows
-      ];
-
-      for (const row of allDeletedRows) {
-        if (row?.id != null) {
-          pendingDeleteCellByEntryId.set(String(row.id), {
-            day: String(dayNum),
-            time: timeKey
-          });
-        }
-      }
-
+    if (legacyErr) {
+      console.warn("Legacy delete failed:", legacyErr);
+      restoreOptimisticDot(cell, removedSnapshot);
+      maybeApplyGoldForCell(cell);
       return;
     }
 
-     // Before adding, re-confirm membership in case first-load auth/RLS is still catching up
+    legacyDeletedRows = data || [];
+    legacyDeletedCount = legacyDeletedRows.length;
+  }
+
+  // if nothing deleted, revert
+  if (deletedCount === 0 && legacyDeletedCount === 0) {
+    restoreOptimisticDot(cell, removedSnapshot);
+    maybeApplyGoldForCell(cell);
+    return;
+  }
+
+  const allDeletedRows = [
+    ...(deletedRows || []),
+    ...legacyDeletedRows
+  ];
+
+  for (const row of allDeletedRows) {
+    if (row?.id != null) {
+      pendingDeleteCellByEntryId.set(String(row.id), {
+        day: String(dayNum),
+        time: timeKey
+      });
+    }
+  }
+
+  return;
+}     
+    // Before adding, re-confirm membership in case first-load auth/RLS is still catching up
     const membershipOk = await ensureMembership(currentTable.id);
     if (!membershipOk) {
       return;
