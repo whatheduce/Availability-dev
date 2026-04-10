@@ -2465,8 +2465,10 @@ function restoreDotToCell(cell, snapshot) {
 //----------  
 async function toggleCell(e) {
   const cell = e.currentTarget;
+  const t0 = performance.now();
 
   const kickedOut = await kickOutIfNoBoardAccess();
+  console.log("toggleCell: kickOutIfNoBoardAccess", Math.round(performance.now() - t0), "ms");
   if (kickedOut) return;
   if (!currentTable || !cell) return;
 
@@ -2481,13 +2483,18 @@ async function toggleCell(e) {
     if (!Number.isFinite(dayNum) || !timeKey) return;
 
     const myUid = user?.id || (await auth.getAuthUser())?.id;
-      if (!myUid) return;
+    console.log("toggleCell: user id ready", Math.round(performance.now() - t0), "ms");
+    if (!myUid) return;
 
     let prof = user;
-      if (!prof?.name) {
-    await auth.hydrateUserFromAuth();
+    if (!prof?.name) {
+      await auth.hydrateUserFromAuth();
       prof = user || await getProfileCached(myUid);
+      console.log("toggleCell: hydrate/profile ready", Math.round(performance.now() - t0), "ms");
+    } else {
+      console.log("toggleCell: profile already ready", Math.round(performance.now() - t0), "ms");
     }
+
     if (!prof?.name) return;
 
     k = addKey(currentTable.id, dayNum, timeKey, myUid);
@@ -2500,113 +2507,125 @@ async function toggleCell(e) {
       prof?.color ||
       "#999";
 
-const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
-const isTogglingOff = !!existingDot;
+    const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
+    const isTogglingOff = !!existingDot;
 
-if (isTogglingOff) {
-  const { data: existingRow, error: existingErr } = await supabase
-    .from("availability_dev")
-    .select("id")
-    .eq("table_id", currentTable.id)
-    .eq("day", dayNum)
-    .eq("time", timeKey)
-    .eq("user_id", myUid)
-    .maybeSingle();
+    if (isTogglingOff) {
+      const { data: existingRow, error: existingErr } = await supabase
+        .from("availability_dev")
+        .select("id")
+        .eq("table_id", currentTable.id)
+        .eq("day", dayNum)
+        .eq("time", timeKey)
+        .eq("user_id", myUid)
+        .maybeSingle();
 
-  if (existingErr) {
-    console.warn("Existing row check failed:", existingErr);
-    return;
-  }
+      console.log("toggleCell: remove row lookup", Math.round(performance.now() - t0), "ms");
 
-  // If the DOM says I have a dot but the DB row isn't there, re-sync and stop
-  if (!existingRow?.id) {
-    await loadAvailability();
-    return;
-  }
+      if (existingErr) {
+        console.warn("Existing row check failed:", existingErr);
+        return;
+      }
 
-  // optimistic remove first
-  const removedSnapshot = removeOptimisticDot(cell, myUid);
-  maybeApplyGoldForCell(cell);
+      // If the DOM says I have a dot but the DB row isn't there, re-sync and stop
+      if (!existingRow?.id) {
+        await loadAvailability();
+        console.log("toggleCell: resynced after missing remove row", Math.round(performance.now() - t0), "ms");
+        return;
+      }
 
-  const { data: deletedRows, error: delErr } = await supabase
-    .from("availability_dev")
-    .delete()
-    .eq("id", existingRow.id)
-    .select("id");
-
-  const deletedCount = deletedRows?.length || 0;
-
-  if (delErr) {
-    console.warn("Delete failed:", delErr);
-    restoreOptimisticDot(cell, removedSnapshot);
-    maybeApplyGoldForCell(cell);
-    return;
-  }
-
-  let legacyDeletedCount = 0;
-  let legacyDeletedRows = [];
-
-  if (deletedCount === 0) {
-    const { data, error: legacyErr } = await supabase
-      .from("availability_dev")
-      .delete()
-      .eq("table_id", currentTable.id)
-      .eq("day", dayNum)
-      .eq("time", timeKey)
-      .is("user_id", null)
-      .eq("name", prof.name)
-      .eq("color", prof.color)
-      .select("id");
-
-    if (legacyErr) {
-      console.warn("Legacy delete failed:", legacyErr);
-      restoreOptimisticDot(cell, removedSnapshot);
+      // optimistic remove first
+      const removedSnapshot = removeOptimisticDot(cell, myUid);
       maybeApplyGoldForCell(cell);
+      console.log("toggleCell: optimistic remove", Math.round(performance.now() - t0), "ms");
+
+      const { data: deletedRows, error: delErr } = await supabase
+        .from("availability_dev")
+        .delete()
+        .eq("id", existingRow.id)
+        .select("id");
+
+      console.log("toggleCell: delete finished", Math.round(performance.now() - t0), "ms");
+
+      const deletedCount = deletedRows?.length || 0;
+
+      if (delErr) {
+        console.warn("Delete failed:", delErr);
+        restoreOptimisticDot(cell, removedSnapshot);
+        maybeApplyGoldForCell(cell);
+        return;
+      }
+
+      let legacyDeletedCount = 0;
+      let legacyDeletedRows = [];
+
+      if (deletedCount === 0) {
+        const { data, error: legacyErr } = await supabase
+          .from("availability_dev")
+          .delete()
+          .eq("table_id", currentTable.id)
+          .eq("day", dayNum)
+          .eq("time", timeKey)
+          .is("user_id", null)
+          .eq("name", prof.name)
+          .eq("color", prof.color)
+          .select("id");
+
+        console.log("toggleCell: legacy delete finished", Math.round(performance.now() - t0), "ms");
+
+        if (legacyErr) {
+          console.warn("Legacy delete failed:", legacyErr);
+          restoreOptimisticDot(cell, removedSnapshot);
+          maybeApplyGoldForCell(cell);
+          return;
+        }
+
+        legacyDeletedRows = data || [];
+        legacyDeletedCount = legacyDeletedRows.length;
+      }
+
+      // if nothing deleted, revert
+      if (deletedCount === 0 && legacyDeletedCount === 0) {
+        restoreOptimisticDot(cell, removedSnapshot);
+        maybeApplyGoldForCell(cell);
+        return;
+      }
+
+      const allDeletedRows = [
+        ...(deletedRows || []),
+        ...legacyDeletedRows
+      ];
+
+      for (const row of allDeletedRows) {
+        if (row?.id != null) {
+          pendingDeleteCellByEntryId.set(String(row.id), {
+            day: String(dayNum),
+            time: timeKey
+          });
+        }
+      }
+
       return;
     }
 
-    legacyDeletedRows = data || [];
-    legacyDeletedCount = legacyDeletedRows.length;
-  }
-
-  // if nothing deleted, revert
-  if (deletedCount === 0 && legacyDeletedCount === 0) {
-    restoreOptimisticDot(cell, removedSnapshot);
-    maybeApplyGoldForCell(cell);
-    return;
-  }
-
-  const allDeletedRows = [
-    ...(deletedRows || []),
-    ...legacyDeletedRows
-  ];
-
-  for (const row of allDeletedRows) {
-    if (row?.id != null) {
-      pendingDeleteCellByEntryId.set(String(row.id), {
-        day: String(dayNum),
-        time: timeKey
-      });
-    }
-  }
-
-  return;
-}     
     // Before adding, re-confirm membership in case first-load auth/RLS is still catching up
     const membershipOk = await ensureMembership(currentTable.id);
+    console.log("toggleCell: ensureMembership", Math.round(performance.now() - t0), "ms");
     if (!membershipOk) {
       return;
     }
-    
+
     // optimistic add first
     if (pendingAdds.has(k)) return;
     pendingAdds.add(k);
 
     addOptimisticDot(cell, myUid, displayName, activeColor);
     maybeApplyGoldForCell(cell);
+    console.log("toggleCell: optimistic add", Math.round(performance.now() - t0), "ms");
 
     // let browser paint before network work
     await new Promise(requestAnimationFrame);
+    console.log("toggleCell: after paint", Math.round(performance.now() - t0), "ms");
 
     const insertPayload = {
       table_id: currentTable.id,
@@ -2621,39 +2640,42 @@ if (isTogglingOff) {
       .from("availability_dev")
       .insert(insertPayload);
 
+    console.log("toggleCell: insert finished", Math.round(performance.now() - t0), "ms");
+
     if (insErr) {
-  // Already exists in DB -> UI was just slightly behind. Re-sync instead of treating as a real failure.
-    if (insErr.code === "23505") {
-      console.warn("Insert skipped: slot already exists, re-syncing cell.");
+      // Already exists in DB -> UI was just slightly behind. Re-sync instead of treating as a real failure.
+      if (insErr.code === "23505") {
+        console.warn("Insert skipped: slot already exists, re-syncing cell.");
 
-      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
-        ?.removeAttribute("data-pending");
+        cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
+          ?.removeAttribute("data-pending");
 
-    maybeApplyGoldForCell(cell);
-    pendingAdds.delete(k);
+        maybeApplyGoldForCell(cell);
+        pendingAdds.delete(k);
 
-    // Optional: reload to ensure UI matches DB
-    await loadAvailability();
-    return;
-  }
+        await loadAvailability();
+        console.log("toggleCell: resynced after duplicate insert", Math.round(performance.now() - t0), "ms");
+        return;
+      }
 
-  console.warn("Insert failed:", insErr);
+      console.warn("Insert failed:", insErr);
 
-  cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
+      cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)?.remove();
 
-  const dc = cell.querySelector(".dot-container");
-  if (dc && dc.children.length === 0) dc.remove();
+      const dc = cell.querySelector(".dot-container");
+      if (dc && dc.children.length === 0) dc.remove();
 
-  maybeApplyGoldForCell(cell);
-  pendingAdds.delete(k);
-  return;
-}
+      maybeApplyGoldForCell(cell);
+      pendingAdds.delete(k);
+      return;
+    }
 
     cell.querySelector(`.dot[data-user-id="${myUid}"][data-pending="1"]`)
       ?.removeAttribute("data-pending");
 
     maybeApplyGoldForCell(cell);
     pendingAdds.delete(k);
+    console.log("toggleCell: complete", Math.round(performance.now() - t0), "ms");
 
   } finally {
     if (k) {
