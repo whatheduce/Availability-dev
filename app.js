@@ -168,6 +168,11 @@ function showDashboard() {
   document.body.classList.remove("show-landing-bg");
   document.body.classList.remove("create-view");
 
+  const loading = document.getElementById("calendar-loading");
+    if (loading) {
+      loading.classList.remove("is-visible");
+      loading.style.display = "none";
+    }
   const dash = document.getElementById("dashboard");
   const createBoard = document.getElementById("create-board");
 
@@ -211,6 +216,12 @@ async function showCreateBoard() {
 function showRouteError() {
   document.body.style.visibility = "visible";
 
+  const loading = document.getElementById("calendar-loading");
+    if (loading) {
+      loading.classList.remove("is-visible");
+      loading.style.display = "none";
+    }
+  
   // Hide other screens
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "none";
@@ -231,6 +242,35 @@ function showBoardView() {
   if (setup) setup.style.display = "none";
 
   document.body.style.visibility = "visible";
+}
+
+//----------
+function showCalendarLoading() {
+  const loading = document.getElementById("calendar-loading");
+  const calendar = document.getElementById("calendar");
+  const side = document.getElementById("calendar-side");
+  const footer = document.getElementById("board-footer");
+
+  if (loading) {
+    loading.style.display = "flex";
+    requestAnimationFrame(() => loading.classList.add("is-visible"));
+  }
+
+  if (calendar) calendar.style.display = "none";
+  if (side) side.style.display = "none";
+  if (footer) footer.style.display = "none";
+}
+
+//----------
+function hideCalendarLoading() {
+  const loading = document.getElementById("calendar-loading");
+  if (!loading) return;
+
+  loading.classList.remove("is-visible");
+
+  setTimeout(() => {
+    loading.style.display = "none";
+  }, 180);
 }
 
 
@@ -1673,6 +1713,13 @@ ownedEl.innerHTML = hostedSlotsHtml.join("");
 async function loadTable() {
   if (!inviteToken && !manageToken) return;
 
+  showBoardView();
+
+  const topbar = document.getElementById("calendar-topbar");
+  if (topbar) topbar.style.display = "flex";
+
+  showCalendarLoading();
+  
   const queryField = inviteToken ? "invite_token" : "owner_token";
   const tokenValue = inviteToken || manageToken;
 
@@ -1697,6 +1744,7 @@ if (!data) {
   // optional: clear stale remembered board
   localStorage.removeItem("lastBoardToken");
 
+  hideCalendarLoading();
   showRouteError();
   return;
 }
@@ -1735,14 +1783,9 @@ if (!au) {
   document.getElementById("identity-section").style.display = "none";
   document.getElementById("create-board").style.display = "none";
 
-  // Show the calendar BEHIND the blur, but build it so there's something there
-  document.getElementById("calendar").style.display = "block";
-  document.getElementById("calendar-topbar").style.display = "flex";
   document.getElementById("dashboard").style.display = "none";
-  const side = document.getElementById("calendar-side");
-    if (side) side.style.display = "none";
-  const footer = document.getElementById("board-footer");
-    if (footer) footer.style.display = "none";
+  document.getElementById("calendar-topbar").style.display = "flex";
+  showCalendarLoading();
 
   await refreshBoardOwnerFlag();
     renderCalendarNote();
@@ -1753,6 +1796,8 @@ if (!au) {
 
   // Optional: try loadAvailability (if RLS blocks selects while logged out, it’ll just stay empty)
   await loadAvailability();
+  document.getElementById("calendar").style.display = "block";
+  hideCalendarLoading();
 
   return;
 }
@@ -1768,6 +1813,7 @@ const membershipOk = await ensureMembership(currentTable.id);
     document.getElementById("calendar").style.display = "none";
     document.getElementById("calendar-topbar").style.display = "none";
     document.getElementById("dashboard").style.display = "block";
+    hideCalendarLoading();
     return;
   }
 
@@ -1775,13 +1821,9 @@ await enforceUniqueBoardColourIfNeeded(currentTable.id);
 
 // User exists → show the calendar UI
 document.getElementById("identity-section").style.display = "none";
-document.getElementById("calendar").style.display = "block";
-document.getElementById("calendar-topbar").style.display = "flex";
 document.getElementById("dashboard").style.display = "none";
-const side = document.getElementById("calendar-side");
-  if (side) side.style.display = "flex";
-const footer = document.getElementById("board-footer");
-  if (footer) footer.style.display = "block";
+document.getElementById("calendar-topbar").style.display = "flex";
+showCalendarLoading();
 
 // Now that UI is visible, start realtime + render
 subscribeRealtime();
@@ -1816,6 +1858,15 @@ renderCompactMeta({
   timezone,
   lastUpdated
 });  
+document.getElementById("calendar").style.display = "block";
+
+const side = document.getElementById("calendar-side");
+if (side) side.style.display = "flex";
+
+const footer = document.getElementById("board-footer");
+if (footer) footer.style.display = "block";
+
+hideCalendarLoading();
 }
 
 //----------  
