@@ -2608,20 +2608,13 @@ async function toggleCell(e) {
       return;
     }
 
-    // Before adding, re-confirm membership in case first-load auth/RLS is still catching up
-    const membershipOk = await ensureMembership(currentTable.id);
-    console.log("toggleCell: ensureMembership", Math.round(performance.now() - t0), "ms");
-    if (!membershipOk) {
-      return;
-    }
+   // optimistic add first
+if (pendingAdds.has(k)) return;
+pendingAdds.add(k);
 
-    // optimistic add first
-    if (pendingAdds.has(k)) return;
-    pendingAdds.add(k);
-
-    addOptimisticDot(cell, myUid, displayName, activeColor);
-    maybeApplyGoldForCell(cell);
-    console.log("toggleCell: optimistic add", Math.round(performance.now() - t0), "ms");
+addOptimisticDot(cell, myUid, displayName, activeColor);
+maybeApplyGoldForCell(cell);
+console.log("toggleCell: optimistic add", Math.round(performance.now() - t0), "ms");
 
     // let browser paint before network work
     await new Promise(requestAnimationFrame);
