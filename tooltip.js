@@ -179,8 +179,8 @@ function applyLocalColourUpdateInPlace(userId, newColor) {
   if (!userId || !newColor) return;
 
   // Update all visible dots for this user on the current board
-  table
-    .querySelectorAll(`.dot[data-user-id="${CSS.escape(String(userId))}"]`)
+  window.table
+    ?.querySelectorAll(`.dot[data-user-id="${CSS.escape(String(userId))}"]`)
     .forEach(dot => {
       dot.style.background = newColor;
     });
