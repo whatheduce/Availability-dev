@@ -2140,15 +2140,9 @@ Object.values(users).forEach(({ userId, name, color }) => {
       const key = `${day}-${time}`;
       const entries = map[key] || [];
 
-      if (enableGold && entries.length >= goldThreshold) {
-        cell.classList.add("gold-cell");
-        goldDays.add(parseInt(day, 10));
-        return;
-      }
-
       if (entries.length > 0) {
-        const dotContainer = document.createElement("div");
-        dotContainer.className = "dot-container";
+  const dotContainer = document.createElement("div");
+  dotContainer.className = "dot-container";
 
   entries.forEach(entry => {
     const dot = document.createElement("div");
@@ -2179,6 +2173,13 @@ Object.values(users).forEach(({ userId, name, color }) => {
 
   cell.appendChild(dotContainer);
   window.refreshDotLayout(cell);
+}
+
+if (enableGold && entries.length >= goldThreshold) {
+  cell.classList.add("gold-cell");
+  goldDays.add(parseInt(day, 10));
+} else {
+  cell.classList.remove("gold-cell");
 }
     });
 
