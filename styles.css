@@ -361,27 +361,30 @@ body.logged-in #landing-bg::after{
   inset: 0;
   z-index: 9999;
   pointer-events: none;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* Card */
 .mobile-view-tip__card {
   position: absolute;
-  width: 280px;
+  width: 200px;
   max-width: 90vw;
 
   pointer-events: auto;
 
-  padding: 14px 14px 12px;
+  padding: 10px 8px;
   border-radius: 16px;
 
   background:
-    linear-gradient(180deg, rgba(255, 247, 237, 0.98), rgba(248, 232, 214, 0.98));
+    linear-gradient(180deg, rgba(255, 247, 237, 0.10), rgba(248, 232, 214, 0.10));
 
   box-shadow:
     0 10px 30px rgba(0,0,0,0.18),
-    inset 0 1px 0 rgba(255,255,255,0.6);
+    inset 0 1px 0 rgba(255,255,255,0.2);
 
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(4px);
 }
 
 /* Arrow pointing to header */
