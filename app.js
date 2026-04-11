@@ -2507,10 +2507,8 @@ async function toggleCell(e) {
       prof?.color ||
       "#999";
 
-    let isTogglingOff = false;
-
-const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
-const isTogglingOff = !!existingDot;
+  const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
+  let isTogglingOff = !!existingDot;
 
     if (isTogglingOff) {
       const { data: existingRow, error: existingErr } = await supabase
