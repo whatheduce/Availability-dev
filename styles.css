@@ -1069,6 +1069,7 @@ td:not(.gold-cell):hover {
   height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  z-index: 0;
 }
 
 .dot {
@@ -1241,6 +1242,7 @@ td:not(.gold-cell):hover {
 }
 
 .gold-cell {
+ position: relative;
   background: linear-gradient(
     145deg,
     #f7d84a 0%,
@@ -1249,6 +1251,27 @@ td:not(.gold-cell):hover {
   );
 
   box-shadow:
+    0 0 10px rgba(216, 146, 30, 0.30),
+    inset 0 0 8px rgba(255, 238, 176, 0.30);
+
+  animation: goldPulse 1.6s infinite ease-in-out;
+}
+
+.gold-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+
+  background: linear-gradient(
+    145deg,
+    #f7d84a 0%,
+    #edbc34 58%,
+    #d8921e 100%
+  );
+ 
+   box-shadow:
     0 0 10px rgba(216, 146, 30, 0.30),
     inset 0 0 8px rgba(255, 238, 176, 0.30);
 
@@ -1270,6 +1293,7 @@ td:not(.gold-cell):hover {
 }
 
 #availabilityTable td.gold-cell {
+ position: relative;
   background: linear-gradient(
     145deg,
     #f7d84a 0%,
