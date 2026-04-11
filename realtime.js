@@ -332,13 +332,9 @@ function subscribeRealtime() {
           }
 
           if (localColourOnlyChange) {
-            const changedUserId = after.user_id;
-            const changedColour = after.local_color || null;
-
-            if (changedUserId && changedColour) {
-              window.applyLocalColourUpdateInPlace(changedUserId, changedColour);
-            }
-
+            await window.loadAvailability();
+            await window.refreshCurrentTableMeta();
+            window.renderCalendarLastUpdated();
             return;
           }
 
