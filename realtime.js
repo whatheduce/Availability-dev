@@ -83,16 +83,15 @@ async function handleAvailabilityChange(payload) {
           `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
         );
 
-    if (cell) {
-      const dc = cell.querySelector(".dot-container");
-      if (dc && dc.querySelectorAll(".dot").length === 0) dc.remove();
-
-      window.refreshDotLayout(cell);
-      await window.applyGoldStateForCell(cell, knownCell.day);
-      window.availabilityMetaByEntryId.delete(String(entryId));
-      return;
-    }
+  if (cell) {
+    // We know something was deleted from this cell, but if the exact entry-id
+    // dot can't be found, safest is to rebuild this one cell from DB.
+    await window.rebuildDotsForCell(cell);
+    await window.applyGoldStateForCell(cell, knownCell.day);
+    window.availabilityMetaByEntryId.delete(String(entryId));
+    return;
   }
+}
 
       await window.loadAvailability();
       scheduleFullRefreshIdle(15000);
