@@ -855,6 +855,46 @@
     <div class="calendar-loading__subtext">Preparing your board…</div>
   </div>
 </div>
+
+<div id="mobile-view-tip" class="mobile-view-tip" style="display:none;" aria-hidden="true">
+  <div class="mobile-view-tip__card">
+    <button
+      type="button"
+      id="mobile-view-tip-close"
+      class="mobile-view-tip__close"
+      aria-label="Dismiss view mode tip"
+    >
+      ×
+    </button>
+
+    <div class="mobile-view-tip__eyebrow">Quick tip</div>
+    <div class="mobile-view-tip__title">Tap a date to view who’s available</div>
+
+    <div class="mobile-view-tip__media">
+      <video
+        id="mobile-view-tip-video"
+        class="mobile-view-tip__video"
+        muted
+        playsinline
+        autoplay
+        loop
+        preload="metadata"
+      >
+        <source src="view-mode-tip.mp4" type="video/mp4" />
+      </video>
+    </div>
+
+    <div class="mobile-view-tip__text">
+      Then tap the cells below to see who’s in each slot.
+    </div>
+
+    <button type="button" id="mobile-view-tip-got-it" class="mobile-view-tip__button">
+      Got it
+    </button>
+  </div>
+
+  <div class="mobile-view-tip__arrow" aria-hidden="true"></div>
+</div>  
   
 <script src="./whole-day.js"></script>  
 <script src="./tooltip.js"></script>
