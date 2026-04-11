@@ -245,6 +245,108 @@ function showBoardView() {
 }
 
 //----------
+function isMobileViewTipEligible() {
+  if (!window.matchMedia("(hover: none), (pointer: coarse), (max-width: 900px)").matches) {
+    return false;
+  }
+
+  if (localStorage.getItem("hearth_seen_mobile_view_tip") === "1") {
+    return false;
+  }
+
+  if (window.mobileInspectDay) {
+    return false;
+  }
+
+  return true;
+}
+
+//----------
+function hideMobileViewTip({ persist = true } = {}) {
+  const tip = document.getElementById("mobile-view-tip");
+  if (!tip) return;
+
+  tip.style.display = "none";
+  tip.classList.remove("mobile-view-tip--visible");
+  tip.setAttribute("aria-hidden", "true");
+
+  if (persist) {
+    localStorage.setItem("hearth_seen_mobile_view_tip", "1");
+  }
+}
+
+//----------
+function showMobileViewTip() {
+  if (!isMobileViewTipEligible()) return;
+
+  const tip = document.getElementById("mobile-view-tip");
+  const card = tip?.querySelector(".mobile-view-tip__card");
+  const arrow = tip?.querySelector(".mobile-view-tip__arrow");
+  const header = document.querySelector("#availabilityTable th.day-header[data-day]");
+
+  if (!tip || !card || !arrow || !header) return;
+
+  const headerRect = header.getBoundingClientRect();
+
+  tip.style.display = "block";
+  tip.setAttribute("aria-hidden", "false");
+  tip.classList.remove("mobile-view-tip--visible");
+
+  // Let layout happen before positioning
+  requestAnimationFrame(() => {
+    const cardWidth = card.offsetWidth || 280;
+    const cardHeight = card.offsetHeight || 220;
+
+    const gap = 12;
+    const arrowSize = 14;
+    const viewportPad = 12;
+
+    let cardLeft = headerRect.left + (headerRect.width / 2) - (cardWidth / 2);
+    cardLeft = Math.max(viewportPad, Math.min(cardLeft, window.innerWidth - cardWidth - viewportPad));
+
+    let cardTop = headerRect.bottom + gap + arrowSize;
+    const maxTop = window.innerHeight - cardHeight - viewportPad;
+    cardTop = Math.min(cardTop, maxTop);
+
+    card.style.left = `${cardLeft}px`;
+    card.style.top = `${cardTop}px`;
+
+    const arrowLeft = headerRect.left + (headerRect.width / 2) - (arrowSize / 2);
+    const clampedArrowLeft = Math.max(
+      cardLeft + 18,
+      Math.min(arrowLeft, cardLeft + cardWidth - 18)
+    );
+
+    arrow.style.left = `${clampedArrowLeft}px`;
+    arrow.style.top = `${cardTop - (arrowSize / 2)}px`;
+
+    tip.classList.add("mobile-view-tip--visible");
+  });
+}
+
+//----------
+function bindMobileViewTipUi() {
+  if (document.body.dataset.mobileViewTipBound === "1") return;
+  document.body.dataset.mobileViewTipBound = "1";
+
+  document.getElementById("mobile-view-tip-close")?.addEventListener("click", () => {
+    hideMobileViewTip({ persist: true });
+  });
+
+  document.getElementById("mobile-view-tip-got-it")?.addEventListener("click", () => {
+    hideMobileViewTip({ persist: true });
+  });
+
+  window.addEventListener("resize", () => {
+    const tip = document.getElementById("mobile-view-tip");
+    if (!tip || tip.style.display === "none") return;
+
+    hideMobileViewTip({ persist: false });
+    setTimeout(() => showMobileViewTip(), 50);
+  });
+}
+
+//----------
 function showCalendarLoading() {
   const loading = document.getElementById("calendar-loading");
   const topbar = document.getElementById("calendar-topbar");
@@ -1865,6 +1967,9 @@ const footer = document.getElementById("board-footer");
 if (footer) footer.style.display = "block";
 
 hideCalendarLoading();
+setTimeout(() => {
+  showMobileViewTip();
+}, 220);
 }
 
 //----------  
@@ -4755,6 +4860,7 @@ if (action === "add-user") {
 async function startApp() {
   document.body.classList.remove("show-landing-bg");
   document.body.style.visibility = "visible";
+  bindMobileViewTipUi();
   bindUiListenersOnce();
 
   // Password recovery handling
