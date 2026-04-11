@@ -378,7 +378,7 @@ body.logged-in #landing-bg::after{
   border-radius: 16px;
 
   background:
-    linear-gradient(180deg, rgba(255, 247, 237, 0.10), rgba(248, 232, 214, 0.10));
+    linear-gradient(180deg, rgba(255, 247, 237, 0.80), rgba(248, 232, 214, 0.70));
 
   box-shadow:
     0 10px 30px rgba(0,0,0,0.18),
