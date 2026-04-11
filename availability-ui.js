@@ -214,17 +214,25 @@ async function applyGoldStateForCell(cell, day) {
   const shouldBeGold = dotCount >= goldThreshold;
 
   if (shouldBeGold) {
-    cell.classList.add("gold-cell");
-    // hide dots while gold
-    cell.querySelector(".dot-container")?.remove();
-  } else {
-    cell.classList.remove("gold-cell");
+  cell.classList.add("gold-cell");
 
-    // If we just transitioned gold -> normal, rebuild visible dots from DB
-    if (wasGold) {
-      await rebuildDotsForCell(cell);
-    }
+  // keep dots in DOM so toggleCell can still detect who is in the cell instantly
+  const dc = cell.querySelector(".dot-container");
+    if (dc) dc.style.display = "none";
+    } else {
+  cell.classList.remove("gold-cell");
+
+  const dc = cell.querySelector(".dot-container");
+
+  // If dots already exist, just show them again
+  if (dc) {
+    dc.style.display = "";
+    refreshDotLayout(cell);
+   } else if (wasGold) {
+    // fallback: if something removed them earlier, rebuild from DB
+    await rebuildDotsForCell(cell);
   }
+}
   
 if (isWholeDayBoard()) {
   return;
@@ -264,14 +272,21 @@ function maybeApplyGoldForCell(cell) {
   if (count >= th) {
     cell.classList.add("gold-cell");
 
-    // Gold cells hide dots in your UI
-    dc?.remove();
+  // keep dots in DOM, just hide them
+  if (dc) dc.style.display = "none";
 
-    // immediately reflect gold state in the day header too
-    const dayNum = parseInt(cell.dataset.day, 10);
-    const thEl = window.table.querySelector(`th.day-header[data-day="${dayNum}"]`);
+  // immediately reflect gold state in the day header too
+  const dayNum = parseInt(cell.dataset.day, 10);
+  const thEl = window.table.querySelector(`th.day-header[data-day="${dayNum}"]`);
     if (thEl) thEl.classList.add("gold-header");
+  } else {
+    cell.classList.remove("gold-cell");
+
+  if (dc) {
+    dc.style.display = "";
+    refreshDotLayout(cell);
   }
+}
 }
 
 //----------
