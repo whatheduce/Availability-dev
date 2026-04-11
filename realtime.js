@@ -72,20 +72,28 @@ async function handleAvailabilityChange(payload) {
       const pendingCell = window.pendingDeleteCellByEntryId.get(String(entryId));
       const knownCell = pendingCell || window.availabilityMetaByEntryId.get(String(entryId));
 
-    if (pendingCell) {
-      window.pendingDeleteCellByEntryId.delete(String(entryId));
-    }
+      if (pendingCell) {
+        window.pendingDeleteCellByEntryId.delete(String(entryId));
+      }
 
-    if (knownCell) {
-      const cell = window.isWholeDayBoard()
-        ? getWholeDayCellFromEntry({ day: knownCell.day, time: knownCell.time })
-        : window.table.querySelector(
-          `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
-        );
+      if (knownCell) {
+        const cell = window.isWholeDayBoard()
+          ? getWholeDayCellFromEntry({ day: knownCell.day, time: knownCell.time })
+          : window.table.querySelector(
+              `td[data-day="${knownCell.day}"][data-time="${knownCell.time}"]`
+            );
 
-  if (cell) {
-    // We know something was deleted from this cell, but if the exact entry-id
-    // dot can't be found, safest is to rebuild this one cell from DB.
+      if (cell) {
+        if (pendingCell) {
+          // This delete was already applied optimistically on this client.
+          // Don't rebuild the cell and cause a flash — just reconcile state.
+          window.refreshDotLayout(cell);
+          await window.applyGoldStateForCell(cell, knownCell.day);
+          window.availabilityMetaByEntryId.delete(String(entryId));
+          return;
+        }
+
+    // Remote delete or unknown local state: rebuild this one cell safely.
     await window.rebuildDotsForCell(cell);
     await window.applyGoldStateForCell(cell, knownCell.day);
     window.availabilityMetaByEntryId.delete(String(entryId));
