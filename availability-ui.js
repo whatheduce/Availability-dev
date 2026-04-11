@@ -165,13 +165,10 @@ async function applyGoldStateForCell(cell, day) {
       ? rawGoldThreshold
       : null;
 
-  if (goldThreshold === null) {
-    const wasGold = cell.classList.contains("gold-cell");
-    cell.classList.remove("gold-cell");
+  const wasGold = cell.classList.contains("gold-cell");
 
-    if (wasGold) {
-      await rebuildDotsForCell(cell);
-    }
+  if (goldThreshold === null) {
+    cell.classList.remove("gold-cell");
 
     if (!isWholeDayBoard()) {
       const dayNum = parseInt(day, 10);
@@ -182,63 +179,21 @@ async function applyGoldStateForCell(cell, day) {
     return;
   }
 
-  const wasGold = cell.classList.contains("gold-cell");
-
-  let dotContainer = cell.querySelector(".dot-container");
-  let dotCount = dotContainer ? dotContainer.children.length : null;
-
-  // If dots are hidden (gold state), DOM can't tell us the real count.
-  // In that specific case, ask the DB for the real count for this cell.
-  if (dotCount === null && wasGold) {
-    const dayNum = parseInt(cell.dataset.day, 10);
-    const timeKey = String(cell.dataset.time || "").trim();
-
-    const { count, error } = await window.supabase
-      .from("availability_dev")
-      .select("id", { count: "exact", head: true })
-      .eq("table_id", window.currentTable.id)
-      .eq("day", dayNum)
-      .eq("time", timeKey);
-
-    if (error) {
-      console.warn("gold count check failed:", error);
-      return;
-    }
-
-    dotCount = count || 0;
-  }
-
-  // If still null, treat as 0
-  dotCount = dotCount ?? 0;
+  const dotContainer = cell.querySelector(".dot-container");
+  const dotCount = dotContainer ? dotContainer.querySelectorAll(".dot").length : 0;
 
   const shouldBeGold = dotCount >= goldThreshold;
 
   if (shouldBeGold) {
-  cell.classList.add("gold-cell");
-
-  // keep dots in DOM so toggleCell can still detect who is in the cell instantly
-  const dc = cell.querySelector(".dot-container");
-    if (dc) dc.style.display = "none";
-    } else {
-  cell.classList.remove("gold-cell");
-
-  const dc = cell.querySelector(".dot-container");
-
-  // If dots already exist, just show them again
-  if (dc) {
-    dc.style.display = "";
-    refreshDotLayout(cell);
-   } else if (wasGold) {
-    // fallback: if something removed them earlier, rebuild from DB
-    await rebuildDotsForCell(cell);
+    cell.classList.add("gold-cell");
+  } else {
+    cell.classList.remove("gold-cell");
   }
-}
-  
-if (isWholeDayBoard()) {
-  return;
-}
-  
-  // Update day header gold state
+
+  if (isWholeDayBoard()) {
+    return;
+  }
+
   const dayNum = parseInt(day, 10);
   const th = window.table.querySelector(`th.day-header[data-day="${dayNum}"]`);
   if (!th) return;
@@ -258,35 +213,29 @@ function maybeApplyGoldForCell(cell) {
       ? rawGoldThreshold
       : null;
 
+  const dayNum = parseInt(cell.dataset.day, 10);
+  const thEl = window.table?.querySelector(`th.day-header[data-day="${dayNum}"]`);
+
   if (th === null) {
     cell.classList.remove("gold-cell");
+    if (thEl) thEl.classList.remove("gold-header");
     return;
   }
-
-  // If already gold, nothing to do
-  if (cell.classList.contains("gold-cell")) return;
 
   const dc = cell.querySelector(".dot-container");
   const count = dc ? dc.querySelectorAll(".dot").length : 0;
 
   if (count >= th) {
     cell.classList.add("gold-cell");
-
-  // keep dots in DOM, just hide them
-  if (dc) dc.style.display = "none";
-
-  // immediately reflect gold state in the day header too
-  const dayNum = parseInt(cell.dataset.day, 10);
-  const thEl = window.table.querySelector(`th.day-header[data-day="${dayNum}"]`);
-    if (thEl) thEl.classList.add("gold-header");
   } else {
     cell.classList.remove("gold-cell");
-
-  if (dc) {
-    dc.style.display = "";
-    refreshDotLayout(cell);
   }
-}
+
+  const anyGoldInDay = !!window.table?.querySelector(`td[data-day="${dayNum}"].gold-cell`);
+  if (thEl) {
+    if (anyGoldInDay) thEl.classList.add("gold-header");
+    else thEl.classList.remove("gold-header");
+  }
 }
 
 //----------
