@@ -2507,8 +2507,31 @@ async function toggleCell(e) {
       prof?.color ||
       "#999";
 
-    const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
-    const isTogglingOff = !!existingDot;
+    let isTogglingOff = false;
+
+// Normal cells: DOM is fast and reliable
+if (!cell.classList.contains("gold-cell")) {
+  const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
+  isTogglingOff = !!existingDot;
+} else {
+  // Gold cells hide dots, so DOM cannot tell us whether this user already exists.
+  // For gold cells only, ask the DB.
+  const { data: existingRow, error: existingErr } = await supabase
+    .from("availability_dev")
+    .select("id")
+    .eq("table_id", currentTable.id)
+    .eq("day", dayNum)
+    .eq("time", timeKey)
+    .eq("user_id", myUid)
+    .maybeSingle();
+
+  if (existingErr) {
+    console.warn("Gold-cell existing row check failed:", existingErr);
+    return;
+  }
+
+  isTogglingOff = !!existingRow?.id;
+}
 
     if (isTogglingOff) {
       const { data: existingRow, error: existingErr } = await supabase
