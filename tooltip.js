@@ -86,18 +86,22 @@ async function renderCellHoverTooltip(cell) {
     return;
   }
 
-  // On true touch / non-hover devices, only allow tooltip in inspect/view mode
-  const isTouchLikeInput = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+ // On true touch / non-hover devices, only allow tooltip in inspect/view mode
+const isTouchLikeInput = window.matchMedia("(hover: none), (pointer: coarse)").matches;
 
-  if (isTouchLikeInput) {
-    const activeDay = String(window.mobileInspectDay || "");
-    const cellDay = String(cell.dataset.day || "");
+if (isTouchLikeInput) {
+  const activeDay = String(window.mobileInspectDay || "");
+  const cellDay = String(cell.dataset.day || "");
+  const isWholeDayInspectCell = cell.classList.contains("inspect-column-cell");
 
-    if (!activeDay || cellDay !== activeDay) {
-      hideCellHoverTooltip();
-      return;
-    }
+  const allowNormalInspect = !!activeDay && cellDay === activeDay;
+  const allowWholeDayInspect = isWholeDayInspectCell;
+
+  if (!allowNormalInspect && !allowWholeDayInspect) {
+    hideCellHoverTooltip();
+    return;
   }
+}
 
   let users = [];
 
