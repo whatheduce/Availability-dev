@@ -304,20 +304,30 @@ function bindWholeDayCells() {
         const cellWeekday = Number(cell.dataset.weekday);
         const cellMonthKey = String(cell.dataset.monthKey || "");
         const inspecting = mobileInspectWeekday !== null && !!mobileInspectMonthKey;
+
         const isActiveCell =
           inspecting &&
           cellWeekday === mobileInspectWeekday &&
           cellMonthKey === mobileInspectMonthKey;
 
-        if (isActiveCell) {
+        // If whole-day view mode is active:
+        // - tapping active column shows popup
+        // - tapping anywhere else exits view mode
+        // - no dot toggling while inspect mode is active
+        if (inspecting) {
           e.preventDefault();
           e.stopPropagation();
 
-          window.hideCellHoverTooltip?.();
+          if (isActiveCell) {
+            window.hideCellHoverTooltip?.();
 
-          Promise.resolve(window.renderCellHoverTooltip?.(cell)).then(() => {
-            window.positionCellHoverTooltip?.(cell);
-          });
+            Promise.resolve(window.renderCellHoverTooltip?.(cell)).then(() => {
+              window.positionCellHoverTooltip?.(cell);
+            });
+          } else {
+            clearWholeDayInspectWeekday();
+            window.hideCellHoverTooltip?.();
+          }
 
           return;
         }
