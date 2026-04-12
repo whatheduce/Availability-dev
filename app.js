@@ -528,10 +528,41 @@ function generateToken() {
   return crypto.randomUUID() + crypto.randomUUID();
 }
 
+//----------
 function getBoardMemberLimit() {
   return IS_PRO ? PRO_BOARD_MEMBER_LIMIT : FREE_BOARD_MEMBER_LIMIT;
 }
 
+//----------
+function bindCalendarWheelScroll() {
+  const calendar = document.getElementById("calendar");
+  if (!calendar) return;
+
+  calendar.addEventListener("wheel", (e) => {
+    // Let normal wheel behaviour keep working on form fields / editable areas
+    const tag = e.target?.tagName;
+    const isEditable =
+      e.target?.isContentEditable ||
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT";
+
+    if (isEditable) return;
+
+    // Only hijack the wheel if the calendar can actually scroll horizontally
+    const canScrollHorizontally = calendar.scrollWidth > calendar.clientWidth;
+    if (!canScrollHorizontally) return;
+
+    // Use whichever axis has the stronger movement
+    const delta =
+      Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+
+    if (!delta) return;
+
+    e.preventDefault();
+    calendar.scrollLeft += delta;
+  }, { passive: false });
+}
 
 
 // =========================
@@ -4063,6 +4094,8 @@ const auth = createAuthModule({
 function bindUiListenersOnce() {
   if (uiListenersBound) return;
   uiListenersBound = true;
+
+  bindCalendarWheelScroll();
 
   // Delete account overlay controls
 const deleteAccountPasswordInput = document.getElementById("delete-account-password");
