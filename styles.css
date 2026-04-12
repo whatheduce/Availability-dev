@@ -463,26 +463,31 @@ body.logged-in #landing-bg::after{
     transform 180ms ease;
 }
 
-/* Bring selected column cells fully back */
+/* Selected whole-day cells need the same border treatment as normal inspect mode */
 .whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.inspect-column-cell {
+  position: relative;
+  z-index: 1;
   opacity: 1;
   background:
     linear-gradient(180deg, rgba(255, 248, 240, 0.98), rgba(248, 236, 220, 0.98)) !important;
-  box-shadow:
-    inset 1px 0 0 rgba(229, 138, 31, 0.7),
-    inset -1px 0 0 rgba(229, 138, 31, 0.7);
 }
 
-/* Top cell in selected column */
-.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-child(-n+7) {
+/* Draw the inspect border ABOVE the cell background */
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.inspect-column-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+
   box-shadow:
-    inset 1px 0 0 rgba(229, 138, 31, 0.7),
-    inset -1px 0 0 rgba(229, 138, 31, 0.7),
-    inset 0 1px 0 rgba(229, 138, 31, 0.7);
+    inset 1px 0 0 rgba(229, 138, 31, 0.9),
+    inset -1px 0 0 rgba(229, 138, 31, 0.9);
 }
 
-/* Gold cells stay gold when selected */
-.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.inspect-column-cell.gold-cell {
+/* Gold cells in inspect mode stay gold, same as normal calendar */
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.inspect-column-cell.gold-cell,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.gold-cell.inspect-column-cell {
   background: linear-gradient(
     145deg,
     rgba(247, 216, 74, 0.82) 0%,
@@ -492,7 +497,7 @@ body.logged-in #landing-bg::after{
   filter: none !important;
 }
 
-/* Weekday headers in active month dim a bit */
+/* Active month weekday headers dim slightly */
 .whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-weekday {
   opacity: 0.55;
   transition:
@@ -503,8 +508,10 @@ body.logged-in #landing-bg::after{
     box-shadow 180ms ease;
 }
 
-/* Active weekday header gets the warm highlight */
+/* Active header matches normal calendar inspect header */
 .whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-weekday.inspect-column-active {
+  position: relative;
+  z-index: 2;
   opacity: 1;
   color: #e58a1f;
   background:
@@ -513,20 +520,44 @@ body.logged-in #landing-bg::after{
       rgba(255, 247, 237, 0.98),
       rgba(248, 232, 214, 0.98)
     );
-  box-shadow:
-    inset 1px 0 0 rgba(229, 138, 31, 0.65),
-    inset -1px 0 0 rgba(229, 138, 31, 0.65),
-    inset 0 1px 0 rgba(229, 138, 31, 0.65);
   text-shadow:
     0 1px 0 rgba(255,255,255,0.5),
     0 0 6px rgba(243, 178, 74, 0.25);
 }
 
-/* Selected column day numbers */
+/* Header border overlay, same strength as normal calendar */
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-weekday.inspect-column-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+
+  box-shadow:
+    inset 1px 0 0 rgba(229, 138, 31, 0.9),
+    inset -1px 0 0 rgba(229, 138, 31, 0.9),
+    inset 0 1px 0 rgba(229, 138, 31, 0.9);
+}
+
+/* Bottom of selected column — closes the open bottom edge */
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:last-child::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(1)::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(2)::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(3)::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(4)::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(5)::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(6)::after,
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-grid > .whole-day-cell.inspect-column-cell:nth-last-child(7)::after {
+  box-shadow:
+    inset 1px 0 0 rgba(229, 138, 31, 0.9),
+    inset -1px 0 0 rgba(229, 138, 31, 0.9),
+    inset 0 -1px 0 rgba(229, 138, 31, 0.9);
+}
+
+/* Day numbers in selected cells */
 .whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.inspect-column-cell .whole-day-cell__number {
   color: #e58a1f;
 }
-
 /* Button */
 .mobile-view-tip__button {
   margin-top: 10px;
