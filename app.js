@@ -1718,6 +1718,7 @@ async function loadBoards() {
     .select(`
       role,
       board_id,
+      created_at,
       tables (
         id,
         name,
@@ -1737,8 +1738,21 @@ async function loadBoards() {
     return;
   }
 
-  const owned = (data || []).filter(x => x.role === "owner");
-  const joined = (data || []).filter(x => x.role !== "owner");
+  const owned = (data || [])
+  .filter(x => x.role === "owner" && x.tables)
+  .sort((a, b) => Number(a.tables.id) - Number(b.tables.id));
+
+  const joined = (data || [])
+    .filter(x => x.role !== "owner" && x.tables)
+    .sort((a, b) => {
+      const aJoined = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bJoined = b.created_at ? new Date(b.created_at).getTime() : 0;
+
+      if (aJoined !== bJoined) return aJoined - bJoined;
+
+        // fallback only if created_at doesn't exist / is equal
+        return Number(a.tables.id) - Number(b.tables.id);
+    });
 
   const ownedEl = document.getElementById("owned-boards");
   const joinedEl = document.getElementById("joined-boards");
