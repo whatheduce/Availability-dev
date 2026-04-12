@@ -448,7 +448,11 @@ body.logged-in #landing-bg::after{
   display: block;
 }
 
-.whole-day-wrap.inspect-column-mode .whole-day-cell[data-weekday] {
+.whole-day-wrap.inspect-column-mode .whole-day-month-card {
+  opacity: 1;
+}
+
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell[data-weekday] {
   opacity: 0.35;
   transition:
     opacity 180ms ease,
@@ -461,7 +465,7 @@ body.logged-in #landing-bg::after{
   opacity: 1;
 }
 
-.whole-day-wrap.inspect-column-mode .whole-day-weekday {
+.whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-weekday {
   opacity: 0.55;
   transition:
     opacity 180ms ease,
