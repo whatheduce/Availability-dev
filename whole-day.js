@@ -429,6 +429,14 @@ async function renderWholeDayAvailability(rows) {
     cell.querySelector(".dot-container")?.remove();
   });
 
+  document.querySelectorAll('.whole-day-cell[data-day][data-time]').forEach(cell => {
+    const day = String(cell.dataset.day || "").trim();
+    const time = String(cell.dataset.time || "").trim();
+    if (!day || !time) return;
+
+    window.cellTooltipCache.delete(`${day}|${time}`);
+  });
+
   if (!rows || !rows.length) return;
 
   const countsByDate = new Map();
@@ -436,6 +444,7 @@ async function renderWholeDayAvailability(rows) {
   const userIds = [...new Set(rows.map(r => r.user_id).filter(Boolean))];
   const profilesMap = await window.fetchProfilesMap(userIds);
   const localColorMap = await window.fetchBoardLocalColorMap(window.currentTable.id, userIds);
+  const tooltipEntriesByKey = new Map();
 
   rows.forEach(row => {
     const dateKey = getWholeDayDateKeyFromRow(row);
@@ -462,6 +471,17 @@ async function renderWholeDayAvailability(rows) {
     const displayColor =
       localColorMap[row.user_id] || prof?.color || row.color || "#999";
 
+    const tooltipKey = `${String(row.day)}|${String(row.time || "All Day")}`;
+
+    if (!tooltipEntriesByKey.has(tooltipKey)) {
+      tooltipEntriesByKey.set(tooltipKey, []);
+    }
+
+    tooltipEntriesByKey.get(tooltipKey).push({
+      name: displayName,
+      color: displayColor
+    });
+
     const dot = document.createElement("div");
     dot.className = "dot";
 
@@ -469,7 +489,7 @@ async function renderWholeDayAvailability(rows) {
       dot.dataset.entryId = String(row.id);
       window.availabilityMetaByEntryId.set(String(row.id), {
         day: String(row.day),
-        time: String(row.time)
+        time: String(row.time || "All Day")
       });
     }
 
@@ -482,6 +502,10 @@ async function renderWholeDayAvailability(rows) {
     countsByDate.set(dateKey, (countsByDate.get(dateKey) || 0) + 1);
 
     window.ensureLegendUser({ ...row, name: displayName, color: displayColor });
+  });
+
+  tooltipEntriesByKey.forEach((entries, key) => {
+    window.cellTooltipCache.set(key, entries);
   });
 
   document.querySelectorAll(".whole-day-cell").forEach(cell => {
