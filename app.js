@@ -2302,6 +2302,7 @@ window.setMobileInspectDay = setMobileInspectDay;
 //----------
 function clearMobileInspectDay() {
   setMobileInspectDay(null);
+  window.clearWholeDayInspectWeekday?.();
   if (typeof hideCellHoverTooltip === "function") {
     hideCellHoverTooltip();
   }
