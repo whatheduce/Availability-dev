@@ -2903,10 +2903,19 @@ function bindMobileInspectDismiss() {
 
   document.addEventListener("click", (e) => {
     if (!isMobileLikeViewport()) return;
-    if (!mobileInspectDay) return;
 
-    const insideTable = e.target.closest("#availabilityTable");
-    if (insideTable) return;
+    const hasNormalInspect = !!mobileInspectDay;
+    const hasWholeDayInspect =
+      typeof window.clearWholeDayInspectWeekday === "function" &&
+      !!document.querySelector(".whole-day-wrap.inspect-column-mode");
+
+    if (!hasNormalInspect && !hasWholeDayInspect) return;
+
+    const insideNormalTable = e.target.closest("#availabilityTable");
+    const insideWholeDay = e.target.closest(".whole-day-wrap");
+    const insideTooltip = e.target.closest("#cell-hover-tooltip");
+
+    if (insideNormalTable || insideWholeDay || insideTooltip) return;
 
     clearMobileInspectDay();
   });
