@@ -1,5 +1,11 @@
 let wholeDayMidnightTimer = null;
+let mobileInspectWeekday = null;
 
+
+
+
+
+//----------
 function getCurrentStructureType() {
   return window.currentTable?.structure_type || "";
 }
@@ -155,6 +161,76 @@ function getNextMonth(year, monthIndex) {
 }
 
 //----------
+function setWholeDayInspectWeekday(weekdayIndex) {
+  mobileInspectWeekday =
+    Number.isInteger(weekdayIndex) && weekdayIndex >= 0 && weekdayIndex <= 6
+      ? weekdayIndex
+      : null;
+
+  const wrap = document.querySelector(".whole-day-wrap");
+  if (!wrap) return;
+
+  wrap.classList.toggle("inspect-column-mode", mobileInspectWeekday !== null);
+
+  wrap.querySelectorAll(".whole-day-weekday").forEach(header => {
+    const idx = Number(header.dataset.weekday);
+    const isActive = mobileInspectWeekday !== null && idx === mobileInspectWeekday;
+    header.classList.toggle("inspect-column-active", isActive);
+    header.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  wrap.querySelectorAll(".whole-day-cell[data-weekday]").forEach(cell => {
+    const idx = Number(cell.dataset.weekday);
+    const isActive = mobileInspectWeekday !== null && idx === mobileInspectWeekday;
+    cell.classList.toggle("inspect-column-cell", isActive);
+  });
+}
+
+//----------
+function toggleWholeDayInspectWeekday(weekdayIndex) {
+  if (mobileInspectWeekday === weekdayIndex) {
+    setWholeDayInspectWeekday(null);
+  } else {
+    setWholeDayInspectWeekday(weekdayIndex);
+  }
+}
+
+//----------
+function clearWholeDayInspectWeekday() {
+  setWholeDayInspectWeekday(null);
+}
+
+function bindWholeDayWeekdayHeaders() {
+  const headers = document.querySelectorAll(".whole-day-weekday");
+
+  headers.forEach(header => {
+    if (header.dataset.boundInspect === "1") return;
+    header.dataset.boundInspect = "1";
+
+    header.addEventListener("click", (e) => {
+      if (!window.isMobileLikeViewport?.()) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const idx = Number(header.dataset.weekday);
+      toggleWholeDayInspectWeekday(idx);
+    });
+
+    header.addEventListener("keydown", (e) => {
+      if (!window.isMobileLikeViewport?.()) return;
+      if (e.key !== "Enter" && e.key !== " ") return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const idx = Number(header.dataset.weekday);
+      toggleWholeDayInspectWeekday(idx);
+    });
+  });
+}
+
+//----------
 function renderWholeDayCalendar() {
   const calendar = document.getElementById("calendar");
   if (!calendar) return;
@@ -177,6 +253,7 @@ function renderWholeDayCalendar() {
       })}
     </div>
   `;
+  setWholeDayInspectWeekday(mobileInspectWeekday);
 }
 
 //----------
