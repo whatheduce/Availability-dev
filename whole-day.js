@@ -253,7 +253,9 @@ function renderWholeDayCalendar() {
       })}
     </div>
   `;
+  
   setWholeDayInspectWeekday(mobileInspectWeekday);
+  bindWholeDayWeekdayHeaders();
 }
 
 //----------
@@ -268,6 +270,24 @@ function bindWholeDayCells() {
 
     cell.dataset.boundClick = "1";
     cell.addEventListener("click", (e) => {
+      if (window.isMobileLikeViewport?.()) {
+        const cellWeekday = Number(cell.dataset.weekday);
+        const inspecting = mobileInspectWeekday !== null;
+
+        if (inspecting && cellWeekday === mobileInspectWeekday) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          window.hideCellHoverTooltip?.();
+
+          Promise.resolve(window.renderCellHoverTooltip?.(cell)).then(() => {
+            window.positionCellHoverTooltip?.(cell);
+          });
+
+          return;
+        }
+      }
+
       window.toggleCell(e);
     });
   });
@@ -311,6 +331,9 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
     const dateKey = window.formatDateKey(new Date(year, monthIndex, dayNum));
     const boardDay = getBoardDayFromDateKey(dateKey);
 
+    const jsDay = new Date(year, monthIndex, dayNum).getDay();
+    const weekdayIndex = (jsDay + 6) % 7; // Mon=0 ... Sun=6
+    
     cells.push(`
       <div
         class="${classNames}"
@@ -320,6 +343,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
         data-date-key="${dateKey}"
         data-day="${boardDay ?? ""}"
         data-time="All Day"
+        data-weekday="${weekdayIndex}"
       >
         <div class="whole-day-cell__number">${dayNum}</div>
         <div class="whole-day-cell__dots"></div>
@@ -331,7 +355,19 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
     <section class="whole-day-month-card">
       <div class="whole-day-month-card__title">${getMonthName(year, monthIndex)}</div>
       <div class="whole-day-weekdays">
-        ${weekdayLabels.map(label => `<div class="whole-day-weekday">${label}</div>`).join("")}
+        ${weekdayLabels
+          .map((label, idx) => `
+            <div
+              class="whole-day-weekday"
+              data-weekday="${idx}"
+              role="button"
+              tabindex="0"
+              aria-pressed="false"
+            >
+              ${label}
+            </div>
+          `)
+          .join("")}
       </div>
       <div class="whole-day-grid">
         ${cells.join("")}
@@ -455,3 +491,6 @@ window.renderWholeDayMonth = renderWholeDayMonth;
 window.isWholeDayCellLocked = isWholeDayCellLocked;
 window.renderWholeDayAvailability = renderWholeDayAvailability;
 window.getWholeDayDateKeyFromRow = getWholeDayDateKeyFromRow;
+window.setWholeDayInspectWeekday = setWholeDayInspectWeekday;
+window.clearWholeDayInspectWeekday = clearWholeDayInspectWeekday;
+window.bindWholeDayWeekdayHeaders = bindWholeDayWeekdayHeaders;
