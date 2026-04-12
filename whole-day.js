@@ -1,6 +1,6 @@
 let wholeDayMidnightTimer = null;
 let mobileInspectWeekday = null;
-
+let mobileInspectMonthKey = null;
 
 
 
@@ -161,10 +161,15 @@ function getNextMonth(year, monthIndex) {
 }
 
 //----------
-function setWholeDayInspectWeekday(weekdayIndex) {
+function setWholeDayInspectWeekday(weekdayIndex, monthKey = null) {
   mobileInspectWeekday =
     Number.isInteger(weekdayIndex) && weekdayIndex >= 0 && weekdayIndex <= 6
       ? weekdayIndex
+      : null;
+
+  mobileInspectMonthKey =
+    mobileInspectWeekday !== null && monthKey
+      ? String(monthKey)
       : null;
 
   const wrap = document.querySelector(".whole-day-wrap");
@@ -172,32 +177,55 @@ function setWholeDayInspectWeekday(weekdayIndex) {
 
   wrap.classList.toggle("inspect-column-mode", mobileInspectWeekday !== null);
 
+  wrap.querySelectorAll(".whole-day-month-card").forEach(card => {
+    const cardMonthKey = String(card.dataset.monthKey || "");
+    const isActiveMonth =
+      mobileInspectWeekday !== null &&
+      mobileInspectMonthKey !== null &&
+      cardMonthKey === mobileInspectMonthKey;
+
+    card.classList.toggle("inspect-month-active", isActiveMonth);
+  });
+
   wrap.querySelectorAll(".whole-day-weekday").forEach(header => {
     const idx = Number(header.dataset.weekday);
-    const isActive = mobileInspectWeekday !== null && idx === mobileInspectWeekday;
+    const headerMonthKey = String(header.dataset.monthKey || "");
+    const isActive =
+      mobileInspectWeekday !== null &&
+      idx === mobileInspectWeekday &&
+      headerMonthKey === mobileInspectMonthKey;
+
     header.classList.toggle("inspect-column-active", isActive);
     header.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
   wrap.querySelectorAll(".whole-day-cell[data-weekday]").forEach(cell => {
     const idx = Number(cell.dataset.weekday);
-    const isActive = mobileInspectWeekday !== null && idx === mobileInspectWeekday;
+    const cellMonthKey = String(cell.dataset.monthKey || "");
+    const isActive =
+      mobileInspectWeekday !== null &&
+      idx === mobileInspectWeekday &&
+      cellMonthKey === mobileInspectMonthKey;
+
     cell.classList.toggle("inspect-column-cell", isActive);
   });
 }
 
 //----------
-function toggleWholeDayInspectWeekday(weekdayIndex) {
-  if (mobileInspectWeekday === weekdayIndex) {
-    setWholeDayInspectWeekday(null);
+function toggleWholeDayInspectWeekday(weekdayIndex, monthKey) {
+  const sameWeekday = mobileInspectWeekday === weekdayIndex;
+  const sameMonth = String(mobileInspectMonthKey || "") === String(monthKey || "");
+
+  if (sameWeekday && sameMonth) {
+    setWholeDayInspectWeekday(null, null);
   } else {
-    setWholeDayInspectWeekday(weekdayIndex);
+    setWholeDayInspectWeekday(weekdayIndex, monthKey);
   }
 }
 
 //----------
 function clearWholeDayInspectWeekday() {
-  setWholeDayInspectWeekday(null);
+  setWholeDayInspectWeekday(null, null);
 }
 
 function bindWholeDayWeekdayHeaders() {
@@ -214,7 +242,8 @@ function bindWholeDayWeekdayHeaders() {
       e.stopPropagation();
 
       const idx = Number(header.dataset.weekday);
-      toggleWholeDayInspectWeekday(idx);
+      const monthKey = String(header.dataset.monthKey || "");
+      toggleWholeDayInspectWeekday(idx, monthKey);
     });
 
     header.addEventListener("keydown", (e) => {
@@ -225,7 +254,8 @@ function bindWholeDayWeekdayHeaders() {
       e.stopPropagation();
 
       const idx = Number(header.dataset.weekday);
-      toggleWholeDayInspectWeekday(idx);
+      const monthKey = String(header.dataset.monthKey || "");
+      toggleWholeDayInspectWeekday(idx, monthKey);
     });
   });
 }
@@ -272,9 +302,14 @@ function bindWholeDayCells() {
     cell.addEventListener("click", (e) => {
       if (window.isMobileLikeViewport?.()) {
         const cellWeekday = Number(cell.dataset.weekday);
-        const inspecting = mobileInspectWeekday !== null;
+        const cellMonthKey = String(cell.dataset.monthKey || "");
+        const inspecting = mobileInspectWeekday !== null && !!mobileInspectMonthKey;
+        const isActiveCell =
+          inspecting &&
+          cellWeekday === mobileInspectWeekday &&
+          cellMonthKey === mobileInspectMonthKey;
 
-        if (inspecting && cellWeekday === mobileInspectWeekday) {
+        if (isActiveCell) {
           e.preventDefault();
           e.stopPropagation();
 
@@ -298,6 +333,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
   const daysInMonth = getDaysInMonth(year, monthIndex);
   const firstOffset = getFirstWeekdayIndex(year, monthIndex);
   const weekdayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const monthKey = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
 
   const cells = [];
 
@@ -340,6 +376,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
         data-month-year="${year}"
         data-month-index="${monthIndex}"
         data-month-day="${dayNum}"
+        data-month-key="${monthKey}"
         data-date-key="${dateKey}"
         data-day="${boardDay ?? ""}"
         data-time="All Day"
@@ -352,7 +389,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
   }
 
   return `
-    <section class="whole-day-month-card">
+    <section class="whole-day-month-card" data-month-key="${monthKey}">
       <div class="whole-day-month-card__title">${getMonthName(year, monthIndex)}</div>
       <div class="whole-day-weekdays">
         ${weekdayLabels
@@ -360,6 +397,7 @@ function renderWholeDayMonth(year, monthIndex, todayInfo) {
             <div
               class="whole-day-weekday"
               data-weekday="${idx}"
+              data-month-key="${monthKey}"
               role="button"
               tabindex="0"
               aria-pressed="false"
