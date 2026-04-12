@@ -436,7 +436,6 @@ async function renderWholeDayAvailability(rows) {
 
   document.querySelectorAll(".whole-day-cell").forEach(cell => {
     cell.classList.remove("gold-cell");
-    cell.querySelector(".dot-container")?.remove();
   });
 
   document.querySelectorAll('.whole-day-cell[data-day][data-time]').forEach(cell => {
