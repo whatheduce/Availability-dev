@@ -448,6 +448,35 @@ body.logged-in #landing-bg::after{
   display: block;
 }
 
+.whole-day-wrap.inspect-column-mode .whole-day-cell[data-weekday] {
+  opacity: 0.35;
+  transition:
+    opacity 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.whole-day-wrap.inspect-column-mode .whole-day-cell.inspect-column-cell {
+  opacity: 1;
+}
+
+.whole-day-wrap.inspect-column-mode .whole-day-weekday {
+  opacity: 0.55;
+  transition:
+    opacity 180ms ease,
+    color 180ms ease,
+    text-shadow 180ms ease;
+}
+
+.whole-day-wrap.inspect-column-mode .whole-day-weekday.inspect-column-active {
+  opacity: 1;
+  color: #e58a1f;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,0.45),
+    0 0 6px rgba(243, 178, 74, 0.2);
+}
+
 /* Button */
 .mobile-view-tip__button {
   margin-top: 10px;
