@@ -5112,6 +5112,8 @@ body.account-view #dash-account {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
+    scroll-padding-left: 20px;
+    scroll-padding-right: 20px;
   }
 
   #calendar:has(.whole-day-wrap)::-webkit-scrollbar {
@@ -5120,19 +5122,20 @@ body.account-view #dash-account {
 
   .whole-day-wrap {
     display: flex;
-    gap: 14px;
+    gap: 22px;
     min-width: 0;
     width: max-content;
     align-items: stretch;
+    padding-right: 20px;
   }
 
   .whole-day-month-card {
-    flex: 0 0 calc(100vw - 40px);
-    width: calc(100vw - 40px);
-    max-width: calc(100vw - 40px);
+    flex: 0 0 calc(100vw - 64px);
+    width: calc(100vw - 64px);
+    max-width: calc(100vw - 64px);
     scroll-snap-align: start;
     scroll-snap-stop: always;
-  } 
+  }
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
