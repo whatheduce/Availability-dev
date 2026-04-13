@@ -5099,10 +5099,6 @@ body.account-view #dash-account {
     text-align: center;
   } 
 
- .whole-day-cell__dots {
-   scale: 80%;
- }
-
  .whole-day-cell {
    min-height: 72px;
  }
@@ -5136,9 +5132,18 @@ body.account-view #dash-account {
     scroll-snap-stop: always;
   }
 
- .whole-day-cell__dots {
+.whole-day-cell__dots {
   position: absolute;
- }
+  inset: 28px 8px 8px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.whole-day-cell .dot {
+  transform: scale(0.8);
+}
  
   .calendar-fade:has(.whole-day-wrap)::after {
    display: none;
