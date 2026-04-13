@@ -5139,6 +5139,15 @@ body.account-view #dash-account {
   align-items: center;
   justify-content: center;
   pointer-events: none;
+
+  width: auto;
+  height: auto;
+}
+
+.whole-day-cell .dot-container {
+  width: auto;
+  height: auto;
+  margin: 0;
 }
 
 .whole-day-cell .dot {
