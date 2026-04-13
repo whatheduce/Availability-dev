@@ -4401,7 +4401,7 @@ body.account-view #dash-account {
  }
 
  .whole-day-cell .dot-container.dots-1-3 {
-  gap: 0px;
+  gap: 3px;
  }
 }
 
@@ -4745,7 +4745,12 @@ body.account-view #dash-account {
 .whole-day-cell .dot {
   transform: scale(0.85);
 }
-} 
+
+ .whole-day-cell .dot-container.dots-1-3 {
+  gap: 0px;
+ } 
+}
+
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 480px) {
  .board-preview {
