@@ -284,7 +284,7 @@ function renderWholeDayCalendar() {
     </div>
   `;
   
-  setWholeDayInspectWeekday(mobileInspectWeekday);
+  setWholeDayInspectWeekday(mobileInspectWeekday, mobileInspectMonthKey);
   bindWholeDayWeekdayHeaders();
 }
 
