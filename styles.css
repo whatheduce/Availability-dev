@@ -4409,7 +4409,7 @@ body.account-view #dash-account {
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 1024px) {
 .whole-day-cell .dot {
-  transform: scale(0.9);
+  transform: scale(0.85);
 }
 
 .whole-day-cell {
@@ -4748,7 +4748,7 @@ body.account-view #dash-account {
  }
 
 .whole-day-cell .dot {
-  transform: scale(0.85);
+  transform: scale(0.80);
  }
 }
 
@@ -5162,7 +5162,7 @@ body.account-view #dash-account {
 }
 
 .whole-day-cell .dot {
-  transform: scale(0.8);
+  transform: scale(0.75);
 }
  
   .calendar-fade:has(.whole-day-wrap)::after {
