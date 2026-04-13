@@ -5143,6 +5143,14 @@ body.account-view #dash-account {
   .calendar-fade:has(.whole-day-wrap)::after {
    display: none;
  }
+
+ .dot-container.dots-1-3 {
+  gap: 3px;
+ }
+ 
+ .dot-container.dots-4-6 {
+  gap: 6px;
+ }
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
