@@ -5151,6 +5151,18 @@ body.account-view #dash-account {
  .dot-container.dots-4-6 {
   gap: 6px;
  }
+
+.whole-day-weekdays,
+.whole-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.whole-day-cell,
+.whole-day-weekday {
+  min-width: 0;
+}
+ 
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
