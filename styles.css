@@ -5135,6 +5135,10 @@ body.account-view #dash-account {
     scroll-snap-align: center;
     scroll-snap-stop: always;
   }
+
+  .calendar-fade:has(.whole-day-wrap)::after {
+   display: none;
+ }
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
