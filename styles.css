@@ -558,6 +558,71 @@ body.logged-in #landing-bg::after{
 .whole-day-wrap.inspect-column-mode .whole-day-month-card.inspect-month-active .whole-day-cell.inspect-column-cell .whole-day-cell__number {
   color: #e58a1f;
 }
+
+.whole-day-weekdays,
+.whole-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.whole-day-cell,
+.whole-day-weekday {
+  min-width: 0;
+}
+
+.whole-day-cell__dots {
+  position: absolute;
+  inset: 28px 8px 8px 8px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.whole-day-cell .dot-container {
+  width: auto;
+  height: auto;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  transform: none !important;
+}
+
+.whole-day-cell .dot-container.dots-1-3 {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  transform: none !important;
+}
+
+.whole-day-cell .dot-container.dots-4-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 12px);
+  grid-auto-rows: 12px;
+  justify-content: center;
+  align-content: center;
+  gap: 8px;
+  padding: 0;
+  transform: none !important;
+}
+
+.whole-day-cell .dot-container.dots-7-8,
+.whole-day-cell .dot-container.dots-9plus {
+  display: grid;
+  grid-template-columns: repeat(4, 10px);
+  grid-auto-rows: 12px;
+  justify-content: center;
+  align-content: center;
+  gap: 7px;
+  padding: 0;
+  transform: none !important;
+}
+
 /* Button */
 .mobile-view-tip__button {
   margin-top: 10px;
@@ -5100,7 +5165,7 @@ body.account-view #dash-account {
   } 
 
  .whole-day-cell__dots {
-   scale: 80%;
+   transform: scale(0.8);
  }
 
  .whole-day-cell {
@@ -5135,31 +5200,10 @@ body.account-view #dash-account {
     scroll-snap-align: center;
     scroll-snap-stop: always;
   }
-
- .whole-day-cell__dots {
-  position: absolute;
- }
  
   .calendar-fade:has(.whole-day-wrap)::after {
    display: none;
  }
-
-.whole-day-weekdays,
-.whole-day-grid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-
-.whole-day-cell,
-.whole-day-weekday {
-  min-width: 0;
-}
-
-.whole-day-cell__dots,
-.whole-day-cell .dot-container {
-  min-width: 0;
-  max-width: 100%;
-} 
  
 } 
 /* ================================================================================================================================================================================================================= */
