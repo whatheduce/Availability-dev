@@ -5136,6 +5136,10 @@ body.account-view #dash-account {
     scroll-snap-stop: always;
   }
 
+ .whole-day-cell__dots {
+  position: absolute;
+ }
+ 
   .calendar-fade:has(.whole-day-wrap)::after {
    display: none;
  }
