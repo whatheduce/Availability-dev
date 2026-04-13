@@ -5106,6 +5106,33 @@ body.account-view #dash-account {
  .whole-day-cell {
    min-height: 72px;
  }
+
+ #calendar:has(.whole-day-wrap) {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  #calendar:has(.whole-day-wrap)::-webkit-scrollbar {
+    display: none;
+  }
+
+  .whole-day-wrap {
+    display: flex;
+    gap: 14px;
+    min-width: 0;
+    width: max-content;
+    align-items: stretch;
+  }
+
+  .whole-day-month-card {
+    flex: 0 0 calc(100vw - 40px);
+    width: calc(100vw - 40px);
+    max-width: calc(100vw - 40px);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  } 
 } 
 /* ================================================================================================================================================================================================================= */
 /* ONLY small phones stack */
