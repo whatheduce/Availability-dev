@@ -4457,6 +4457,14 @@ body.account-view #dash-account {
    min-width: 350px;
  }
 
+.whole-day-cell .dot {
+  width: 12px;
+  height: 12px;
+} 
+
+.whole-day-cell .dot-container.dots-1-3 {
+ transform: translateX(3px);
+ } 
 } 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 899px) {
