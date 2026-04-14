@@ -4408,10 +4408,6 @@ body.account-view #dash-account {
 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 1024px) {
-.whole-day-cell .dot {
-  transform: scale(0.85);
-}
-
 .whole-day-cell {
   min-height: 86px;
 }
@@ -4749,10 +4745,6 @@ body.account-view #dash-account {
 
  .whole-day-cell {
    min-height: 80px;
- }
-
-.whole-day-cell .dot {
-  transform: scale(0.80);
  }
 }
 
@@ -5163,10 +5155,6 @@ body.account-view #dash-account {
   width: auto;
   height: auto;
   margin: 0;
-}
-
-.whole-day-cell .dot {
-  transform: scale(0.75);
 }
  
   .calendar-fade:has(.whole-day-wrap)::after {
