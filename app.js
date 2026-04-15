@@ -41,6 +41,9 @@ const IS_PRO = false;
 const FREE_BOARD_MEMBER_LIMIT = 5;
 const PRO_BOARD_MEMBER_LIMIT = 30;
 const MAX_BOARD_NAME_LENGTH = 50;
+const localBoardColorCache = new Map(); // `${boardId}|${userId}` -> local_color
+window.localBoardColorCache = localBoardColorCache;
+
 
 
 
@@ -383,6 +386,23 @@ function hideCalendarLoading() {
 // GENERAL UI HELPERS
 // =========================
 
+function getLocalBoardColor(boardId, userId) {
+  if (!boardId || !userId) return null;
+  return localBoardColorCache.get(`${boardId}|${userId}`) || null;
+}
+window.getLocalBoardColor = getLocalBoardColor;
+
+//----------
+function setLocalBoardColor(boardId, userId, color) {
+  if (!boardId || !userId) return;
+
+  const key = `${boardId}|${userId}`;
+  if (color) localBoardColorCache.set(key, color);
+  else localBoardColorCache.delete(key);
+}
+window.setLocalBoardColor = setLocalBoardColor;
+
+//----------
 function autoResizeFooterNote() {
   const el = document.getElementById("footer-note-input");
   if (!el) return;
@@ -1027,10 +1047,13 @@ async function fetchBoardLocalColorMap(boardId, userIds) {
   }
 
   const map = {};
-  (data || []).forEach(row => {
-    if (row?.user_id && row?.local_color) map[row.user_id] = row.local_color;
-  });
-  return map;
+(data || []).forEach(row => {
+  if (row?.user_id && row?.local_color) {
+    map[row.user_id] = row.local_color;
+    setLocalBoardColor(boardId, row.user_id, row.local_color);
+  }
+});
+return map;
 }
 window.fetchBoardLocalColorMap = fetchBoardLocalColorMap;
 
@@ -4417,6 +4440,10 @@ colourSave?.addEventListener("click", async () => {
     .eq("user_id", au.id);
 
   if (error) throw error;
+
+  if (typeof setLocalBoardColor === "function") {
+    setLocalBoardColor(colourModalBoardId, au.id, v);
+  }
 
   const targetBoardId = colourModalBoardId;
 
