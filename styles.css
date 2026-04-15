@@ -5157,6 +5157,9 @@ body.account-view #dash-account {
     min-width: 0;
     width: max-content;
     align-items: stretch;
+    padding-left: 12px;
+    padding-right: 12px;
+    box-sizing: border-box;
   }
 
   .whole-day-month-card {
