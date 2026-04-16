@@ -1188,7 +1188,7 @@ async function ensureMembership(boardId) {
 
     await confirmModal({
       title: "Calendar full",
-      message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
+      message: `This calendar already has the maximum number of users.`,
       okText: "OK",
       cancelText: ""
     });
