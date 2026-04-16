@@ -206,6 +206,7 @@ async function hydrateUserFromAuth() {
 
 async function handleAuthSubmit() {
   clearAuthError();
+
   const emailEl = document.getElementById("auth-email");
   const passEl = document.getElementById("auth-password");
   const msgEl = document.getElementById("auth-msg");
@@ -213,43 +214,46 @@ async function handleAuthSubmit() {
   const password = (passEl?.value || "").trim();
 
   if (!email) {
-  showAuthError("Please enter your email");
-  return;
-}
-
-if (!password) {
-  showAuthError("Please enter your password");
-  return;
-}
-
-  if (msgEl) { msgEl.style.display = "none"; msgEl.textContent = ""; }
-
-  if (authMode === "signup") {
-  if (password.length < 8) {
-    showAuthOverlay("Password must be at least 8 characters. We recommend using a mix of letters and numbers.");
+    showAuthError("Please enter your email");
     return;
   }
 
-  if (password.length > 72) {
-  showAuthOverlay("Password must be 72 characters or less.");
-  return;
-}  
+  if (!password) {
+    showAuthError("Please enter your password");
+    return;
+  }
 
-  const { error } = await supabase.auth.signUp({ email, password });
- if (error) {
-  showAuthError("Incorrect email or password");
-  return;
-}
+  if (msgEl) {
+    msgEl.style.display = "none";
+    msgEl.textContent = "";
+  }
 
-  showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
-  authMode = "signin";
-  return;
-}
+  if (authMode === "signup") {
+    if (password.length < 8) {
+      showAuthOverlay("Password must be at least 8 characters. We recommend using a mix of letters and numbers.");
+      return;
+    }
+
+    if (password.length > 72) {
+      showAuthOverlay("Password must be 72 characters or less.");
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      showAuthOverlay(error.message || "Sign up failed.");
+      return;
+    }
+
+    showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
+    authMode = "signin";
+    return;
+  }
 
   // signin
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    showAuthOverlay(error.message || "Sign in failed.");
+    showAuthError("Incorrect email or password");
     return;
   }
 
@@ -257,20 +261,19 @@ if (!password) {
   window.renderDashboardSubtitle();
   hideAuthOverlay();
 
-    if (!hydrated) {
-      showProfileSetup();
-      return;
-    }
+  if (!hydrated) {
+    showProfileSetup();
+    return;
+  }
 
   document.body.classList.add("logged-in");
 
-    // Now proceed to board or create screen
-    if (inviteToken || manageToken) {
-      await loadTable();
-    } else {
-      showDashboard();
-      await loadBoards();
-    }
+  if (inviteToken || manageToken) {
+    await loadTable();
+  } else {
+    showDashboard();
+    await loadBoards();
+  }
 }
 
 async function saveProfileSetup() {
@@ -490,7 +493,7 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
   return {
     showAuthOverlay,
     showAuthError,
-    ClearAuthError,
+    clearAuthError,
     hideAuthOverlay,
     setAuthMode,
     resetAuthToFreshSignin,
