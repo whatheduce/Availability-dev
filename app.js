@@ -1170,11 +1170,13 @@ async function ensureMembership(boardId) {
   const au = await auth.getAuthUser();
   if (!au || !boardId) return false;
 
-  const memberLimit = getBoardMemberLimit();
+  const boardMaxMembers =
+  Number(currentTable?.max_members) ||
+  FREE_BOARD_MEMBER_LIMIT;
 
   const { data, error } = await supabase.rpc("join_board_if_space", {
     p_board_id: boardId,
-    p_max_members: memberLimit
+    p_max_members: boardMaxMembers
   });
 
   if (error) {
@@ -1188,7 +1190,7 @@ async function ensureMembership(boardId) {
 
     await confirmModal({
       title: "Calendar full",
-      message: `This calendar already has the maximum number of users.`,
+      message: `This calendar already has ${boardMaxMembers} users, which is the maximum allowed.`,
       okText: "OK",
       cancelText: ""
     });
