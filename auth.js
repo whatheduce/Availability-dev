@@ -95,6 +95,22 @@ function showAuthOverlay(msg = "", opts = {}) {
   }
 }
 
+function showAuthError(message) {
+  const el = document.getElementById("auth-error");
+  if (!el) return;
+
+  el.textContent = message;
+  el.classList.add("is-visible");
+}
+
+function clearAuthError() {
+  const el = document.getElementById("auth-error");
+  if (!el) return;
+
+  el.textContent = "";
+  el.classList.remove("is-visible");
+}
+  
 function hideAuthOverlay() {
   const overlay = document.getElementById("auth-overlay");
   if (overlay) overlay.style.display = "none";
@@ -465,6 +481,8 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
   
   return {
     showAuthOverlay,
+    showAuthError,
+    ClearAuthError,
     hideAuthOverlay,
     setAuthMode,
     resetAuthToFreshSignin,
