@@ -4232,6 +4232,20 @@ body.account-view #dash-account {
   background: rgba(253, 249, 244, 1);
 }
 
+.auth-error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #b3261e; /* soft red */
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.auth-error.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* =========================
    AUTH BUTTON LAYOUT
    ========================= */
