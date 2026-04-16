@@ -775,7 +775,7 @@ async function refreshCurrentTableMeta() {
 
   const { data, error } = await supabase
     .from("tables")
-    .select("id, last_activity_at, gold_threshold, host_tz, name, structure_type")
+    .select("id, last_activity_at, gold_threshold, host_tz, name, structure_type, max_members")
     .eq("id", currentTable.id)
     .single();
 
@@ -795,7 +795,9 @@ async function renderCalendarInviteStats() {
   if (!wrap || !joinedEl || !totalEl || !currentTable?.id) return;
 
   const memberCount = await getBoardMemberCount(currentTable.id);
-  const memberLimit = getBoardMemberLimit();
+  const memberLimit =
+    Number(currentTable?.max_members) ||
+    FREE_BOARD_MEMBER_LIMIT;
 
   joinedEl.textContent = String(memberCount);
   totalEl.textContent = String(memberLimit);
@@ -1756,7 +1758,8 @@ async function loadBoards() {
         structure_type,
         start_date,
         host_tz,
-        gold_threshold
+        gold_threshold,
+        max_members
       )
     `)
     .eq("user_id", au.id);
