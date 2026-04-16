@@ -271,8 +271,15 @@ async function kickOutIfNoBoardAccess() {
   const hasAccess = await userStillHasBoardAccess();
   if (hasAccess) return false;
 
+  if (typeof hideCalendarLoading === "function") {
+    hideCalendarLoading();
+  }
+
   alert("You have been removed from this calendar.");
-  window.location.href = "/";
+
+  localStorage.removeItem("lastBoardToken");
+  window.location.replace(window.location.pathname);
+
   return true;
 }
 
