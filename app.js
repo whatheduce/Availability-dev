@@ -549,11 +549,6 @@ function generateToken() {
 }
 
 //----------
-function getBoardMemberLimit() {
-  return IS_PRO ? PRO_BOARD_MEMBER_LIMIT : FREE_BOARD_MEMBER_LIMIT;
-}
-
-//----------
 function bindCalendarWheelScroll() {
   const calendar = document.getElementById("calendar");
   if (!calendar) return;
@@ -3476,14 +3471,17 @@ try {
     return;
   }
 
-  const memberLimit = getBoardMemberLimit();
-  const memberCount = await getBoardMemberCount(boardId);
+ const memberLimit =
+  Number(currentTable?.max_members) ||
+  FREE_BOARD_MEMBER_LIMIT;
 
-  if (memberCount >= memberLimit) {
-    errEl.style.display = "block";
-    errEl.textContent = `This calendar is full. The ${IS_PRO ? "Pro" : "free"} version allows up to ${memberLimit} total users.`;
-    return;
-  }
+const memberCount = await getBoardMemberCount(boardId);
+
+if (memberCount >= memberLimit) {
+  errEl.style.display = "block";
+  errEl.textContent = `This calendar is full. It allows up to ${memberLimit} total users.`;
+  return;
+}
   
   const inviteLink = buildInviteLink(inviteToken);
   const boardName = inviteContext?.boardName || "Availability Calendar";
@@ -4852,17 +4850,20 @@ if (action === "add-user") {
   }
 
   const memberCount = await getBoardMemberCount(boardId);
-  const memberLimit = getBoardMemberLimit();
 
-  if (memberCount >= memberLimit) {
-    await confirmModal({
-      title: "Calendar full",
-      message: `This calendar already has the maximum number of users.`,
-      okText: "OK",
-      cancelText: ""
-    });
-    return;
-  }
+const memberLimit =
+  Number(currentTable?.max_members) ||
+  FREE_BOARD_MEMBER_LIMIT;
+
+if (memberCount >= memberLimit) {
+  await confirmModal({
+    title: "Calendar full",
+    message: `This calendar already allows up to ${memberLimit} users.`,
+    okText: "OK",
+    cancelText: ""
+  });
+  return;
+}
 
   openInviteModal({
     boardId,
@@ -5064,7 +5065,10 @@ if (addUsersBtn) {
     }
 
     const memberCount = await getBoardMemberCount(boardId);
-    const memberLimit = getBoardMemberLimit();
+
+    const memberLimit =
+      Number(currentTable?.max_members) ||
+      FREE_BOARD_MEMBER_LIMIT;
 
     if (memberCount >= memberLimit) {
       await confirmModal({
