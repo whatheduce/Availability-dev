@@ -4233,7 +4233,7 @@ body.account-view #dash-account {
 }
 
 .auth-error {
-  margin-top: 6px;
+  margin-bottom: 6px;
   font-size: 13px;
   color: #b3261e; /* soft red */
   opacity: 0;
