@@ -1183,19 +1183,22 @@ async function ensureMembership(boardId) {
   }
 
   if (!data?.ok) {
-    if (data?.reason === "board_full") {
-      await confirmModal({
-        title: "Calendar full",
-        message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
-        okText: "OK",
-        showCancel: false
-      });
-      return false;
-    }
+  if (data?.reason === "board_full") {
+    hideCalendarLoading();
 
-    console.error("ensureMembership rejected:", data);
+    await confirmModal({
+      title: "Calendar full",
+      message: `This calendar already has ${memberLimit} users, which is the ${IS_PRO ? "Pro" : "free"} limit.`,
+      okText: "OK",
+      cancelText: ""
+    });
+
     return false;
   }
+
+  console.error("ensureMembership rejected:", data);
+  return false;
+}
 
   if (au.email) {
     const { error: acceptErr } = await supabase
