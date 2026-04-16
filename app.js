@@ -2394,6 +2394,7 @@ async function createBoard() {
       return;
     }
   
+  const maxMembers = IS_PRO ? 30 : 5;
   const hostedCount = await getHostedBoardCount();
 
   if (!IS_PRO && hostedCount >= 2) {
@@ -2480,9 +2481,9 @@ const startDate = yyyyMmDdInTimeZone(new Date(), tz);
       structure_type: structureChoice,
       host_tz: tz,
       start_date: startDate,
-      gold_threshold: goldThreshold
+      gold_threshold: goldThreshold,
+      max_members: maxMembers
     }])
-
   if (error) {
     console.error("Error creating board:", error);
     return;
