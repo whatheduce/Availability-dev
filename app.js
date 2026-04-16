@@ -1980,13 +1980,12 @@ if (!hydrated) {
 }
 
 const membershipOk = await ensureMembership(currentTable.id);
-  if (!membershipOk) {
-    document.getElementById("calendar").style.display = "none";
-    document.getElementById("calendar-topbar").style.display = "none";
-    document.getElementById("dashboard").style.display = "block";
-    hideCalendarLoading();
-    return;
-  }
+if (!membershipOk) {
+  hideCalendarLoading();
+  localStorage.removeItem("lastBoardToken");
+  window.location.replace(window.location.pathname);
+  return;
+}
 
 await enforceUniqueBoardColourIfNeeded(currentTable.id);
 
