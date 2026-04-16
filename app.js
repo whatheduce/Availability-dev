@@ -195,7 +195,7 @@ async function showCreateBoard() {
   }
 
   const hostedCount = await getHostedBoardCount();
-    if (!IS_PRO && hostedCount >= 2){
+    if (!user?.is_pro && hostedCount >= 2){
       showConfirmPopup(
         "The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro (Coming Soon!).",
         { title: "Hosted Calendar Limit" }
@@ -1785,7 +1785,7 @@ async function loadBoards() {
 
 // Hosted
 const maxHostedSlots = 10;
-const openHostedSlots = IS_PRO ? 10 : 2;
+const openHostedSlots = user?.is_pro ? 10 : 2;
 
 const hostedSlotsHtml = [];
 
@@ -2394,7 +2394,7 @@ async function createBoard() {
       return;
     }
   
-  const maxMembers = IS_PRO ? 30 : 5;
+  const maxMembers = user?.is_pro ? 30 : 5;
   const hostedCount = await getHostedBoardCount();
 
   if (!IS_PRO && hostedCount >= 2) {
