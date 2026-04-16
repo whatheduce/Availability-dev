@@ -205,16 +205,22 @@ async function hydrateUserFromAuth() {
 }
 
 async function handleAuthSubmit() {
+  clearAuthError();
   const emailEl = document.getElementById("auth-email");
   const passEl = document.getElementById("auth-password");
   const msgEl = document.getElementById("auth-msg");
   const email = (emailEl?.value || "").trim();
   const password = (passEl?.value || "").trim();
 
-  if (!email || !password) {
-    showAuthOverlay("Please enter email and password.");
-    return;
-  }
+  if (!email) {
+  showAuthError("Please enter your email");
+  return;
+}
+
+if (!password) {
+  showAuthError("Please enter your password");
+  return;
+}
 
   if (msgEl) { msgEl.style.display = "none"; msgEl.textContent = ""; }
 
@@ -230,10 +236,10 @@ async function handleAuthSubmit() {
 }  
 
   const { error } = await supabase.auth.signUp({ email, password });
-  if (error) {
-    showAuthOverlay(error.message || "Sign up failed.");
-    return;
-  }
+ if (error) {
+  showAuthError("Incorrect email or password");
+  return;
+}
 
   showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
   authMode = "signin";
@@ -341,6 +347,8 @@ document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
     });
 
 document.getElementById("auth-submit")?.addEventListener("click", handleAuthSubmit);
+document.getElementById("auth-email")?.addEventListener("input", clearAuthError);
+document.getElementById("auth-password")?.addEventListener("input", clearAuthError);  
 
   document.getElementById("auth-toggle-mode")?.addEventListener("click", () => {
     // If button is hidden (locked), do nothing
