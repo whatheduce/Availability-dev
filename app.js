@@ -37,9 +37,7 @@ const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
 window.pendingDeleteCellByEntryId = pendingDeleteCellByEntryId;
 const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
 window.availabilityMetaByEntryId = availabilityMetaByEntryId; 
-const IS_PRO = false;
 const FREE_BOARD_MEMBER_LIMIT = 5;
-const PRO_BOARD_MEMBER_LIMIT = 30;
 const MAX_BOARD_NAME_LENGTH = 50;
 const localBoardColorCache = new Map(); // `${boardId}|${userId}` -> local_color
 window.localBoardColorCache = localBoardColorCache;
@@ -2397,7 +2395,7 @@ async function createBoard() {
   const maxMembers = user?.is_pro ? 30 : 5;
   const hostedCount = await getHostedBoardCount();
 
-  if (!IS_PRO && hostedCount >= 2) {
+  if (!user?.is_pro && hostedCount >= 2) {
     alert("The free version only allows up to 2 Hosted Calendars. Unlock up to 10 with Pro.");
     return;
   }
@@ -2464,7 +2462,7 @@ const startDate = yyyyMmDdInTimeZone(new Date(), tz);
       return;
     }
 
-    if (!IS_PRO && goldThreshold >= 6) {
+    if (!user?.is_pro && goldThreshold >= 6) {
       alert("Free version allows gold threshold up to 5.");
       return;
     }
