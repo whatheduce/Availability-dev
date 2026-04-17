@@ -192,7 +192,8 @@ async function loadProfile() {
   setUser({
     id: au.id,
     name: data.name,
-    color: data.color
+    color: data.color,
+    is_pro: !!data.is_pro
   });
 
   return data;
@@ -293,7 +294,12 @@ async function saveProfileSetup() {
 
   if (error) return alert(error.message);
 
-  setUser({ id: au.id, name, color });
+  setUser({
+    id: au.id,
+    name,
+    color,
+    is_pro: !!getUser()?.is_pro
+  });
   window.renderDashboardSubtitle(name);
 
   const params = new URLSearchParams(window.location.search);
