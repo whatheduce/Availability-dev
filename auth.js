@@ -334,14 +334,43 @@ function hideProfileSetup() {
   if (dash) dash.style.display = "block"; // ✅ bring dashboard back
 }
 
+function bindPasswordRecoveryListener() {
+  supabase.auth.onAuthStateChange(async (event) => {
+    if (event !== "PASSWORD_RECOVERY") return;
+
+    localStorage.setItem("pw_recovery_in_progress", "1");
+
+    showAuthOverlay("");
+    setAuthMode("recovery");
+
+    const p1 = document.getElementById("auth-new-password");
+    if (p1) p1.focus();
+  });
+
+  // If the page reloads while already in recovery mode,
+  // keep showing the recovery UI.
+  const recoveryInProgress = localStorage.getItem("pw_recovery_in_progress") === "1";
+  if (recoveryInProgress) {
+    showAuthOverlay("");
+    setAuthMode("recovery");
+
+    const p1 = document.getElementById("auth-new-password");
+    if (p1) {
+      setTimeout(() => p1.focus(), 0);
+    }
+  }
+}
+  
 function bindAuthUi() {
-    const authForm = document.getElementById("auth-form");
-      if (authForm) {
-        authForm.addEventListener("submit", (e) => {
-          e.preventDefault();
-          handleAuthSubmit();
-        });
-      }
+  bindPasswordRecoveryListener();
+    
+  const authForm = document.getElementById("auth-form");
+    if (authForm) {
+      authForm.addEventListener("submit", (e) => {
+         e.preventDefault();
+         handleAuthSubmit();
+       });
+     }
 
 document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
