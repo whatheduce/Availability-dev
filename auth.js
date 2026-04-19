@@ -122,8 +122,9 @@ function setAuthMode(mode /* "signin" | "recovery" */) {
   if (mode === "signin") {
     authMode = "signin";
   }
+
   const form = document.getElementById("auth-form");
-  const toggleRow = document.getElementById("auth-toggle-mode")?.parentElement; // the flex row
+  const toggleRow = document.getElementById("auth-toggle-mode")?.parentElement;
   const recovery = document.getElementById("auth-recovery");
   const title = document.getElementById("auth-title");
   const subtitle = document.getElementById("auth-subtitle");
@@ -132,14 +133,25 @@ function setAuthMode(mode /* "signin" | "recovery" */) {
 
   const isRecovery = mode === "recovery";
 
+  form.hidden = isRecovery;
   form.style.display = isRecovery ? "none" : "block";
+
   if (toggleRow) toggleRow.style.display = isRecovery ? "none" : "flex";
+
+  recovery.hidden = !isRecovery;
   recovery.style.display = isRecovery ? "block" : "none";
 
-  if (title) title.textContent = isRecovery ? "Reset your password" : "Sign in to access your Hearth Account";
-  if (subtitle) subtitle.textContent = isRecovery
-    ? "Enter a new password to finish resetting your account."
-    : "Create an account or sign in to continue.";
+  if (title) {
+    title.textContent = isRecovery
+      ? "Reset your password"
+      : "Sign in to access your Hearth Account";
+  }
+
+  if (subtitle) {
+    subtitle.textContent = isRecovery
+      ? "Enter a new password to finish resetting your account."
+      : "Create an account or sign in to continue.";
+  }
 }
 
 function resetAuthToFreshSignin() {
