@@ -39,7 +39,6 @@ function showAuthOverlay(msg = "", opts = {}) {
 
   // Always show overlay
   overlay.style.display = "block";
-  document.body.classList.add("show-landing-bg");
 
   // Hide/show the toggle reliably
   toggle.hidden = lockSignin;
@@ -115,8 +114,6 @@ function clearAuthError() {
 function hideAuthOverlay() {
   const overlay = document.getElementById("auth-overlay");
   if (overlay) overlay.style.display = "none";
-
-  document.body.classList.remove("show-landing-bg");
 }
 
 function openAuth(mode = "signin", opts = {}) {
