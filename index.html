@@ -5,6 +5,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Availability Calendar</title>
+  <script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const isAuthRoute = !!(params.get("t") || params.get("m"));
+    document.documentElement.classList.add(isAuthRoute ? "route-auth" : "route-landing");
+  })();
+</script>
   <link rel="stylesheet" href="/styles.css">
 </head>
 
