@@ -29,38 +29,14 @@ body.account-view #dash-topbar {
   display: none !important;
 }
 
-#landing-bg{
+#landing-bg {
   position: fixed;
   inset: 0;
-
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.8s ease;
-  animation: none;
- 
-  background-image: url("HearthImage1.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
   z-index: 0;
-
-  transition: opacity 1s ease;
-  filter: blur(8px);
   pointer-events: none;
-}
-
-body.show-landing-bg #landing-bg{
-  opacity: 1;
-  animation: hearthZoom 30s ease-in-out infinite alternate;
-}
-
-#landing-bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: rgba(252, 248, 242, 0.30);
-  transition: opacity 1s ease;
+  background: #F6ECDD;
+  background-image: none !important;
+  filter: none !important;
   opacity: 1;
 }
 
@@ -4404,6 +4380,10 @@ body.account-view #dash-account {
 
 body {
   background: var(--landing-bg);
+}
+
+html.route-auth #landing-page {
+  display: none !important;
 }
 
 /* page shell */
