@@ -169,11 +169,14 @@ function showDashboard() {
   document.body.classList.remove("show-landing-bg");
   document.body.classList.remove("create-view");
 
+  hideLandingPage();
+
   const loading = document.getElementById("calendar-loading");
-    if (loading) {
-      loading.classList.remove("is-visible");
-      loading.style.display = "none";
-    }
+  if (loading) {
+    loading.classList.remove("is-visible");
+    loading.style.display = "none";
+  }
+
   const dash = document.getElementById("dashboard");
   const createBoard = document.getElementById("create-board");
 
@@ -192,6 +195,8 @@ async function showCreateBoard() {
     return;
   }
 
+  hideLandingPage();
+  
   const hostedCount = await getHostedBoardCount();
     if (!user?.is_pro && hostedCount >= 2){
       showConfirmPopup(
@@ -216,6 +221,7 @@ async function showCreateBoard() {
 //----------
 function showRouteError() {
   document.body.style.visibility = "visible";
+  hideLandingPage();
 
   const loading = document.getElementById("calendar-loading");
     if (loading) {
@@ -236,6 +242,8 @@ function showRouteError() {
 
 //----------
 function showBoardView() {
+  hideLandingPage();
+  
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "none";
 
@@ -377,6 +385,35 @@ function hideCalendarLoading() {
     loading.style.display = "none";
   }, 180);
 }
+
+//----------
+function showLandingPage() {
+  document.body.style.visibility = "visible";
+  document.body.classList.remove("show-landing-bg");
+  document.body.classList.remove("create-view");
+
+  const landing = document.getElementById("landing-page");
+  if (landing) landing.style.display = "block";
+
+  const dash = document.getElementById("dashboard");
+  if (dash) dash.style.display = "none";
+
+  const createBoard = document.getElementById("create-board");
+  if (createBoard) createBoard.style.display = "none";
+
+  const setup = document.getElementById("profile-setup");
+  if (setup) setup.hidden = true;
+
+  const routeError = document.getElementById("route-error");
+  if (routeError) routeError.style.display = "none";
+}
+
+//----------
+function hideLandingPage() {
+  const landing = document.getElementById("landing-page");
+  if (landing) landing.style.display = "none";
+}
+
 
 
 
@@ -4158,6 +4195,17 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
   document.getElementById("footer-note-input")?.addEventListener("input", autoResizeFooterNote);
 
   auth.bindAuthUi();
+
+  const openLandingSignin = () => auth.openAuth("signin");
+  const openLandingSignup = () => auth.openAuth("signup");
+
+  document.getElementById("landing-signin")?.addEventListener("click", openLandingSignin);
+  document.getElementById("landing-hero-signin")?.addEventListener("click", openLandingSignin);
+  document.getElementById("landing-bottom-signin")?.addEventListener("click", openLandingSignin);
+
+  document.getElementById("landing-signup")?.addEventListener("click", openLandingSignup);
+  document.getElementById("landing-hero-signup")?.addEventListener("click", openLandingSignup);
+  document.getElementById("landing-bottom-signup")?.addEventListener("click", openLandingSignup);
   
   // Dashboard: Create New Calendar (your dashboard button)
   const dashCreate = document.getElementById("create-board-btn");
@@ -4985,11 +5033,19 @@ async function startApp() {
     return;
   }
 
-  if (!session) {
-    const lockSignin = !!manageToken;
-    auth.showAuthOverlay("", { lockSignin });
-    return;
-  }
+    if (!session) {
+      if (!inviteToken && !manageToken) {
+        showLandingPage();
+        auth.hideAuthOverlay();
+        return;
+      }
+
+      hideLandingPage();
+
+      const lockSignin = !!manageToken;
+      auth.openAuth("signin", { lockSignin });
+      return;
+    }
 
   // Homepage → dashboard flow
   if (!inviteToken && !manageToken) {
