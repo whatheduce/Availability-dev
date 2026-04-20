@@ -118,6 +118,25 @@ function hideAuthOverlay() {
 
   document.body.classList.remove("show-landing-bg");
 }
+
+function openAuth(mode = "signin", opts = {}) {
+  authMode = mode === "signup" ? "signup" : "signin";
+
+  clearAuthError();
+
+  const msg = document.getElementById("auth-msg");
+  if (msg) {
+    msg.textContent = "";
+    msg.style.display = "none";
+  }
+
+  showAuthOverlay("", opts);
+
+  const emailEl = document.getElementById("auth-email");
+  if (emailEl) {
+    setTimeout(() => emailEl.focus(), 0);
+  }
+}
   
 function setAuthMode(mode /* "signin" | "recovery" */) {
   if (mode === "signin") {
@@ -332,19 +351,25 @@ async function saveProfileSetup() {
 function showProfileSetup() {
   document.body.style.visibility = "visible";
 
+  const landing = document.getElementById("landing-page");
+  if (landing) landing.style.display = "none";
+
   const dash = document.getElementById("dashboard");
   if (dash) dash.style.display = "none";
 
   const setup = document.getElementById("profile-setup");
-  if (setup) setup.hidden = false; // ✅ show
+  if (setup) setup.hidden = false;
 }
 
 function hideProfileSetup() {
   const setup = document.getElementById("profile-setup");
-  if (setup) setup.hidden = true; // ✅ hide
+  if (setup) setup.hidden = true;
+
+  const landing = document.getElementById("landing-page");
+  if (landing) landing.style.display = "none";
 
   const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "block"; // ✅ bring dashboard back
+  if (dash) dash.style.display = "block";
 }
 
 function bindPasswordRecoveryListener() {
@@ -540,6 +565,7 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
   
   return {
     showAuthOverlay,
+    openAuth,
     showAuthError,
     clearAuthError,
     hideAuthOverlay,
