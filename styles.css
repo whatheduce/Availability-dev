@@ -188,6 +188,10 @@ body.logged-in #landing-bg::after{
   );
 }
 
+.calendar-fade:has(.whole-day-wrap)::after {
+  display: none;
+}
+
 .calendar-meta-stack {
   display: flex;
   flex-direction: column;
@@ -5360,10 +5364,6 @@ body.logged-in .landing-page {
    padding: 12px;
 } 
 
- .calendar-fade:after {
-  width: 10%;
-} 
-
  .calendar-topbar {
    display: grid;
    grid-template-columns: 1fr;
@@ -5551,10 +5551,6 @@ body.logged-in .landing-page {
   height: auto;
   margin: 0;
 }
- 
-  .calendar-fade:has(.whole-day-wrap)::after {
-   display: none;
- }
 
 .whole-day-weekdays,
 .whole-day-grid {
