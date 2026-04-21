@@ -2811,14 +2811,6 @@ async function toggleCell(e) {
    // optimistic add first
 if (pendingAdds.has(k)) return;
 pendingAdds.add(k);
-
-
-console.log("optimistic activeColor", {
-  local: typeof getLocalBoardColor === "function" ? getLocalBoardColor(currentTable.id, myUid) : null,
-  profile: prof?.color,
-  chosen: activeColor
-});
-
     
 addOptimisticDot(cell, myUid, displayName, activeColor);
 maybeApplyGoldForCell(cell);
