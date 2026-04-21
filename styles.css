@@ -4589,24 +4589,12 @@ html.route-auth #landing-page {
   -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: right;
   overflow: hidden;
 }
 
 .landing-media-shell--hero {
   min-height: 500px;
-}
-
-.landing-media img {
-  width: 100%;
-  max-width: 520px;
-  border-radius: 18px;
-
-  box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.18),
-    0 5px 15px rgba(0, 0, 0, 0.08);
-
-  transform: rotate(-3deg);
 }
 
 .landing-placeholder {
