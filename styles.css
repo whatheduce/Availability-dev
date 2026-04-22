@@ -4579,8 +4579,6 @@ html.route-auth #landing-page {
 
 /* media placeholders / shells */
 .landing-media-shell {
-  width: min(100%, 560px);
-  min-height: 380px;
   border-radius: 34px;
   background: var(--landing-surface);
   border: 1px solid var(--landing-border);
@@ -4591,10 +4589,6 @@ html.route-auth #landing-page {
   align-items: center;
   justify-content: right;
   overflow: hidden;
-}
-
-.landing-media-shell--hero {
-  min-height: 500px;
 }
 
 .landing-placeholder {
@@ -4664,12 +4658,6 @@ body.logged-in .landing-page {
   .landing-split__copy {
     max-width: 100%;
   }
-
-  .landing-media-shell,
-  .landing-media-shell--hero {
-    width: 100%;
-    min-height: 340px;
-  }
 }
 
 @media (max-width: 760px) {
@@ -4710,12 +4698,6 @@ body.logged-in .landing-page {
   .landing-section-text {
     font-size: 17px;
     line-height: 1.68;
-  }
-
-  .landing-media-shell,
-  .landing-media-shell--hero {
-    min-height: 280px;
-    border-radius: 26px;
   }
 
   .landing-cta__inner {
