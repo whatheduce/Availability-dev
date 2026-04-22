@@ -4510,6 +4510,8 @@ html.route-auth #landing-page {
 .landing-hero {
   min-height: 82vh;
   padding-top: 14px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(560px, 1.15fr);
+  gap: 56px;
 }
 
 .landing-eyebrow,
@@ -4594,7 +4596,28 @@ html.route-auth #landing-page {
 }
 
 .landing-media-shell--hero {
-  min-height: 500px;
+  width: min(100%, 720px);
+  min-height: 0;
+  aspect-ratio: 16 / 10;
+  padding: 18px;
+  border-radius: 34px;
+  background: rgba(255, 252, 246, 0.72);
+  border: 1px solid rgba(80, 57, 38, 0.12);
+  box-shadow: 0 18px 45px rgba(58, 40, 24, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.landing-media-shell--hero img {
+  width: 108%;
+  max-width: none;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  border-radius: 20px;
+  transform: rotate(-2deg);
 }
 
 .landing-placeholder {
