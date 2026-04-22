@@ -4598,12 +4598,7 @@ html.route-auth #landing-page {
 .landing-media-shell--hero {
   width: min(100%, 720px);
   min-height: 0;
-  aspect-ratio: 16 / 10;
-  padding: 18px;
-  border-radius: 34px;
-  background: rgba(255, 252, 246, 0.72);
-  border: 1px solid rgba(80, 57, 38, 0.12);
-  box-shadow: 0 18px 45px rgba(58, 40, 24, 0.08);
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4617,7 +4612,6 @@ html.route-auth #landing-page {
   display: block;
   object-fit: contain;
   border-radius: 20px;
-  transform: rotate(-2deg);
 }
 
 .landing-placeholder {
