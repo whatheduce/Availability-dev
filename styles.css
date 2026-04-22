@@ -4586,6 +4586,25 @@ body.account-view #dash-account {
   color: var(--landing-text-soft);
 }
 
+.landing-hero__text-row {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.7fr);
+  gap: 42px;
+  align-items: end;
+  text-align: left;
+}
+
+.landing-hero__text-row .landing-title {
+  margin: 0;
+}
+
+.landing-hero__text-row .landing-subtitle {
+  margin: 0;
+  padding-bottom: 6px;
+}
+
 .landing-subtitle--center,
 .landing-section-text--center {
   max-width: 760px;
@@ -5308,6 +5327,16 @@ html.route-auth #landing-page {
  .whole-day-cell {
    min-height: 80px;
  }
+
+.landing-hero__text-row {
+  grid-template-columns: 1fr;
+  gap: 18px;
+  text-align: left;
+}
+
+.landing-hero__text-row .landing-subtitle {
+  max-width: 100%;
+} 
 }
 
 /* ================================================================================================================================================================================================================= */
