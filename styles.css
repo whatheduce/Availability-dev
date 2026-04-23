@@ -4589,11 +4589,11 @@ body.account-view #dash-account {
 }
 
 .landing-hero__text-row {
-  max-width: 1080px;
+  max-width: 980px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.7fr);
-  gap: 42px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 38px;
   align-items: center;
   text-align: left;
 }
