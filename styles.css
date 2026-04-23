@@ -4591,8 +4591,8 @@ body.account-view #dash-account {
   max-width: 980px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
-  gap: 38px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 400px);
+  gap: 28px;
   align-items: center;
   text-align: left;
 }
