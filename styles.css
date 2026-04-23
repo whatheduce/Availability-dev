@@ -4484,7 +4484,6 @@ body.account-view #dash-account {
 .landing-nav__left {
   display: flex;
   align-items: center;
-  gap: 18px;
   min-width: 0;
 }
 
@@ -4503,7 +4502,7 @@ body.account-view #dash-account {
 }
 
 .landing-brand__tagline {
-  max-width: 300px;
+  max-width: 200px;
   font-size: 14px;
   line-height: 1.45;
   color: var(--landing-text-soft);
