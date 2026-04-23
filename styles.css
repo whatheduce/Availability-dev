@@ -4578,6 +4578,7 @@ body.account-view #dash-account {
   width: 100%;
   height: auto;
   display: block;
+  scale: 85%;
 }
 
 .landing-subtitle {
