@@ -4407,7 +4407,7 @@ body.account-view #dash-account {
 .landing-section-block {
   position: relative;
   overflow: hidden;
-  padding: 78px 28px;
+  padding: 28px;
 }
 
 .landing-section-block > * {
@@ -4627,7 +4627,6 @@ body.account-view #dash-account {
 }
 
 .landing-hero__media {
-  margin-top: 28px;
   display: flex;
   justify-content: center;
 }
@@ -4839,7 +4838,7 @@ html.route-auth #landing-page {
 
 @media (max-width: 1100px) {
   .landing-section-block {
-    padding: 64px 22px;
+    padding: 22px;
   }
 
   .landing-nav {
@@ -4893,7 +4892,7 @@ html.route-auth #landing-page {
   }
 
   .landing-section-block {
-    padding: 54px 18px;
+    padding: 18px;
   }
 
   .landing-media-stage {
