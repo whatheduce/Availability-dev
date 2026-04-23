@@ -4588,7 +4588,7 @@ body.account-view #dash-account {
 }
 
 .landing-hero__text-row {
-  max-width: 980px;
+  max-width: 950px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 400px);
