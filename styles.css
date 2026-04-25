@@ -4685,15 +4685,17 @@ body.account-view #dash-account {
   box-shadow: 0 16px 34px rgba(58, 40, 24, 0.06);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  margin-top: 28px;
 }
 
 .landing-feature-card__title {
   margin: 0 0 14px;
-  font-size: clamp(24px, 3vw, 34px);
+  font-size: clamp(20px, 2.5vw, 28px);
   line-height: 1.08;
   letter-spacing: -0.02em;
   color: var(--landing-text);
   font-weight: 600;
+  padding-top: 12px;
 }
 
 .landing-feature-card__text {
@@ -4731,6 +4733,7 @@ body.account-view #dash-account {
   width: 100%;
   padding: 14px;
   border-radius: 24px;
+  max-width: 400px;
 }
 
 /* placeholders while building */
