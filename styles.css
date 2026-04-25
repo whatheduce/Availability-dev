@@ -4457,6 +4457,7 @@ body.account-view #dash-account {
 
 .landing-feature {
   background: var(--landing-bg-alt);
+  padding-top: 68px;
 }
 
 .landing-feature-grid {
@@ -4641,7 +4642,7 @@ body.account-view #dash-account {
 }
 
 .landing-section-title {
-  margin: 0 0 16px;
+  margin: 16px 0 16px;
   font-size: clamp(30px, 4vw, 50px);
   line-height: 1.04;
   letter-spacing: -0.03em;
