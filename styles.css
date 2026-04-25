@@ -4453,12 +4453,13 @@ body.account-view #dash-account {
 
 .landing-hero {
   background: var(--landing-bg);
+  padding-bottom: 112px;
 }
 
 .landing-feature {
   background: var(--landing-bg-alt);
   padding-top: 68px;
-  padding-bottom: 68px;
+  padding-bottom: 112px;
 }
 
 .landing-feature-grid {
