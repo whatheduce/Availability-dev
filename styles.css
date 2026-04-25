@@ -4458,6 +4458,7 @@ body.account-view #dash-account {
 .landing-feature {
   background: var(--landing-bg-alt);
   padding-top: 68px;
+  padding-bottom: 68px;
 }
 
 .landing-feature-grid {
@@ -4657,7 +4658,7 @@ body.account-view #dash-account {
 }
 
 .landing-feature__media {
-  max-width: 1180px;
+  max-width: 740px;
   margin: 0 auto;
 }
 
