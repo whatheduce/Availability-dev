@@ -5120,6 +5120,13 @@ html.route-auth #landing-page {
     gap: 10px 16px;
   }
 
+ /* Only apply grid layout when the calendar topbar is actually shown */
+.calendar-topbar[style*="display: block"],
+.calendar-topbar[style*="display: flex"],
+.calendar-topbar[style*="display: grid"] {
+  display: grid !important;
+}
+
   .calendar-topbar-left {
     grid-area: left;
     align-self: start;
