@@ -5112,7 +5112,6 @@ html.route-auth #landing-page {
  }
 
   .calendar-topbar {
-    display: grid !important;
     grid-template-columns: auto 1fr;
     grid-template-areas:
       "left right"
