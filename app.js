@@ -4188,8 +4188,8 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
 
   auth.bindAuthUi();
 
-  const openLandingSignin = () => auth.openAuth("signin");
-  const openLandingSignup = () => auth.openAuth("signup");
+  const openLandingSignin = () => auth.openAuth("signin", { allowClickAway: true });
+  const openLandingSignup = () => auth.openAuth("signup", { allowClickAway: true });
 
   document.getElementById("landing-signin")?.addEventListener("click", openLandingSignin);
   document.getElementById("landing-hero-signin")?.addEventListener("click", openLandingSignin);
