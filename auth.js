@@ -16,6 +16,7 @@ const {
 } = deps;
 
 let authMode = "signin";
+let allowAuthClickAway = false;
 
 function showAuthOverlay(msg = "", opts = {}) {
   document.body.style.visibility = "visible";
@@ -27,6 +28,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   const forgotBtn = document.getElementById("auth-forgot");
   const passwordInput = document.getElementById("auth-password");
   const confirmInput = document.getElementById("auth-password-confirm");
+  allowAuthClickAway = !!opts.allowClickAway;
 
   if (!overlay || !toggle || !subtitle) return;
 
@@ -112,6 +114,7 @@ function clearAuthError() {
 }
   
 function hideAuthOverlay() {
+  allowAuthClickAway = false;
   const overlay = document.getElementById("auth-overlay");
   if (overlay) overlay.style.display = "none";
 }
@@ -407,6 +410,22 @@ function bindAuthUi() {
        });
      }
 
+  const authOverlay = document.getElementById("auth-overlay");
+  const authCard = document.getElementById("auth-card");
+
+  if (authOverlay && authCard) {
+    authOverlay.addEventListener("click", (e) => {
+      if (!allowAuthClickAway) return;
+      if (e.target !== authOverlay) return;
+
+      hideAuthOverlay();
+    });
+
+    authCard.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+  }
+  
 document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         const btn = document.getElementById("auth-submit");
