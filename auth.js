@@ -411,7 +411,7 @@ function bindAuthUi() {
      }
 
   const authOverlay = document.getElementById("auth-overlay");
-  const authCard = document.getElementById("auth-card");
+  const authCard = document.getElementById("auth-modal");
 
   if (authOverlay && authCard) {
     authOverlay.addEventListener("click", (e) => {
