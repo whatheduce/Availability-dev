@@ -4686,6 +4686,7 @@ body.account-view #dash-account {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   margin-top: 28px;
+  max-width: 450px;
 }
 
 .landing-feature-card__title {
@@ -4696,6 +4697,7 @@ body.account-view #dash-account {
   color: var(--landing-text);
   font-weight: 600;
   padding-top: 12px;
+  text-align: center;
 }
 
 .landing-feature-card__text {
