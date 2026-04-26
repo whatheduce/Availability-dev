@@ -4505,6 +4505,30 @@ body.account-view #dash-account {
 
 .landing-feature-grid-section {
   background: var(--landing-bg-alt-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-feature-grid-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background-image:
+    linear-gradient(
+      to right,
+      rgba(120, 100, 70, 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(120, 100, 70, 0.055) 1px,
+      transparent 1px
+    );
+
+  background-size: 72px 72px;
 }
 
 .landing-footer-cta {
@@ -4715,6 +4739,7 @@ body.account-view #dash-account {
   gap: 24px;
   max-width: 1180px;
   margin: 0 auto;
+  z-index: 1;
 }
 
 .landing-feature-card {
