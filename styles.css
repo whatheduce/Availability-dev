@@ -4,6 +4,7 @@
       overflow-x: hidden;
       margin: 0;
       padding: 0;
+      background: var(--landing-bg);
     }
 
 html {
