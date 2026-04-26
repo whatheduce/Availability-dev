@@ -4730,11 +4730,12 @@ body.account-view #dash-account {
 
 .landing-feature-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(2, auto);
+  gap: 64px;
   max-width: 1180px;
   margin: 0 auto;
   z-index: 1;
+ justify-content: center;
 }
 
 .landing-feature-card {
