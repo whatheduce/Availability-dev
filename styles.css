@@ -4434,11 +4434,30 @@ body.account-view #dash-account {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.18;
+  opacity: 1;
+
   background:
-    linear-gradient(rgba(181, 145, 58, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(181, 145, 58, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(181, 145, 58, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(181, 145, 58, 0.035) 1px, transparent 1px);
+
   background-size: 120px 120px;
+}
+
+.landing-hero::before {
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 44%,
+    transparent 0%,
+    transparent 34%,
+    black 66%,
+    black 100%
+  );
+  mask-image: radial-gradient(
+    circle at 50% 44%,
+    transparent 0%,
+    transparent 34%,
+    black 66%,
+    black 100%
+  );
 }
 
 /* soft warm glow */
@@ -4466,23 +4485,6 @@ body.account-view #dash-account {
 .landing-hero {
   background: var(--landing-bg);
   padding-bottom: 112px;
-}
-
-.landing-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(246, 236, 221, 0) 0%,
-      rgba(246, 236, 221, 0.65) 42%,
-      rgba(246, 236, 221, 0.92) 62%,
-      rgba(246, 236, 221, 1) 78%
-    );
 }
 
 .landing-hero__inner {
