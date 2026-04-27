@@ -4574,15 +4574,16 @@ body.account-view #dash-account {
 
 .landing-nav__actions {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 9px;
   flex-shrink: 0;
 }
 
-.landing-nav-actions {
+.landing-auth-buttons {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  gap: 12px;
 }
 
 .landing-nav-btn {
@@ -4618,8 +4619,6 @@ body.account-view #dash-account {
 }
 
 .landing-free-note {
-  margin-top: 14px;
-
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -4628,7 +4627,6 @@ body.account-view #dash-account {
   color: #8d7b5f;
   font-size: 0.8rem;
   font-weight: 500;
-
   opacity: 0.9;
 }
 
