@@ -4790,7 +4790,7 @@ body.account-view #dash-account {
   width: min(100%, 980px);
   padding: 0;
   background: transparent;
-  border: none;
+  border: 2px solid #e58a1f;
   box-shadow: none;
   position: relative;
 }
