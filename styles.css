@@ -4575,7 +4575,7 @@ body.account-view #dash-account {
 .landing-nav__actions {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 9px;
   flex-shrink: 0;
 }
@@ -4622,7 +4622,7 @@ body.account-view #dash-account {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
 
   color: #8d7b5f;
   font-size: 0.8rem;
