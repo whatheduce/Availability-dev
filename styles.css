@@ -4662,6 +4662,7 @@ body.account-view #dash-account {
 .landing-hero__text-row .landing-subtitle {
   margin: 0;
   max-width: 420px;
+  text-align: center;
 }
 
 .landing-subtitle--center,
