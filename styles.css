@@ -4799,7 +4799,6 @@ body.account-view #dash-account {
 ========================= */
 
 .landing-media-stage {
-  width: min(100%, 1080px);
   margin: 0 auto;
   padding: 18px;
   border-radius: var(--landing-radius);
