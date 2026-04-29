@@ -4724,7 +4724,7 @@ body.account-view #dash-account {
 
 .landing-feature__intro {
   max-width: 920px;
-  margin: 0 auto 30px;
+  margin: 0 24px;
   text-align: center;
   padding-top: 28px;
 }
