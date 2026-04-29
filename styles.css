@@ -4726,6 +4726,7 @@ body.account-view #dash-account {
   max-width: 920px;
   margin: 0 auto 30px;
   text-align: center;
+  padding-top: 28px;
 }
 
 .landing-section-title {
@@ -5482,7 +5483,7 @@ html.route-auth #landing-page {
   }
 
   .landing-section-block {
-    padding: 18px 18px 30px;
+    padding: 18px 18px 44px;
     border-bottom: solid 2px black;
   }
 
