@@ -5474,7 +5474,8 @@ html.route-auth #landing-page {
   }
 
   .landing-section-block {
-    padding: 18px;
+    padding: 18 18px 30px:
+    border-bottom: solid 2px black;
   }
 
   .landing-media-stage {
