@@ -5466,6 +5466,10 @@ html.route-auth #landing-page {
     font-size: 13px;
   }
 
+.landing-title-art-wrap {
+ display: none;
+}
+ 
   .landing-subtitle,
   .landing-section-text,
   .landing-feature-card__text {
