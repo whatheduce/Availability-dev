@@ -5469,6 +5469,10 @@ html.route-auth #landing-page {
 .landing-title-art-wrap {
  display: none;
 }
+
+.landing-eyebrow, .landing-section-eyebrow {
+ font-size: 20px;
+}
  
   .landing-subtitle,
   .landing-section-text,
