@@ -5440,7 +5440,7 @@ html.route-auth #landing-page {
   grid-template-columns: 1fr;
   gap: 0px;
   text-align: left;
-  padding-bottom: 20px;
+  padding: 20px;
 }
 
 .landing-hero__text-row .landing-subtitle {
@@ -5482,7 +5482,7 @@ html.route-auth #landing-page {
   }
 
   .landing-section-block {
-    padding: 18 18px 30px;
+    padding: 18px 18px 30px;
     border-bottom: solid 2px black;
   }
 
