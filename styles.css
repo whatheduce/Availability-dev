@@ -5459,6 +5459,7 @@ html.route-auth #landing-page {
 
  .landing-nav__actions {
   justify-content: center;
+  scale: 80%;
  }
  
   .landing-brand__logo {
