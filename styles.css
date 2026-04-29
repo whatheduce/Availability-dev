@@ -5028,14 +5028,6 @@ html.route-auth #landing-page {
     font-size: 13px;
   }
 
-  .landing-nav__actions {
-    width: 100%;
-  }
-
-  .landing-nav-btn {
-    flex: 1 1 0;
-  }
-
   .landing-subtitle,
   .landing-section-text,
   .landing-feature-card__text {
