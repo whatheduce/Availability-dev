@@ -5453,18 +5453,24 @@ html.route-auth #landing-page {
  }
 
   .landing-nav {
-    flex-direction: column;
     align-items: stretch;
     gap: 0px;
   }
 
+ .landing-nav__actions {
+  justify-content: center;
+ }
+ 
   .landing-brand__logo {
     width: 160px;
+    position: absolute;
+    left: 0;
   }
 
   .landing-brand__tagline {
     max-width: none;
     font-size: 13px;
+    margin-left: 112px;
   }
 
 .landing-title-art-wrap {
