@@ -5507,6 +5507,10 @@ html.route-auth #landing-page {
     border-radius: 22px;
   }
 
+ .landing-feature__media {
+  width: 90%;
+ }
+
   .landing-footer-cta__inner {
     padding: 34px 22px;
     border-radius: 24px;
