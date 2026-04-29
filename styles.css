@@ -5138,7 +5138,11 @@ html.route-auth #landing-page {
 
 .whole-day-cell .dot-container.dots-4-6 {
   gap: 4px;
- } 
+ }
+
+.landing-subtitle {
+ font-size: 16px;
+ }
 } 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 899px) {
@@ -5434,7 +5438,7 @@ html.route-auth #landing-page {
 
 .landing-hero__text-row {
   grid-template-columns: 1fr;
-  gap: 18px;
+  gap: 0px;
   text-align: left;
 }
 
@@ -5495,7 +5499,12 @@ html.route-auth #landing-page {
   .landing-footer-cta__inner {
     padding: 34px 22px;
     border-radius: 24px;
-  } 
+  }
+
+ .landing-title-art {
+  width: 60%;
+  margin: auto;
+ }
 }
 
 /* ================================================================================================================================================================================================================= */
