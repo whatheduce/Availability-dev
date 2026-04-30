@@ -804,7 +804,7 @@ async function refreshCurrentTableMeta() {
   if (!currentTable?.id) return;
 
   const { data, error } = await supabase
-    .from("tables")
+    .from("tables_safe")
     .select("id, last_activity_at, gold_threshold, host_tz, name, structure_type, max_members")
     .eq("id", currentTable.id)
     .single();
@@ -1964,7 +1964,7 @@ await rollForwardIfNeeded(currentTable.id);
 
 // Always refetch so the UI always uses the DB's current start_date/host_tz
 const { data: refreshed, error: refreshErr } = await supabase
-  .from("tables")
+  .from("tables_safe")
   .select("*")
   .eq("id", currentTable.id)
   .single();
