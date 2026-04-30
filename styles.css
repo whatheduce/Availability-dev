@@ -5968,6 +5968,20 @@ html.route-auth #landing-page {
  .landing-brand__tagline {
   display: none;
  }
+
+ .landing-section-title {
+   font-size: 18px;
+   line-height: 1.24;
+ }
+
+ .landing-subtitle, .landing-section-text, .landing-feature-card__text {
+   font-size: 14px;
+   line-height: 1.40;
+ }
+
+ .landing-eyebrow {
+   font-size: 18px;
+ }
 } 
 
 /* ================================================================================================================================================================================================================= */
