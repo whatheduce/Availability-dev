@@ -1926,15 +1926,11 @@ async function loadTable() {
   showBoardView();
   showCalendarLoading();
   
-  const queryField = inviteToken ? "invite_token" : "owner_token";
-  const tokenValue = inviteToken || manageToken;
-
-  const { data, error } = await supabase
-    .from("tables")
-    .select("*")
-    .eq(queryField, tokenValue)
-    .maybeSingle();
-
+ const { data, error } = await supabase.rpc("get_board_by_access_token", {
+  p_invite_token: inviteToken || null,
+  p_owner_token: manageToken || null
+});
+  
   if (error) {
   console.error("Error loading table:", error);
 }
