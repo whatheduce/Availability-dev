@@ -4906,7 +4906,7 @@ body.account-view #dash-account {
 }
 
 .landing-footer {
-  padding: 40px 24px 56px;
+  padding: 0 24px 56px;
   display: flex;
   justify-content: center;
 }
