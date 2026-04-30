@@ -4443,7 +4443,7 @@ body.account-view #dash-account {
 .landing-section-block {
   position: relative;
   overflow: hidden;
-  padding: 28px;
+  padding: 44px 28px 64px;
 }
 
 .landing-section-block > * {
@@ -4882,7 +4882,7 @@ body.account-view #dash-account {
 
 .landing-footer-cta__inner {
   max-width: 860px;
-  margin: 0 auto;
+  margin: 34px auto;
   text-align: center;
   padding: 42px 30px;
   border-radius: 30px;
@@ -4991,8 +4991,16 @@ html.route-auth #landing-page {
 
 @media (max-width: 1100px) {
   .landing-section-block {
-    padding: 22px;
+    padding-top: 14px;
   }
+
+ .landing-feature-grid {
+  gap: 0px;
+ }
+
+ .landing-feature-card {
+  margin: 28px auto;
+ }
 
   .landing-nav {
     padding: 20px 22px 16px;
