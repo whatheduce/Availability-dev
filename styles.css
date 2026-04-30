@@ -5490,6 +5490,10 @@ html.route-auth #landing-page {
  font-size: 20px;
 }
 
+.landing-eyebrow {
+ font-size: 20px;
+} 
+
 .landing-section-eyebrow-card {
  font-size: 12px;
 }
