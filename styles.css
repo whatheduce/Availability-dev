@@ -5463,6 +5463,7 @@ html.route-auth #landing-page {
   .landing-nav {
     align-items: stretch;
     gap: 0px;
+    padding: 20px 0 16px;
   }
 
  .landing-nav__actions {
@@ -5473,12 +5474,12 @@ html.route-auth #landing-page {
   .landing-brand__logo {
     width: 160px;
     position: absolute;
-    left: 0;
+    left: -20px;
   }
 
   .landing-brand__tagline {
     max-width: none;
-    font-size: 13px;
+    font-size: 10px;
     margin-left: 112px;
   }
 
@@ -5963,6 +5964,10 @@ html.route-auth #landing-page {
   min-width: 0;
   max-width: 100%;
  } 
+ 
+ .landing-brand__tagline {
+  display: none;
+ }
 } 
 
 /* ================================================================================================================================================================================================================= */
