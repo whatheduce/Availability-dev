@@ -5486,11 +5486,11 @@ html.route-auth #landing-page {
  display: none;
 }
 
-.landing-eyebrow, {
+.landing-section-eyebrow, {
  font-size: 20px;
 }
 
-.landing-section-eyebrow {
+.landing-section-eyebrow-card {
  font-size: 12px;
 }
  
