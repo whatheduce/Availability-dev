@@ -4609,6 +4609,8 @@ pwSave?.addEventListener("click", async () => {
       return;
     }
 
+    await auth.sendPasswordChangedEmail();
+
     closePwModal();
 
     await confirmModal({
