@@ -5497,11 +5497,6 @@ html.route-auth #landing-page {
     line-height: 1.68;
   }
 
-  .landing-section-block {
-    padding: 18px 18px 44px;
-    border-bottom: solid 2px black;
-  }
-
   .landing-media-stage {
     margin: 0 12px;
     border-radius: 22px;
