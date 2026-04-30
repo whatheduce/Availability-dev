@@ -1930,12 +1930,14 @@ async function loadTable() {
   p_invite_token: inviteToken || null,
   p_owner_token: manageToken || null
 });
+
+const board = Array.isArray(data) ? data[0] : data;  
   
   if (error) {
   console.error("Error loading table:", error);
 }
 
-if (!data) {
+if (!board) {
   // No board exists for this token (e.g., DB wiped or invalid link)
   document.getElementById("create-board").style.display = "none";
   document.getElementById("calendar").style.display = "none";
@@ -1951,7 +1953,7 @@ if (!data) {
   return;
 }
 
-currentTable = data;
+currentTable = board;
 window.currentTable = currentTable;
   
   // ⭐ remember this board for next time
