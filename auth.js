@@ -198,6 +198,14 @@ function resetAuthToFreshSignin() {
   if (typeof setAuthMode === "function") setAuthMode("signin");
 }  
 
+async function sendPasswordChangedEmail() {
+  const { error } = await supabase.functions.invoke("send-password-changed-email");
+
+  if (error) {
+    console.warn("Password changed email failed:", error);
+  }
+}
+  
 async function getAuthUser() {
   const { data, error } = await supabase.auth.getUser();
   if (error) return null;
@@ -539,6 +547,8 @@ document.getElementById("auth-set-password")?.addEventListener("click", async ()
       return;
     }
 
+    await sendPasswordChangedEmail();
+
     // Clean URL/hash so refresh doesn't re-trigger recovery mode
     window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
 
@@ -595,5 +605,6 @@ document.getElementById("auth-new-password-confirm")?.addEventListener("keydown"
     hideProfileSetup,
     saveProfileSetup,
     bindAuthUi,
+    sendPasswordChangedEmail,
   };
 }
