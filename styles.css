@@ -5486,7 +5486,7 @@ html.route-auth #landing-page {
  display: none;
 }
 
-.landing-section-eyebrow, {
+.landing-section-eyebrow {
  font-size: 20px;
 }
 
