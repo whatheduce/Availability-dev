@@ -817,6 +817,43 @@ async function refreshCurrentTableMeta() {
 window.refreshCurrentTableMeta = refreshCurrentTableMeta;
 
 //----------
+async function renderPendingRequestsUi(boardId) {
+  const mobileBar = document.getElementById("pending-requests-mobile-bar");
+  const mobileText = document.getElementById("pending-requests-mobile-text");
+  const sideCard = document.getElementById("pending-requests-side-card");
+  const sideText = document.getElementById("pending-requests-side-text");
+
+  if (!mobileBar || !mobileText || !sideCard || !sideText) return;
+
+  mobileBar.hidden = true;
+  sideCard.hidden = true;
+
+  if (!isBoardOwner || !boardId) return;
+
+  const { data, error } = await supabase
+    .from("board_join_requests")
+    .select("id")
+    .eq("board_id", boardId)
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("Failed to load pending requests:", error);
+    return;
+  }
+
+  const count = data?.length || 0;
+  if (!count) return;
+
+  const label = `${count} Pending Request${count === 1 ? "" : "s"}`;
+
+  mobileText.textContent = label;
+  sideText.textContent = label;
+
+  mobileBar.hidden = false;
+  sideCard.hidden = false;
+}
+
+//----------
 async function renderCalendarInviteStats() {
   const wrap = document.getElementById("calendar-invite-stats");
   const joinedEl = document.getElementById("calendar-invite-joined");
@@ -1989,6 +2026,7 @@ if (!au) {
   showCalendarLoading();
 
   await refreshBoardOwnerFlag();
+  await renderPendingRequestsUi(currentTable.id);
     renderCalendarNote();
     setCalendarNoteEditing(false);
 
