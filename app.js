@@ -1203,8 +1203,8 @@ async function ensureMembership(boardId) {
   if (!au || !boardId) return false;
 
   const boardMaxMembers =
-  Number(currentTable?.max_members) ||
-  FREE_BOARD_MEMBER_LIMIT;
+    Number(currentTable?.max_members) ||
+    FREE_BOARD_MEMBER_LIMIT;
 
   const { data, error } = await supabase.rpc("join_board_if_space", {
     p_board_id: boardId,
@@ -1217,38 +1217,38 @@ async function ensureMembership(boardId) {
   }
 
   if (!data?.ok) {
-  if (data?.reason === "board_full") {
-    hideCalendarLoading();
+    if (data?.reason === "board_full") {
+      hideCalendarLoading();
 
-    await confirmModal({
-      title: "Calendar full",
-      message: `This calendar already has ${boardMaxMembers} users, which is the maximum allowed.`,
-      okText: "OK",
-      cancelText: ""
-    });
+      await confirmModal({
+        title: "Calendar full",
+        message: `This calendar already has ${boardMaxMembers} users, which is the maximum allowed.`,
+        okText: "OK",
+        cancelText: ""
+      });
 
+      return false;
+    }
+
+    if (data?.reason === "approval_required") {
+      hideCalendarLoading();
+
+      await confirmModal({
+        title: "Access requested",
+        message: "Your request to join this calendar has been sent to the calendar owner. You’ll be able to access it once they approve you.",
+        okText: "OK",
+        cancelText: ""
+      });
+
+      return false;
+    }
+
+    console.error("ensureMembership rejected:", data);
     return false;
   }
 
-  console.error("ensureMembership rejected:", data);
-  return false;
+  return true;
 }
-
-  if (au.email) {
-    const { error: acceptErr } = await supabase
-      .from("board_invites")
-      .update({
-        accepted_at: new Date().toISOString(),
-        accepted_by_user_id: au.id
-      })
-      .eq("board_id", boardId)
-      .eq("email", au.email.toLowerCase().trim())
-      .is("accepted_at", null);
-
-    if (acceptErr) {
-      console.warn("Failed to mark invite accepted:", acceptErr);
-    }
-  }
 
   return true;
 }
