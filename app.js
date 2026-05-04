@@ -1250,9 +1250,6 @@ async function ensureMembership(boardId) {
   return true;
 }
 
-  return true;
-}
-
 //----------
 async function getBoardColorMap(boardId) {
   // 1) Get member user_ids for this board
