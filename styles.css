@@ -354,6 +354,26 @@ body.logged-in #landing-bg::after{
   opacity: 1;
 }
 
+.pending-requests-mobile-bar {
+  display: none;
+}
+
+.pending-requests-side-card {
+  margin-top: 12px;
+  border-color: rgba(229, 138, 31, 0.35);
+  background: rgba(229, 138, 31, 0.10);
+}
+
+.pending-requests-side-card[hidden],
+.pending-requests-mobile-bar[hidden] {
+  display: none !important;
+}
+
+.pending-requests-side-card button {
+  margin-top: 10px;
+  width: 100%;
+}
+
 /* =========================
    MOBILE VIEW TIP
    ========================= */
@@ -5978,6 +5998,57 @@ html.route-auth #landing-page {
 } 
 
 /* ================================================================================================================================================================================================================= */
+/* ONLY small phones stack */
+@media (max-width: 520px) {
+  #dash-account .acct-row,
+  #dash-account .account-row {
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+  }
+
+  #dash-account .acct-label,
+  #dash-account .account-label {
+    grid-column: 1 / -1;
+  }
+
+  #dash-account .acct-value,
+  #dash-account .account-value {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .pending-requests-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    position: sticky;
+    top: 0;
+    z-index: 80;
+
+    padding: 12px 14px;
+    background: #E58A1F;
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .pending-requests-mobile-bar button {
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: #ffffff;
+    color: #9a4f11;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .pending-requests-side-card {
+    display: none !important;
+  }
+}
+
+/* ================================================================================================================================================================================================================= */
 @media (max-width: 400px) {
 .whole-day-cell .dot {
   width: 10px;
@@ -6023,24 +6094,5 @@ html.route-auth #landing-page {
  }
 }
 
-/* ================================================================================================================================================================================================================= */
-/* ONLY small phones stack */
-@media (max-width: 520px) {
-  #dash-account .acct-row,
-  #dash-account .account-row {
-    grid-template-columns: 1fr auto;
-    row-gap: 6px;
-  }
 
-  #dash-account .acct-label,
-  #dash-account .account-label {
-    grid-column: 1 / -1;
-  }
-
-  #dash-account .acct-value,
-  #dash-account .account-value {
-    justify-self: start;
-    text-align: left;
-  }
-}
  
