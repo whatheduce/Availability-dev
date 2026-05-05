@@ -915,13 +915,14 @@ document.addEventListener("click", async (e) => {
   const id = row.dataset.id;
 
   if (e.target.classList.contains("approve-btn")) {
-    await supabase
-      .from("board_join_requests")
-      .update({
-        status: "approved",
-        decided_at: new Date().toISOString()
-      })
-      .eq("id", id);
+    const { data, error } = await supabase.rpc("approve_board_join_request", {
+      p_request_id: Number(id)
+    });
+
+    if (error || !data?.ok) {
+      console.error("Approve failed:", error || data);
+      return;
+    }
 
     row.remove();
     await renderPendingRequestsUi(currentTable.id);
