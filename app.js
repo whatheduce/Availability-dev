@@ -924,6 +924,7 @@ document.addEventListener("click", async (e) => {
       .eq("id", id);
 
     row.remove();
+    await renderPendingRequestsUi(currentTable.id);
   }
 
   if (e.target.classList.contains("deny-btn")) {
@@ -936,6 +937,7 @@ document.addEventListener("click", async (e) => {
       .eq("id", id);
 
     row.remove();
+    await renderPendingRequestsUi(currentTable.id);
   }
 });
 
@@ -4841,8 +4843,12 @@ document.getElementById("pending-requests-side-open")
   ?.addEventListener("click", openPendingRequestsModal);
 
 document.getElementById("pending-requests-close")
-  ?.addEventListener("click", () => {
+  ?.addEventListener("click", async () => {
     document.getElementById("pending-requests-modal").hidden = true;
+
+    if (currentTable?.id) {
+      await renderPendingRequestsUi(currentTable.id);
+    }
   });
   
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
