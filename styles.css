@@ -374,6 +374,36 @@ body.logged-in #landing-bg::after{
   width: 100%;
 }
 
+.request-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.request-email {
+  font-weight: 600;
+}
+
+.request-actions button {
+  margin-left: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.approve-btn {
+  background: #22c55e;
+  color: white;
+}
+
+.deny-btn {
+  background: #ef4444;
+  color: white;
+}
+
 /* =========================
    MOBILE VIEW TIP
    ========================= */
