@@ -955,17 +955,19 @@ document.addEventListener("click", async (e) => {
 }
 
   if (e.target.classList.contains("deny-btn")) {
-    await supabase
+    const { error } = await supabase
       .from("board_join_requests")
-      .update({
-        status: "denied",
-        decided_at: new Date().toISOString()
-      })
+      .delete()
       .eq("id", id);
 
-    row.remove();
-    await renderPendingRequestsUi(currentTable.id);
+  if (error) {
+    console.error("Deny failed:", error);
+    return;
   }
+
+  row.remove();
+  await renderPendingRequestsUi(currentTable.id);
+}
 });
 
 
