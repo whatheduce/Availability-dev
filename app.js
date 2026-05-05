@@ -915,27 +915,43 @@ document.addEventListener("click", async (e) => {
   const id = row.dataset.id;
 
   if (e.target.classList.contains("approve-btn")) {
-    const { data, error } = await supabase.rpc("approve_board_join_request", {
-      p_request_id: Number(id)
+  const email = row.querySelector(".request-email")?.textContent?.trim() || "user";
+
+  showConfirmPopup(`Approving ${email}...`, {
+    title: "Approving request",
+    showOk: false
+  });
+
+  const { data, error } = await supabase.rpc("approve_board_join_request", {
+    p_request_id: Number(id)
+  });
+
+  if (error || !data?.ok) {
+    console.error("Approve failed:", error || data);
+
+    showConfirmPopup("Approval failed. Please try again.", {
+      title: "Approval failed"
     });
 
-    if (error || !data?.ok) {
-      console.error("Approve failed:", error || data);
-      return;
-    }
+    return;
+  }
 
-    const { error: emailErr } = await supabase.functions.invoke("send-join-approved-email", {
-      body: {
-        request_id: Number(id)
-      }
-    });
-
-    if (emailErr) {
-      console.warn("Approval email failed:", emailErr);
+  const { error: emailErr } = await supabase.functions.invoke("send-join-approved-email", {
+    body: {
+      request_id: Number(id)
     }
+  });
+
+  if (emailErr) {
+    console.warn("Approval email failed:", emailErr);
+  }
 
   row.remove();
   await renderPendingRequestsUi(currentTable.id);
+
+  showConfirmPopup(`${email} has been approved.`, {
+    title: "Request Approved"
+  });
 }
 
   if (e.target.classList.contains("deny-btn")) {
