@@ -550,6 +550,42 @@ function confirmModal({ title = "Confirm", message = "Are you sure?", okText = "
 }
 
 //----------
+async function openPendingRequestsModal() {
+  const overlay = document.getElementById("pending-requests-modal");
+  const list = document.getElementById("pending-requests-list");
+
+  if (!overlay || !list || !currentTable?.id) return;
+
+  const { data, error } = await supabase
+    .from("board_join_requests")
+    .select("id, email, created_at")
+    .eq("board_id", currentTable.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Failed to load requests:", error);
+    return;
+  }
+
+  if (!data.length) {
+    list.innerHTML = `<div style="opacity:0.7;">No pending requests</div>`;
+  } else {
+    list.innerHTML = data.map(req => `
+      <div class="request-row" data-id="${req.id}">
+        <div class="request-email">${req.email}</div>
+        <div class="request-actions">
+          <button class="approve-btn">Approve</button>
+          <button class="deny-btn">Deny</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  overlay.hidden = false;
+}
+
+//----------
 function escapeHtml(str) {
   return String(str || "")
     .replaceAll("&", "&amp;")
@@ -870,6 +906,38 @@ async function renderCalendarInviteStats() {
   totalEl.textContent = String(memberLimit);
   wrap.style.display = "block";
 }
+
+
+document.addEventListener("click", async (e) => {
+  const row = e.target.closest(".request-row");
+  if (!row) return;
+
+  const id = row.dataset.id;
+
+  if (e.target.classList.contains("approve-btn")) {
+    await supabase
+      .from("board_join_requests")
+      .update({
+        status: "approved",
+        decided_at: new Date().toISOString()
+      })
+      .eq("id", id);
+
+    row.remove();
+  }
+
+  if (e.target.classList.contains("deny-btn")) {
+    await supabase
+      .from("board_join_requests")
+      .update({
+        status: "denied",
+        decided_at: new Date().toISOString()
+      })
+      .eq("id", id);
+
+    row.remove();
+  }
+});
 
 
 
@@ -4764,6 +4832,17 @@ nameSave?.addEventListener("click", async () => {
   }
 });
 
+document.getElementById("pending-requests-mobile-open")
+  ?.addEventListener("click", openPendingRequestsModal);
+
+document.getElementById("pending-requests-side-open")
+  ?.addEventListener("click", openPendingRequestsModal);
+
+document.getElementById("pending-requests-close")
+  ?.addEventListener("click", () => {
+    document.getElementById("pending-requests-modal").hidden = true;
+  });
+  
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
   if (!isBoardOwner) return;
   setCalendarNoteEditing(true);
