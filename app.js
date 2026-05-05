@@ -924,9 +924,19 @@ document.addEventListener("click", async (e) => {
       return;
     }
 
-    row.remove();
-    await renderPendingRequestsUi(currentTable.id);
-  }
+    const { error: emailErr } = await supabase.functions.invoke("send-join-approved-email", {
+      body: {
+        request_id: Number(id)
+      }
+    });
+
+    if (emailErr) {
+      console.warn("Approval email failed:", emailErr);
+    }
+
+  row.remove();
+  await renderPendingRequestsUi(currentTable.id);
+}
 
   if (e.target.classList.contains("deny-btn")) {
     await supabase
