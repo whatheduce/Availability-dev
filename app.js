@@ -2138,6 +2138,8 @@ buildCalendar();
 await loadAvailability();
 
 await refreshBoardOwnerFlag();
+await renderPendingRequestsUi(currentTable.id);  
+  
 renderCalendarNote();
 setCalendarNoteEditing(false);
 await renderCalendarInviteStats();
