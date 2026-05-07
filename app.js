@@ -275,6 +275,10 @@ function hideMobileViewTip({ persist = true } = {}) {
   const tip = document.getElementById("mobile-view-tip");
   if (!tip) return;
 
+  if (tip.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+
   tip.style.display = "none";
   tip.classList.remove("mobile-view-tip--visible");
   tip.setAttribute("aria-hidden", "true");
