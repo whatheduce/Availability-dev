@@ -859,13 +859,17 @@ async function renderPendingRequestsUi(boardId) {
   const mobileText = document.getElementById("pending-requests-mobile-text");
   const sideCard = document.getElementById("pending-requests-side-card");
   const sideText = document.getElementById("pending-requests-side-text");
+  const modal = document.getElementById("pending-requests-modal");
 
   if (!mobileBar || !mobileText || !sideCard || !sideText) return;
 
   mobileBar.hidden = true;
   sideCard.hidden = true;
 
-  if (!isBoardOwner || !boardId) return;
+  if (!isBoardOwner || !boardId) {
+    if (modal) modal.hidden = true;
+    return;
+  }
 
   const { data, error } = await supabase
     .from("board_join_requests")
@@ -879,7 +883,11 @@ async function renderPendingRequestsUi(boardId) {
   }
 
   const count = data?.length || 0;
-  if (!count) return;
+
+  if (!count) {
+    if (modal) modal.hidden = true;
+    return;
+  }
 
   const label = `${count} Pending Request${count === 1 ? "" : "s"}`;
 
