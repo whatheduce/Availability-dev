@@ -6060,9 +6060,20 @@ html.route-auth #landing-page {
     z-index: 80;
 
     padding: 12px 14px;
-    background: #E58A1F;
+    background: rgba(229, 138, 31, 0.88);
+    backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
+    border-radius: 14px;
+
+    box-shadow:
+     0 6px 24px rgba(229, 138, 31, 0.22),
+     0 0 12px rgba(229, 138, 31, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+   
     color: #ffffff;
     font-weight: 800;
+    margin: 5px 0px;
   }
 
   .pending-requests-mobile-bar button {
