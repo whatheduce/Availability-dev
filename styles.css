@@ -237,12 +237,6 @@ body.logged-in #landing-bg::after{
   white-space: nowrap;
 }
 
-@media (max-width: 720px){
-  .footer-note--top{
-    width: 100%;
-  }
-}
-
 .calendar-topbar-right{
   display: flex;
   flex-direction: column;
@@ -1117,7 +1111,7 @@ td.month-break:not(.gold-cell):hover {
 
 .footer-note{
   max-width: 980px;
-  margin: 8px 10px 8px;
+  margin: 8px 20px 8px;
   margin-left: 20px;
   padding: 12px 14px;
   border-radius: 16px;
@@ -5316,6 +5310,10 @@ html.route-auth #landing-page {
   --mini-scale: 0.85;
 }
 
+ .footer-note--top{
+  width: 100%;
+}
+ 
   #dashboard {
     height: 100dvh;
     display: flex;
