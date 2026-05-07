@@ -6121,6 +6121,7 @@ html.route-auth #landing-page {
 
  .request-actions button{
   font-size: 0.8rem;
+  margin-left: 3px;
  }
 
  .modal-card {
@@ -6130,6 +6131,10 @@ html.route-auth #landing-page {
 
  .modal-overlay {
   padding: 0px;
+ }
+ 
+ .request-row {
+  gap: 2px;
  }
 }
 
