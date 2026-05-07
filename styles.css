@@ -6119,9 +6119,10 @@ html.route-auth #landing-page {
   font-size: 0.8rem;
  }
 
- .request-actions button{
+ .request-actions button {
   font-size: 0.8rem;
   margin-left: 3px;
+  padding: 6px 7px;
  }
 
  .modal-card {
@@ -6134,7 +6135,7 @@ html.route-auth #landing-page {
  }
  
  .request-row {
-  gap: 2px;
+  gap: 0px;
  }
 }
 
