@@ -993,35 +993,44 @@ document.addEventListener("click", async (e) => {
 });
   }
 
-  if (e.target.classList.contains("block-btn")) {
-    showConfirmPopup(`Blocking ${email}...`, {
-      title: "Blocking request",
-      showOk: false
+if (e.target.classList.contains("block-btn")) {
+  const confirmed = await confirmModal({
+    title: "Block user?",
+    message: `Are you sure you want to permanently block ${email} from accessing this calendar?`,
+    okText: "Block user",
+    cancelText: "Cancel"
+  });
+
+  if (!confirmed) return;
+
+  showConfirmPopup(`Blocking ${email}...`, {
+    title: "Blocking request",
+    showOk: false
+  });
+
+  const { data, error } = await supabase.rpc("block_board_join_request", {
+    p_request_id: Number(id)
+  });
+
+  if (error || !data?.ok) {
+    console.error("Block failed:", error || data);
+
+    showConfirmPopup("Block failed. Please try again.", {
+      title: "Block failed"
     });
 
-    const { data, error } = await supabase.rpc("block_board_join_request", {
-      p_request_id: Number(id)
-    });
-
-    if (error || !data?.ok) {
-      console.error("Block failed:", error || data);
-
-      showConfirmPopup("Block failed. Please try again.", {
-        title: "Block failed"
-      });
-
-      return;
-    }
-
-    closeModalIfLastRequest();
-    row.remove();
-
-    await renderPendingRequestsUi(currentTable.id);
-
-    showConfirmPopup(`${email} has been blocked from this calendar.`, {
-      title: "User blocked"
-    });
+    return;
   }
+
+  closeModalIfLastRequest();
+  row.remove();
+
+  await renderPendingRequestsUi(currentTable.id);
+
+  showConfirmPopup(`${email} has been blocked from this calendar.`, {
+    title: "User blocked"
+  });
+}
 });
 
 
