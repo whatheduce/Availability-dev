@@ -967,6 +967,36 @@ document.addEventListener("click", async (e) => {
   row.remove();
   await renderPendingRequestsUi(currentTable.id);
 }
+
+  if (e.target.classList.contains("block-btn")) {
+    const email = row.querySelector(".request-email")?.textContent?.trim() || "user";
+
+  showConfirmPopup(`Blocking ${email}...`, {
+    title: "Blocking request",
+    showOk: false
+  });
+
+  const { data, error } = await supabase.rpc("block_board_join_request", {
+    p_request_id: Number(id)
+  });
+
+  if (error || !data?.ok) {
+    console.error("Block failed:", error || data);
+
+    showConfirmPopup("Block failed. Please try again.", {
+      title: "Block failed"
+    });
+
+    return;
+  }
+
+  row.remove();
+  await renderPendingRequestsUi(currentTable.id);
+
+  showConfirmPopup(`${email} has been blocked from this calendar.`, {
+    title: "User blocked"
+  });
+}  
 });
 
 
