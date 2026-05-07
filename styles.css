@@ -6063,7 +6063,6 @@ html.route-auth #landing-page {
     background: rgba(229, 138, 31, 0.88);
     backdrop-filter: blur(8px);
    -webkit-backdrop-filter: blur(8px);
-    border-radius: 14px;
 
     box-shadow:
      0 6px 24px rgba(229, 138, 31, 0.22),
