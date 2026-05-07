@@ -955,13 +955,12 @@ document.addEventListener("click", async (e) => {
 }
 
   if (e.target.classList.contains("deny-btn")) {
-    const { error } = await supabase
-      .from("board_join_requests")
-      .delete()
-      .eq("id", id);
+    const { data, error } = await supabase.rpc("deny_board_join_request", {
+      p_request_id: Number(id)
+    });
 
-  if (error) {
-    console.error("Deny failed:", error);
+  if (error || !data?.ok) {
+    console.error("Deny failed:", error || data);
     return;
   }
 
