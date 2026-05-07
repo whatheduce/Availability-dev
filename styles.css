@@ -6075,6 +6075,18 @@ html.route-auth #landing-page {
     margin: 5px 0px;
   }
 
+  @keyframes pendingMobileBarIn {
+    from {
+      opacity: 0;
+      transform: translateX(-120%);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+ 
   .pending-requests-mobile-bar button {
     border: 0;
     border-radius: 999px;
@@ -6083,6 +6095,7 @@ html.route-auth #landing-page {
     color: #9a4f11;
     font-weight: 800;
     cursor: pointer;
+   animation: pendingMobileBarIn 0.45s ease-out 1s both;
   }
 
   .pending-requests-side-card {
@@ -6136,5 +6149,10 @@ html.route-auth #landing-page {
  }
 }
 
-
+/* ================================================================================================================================================================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .pending-requests-mobile-bar {
+    animation: none;
+  }
+}
  
