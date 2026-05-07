@@ -987,6 +987,10 @@ document.addEventListener("click", async (e) => {
     row.remove();
 
     await renderPendingRequestsUi(currentTable.id);
+    
+    showConfirmPopup(`${email} has been denied access. They can request access again unless you block them in the future.`, {
+    title: "Request denied"
+});
   }
 
   if (e.target.classList.contains("block-btn")) {
