@@ -2193,7 +2193,6 @@ if (!au) {
   // Not signed in → show blurred auth overlay and stop interactions
   auth.showAuthOverlay();
 
-  document.getElementById("identity-section").style.display = "none";
   document.getElementById("create-board").style.display = "none";
 
   document.getElementById("dashboard").style.display = "none";
@@ -2233,7 +2232,6 @@ if (!membershipOk) {
 await enforceUniqueBoardColourIfNeeded(currentTable.id);
 
 // User exists → show the calendar UI
-document.getElementById("identity-section").style.display = "none";
 document.getElementById("dashboard").style.display = "none";
 showCalendarLoading();
 
