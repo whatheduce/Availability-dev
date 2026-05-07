@@ -577,6 +577,7 @@ async function openPendingRequestsModal() {
         <div class="request-actions">
           <button class="approve-btn">Approve</button>
           <button class="deny-btn">Deny</button>
+          <button class="block-btn">Block</button>
         </div>
       </div>
     `).join("");
