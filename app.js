@@ -922,90 +922,102 @@ document.addEventListener("click", async (e) => {
   if (!row) return;
 
   const id = row.dataset.id;
-
-  if (e.target.classList.contains("approve-btn")) {
   const email = row.querySelector(".request-email")?.textContent?.trim() || "user";
 
-  showConfirmPopup(`Approving ${email}...`, {
-    title: "Approving request",
-    showOk: false
-  });
+  const closeModalIfLastRequest = () => {
+    const modal = document.getElementById("pending-requests-modal");
+    const remainingRows = document.querySelectorAll(".request-row").length;
 
-  const { data, error } = await supabase.rpc("approve_board_join_request", {
-    p_request_id: Number(id)
-  });
+    if (modal && remainingRows <= 1) {
+      modal.hidden = true;
+    }
+  };
 
-  if (error || !data?.ok) {
-    console.error("Approve failed:", error || data);
-
-    showConfirmPopup("Approval failed. Please try again.", {
-      title: "Approval failed"
+  if (e.target.classList.contains("approve-btn")) {
+    showConfirmPopup(`Approving ${email}...`, {
+      title: "Approving request",
+      showOk: false
     });
 
-    return;
-  }
+    const { data, error } = await supabase.rpc("approve_board_join_request", {
+      p_request_id: Number(id)
+    });
 
-  const { error: emailErr } = await supabase.functions.invoke("send-join-approved-email", {
-    body: {
-      request_id: Number(id)
+    if (error || !data?.ok) {
+      console.error("Approve failed:", error || data);
+
+      showConfirmPopup("Approval failed. Please try again.", {
+        title: "Approval failed"
+      });
+
+      return;
     }
-  });
 
-  if (emailErr) {
-    console.warn("Approval email failed:", emailErr);
+    const { error: emailErr } = await supabase.functions.invoke("send-join-approved-email", {
+      body: {
+        request_id: Number(id)
+      }
+    });
+
+    if (emailErr) {
+      console.warn("Approval email failed:", emailErr);
+    }
+
+    closeModalIfLastRequest();
+    row.remove();
+
+    await renderPendingRequestsUi(currentTable.id);
+
+    showConfirmPopup(`${email} has been approved.`, {
+      title: "Request Approved"
+    });
   }
-
-  row.remove();
-  await renderPendingRequestsUi(currentTable.id);
-
-  showConfirmPopup(`${email} has been approved.`, {
-    title: "Request Approved"
-  });
-}
 
   if (e.target.classList.contains("deny-btn")) {
     const { data, error } = await supabase.rpc("deny_board_join_request", {
       p_request_id: Number(id)
     });
 
-  if (error || !data?.ok) {
-    console.error("Deny failed:", error || data);
-    return;
-  }
+    if (error || !data?.ok) {
+      console.error("Deny failed:", error || data);
+      return;
+    }
 
-  row.remove();
-  await renderPendingRequestsUi(currentTable.id);
-}
+    closeModalIfLastRequest();
+    row.remove();
+
+    await renderPendingRequestsUi(currentTable.id);
+  }
 
   if (e.target.classList.contains("block-btn")) {
-    const email = row.querySelector(".request-email")?.textContent?.trim() || "user";
-
-  showConfirmPopup(`Blocking ${email}...`, {
-    title: "Blocking request",
-    showOk: false
-  });
-
-  const { data, error } = await supabase.rpc("block_board_join_request", {
-    p_request_id: Number(id)
-  });
-
-  if (error || !data?.ok) {
-    console.error("Block failed:", error || data);
-
-    showConfirmPopup("Block failed. Please try again.", {
-      title: "Block failed"
+    showConfirmPopup(`Blocking ${email}...`, {
+      title: "Blocking request",
+      showOk: false
     });
 
-    return;
+    const { data, error } = await supabase.rpc("block_board_join_request", {
+      p_request_id: Number(id)
+    });
+
+    if (error || !data?.ok) {
+      console.error("Block failed:", error || data);
+
+      showConfirmPopup("Block failed. Please try again.", {
+        title: "Block failed"
+      });
+
+      return;
+    }
+
+    closeModalIfLastRequest();
+    row.remove();
+
+    await renderPendingRequestsUi(currentTable.id);
+
+    showConfirmPopup(`${email} has been blocked from this calendar.`, {
+      title: "User blocked"
+    });
   }
-
-  row.remove();
-  await renderPendingRequestsUi(currentTable.id);
-
-  showConfirmPopup(`${email} has been blocked from this calendar.`, {
-    title: "User blocked"
-  });
-}  
 });
 
 
