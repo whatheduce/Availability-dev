@@ -373,10 +373,23 @@ body.logged-in #landing-bg::after{
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid rgba(0,0,0,0.08);
+  gap: 14px;
+  min-width: 0;
 }
 
 .request-email {
   font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-actions {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
 }
 
 .request-actions button {
@@ -6101,6 +6114,14 @@ html.route-auth #landing-page {
   .pending-requests-side-card {
     display: none !important;
   }
+
+ .request-email {
+  font-size: 0.8rem;
+ }
+
+ .request-actions button{
+  font-size: 0.8rem;
+ }
 }
 
 /* ================================================================================================================================================================================================================= */
