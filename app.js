@@ -1365,6 +1365,19 @@ async function ensureMembership(boardId) {
       return false;
     }
 
+    if (data?.reason === "blocked") {
+      hideCalendarLoading();
+
+      await confirmModal({
+        title: "Access blocked",
+        message: "You do not have access to this calendar.",
+        okText: "OK",
+        cancelText: ""
+      });
+
+      return false;
+    }
+
     if (data?.reason === "approval_required") {
       hideCalendarLoading();
 
