@@ -5515,11 +5515,6 @@ html.route-auth #landing-page {
     max-width: calc(100vw - 24px);
   }
 
-  #calendar-side-left,
-  #calendar-side-right {
-    width: 100%;
-  }
-
   .calendar-fade:after {
      width: 10%;
  }
