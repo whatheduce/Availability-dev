@@ -363,6 +363,26 @@ body.logged-in #landing-bg::after{
   box-shadow:
     0 6px 24px rgba(229, 138, 31, 0.22),
     0 0 12px rgba(229, 138, 31, 0.12);
+
+  animation: pendingRequestsPopIn 0.55s cubic-bezier(0.2, 1.4, 0.35, 1) 1s both;
+  transform-origin: center;
+}
+
+@keyframes pendingRequestsPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.82) translateY(-8px);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1.04) translateY(0);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .pending-requests-side-card[hidden],
@@ -6094,6 +6114,7 @@ html.route-auth #landing-page {
     color: #ffffff;
     font-weight: 800;
     margin: 5px 0px;
+    animation: pendingMobileBarIn 0.45s ease-out 1s both;
   }
 
   @keyframes pendingMobileBarIn {
@@ -6116,11 +6137,11 @@ html.route-auth #landing-page {
     color: #9a4f11;
     font-weight: 800;
     cursor: pointer;
-    animation: pendingMobileBarIn 0.45s ease-out 1s both;
   }
 
   .pending-requests-side-card {
     display: none !important;
+   animation: none;
   }
 
  .request-email {
@@ -6196,7 +6217,8 @@ html.route-auth #landing-page {
 
 /* ================================================================================================================================================================================================================= */
 @media (prefers-reduced-motion: reduce) {
-  .pending-requests-mobile-bar {
+  .pending-requests-mobile-bar,
+  .pending-requests-side-card{
     animation: none;
   }
 }
