@@ -2313,7 +2313,7 @@ body.notifications-view #dash-topbar {
 }
 
 .notification-title {
-  font-weight: 750;
+  font-weight: 550;
   color: #2b2118;
   opacity: 1;
 }
