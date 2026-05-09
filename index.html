@@ -383,7 +383,52 @@
 </div>
 </div>
 
-<!-- Dashboard Settings Drawer (overlay) -->
+<div id="dash-notifications" style="display:none;">
+  <div class="dash-section">
+    <div class="dash-section-title">Notifications</div>
+    <div class="dashboard-section-divider"></div>
+
+    <div class="settings-card">
+      <div class="settings-row notification-row">
+        <div>
+          <div class="settings-label notification-title">Weekly Input Reminders</div>
+          <div class="notification-desc">Remind me when I haven’t added availability yet.</div>
+        </div>
+
+        <button
+          id="notif-weekly-reminders"
+          class="toggle-switch"
+          type="button"
+          aria-pressed="false"
+        >
+          <span></span>
+        </button>
+      </div>
+
+      <div class="settings-row notification-row">
+        <div>
+          <div class="settings-label notification-title">Gold Threshold Reached</div>
+          <div class="notification-desc">Notify me when a calendar reaches its gold threshold.</div>
+        </div>
+
+        <button
+          id="notif-gold-threshold"
+          class="toggle-switch"
+          type="button"
+          aria-pressed="false"
+        >
+          <span></span>
+        </button>
+      </div>
+    </div>
+
+    <button id="notif-back-dashboard" class="settings-action compact">
+      Back to Dashboard
+    </button>
+  </div>
+</div>
+  
+                                                                                                                <!-- Dashboard Settings Drawer (overlay) -->
 <div id="settings-backdrop" class="drawer-backdrop" aria-hidden="true"></div>
   
 <aside id="settings-drawer" class="drawer" aria-hidden="true">
