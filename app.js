@@ -4674,8 +4674,8 @@ drawer?.addEventListener("click", async (e) => {
       hideDrawerOnly();
       document.body.classList.add("notifications-view");
 
-      showNotificationsPanel();
       await hydrateNotificationSettings();
+      showNotificationsPanel();
       return;
     }
 
@@ -4686,8 +4686,8 @@ drawer?.addEventListener("click", async (e) => {
     drawer?.setAttribute("aria-hidden", "false");
     backdrop?.setAttribute("aria-hidden", "true");
 
+    await hydrateNotificationSettings();  
     showNotificationsPanel();
-    await hydrateNotificationSettings();
     return;
   }
 
