@@ -353,6 +353,8 @@ body.logged-in #landing-bg::after{
 
 .pending-requests-side-card {
   margin: 24px;
+  padding: 10px;
+  border-radius: 6px;
   border-color: rgba(229, 138, 31, 0.35);
   background: rgba(229, 138, 31, 0.88);
   backdrop-filter: blur(8px);
