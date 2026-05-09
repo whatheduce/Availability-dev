@@ -217,7 +217,6 @@ async function showCreateBoard() {
   }
 }
 
-
 //----------
 function showRouteError() {
   document.body.style.visibility = "visible";
@@ -3225,6 +3224,45 @@ function showDashboardPanel() {
 }
 
 //----------  
+async function hydrateNotificationSettings() {
+  const weeklyBtn = document.getElementById("notif-weekly-reminders");
+  const goldBtn = document.getElementById("notif-gold-threshold");
+
+  const { data, error } = await supabase.rpc("get_my_notification_settings");
+
+  if (error) {
+    console.warn("Could not load notification settings:", error);
+    return;
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+
+  weeklyBtn?.setAttribute(
+    "aria-pressed",
+    String(!!row?.weekly_input_reminders)
+  );
+
+  goldBtn?.setAttribute(
+    "aria-pressed",
+    String(!!row?.gold_threshold_reached_notifications)
+  );
+}
+
+async function saveNotificationSetting(setting, enabled) {
+  const { data, error } = await supabase.rpc("set_my_notification_setting", {
+    p_setting: setting,
+    p_enabled: enabled
+  });
+
+  if (error || !data?.ok) {
+    console.warn("Could not save notification setting:", error || data);
+    return false;
+  }
+
+  return true;
+}
+
+//----------  
 async function hydrateAccountPanel() {
   try {
     const au = await auth.getAuthUser();
@@ -4637,6 +4675,7 @@ drawer?.addEventListener("click", async (e) => {
       document.body.classList.add("notifications-view");
 
       showNotificationsPanel();
+      await hydrateNotificationSettings();
       return;
     }
 
@@ -4648,6 +4687,7 @@ drawer?.addEventListener("click", async (e) => {
     backdrop?.setAttribute("aria-hidden", "true");
 
     showNotificationsPanel();
+    await hydrateNotificationSettings();
     return;
   }
 
@@ -4664,11 +4704,35 @@ document.getElementById("notif-back-dashboard")?.addEventListener("click", () =>
 });
 
 document.querySelectorAll(".toggle-switch").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const next = btn.getAttribute("aria-pressed") !== "true";
+  btn.addEventListener("click", async () => {
+    const previous = btn.getAttribute("aria-pressed") === "true";
+    const next = !previous;
+
     btn.setAttribute("aria-pressed", String(next));
+
+    let setting = null;
+
+    if (btn.id === "notif-weekly-reminders") {
+      setting = "weekly_input_reminders";
+    }
+
+    if (btn.id === "notif-gold-threshold") {
+      setting = "gold_threshold_reached_notifications";
+    }
+
+    if (!setting) return;
+
+    const ok = await saveNotificationSetting(setting, next);
+
+    if (!ok) {
+      btn.setAttribute("aria-pressed", String(previous));
+
+      showConfirmPopup("Could not save notification setting. Please try again.", {
+        title: "Notification setting"
+      });
+    }
   });
-});  
+});
 
 nameInput?.addEventListener("input", updateNameCount);
 
