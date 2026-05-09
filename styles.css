@@ -5895,10 +5895,11 @@ html.route-auth #landing-page {
 
   #calendar-side-left {
    align-items: center;
+   width: 90%;
  }
 
  #board-footer.side-card {
-  min-width: 278px;
+  min-width: 240px;
   margin-left: 8px;
  }
  
@@ -5920,7 +5921,8 @@ html.route-auth #landing-page {
  }
 
  #calendar-side {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
+  align-items: center;
  }
 
  .time-label {
@@ -5950,6 +5952,7 @@ html.route-auth #landing-page {
 
   #calendar-side-right {
     position: relative;
+    margin-left: 0;
   }
 
   #legend {
