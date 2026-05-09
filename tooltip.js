@@ -216,14 +216,30 @@ calendarEl?.addEventListener("mouseover", (e) => {
   clearTimeout(hoverTooltipTimer);
   hoverTooltipCell = cell;
 
+  const isTouchLikeInput = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+
+  const activeDay = String(window.mobileInspectDay || "");
+  const cellDay = String(cell.dataset.day || "");
+  const isWholeDayInspectCell = cell.classList.contains("inspect-column-cell");
+
+  const isMobileInspectMode =
+    isTouchLikeInput &&
+    (
+      (!!activeDay && cellDay === activeDay) ||
+      isWholeDayInspectCell
+    );
+
+  const delay = isMobileInspectMode ? 0 : HOVER_TOOLTIP_DELAY;
+
   hoverTooltipTimer = setTimeout(async () => {
     if (hoverTooltipCell !== cell) return;
 
     await renderCellHoverTooltip(cell);
 
     if (hoverTooltipCell !== cell || cellHoverTooltip.hidden) return;
+
     positionCellHoverTooltip(cell);
-  }, HOVER_TOOLTIP_DELAY);
+  }, delay);
 });
 
 calendarEl?.addEventListener("mousemove", (e) => {
