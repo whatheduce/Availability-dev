@@ -3184,23 +3184,43 @@ function bindMobileInspectDismiss() {
 
 function showAccountPanel() {
   document.body.classList.add("account-view");
+  document.body.classList.remove("notifications-view");
 
   const dashBody = document.getElementById("dash-body");
   const acct = document.getElementById("dash-account");
+  const notifications = document.getElementById("dash-notifications");
 
   if (dashBody) dashBody.style.display = "none";
+  if (notifications) notifications.style.display = "none";
   if (acct) acct.style.display = "block";
+}
+
+//----------  
+function showNotificationsPanel() {
+  document.body.classList.add("notifications-view");
+  document.body.classList.remove("account-view");
+
+  const dashBody = document.getElementById("dash-body");
+  const acct = document.getElementById("dash-account");
+  const notifications = document.getElementById("dash-notifications");
+
+  if (dashBody) dashBody.style.display = "none";
+  if (acct) acct.style.display = "none";
+  if (notifications) notifications.style.display = "block";
 }
 
 //----------  
 function showDashboardPanel() {
   document.body.classList.remove("create-view");
-  document.body.classList.remove("account-view"); 
+  document.body.classList.remove("account-view");
+  document.body.classList.remove("notifications-view");
 
   const dashBody = document.getElementById("dash-body");
   const acct = document.getElementById("dash-account");
+  const notifications = document.getElementById("dash-notifications");
 
   if (acct) acct.style.display = "none";
+  if (notifications) notifications.style.display = "none";
   if (dashBody) dashBody.style.display = "block";
 }
 
@@ -4611,6 +4631,26 @@ drawer?.addEventListener("click", async (e) => {
     return;
   }
 
+    if (btn.id === "drawer-notifications") {
+    if (window.innerWidth < 900) {
+      hideDrawerOnly();
+      document.body.classList.add("notifications-view");
+
+      showNotificationsPanel();
+      return;
+    }
+
+    document.body.classList.add("drawer-open");
+    document.body.classList.add("settings-split");
+    document.body.classList.add("notifications-view");
+
+    drawer?.setAttribute("aria-hidden", "false");
+    backdrop?.setAttribute("aria-hidden", "true");
+
+    showNotificationsPanel();
+    return;
+  }
+
   // (optional later) handle other drawer buttons here:
   // if (btn.id === "drawer-notifications") ...
 });
@@ -4618,6 +4658,17 @@ drawer?.addEventListener("click", async (e) => {
 document.getElementById("acct-back-dashboard")?.addEventListener("click", () => {
   closeDrawer(); // ✅ same behavior as clicking the ✕
 });
+
+document.getElementById("notif-back-dashboard")?.addEventListener("click", () => {
+  closeDrawer();
+});
+
+document.querySelectorAll(".toggle-switch").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const next = btn.getAttribute("aria-pressed") !== "true";
+    btn.setAttribute("aria-pressed", String(next));
+  });
+});  
 
 nameInput?.addEventListener("input", updateNameCount);
 
