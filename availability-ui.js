@@ -4,7 +4,7 @@
 
 
 //----------
-function ensureDotContainer(cell) {
+function ensureDotContainer(cell, { refresh = true } = {}) {
   let dc = cell.querySelector(".dot-container");
   if (!dc) {
     dc = document.createElement("div");
@@ -22,7 +22,10 @@ function ensureDotContainer(cell) {
     }
   }
 
-  refreshDotLayout(cell);
+  if (refresh) {
+    refreshDotLayout(cell);
+  }
+
   return dc;
 }
 
