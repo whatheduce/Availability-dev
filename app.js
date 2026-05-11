@@ -2222,9 +2222,16 @@ if (!au) {
 
 const hydrated = await auth.hydrateUserFromAuth();
 
+const auAfterHydrate = await auth.getAuthUser();
+
 if (!hydrated) {
-  await supabase.auth.signOut();
-  auth.showAuthOverlay("Please sign in again.");
+  // Genuine signed-in user with no profile yet
+  if (auAfterHydrate) {
+    auth.showProfileSetup();
+  } else {
+    auth.showAuthOverlay("Please sign in again.");
+  }
+
   return;
 }
 
