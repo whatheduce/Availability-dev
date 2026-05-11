@@ -5699,12 +5699,12 @@ html.route-auth #landing-page {
   .calendar-meta-corner__inner {
     display: grid;
     gap: 4px;
-    font-size: 8px;
-    line-height: 1.4;
     color: #6b5c4f;
     text-align: left;
     white-space: normal;
-    letter-spacing: -0.03em;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    line-height: 1;
   }
 }
 
@@ -6128,6 +6128,12 @@ html.route-auth #landing-page {
  .landing-eyebrow {
    font-size: 18px;
  }
+
+  .calendar-meta-corner__inner {
+    letter-spacing: -0.03em;
+    font-size: 8px;
+    line-height: 1.4;
+  }
 } 
 
 /* ================================================================================================================================================================================================================= */
