@@ -33,6 +33,8 @@ const manageToken = params.get("m");
 window.manageToken = manageToken;
 const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock
+const lastCellTapAt = new Map();
+const CELL_TAP_DEBOUNCE_MS = 450;
 const pendingDeleteCellByEntryId = new Map(); // entryId -> { day, time }
 window.pendingDeleteCellByEntryId = pendingDeleteCellByEntryId;
 const availabilityMetaByEntryId = new Map(); // entryId -> { day, time }
@@ -2910,6 +2912,16 @@ async function toggleCell(e) {
       if (!prof?.name) return;
 
     k = addKey(currentTable.id, dayNum, timeKey, myUid);
+    
+    const now = performance.now();
+    const lastTap = lastCellTapAt.get(k) || 0;
+
+    if (now - lastTap < CELL_TAP_DEBOUNCE_MS) {
+      return;
+    }
+
+    lastCellTapAt.set(k, now);
+    
     if (inFlightCells.has(k)) return;
     inFlightCells.add(k);
 
