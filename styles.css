@@ -5414,12 +5414,6 @@ html.route-auth #landing-page {
     align-items: flex-start;
   }
 
-  #calendar-title {
-    padding-top: 6px;
-    padding-left: 24px;
-    text-align: left;
-  }
-
    #dash-notifications {
     position: fixed;
     padding-left: 28px;
@@ -5702,6 +5696,25 @@ html.route-auth #landing-page {
  .landing-title-art {
   width: 60%;
   margin: auto;
+ }
+
+ .calendar-topbar-left {
+  gap: 6px;
+ }
+
+ .back-btn {
+  font-size: 12px;
+  width: 100px;
+ }
+
+  .add-users-btn {
+  font-size: 12px;
+  width: 100px;
+ }
+
+  .remove-user-btn {
+  font-size: 12px;
+  width: 100px;
  }
 }
 
@@ -6021,21 +6034,6 @@ html.route-auth #landing-page {
     padding: 6px 6px 4px;
   }
 
-  .calendar-meta-corner__inner {
-    display: grid;
-    gap: 4px;
-    font-size: 8px;
-    line-height: 1.4;
-    color: #6b5c4f;
-    text-align: left;
-    white-space: normal;
-    letter-spacing: -0.03em;
-  }
-
-  .calendar-topbar-right {
-    display: none !important;
-  }
-
   #calendar-side-right {
     position: relative;
     margin-left: 0;
@@ -6152,7 +6150,6 @@ html.route-auth #landing-page {
 } 
 
 /* ================================================================================================================================================================================================================= */
-/* ONLY small phones stack */
 @media (max-width: 520px) {
   #dash-account .acct-row,
   #dash-account .account-row {
@@ -6248,6 +6245,21 @@ html.route-auth #landing-page {
  .request-row {
   gap: 0px;
  }
+
+ .calendar-topbar-right {
+  display: none !important;
+ }
+
+   .calendar-meta-corner__inner {
+    display: grid;
+    gap: 4px;
+    font-size: 8px;
+    line-height: 1.4;
+    color: #6b5c4f;
+    text-align: left;
+    white-space: normal;
+    letter-spacing: -0.03em;
+  }
 }
 
 /* ================================================================================================================================================================================================================= */
