@@ -2221,8 +2221,10 @@ if (!au) {
 }
 
 const hydrated = await auth.hydrateUserFromAuth();
+
 if (!hydrated) {
-  auth.showProfileSetup();
+  await supabase.auth.signOut();
+  auth.showAuthOverlay("Please sign in again.");
   return;
 }
 
