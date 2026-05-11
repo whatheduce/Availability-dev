@@ -3126,11 +3126,13 @@ function bindCalendarClickDelegation() {
 
   table.dataset.bound = "1";
 
-  table.addEventListener("click", (e) => {
+  let lastPointerHandledAt = 0;
+
+  const handleCellTap = (e, { fromPointer = false } = {}) => {
     const cell = e.target.closest("td[data-day][data-time]");
     if (!cell) return;
 
-        if (isMobileLikeViewport() && mobileInspectDay) {
+    if (isMobileLikeViewport() && mobileInspectDay) {
       e.preventDefault();
       e.stopPropagation();
 
@@ -3150,7 +3152,30 @@ function bindCalendarClickDelegation() {
       return;
     }
 
-    toggleCell({ currentTarget: cell }); // reuse your existing toggleCell
+    if (fromPointer) {
+      lastPointerHandledAt = Date.now();
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    toggleCell({ currentTarget: cell });
+  };
+
+  table.addEventListener("pointerdown", (e) => {
+    if (!isMobileLikeViewport()) return;
+    if (e.pointerType === "mouse") return;
+
+    handleCellTap(e, { fromPointer: true });
+  });
+
+  table.addEventListener("click", (e) => {
+    if (Date.now() - lastPointerHandledAt < 500) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    handleCellTap(e);
   });
 }
 
