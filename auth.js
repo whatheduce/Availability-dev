@@ -223,9 +223,13 @@ async function loadProfile() {
     .maybeSingle();
 
   if (error) {
-    console.error(error);
-    return null;
-  }
+  console.error(error);
+
+  // Session likely stale/invalid (eg password changed elsewhere)
+  await supabase.auth.signOut();
+
+  return null;
+}
 
   if (!data) return null;
 
