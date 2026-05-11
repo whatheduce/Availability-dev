@@ -1995,19 +1995,9 @@ body.create-view #go-create {
   cursor: not-allowed;
 }
 
-    .pro-select:disabled {
-      opacity: 0.8;
-    }
-
-    @keyframes dotPopIn {
-      from { transform: scale(0.5); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-
-    .dot.pop-in {
-      animation: dotPopIn 120ms ease-out;
-      transform-origin: center;
-    }
+.pro-select:disabled {
+  opacity: 0.8;
+ }
 
 .topbar-btn {
   padding: 8px 8px;
