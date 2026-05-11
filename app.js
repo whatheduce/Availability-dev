@@ -2932,10 +2932,11 @@ async function toggleCell(e) {
    if (isTogglingOff) {
   // Optimistic remove immediately so mobile feels instant.
   const removedSnapshot = removeOptimisticDot(cell, myUid);
-  maybeApplyGoldForCell(cell);
 
-  // Let the browser paint the removal before network/database work.
+  // Let the browser paint the dot removal before recalculating gold/network work.
   await new Promise(requestAnimationFrame);
+
+  maybeApplyGoldForCell(cell);
 
   const { data: existingRow, error: existingErr } = await supabase
     .from("availability_dev")
