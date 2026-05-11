@@ -5702,16 +5702,6 @@ html.route-auth #landing-page {
   gap: 6px;
  }
 
- .back-btn {
-  font-size: 12px;
-  width: 100px;
- }
-
-  .topbar-btn {
-  font-size: 12px;
-  width: 100px;
- }
-
   .calendar-topbar-right {
   display: none !important;
  }
