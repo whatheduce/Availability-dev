@@ -2929,36 +2929,42 @@ async function toggleCell(e) {
   const existingDot = cell.querySelector(`.dot[data-user-id="${CSS.escape(String(myUid))}"]`);
   let isTogglingOff = !!existingDot;
 
-    if (isTogglingOff) {
-      const { data: existingRow, error: existingErr } = await supabase
-        .from("availability_dev")
-        .select("id")
-        .eq("table_id", currentTable.id)
-        .eq("day", dayNum)
-        .eq("time", timeKey)
-        .eq("user_id", myUid)
-        .maybeSingle();
+   if (isTogglingOff) {
+  // Optimistic remove immediately so mobile feels instant.
+  const removedSnapshot = removeOptimisticDot(cell, myUid);
+  maybeApplyGoldForCell(cell);
 
-      if (existingErr) {
-        console.warn("Existing row check failed:", existingErr);
-        return;
-      }
+  // Let the browser paint the removal before network/database work.
+  await new Promise(requestAnimationFrame);
 
-      // If the DOM says I have a dot but the DB row isn't there, re-sync and stop
-      if (!existingRow?.id) {
-        await loadAvailability();
-        return;
-      }
+  const { data: existingRow, error: existingErr } = await supabase
+    .from("availability_dev")
+    .select("id")
+    .eq("table_id", currentTable.id)
+    .eq("day", dayNum)
+    .eq("time", timeKey)
+    .eq("user_id", myUid)
+    .maybeSingle();
 
-      // optimistic remove first
-      const removedSnapshot = removeOptimisticDot(cell, myUid);
-      maybeApplyGoldForCell(cell);
+  if (existingErr) {
+    console.warn("Existing row check failed:", existingErr);
+    restoreOptimisticDot(cell, removedSnapshot);
+    maybeApplyGoldForCell(cell);
+    return;
+  }
 
-      const { data: deletedRows, error: delErr } = await supabase
-        .from("availability_dev")
-        .delete()
-        .eq("id", existingRow.id)
-        .select("id");
+  // If the DOM said I had a dot but the DB row isn't there, keep the optimistic removal
+  // and re-sync so the UI matches the database.
+  if (!existingRow?.id) {
+    await loadAvailability();
+    return;
+  }
+
+  const { data: deletedRows, error: delErr } = await supabase
+    .from("availability_dev")
+    .delete()
+    .eq("id", existingRow.id)
+    .select("id");
 
       const deletedCount = deletedRows?.length || 0;
 
