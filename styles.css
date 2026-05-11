@@ -283,9 +283,15 @@ body.logged-in #landing-bg::after{
 
 .calendar-topbar-left {
   display: flex;
-  flex-direction: column;    /* stack on the left */
+  flex-direction: row;
   align-items: flex-start;
   gap: 10px;
+}
+
+.calendar-topbar-left-group {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* =========================
