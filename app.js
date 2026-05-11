@@ -2891,8 +2891,6 @@ async function toggleCell(e) {
   const cell = e.currentTarget;
   const t0 = performance.now();
 
-  const kickedOut = await kickOutIfNoBoardAccess();
-  if (kickedOut) return;
   if (!currentTable || !cell) return;
 
   let k;
