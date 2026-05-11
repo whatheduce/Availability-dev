@@ -5392,7 +5392,7 @@ html.route-auth #landing-page {
       "left right"
       "title title";
     align-items: start;
-    gap: 10px 16px;
+    gap: 0px;
   }
 
  /* Only apply grid layout when the calendar topbar is actually shown */
@@ -5711,6 +5711,21 @@ html.route-auth #landing-page {
   font-size: 12px;
   width: 100px;
  }
+
+  .calendar-topbar-right {
+  display: none !important;
+ }
+
+  .calendar-meta-corner__inner {
+    display: grid;
+    gap: 4px;
+    font-size: 8px;
+    line-height: 1.4;
+    color: #6b5c4f;
+    text-align: left;
+    white-space: normal;
+    letter-spacing: -0.03em;
+  }
 }
 
 /* ================================================================================================================================================================================================================= */
@@ -5948,15 +5963,6 @@ html.route-auth #landing-page {
   gap: 8px;
   grid-area: left;
  } 
-
-.calendar-topbar-right {
-  grid-area: right;
-  align-items: flex-start;
-  text-align: left;
-  justify-self: start;
-  font-size: 13px;
-  gap: 2px;
- }
  
   #calendar-title-wrap {
     grid-area: title;
@@ -6240,21 +6246,6 @@ html.route-auth #landing-page {
  .request-row {
   gap: 0px;
  }
-
- .calendar-topbar-right {
-  display: none !important;
- }
-
-   .calendar-meta-corner__inner {
-    display: grid;
-    gap: 4px;
-    font-size: 8px;
-    line-height: 1.4;
-    color: #6b5c4f;
-    text-align: left;
-    white-space: normal;
-    letter-spacing: -0.03em;
-  }
 }
 
 /* ================================================================================================================================================================================================================= */
