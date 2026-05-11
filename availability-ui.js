@@ -240,7 +240,7 @@ function maybeApplyGoldForCell(cell) {
 
 //----------
 function addOptimisticDot(cell, userId, name, color) {
-  const dc = ensureDotContainer(cell);
+  const dc = ensureDotContainer(cell, { refresh: false });
   if (!dc) return;
 
   if (dc.querySelector(`.dot[data-user-id="${userId}"]`)) return;
@@ -255,11 +255,7 @@ function addOptimisticDot(cell, userId, name, color) {
 
   dc.appendChild(dot);
 
-  requestAnimationFrame(() => {
-    if (cell.isConnected) {
-      refreshDotLayout(cell);
-    }
-  });
+  refreshDotLayout(cell);
 }
 
 //----------
