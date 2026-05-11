@@ -5707,12 +5707,7 @@ html.route-auth #landing-page {
   width: 100px;
  }
 
-  .add-users-btn {
-  font-size: 12px;
-  width: 100px;
- }
-
-  .remove-user-btn {
+  .topbar-btn {
   font-size: 12px;
   width: 100px;
  }
