@@ -4640,7 +4640,52 @@ const feedbackSend = document.getElementById("feedback-send");
 const feedbackText = document.getElementById("feedback-text");
 
 if (feedbackBtn && feedbackModal) {
-  feedbackBtn.addEventListener("click", () => {
+  feedbackBtn.addEventListener("click", async () => {
+    const au = await auth.getAuthUser();
+
+    if (!au?.id) {
+      await confirmModal({
+        title: "Sign in required",
+        message: "Please sign in before sending feedback.",
+        okText: "Close",
+        cancelText: ""
+      });
+      return;
+    }
+
+    const { data: limited, error } = await supabase.rpc("is_rate_limited", {
+      p_action: "feedback",
+      p_identifier: au.id,
+      p_max_attempts: 1,
+      p_window_seconds: 43200
+    });
+
+    if (error) {
+      console.warn("Feedback cooldown check failed:", error);
+
+      await confirmModal({
+        title: "Feedback unavailable",
+        message: "Could not check feedback availability. Please try again.",
+        okText: "Close",
+        cancelText: ""
+      });
+
+      return;
+    }
+
+    if (limited) {
+      document.body.classList.remove("drawer-open");
+
+      await confirmModal({
+        title: "Feedback limit",
+        message: "Feedback can only be sent once every 12 hours.",
+        okText: "Close",
+        cancelText: ""
+      });
+
+      return;
+    }
+
     document.body.classList.remove("drawer-open");
     feedbackText.value = "";
     feedbackModal.hidden = false;
