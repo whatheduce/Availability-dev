@@ -3143,6 +3143,9 @@ function bindCalendarClickDelegation() {
   table.dataset.bound = "1";
 
   let lastPointerHandledAt = 0;
+  let touchStart = null;
+
+  const TAP_MOVE_THRESHOLD = 12;
 
   const handleCellTap = (e, { fromPointer = false } = {}) => {
     const cell = e.target.closest("td[data-day][data-time]");
@@ -3181,7 +3184,34 @@ function bindCalendarClickDelegation() {
     if (!isMobileLikeViewport()) return;
     if (e.pointerType === "mouse") return;
 
-    handleCellTap(e, { fromPointer: true });
+    const cell = e.target.closest("td[data-day][data-time]");
+    if (!cell) return;
+
+    touchStart = {
+      x: e.clientX,
+      y: e.clientY,
+      cell
+    };
+  });
+
+  table.addEventListener("pointerup", (e) => {
+    if (!isMobileLikeViewport()) return;
+    if (e.pointerType === "mouse") return;
+    if (!touchStart) return;
+
+    const dx = Math.abs(e.clientX - touchStart.x);
+    const dy = Math.abs(e.clientY - touchStart.y);
+    const cell = e.target.closest("td[data-day][data-time]");
+
+    if (dx <= TAP_MOVE_THRESHOLD && dy <= TAP_MOVE_THRESHOLD && cell === touchStart.cell) {
+      handleCellTap(e, { fromPointer: true });
+    }
+
+    touchStart = null;
+  });
+
+  table.addEventListener("pointercancel", () => {
+    touchStart = null;
   });
 
   table.addEventListener("click", (e) => {
