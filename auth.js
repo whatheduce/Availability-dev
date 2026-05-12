@@ -480,6 +480,19 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     forgotBtn.textContent = "Sending...";
   }
 
+  const lastResetSentAt = Number(localStorage.getItem("hearth_pw_reset_sent_at") || 0);
+  const now = Date.now();
+  const cooldownMs = 60 * 1000;
+
+  if (now - lastResetSentAt < cooldownMs) {
+    showConfirmPopup("Please wait a minute before requesting another password reset email.", {
+      title: "Forgot password"
+    });
+    return;
+  }
+
+localStorage.setItem("hearth_pw_reset_sent_at", String(now));
+
   // show immediate feedback modal
   showConfirmPopup("Sending password reset email...", {
   title: "Forgot password",
