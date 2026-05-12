@@ -3502,7 +3502,7 @@ body.notifications-view #dash-topbar {
   display: grid;
   grid-template-columns: 60px repeat(7, 1fr);
   gap: 2px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .mini-corner {
@@ -3510,7 +3510,7 @@ body.notifications-view #dash-topbar {
 }
 
 .mini-colhead {
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 600;
   opacity: 0.75;
   height: 18px;
@@ -3534,7 +3534,7 @@ body.notifications-view #dash-topbar {
 }
 
 .mini-rowhead {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   opacity: 0.8;
   padding: 2px 4px;
