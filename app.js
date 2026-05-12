@@ -4660,31 +4660,54 @@ feedbackSend?.addEventListener("click", async () => {
     return;
   }
 
-try {
-  feedbackSend.disabled = true;
+  try {
+    feedbackSend.disabled = true;
 
-  const { error } = await supabase.functions.invoke("send-feedback", {
-    body: { message: text }
-  });
+    const { error } = await supabase.functions.invoke("send-feedback", {
+      body: { message: text }
+    });
 
-  if (error) throw error;
+    if (error) {
+      const status = error?.context?.status;
 
-  feedbackModal.hidden = true;
-  feedbackText.value = "";
+      if (status === 429) {
+        feedbackModal.hidden = true;
 
-  await confirmModal({
-    title: "Thank you!",
-    message: "Your feedback has been sent.",
-    okText: "Close",
-    cancelText: ""
-  });
+        await confirmModal({
+          title: "Feedback limit",
+          message: "Feedback can only be sent once every 12 hours.",
+          okText: "Close",
+          cancelText: ""
+        });
 
-} catch (err) {
-  console.error("Feedback send failed:", err);
-  alert("Could not send feedback. Please try again.");
-} finally {
-  feedbackSend.disabled = false;
-}
+        return;
+      }
+
+      throw error;
+    }
+
+    feedbackModal.hidden = true;
+    feedbackText.value = "";
+
+    await confirmModal({
+      title: "Thank you!",
+      message: "Your feedback has been sent.",
+      okText: "Close",
+      cancelText: ""
+    });
+
+  } catch (err) {
+    console.error("Feedback send failed:", err);
+
+    await confirmModal({
+      title: "Feedback failed",
+      message: "Could not send feedback. Please try again.",
+      okText: "Close",
+      cancelText: ""
+    });
+  } finally {
+    feedbackSend.disabled = false;
+  }
 });
 
 // Drawer item routing (delegated so it works even if drawer DOM is rebuilt)
