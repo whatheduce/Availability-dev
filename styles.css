@@ -4169,6 +4169,7 @@ body.notifications-view #dash-topbar {
   grid-template-columns: 1fr 1fr;  /* <-- makes note start ~halfway */
   gap: 2%;
   align-items: start;
+  box-sizing: border-box;
 }
 
 .side-card{
