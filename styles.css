@@ -5210,6 +5210,7 @@ html.route-auth #landing-page {
 
  #calendar-side {
   gap: 0;
+  box-sizing: border-box;
  }
 }
 
