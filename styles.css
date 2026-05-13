@@ -273,8 +273,8 @@ body.logged-in #landing-bg::after{
 
 .calendar-topbar{
   width: 100%;
-  margin-top: 14px;
-  padding: 0 20px;
+  margin-top: 0;
+  padding: 14px 20px 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
