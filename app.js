@@ -397,6 +397,9 @@ function showLandingPage() {
   document.body.classList.remove("show-landing-bg");
   document.body.classList.remove("create-view");
 
+  const landingBg = document.getElementById("landing-bg");
+    if (landingBg) landingBg.style.display = "block";
+
   const landing = document.getElementById("landing-page");
   if (landing) landing.style.display = "block";
 
@@ -417,8 +420,10 @@ function showLandingPage() {
 function hideLandingPage() {
   const landing = document.getElementById("landing-page");
   if (landing) landing.style.display = "none";
-}
 
+  const landingBg = document.getElementById("landing-bg");
+  if (landingBg) landingBg.style.display = "none";
+}
 
 
 
