@@ -4164,7 +4164,6 @@ body.notifications-view #dash-topbar {
 #calendar-side{
   width: 100%;
   margin: 14px 0 0; 
-  padding-right: 20px;
   display: grid;
   grid-template-columns: 1fr 1fr;  /* <-- makes note start ~halfway */
   gap: 2%;
@@ -5211,7 +5210,6 @@ html.route-auth #landing-page {
 
  #calendar-side {
   gap: 0;
-  box-sizing: border-box;
  }
 }
 
