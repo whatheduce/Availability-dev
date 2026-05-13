@@ -1111,7 +1111,7 @@ td.month-break:not(.gold-cell):hover {
 }
 
 #legend{
-  width: 280px;
+  max-width: 320px;
   display: block;
   margin-bottom: 20px;
 }
@@ -6029,6 +6029,7 @@ html.route-auth #landing-page {
   #legend {
     position: relative;
     margin-top: 0;
+    max-width: 268px;
   }
 
   #presence {
