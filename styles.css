@@ -1127,12 +1127,18 @@ td.month-break:not(.gold-cell):hover {
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-content: space-between;
   min-width: 0;
   flex-wrap: wrap;
 }
 
 .legend-user-name {
+  flex: 1;
+  min-width: 0;
   line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .legend-local-colour-btn {
@@ -5979,7 +5985,7 @@ html.route-auth #landing-page {
  }
 
  #board-footer.side-card {
-  min-width: 240px;
+  min-width: 224px;
   margin: 8px 20px 8px;
  }
  
