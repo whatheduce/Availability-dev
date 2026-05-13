@@ -243,7 +243,7 @@ body.logged-in #landing-bg::after{
   align-items: flex-end;
   gap: 6px;
   text-align: right;
-  margin-right: 60px;
+  margin-right: 30px;
 }
 
 #calendar-title-wrap{
@@ -279,6 +279,7 @@ body.logged-in #landing-bg::after{
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
+  box-sizing: border-box;
 }
 
 .calendar-topbar-left {
