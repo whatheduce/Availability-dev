@@ -5419,6 +5419,11 @@ html.route-auth #landing-page {
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
   }
+
+  html.route-auth,
+  html.route-auth body {
+   overflow-y: hidden;
+  }
 }
 
 /* ================================================================================================================================================================================================================= */
