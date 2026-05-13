@@ -364,13 +364,16 @@ function showProfileSetup() {
   document.body.style.visibility = "visible";
 
   const landing = document.getElementById("landing-page");
-  if (landing) landing.style.display = "none";
+    if (landing) landing.style.display = "none";
+
+  const landingBg = document.getElementById("landing-bg");
+    if (landingBg) landingBg.style.display = "none";
 
   const dash = document.getElementById("dashboard");
-  if (dash) dash.style.display = "none";
+    if (dash) dash.style.display = "none";
 
   const setup = document.getElementById("profile-setup");
-  if (setup) setup.hidden = false;
+    if (setup) setup.hidden = false;
 }
 
 function hideProfileSetup() {
