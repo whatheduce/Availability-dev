@@ -2189,8 +2189,7 @@ if (inviteToken) {
   localStorage.setItem("lastBoardToken", inviteToken);
 }
 
-  // Roll board forward based on host timezone + start_date (any visitor can trigger)
-await rollForwardIfNeeded(currentTable.id);
+const rolledDays = await rollForwardIfNeeded(currentTable.id);
 
 // Always refetch so the UI always uses the DB's current start_date/host_tz
 const { data: refreshed, error: refreshErr } = await supabase
@@ -2269,6 +2268,10 @@ subscribePresence();
 
 buildCalendar();
 await loadAvailability();
+
+  if (rolledDays > 0) {
+  await loadAvailability();
+}
 
 await refreshBoardOwnerFlag();
 await renderPendingRequestsUi(currentTable.id);  
