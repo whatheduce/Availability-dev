@@ -2262,16 +2262,16 @@ await enforceUniqueBoardColourIfNeeded(currentTable.id);
 document.getElementById("dashboard").style.display = "none";
 showCalendarLoading();
 
-// Now that UI is visible, start realtime + render
-subscribeRealtime();
-subscribePresence();
-
 buildCalendar();
 await loadAvailability();
 
   if (rolledDays > 0) {
   await loadAvailability();
 }
+
+// Now that UI is visible, start realtime + render
+subscribeRealtime();
+subscribePresence();  
 
 await refreshBoardOwnerFlag();
 await renderPendingRequestsUi(currentTable.id);  
