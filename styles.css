@@ -4009,6 +4009,81 @@ body.notifications-view #dash-topbar {
   width: min(520px, 100%);
 }
 
+.recurring-availability-card {
+  width: min(940px, calc(100vw - 24px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.recurring-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.recurring-choice-btn {
+  border: 1px solid rgba(126, 104, 82, 0.18);
+  border-radius: 16px;
+  background: rgba(252, 248, 242, 0.92);
+  padding: 18px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.recurring-choice-btn:hover {
+  background: rgba(126, 104, 82, 0.08);
+}
+
+.recurring-calendar-wrap {
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(126, 104, 82, 0.16);
+  background: rgba(255,255,255,0.32);
+  margin-top: 12px;
+}
+
+#recurring-availability-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+#recurring-availability-table th,
+#recurring-availability-table td {
+  border: 1px solid rgba(126, 104, 82, 0.14);
+  padding: 10px;
+  text-align: center;
+}
+
+#recurring-availability-table th {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.recurring-time-label {
+  text-align: left !important;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.recurring-cell {
+  cursor: pointer;
+  height: 36px;
+  position: relative;
+}
+
+.recurring-cell.is-selected::after {
+  content: "";
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  background: currentColor;
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+}
+
 #timezone-search {
   width: 100%;
   box-sizing: border-box;
