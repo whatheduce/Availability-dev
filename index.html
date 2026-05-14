@@ -1019,6 +1019,50 @@
   </div>
 </div>  
 
+<!-- Recurring Availability Modal -->
+<div id="recurring-availability-modal" class="modal-overlay" hidden>
+  <div class="modal-card recurring-availability-card" role="dialog" aria-modal="true">
+    <div class="modal-title">Add Recurring Availability</div>
+
+    <div id="recurring-choice-step">
+      <div class="modal-message">
+        Choose how often this availability should repeat.
+      </div>
+
+      <div class="recurring-choice-grid">
+        <button class="recurring-choice-btn" type="button" data-recurring-days="7">
+          Weekly Recurrence
+        </button>
+
+        <button class="recurring-choice-btn" type="button" data-recurring-days="14">
+          Fortnightly Recurrence
+        </button>
+      </div>
+    </div>
+
+    <div id="recurring-calendar-step" hidden>
+      <div class="modal-message">
+        Select the times you are normally available, then save them to this calendar.
+      </div>
+
+      <div class="recurring-calendar-wrap">
+        <table id="recurring-availability-table"></table>
+      </div>
+
+      <div class="modal-actions">
+        <button id="recurring-back" class="modal-btn" type="button">Back</button>
+        <button id="recurring-save" class="modal-btn modal-btn--primary" type="button">
+          Save to calendar
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="recurring-cancel" class="modal-btn" type="button">Cancel</button>
+    </div>
+  </div>
+</div>  
+
 <!-- Remove User Modal -->
 <div id="remove-user-modal" class="modal-overlay" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="remove-user-title">
