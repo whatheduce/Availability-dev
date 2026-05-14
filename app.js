@@ -5386,13 +5386,38 @@ document.getElementById("recurring-save")?.addEventListener("click", async () =>
 
   if (!ok) return;
 
-  console.log("Recurring availability save stub:", {
-    boardId: recurringAvailabilityState.boardId,
-    days: recurringAvailabilityState.days,
-    selected: [...recurringAvailabilityState.selected]
+  const slots = [...recurringAvailabilityState.selected].map((key) => {
+    const [dayIndex, ...timeParts] = key.split("|");
+
+    return {
+      day_index: Number(dayIndex),
+      time: timeParts.join("|")
+    };
   });
 
+  const { data, error } = await supabase.rpc("save_recurring_availability", {
+    p_board_id: Number(recurringAvailabilityState.boardId),
+    p_cycle_length: Number(recurringAvailabilityState.days),
+    p_slots: slots
+  });
+
+  if (error || !data?.ok) {
+    console.error("Recurring availability save failed:", error || data);
+
+    showConfirmPopup("Recurring availability could not be saved. Please try again.", {
+      title: "Save failed"
+    });
+
+    return;
+  }
+
   closeRecurringAvailabilityModal();
+
+  showConfirmPopup("Recurring availability saved.", {
+    title: "Saved"
+  });
+
+  await loadBoards();
 });  
   
     // Enter key on password field = show button press + submit
