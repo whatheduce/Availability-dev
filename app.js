@@ -136,6 +136,7 @@ let recurringAvailabilityState = {
   boardId: null,
   days: 7,
   rows: [],
+  color: "#999",
   selected: new Set()
 };
 
@@ -4511,11 +4512,12 @@ function normalizeRecurringRows(rows) {
 }
 
 //----------   
-function openRecurringAvailabilityModal(boardId, rows = []) {
+function openRecurringAvailabilityModal(boardId, rows = [], color = "#999") {
   recurringAvailabilityState = {
     boardId,
     days: 7,
     rows: normalizeRecurringRows(rows),
+    color: color || "#999",
     selected: new Set()
   };
 
@@ -4567,6 +4569,7 @@ function buildRecurringAvailabilityTable(days) {
       td.className = "recurring-cell";
       td.dataset.dayIndex = String(i);
       td.dataset.time = label;
+      td.style.color = recurringAvailabilityState.color;
       tr.appendChild(td);
     }
 
@@ -5585,7 +5588,15 @@ if (action === "recurring-availability") {
     rows = [];
   }
 
-  openRecurringAvailabilityModal(boardId, rows);
+  const au = await auth.getAuthUser();
+  const userId = au?.id || user?.id || null;
+
+  let recurringColor =
+    getLocalBoardColor(boardId, userId) ||
+    user?.color ||
+    "#999";
+
+  openRecurringAvailabilityModal(boardId, rows, recurringColor);
   return;
 }
     
