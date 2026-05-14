@@ -2060,6 +2060,7 @@ for (let i = 0; i < maxHostedSlots; i++) {
 
       <div class="board-actions-menu" hidden>
         <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
+        <button class="board-actions-item" type="button" data-action="recurring-availability">Add Recurring Availability</button>
         <button class="board-actions-item" type="button" data-action="delete">Delete</button>
       </div>
 
