@@ -132,6 +132,11 @@ window.cellTooltipCache = cellTooltipCache;
 let mustChooseLocalBoardColour = false;
 let mobileInspectDay = null; // string day number, e.g. "1", "2", ...
 window.mobileInspectDay = mobileInspectDay;
+let recurringAvailabilityState = {
+  boardId: null,
+  days: 7,
+  selected: new Set()
+};
 
 
 
@@ -4486,6 +4491,82 @@ for (const t of boards) {
   }
 }
 
+//----------   
+function openRecurringAvailabilityModal(boardId) {
+  recurringAvailabilityState = {
+    boardId,
+    days: 7,
+    selected: new Set()
+  };
+
+  document.getElementById("recurring-choice-step").hidden = false;
+  document.getElementById("recurring-calendar-step").hidden = true;
+  document.getElementById("recurring-availability-modal").hidden = false;
+}
+
+//----------   
+function closeRecurringAvailabilityModal() {
+  document.getElementById("recurring-availability-modal").hidden = true;
+}
+
+//----------   
+function showRecurringCalendar(days) {
+  recurringAvailabilityState.days = Number(days) || 7;
+  recurringAvailabilityState.selected = new Set();
+
+  document.getElementById("recurring-choice-step").hidden = true;
+  document.getElementById("recurring-calendar-step").hidden = false;
+
+  buildRecurringAvailabilityTable(recurringAvailabilityState.days);
+}
+
+//----------   
+function buildRecurringAvailabilityTable(days) {
+  const table = document.getElementById("recurring-availability-table");
+  if (!table) return;
+
+  table.innerHTML = "";
+
+  const rows = currentTable?.row_structure || [];
+  const dayLabels = days === 14
+    ? ["Mon 1", "Tue 1", "Wed 1", "Thu 1", "Fri 1", "Sat 1", "Sun 1", "Mon 2", "Tue 2", "Wed 2", "Thu 2", "Fri 2", "Sat 2", "Sun 2"]
+    : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const headerRow = document.createElement("tr");
+  headerRow.innerHTML = `<th></th>${dayLabels.map(label => `<th>${label}</th>`).join("")}`;
+  table.appendChild(headerRow);
+
+  rows.forEach((timeObj) => {
+    const label = typeof timeObj === "string" ? timeObj : timeObj.label;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="recurring-time-label">${escapeHtml(label)}</td>`;
+
+    for (let i = 0; i < days; i++) {
+      const td = document.createElement("td");
+      td.className = "recurring-cell";
+      td.dataset.dayIndex = String(i);
+      td.dataset.time = label;
+      tr.appendChild(td);
+    }
+
+    table.appendChild(tr);
+  });
+}
+
+//----------   
+function toggleRecurringCell(cell) {
+  const key = `${cell.dataset.dayIndex}|${cell.dataset.time}`;
+
+  if (recurringAvailabilityState.selected.has(key)) {
+    recurringAvailabilityState.selected.delete(key);
+    cell.classList.remove("is-selected");
+  } else {
+    recurringAvailabilityState.selected.add(key);
+    cell.classList.add("is-selected");
+  }
+}
+
 
 
 // =========================
@@ -5252,6 +5333,44 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
     closeRemoveUserModal();
   }
 });
+
+document.getElementById("recurring-cancel")?.addEventListener("click", closeRecurringAvailabilityModal);
+
+document.getElementById("recurring-back")?.addEventListener("click", () => {
+  document.getElementById("recurring-choice-step").hidden = false;
+  document.getElementById("recurring-calendar-step").hidden = true;
+});
+
+document.querySelectorAll(".recurring-choice-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    showRecurringCalendar(btn.dataset.recurringDays);
+  });
+});
+
+document.getElementById("recurring-availability-table")?.addEventListener("click", (e) => {
+  const cell = e.target.closest(".recurring-cell");
+  if (!cell) return;
+  toggleRecurringCell(cell);
+});
+
+document.getElementById("recurring-save")?.addEventListener("click", async () => {
+  const ok = await confirmModal({
+    title: "Replace availability?",
+    message: "This will remove your existing availability in this calendar and replace it. You can freely add/remove availability again once complete.",
+    okText: "Save to calendar",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  console.log("Recurring availability save stub:", {
+    boardId: recurringAvailabilityState.boardId,
+    days: recurringAvailabilityState.days,
+    selected: [...recurringAvailabilityState.selected]
+  });
+
+  closeRecurringAvailabilityModal();
+});  
   
     // Enter key on password field = show button press + submit
   document.getElementById("auth-password")?.addEventListener("keydown", (e) => {
@@ -5435,6 +5554,11 @@ if (memberCount >= memberLimit) {
         item.disabled = false;
         item.textContent = "Delete";
       }
+    }
+
+    if (action === "recurring-availability") {
+      openRecurringAvailabilityModal(boardId);
+      return;
     }
     
     return;
