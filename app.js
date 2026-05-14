@@ -135,6 +135,7 @@ window.mobileInspectDay = mobileInspectDay;
 let recurringAvailabilityState = {
   boardId: null,
   days: 7,
+  rows: [],
   selected: new Set()
 };
 
@@ -2060,6 +2061,7 @@ for (let i = 0; i < maxHostedSlots; i++) {
       data-board-id="${b.tables.id}"
       data-invite-token="${b.tables.invite_token}"
       data-owner-token="${b.tables.owner_token}"
+      data-row-structure="${escapeHtml(JSON.stringify(b.tables.row_structure || []))}"
     >
       <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
@@ -4492,10 +4494,28 @@ for (const t of boards) {
 }
 
 //----------   
-function openRecurringAvailabilityModal(boardId) {
+function normalizeRecurringRows(rows) {
+  if (typeof rows === "string") {
+    try {
+      rows = JSON.parse(rows);
+    } catch {
+      rows = [];
+    }
+  }
+
+  if (!Array.isArray(rows)) return [];
+
+  return rows
+    .map(r => typeof r === "string" ? r : (r?.key || r?.name || r?.label || ""))
+    .filter(Boolean);
+}
+
+//----------   
+function openRecurringAvailabilityModal(boardId, rows = []) {
   recurringAvailabilityState = {
     boardId,
     days: 7,
+    rows: normalizeRecurringRows(rows),
     selected: new Set()
   };
 
@@ -4527,7 +4547,7 @@ function buildRecurringAvailabilityTable(days) {
 
   table.innerHTML = "";
 
-  const rows = currentTable?.row_structure || [];
+  const rows = recurringAvailabilityState.rows || [];
   const dayLabels = days === 14
     ? ["Mon 1", "Tue 1", "Wed 1", "Thu 1", "Fri 1", "Sat 1", "Sun 1", "Mon 2", "Tue 2", "Wed 2", "Thu 2", "Fri 2", "Sat 2", "Sun 2"]
     : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -4537,7 +4557,7 @@ function buildRecurringAvailabilityTable(days) {
   table.appendChild(headerRow);
 
   rows.forEach((timeObj) => {
-    const label = typeof timeObj === "string" ? timeObj : timeObj.label;
+    const label = timeObj;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `<td class="recurring-time-label">${escapeHtml(label)}</td>`;
@@ -5556,10 +5576,18 @@ if (memberCount >= memberLimit) {
       }
     }
 
-    if (action === "recurring-availability") {
-      openRecurringAvailabilityModal(boardId);
-      return;
-    }
+if (action === "recurring-availability") {
+  let rows = [];
+
+  try {
+    rows = JSON.parse(card.dataset.rowStructure || "[]");
+  } catch {
+    rows = [];
+  }
+
+  openRecurringAvailabilityModal(boardId, rows);
+  return;
+}
     
     return;
   }
