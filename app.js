@@ -2145,15 +2145,21 @@ ownedEl.innerHTML = hostedSlotsHtml.join("");
   } else {
     joinedEl.innerHTML = joined.map(b => `
   <div class="board-pill-shell">
-    <div 
+    <div  
       class="board-pill board-pill--square"
-      data-kind="joined"
-      data-board-id="${b.tables.id}"
-      data-invite-token="${b.tables.invite_token}"
-    >
+        data-kind="joined"
+        data-board-id="${b.tables.id}"
+        data-invite-token="${b.tables.invite_token}"
+        data-row-structure="${escapeHtml(JSON.stringify(b.tables.row_structure || []))}"
+        data-has-recurring="${recurringBoardIds.has(Number(b.tables.id)) ? "1" : "0"}"
+      >
       <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
       <div class="board-actions-menu" hidden>
+        <button class="board-actions-item" type="button" data-action="recurring-availability">
+          ${recurringBoardIds.has(Number(b.tables.id)) ? "Edit Recurring Availability" : "Add Recurring Availability"}
+        </button>
+
         <button class="board-actions-item" type="button" data-action="remove">Remove calendar</button>
       </div>
 
