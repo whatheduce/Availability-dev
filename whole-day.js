@@ -266,21 +266,23 @@ function renderWholeDayCalendar() {
   if (!calendar) return;
 
   const { year, month, day } = getBoardTodayParts();
-  const monthA = { year, monthIndex: month - 1 };
-  const monthB = getNextMonth(monthA.year, monthA.monthIndex);
+  const monthsToShow = window.getBoardOwnerIsPro?.() ? 4 : 2;
+
+  const months = [];
+  let next = { year, monthIndex: month - 1 };
+
+  for (let i = 0; i < monthsToShow; i++) {
+    months.push(next);
+    next = getNextMonth(next.year, next.monthIndex);
+  }
 
   calendar.innerHTML = `
     <div class="whole-day-wrap">
-      ${renderWholeDayMonth(monthA.year, monthA.monthIndex, {
+      ${months.map(m => renderWholeDayMonth(m.year, m.monthIndex, {
         todayYear: year,
         todayMonth: month,
         todayDay: day
-      })}
-      ${renderWholeDayMonth(monthB.year, monthB.monthIndex, {
-        todayYear: year,
-        todayMonth: month,
-        todayDay: day
-      })}
+      })).join("")}
     </div>
   `;
   
