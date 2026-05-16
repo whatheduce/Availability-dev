@@ -137,6 +137,7 @@ let recurringAvailabilityState = {
   days: 7,
   rows: [],
   color: "#999",
+  hasExistingRecurring: false,
   selected: new Set()
 };
 
@@ -2084,6 +2085,7 @@ for (let i = 0; i < maxHostedSlots; i++) {
       data-invite-token="${b.tables.invite_token}"
       data-owner-token="${b.tables.owner_token}"
       data-row-structure="${escapeHtml(JSON.stringify(b.tables.row_structure || []))}"
+      data-has-recurring="${recurringBoardIds.has(Number(b.tables.id)) ? "1" : "0"}"
     >
       <button class="board-actions-btn" type="button" aria-label="Calendar actions">+</button>
 
@@ -4538,14 +4540,18 @@ function normalizeRecurringRows(rows) {
 }
 
 //----------   
-function openRecurringAvailabilityModal(boardId, rows = [], color = "#999") {
+function openRecurringAvailabilityModal(boardId, rows = [], color = "#999", hasExistingRecurring = false) {
   recurringAvailabilityState = {
     boardId,
     days: 7,
     rows: normalizeRecurringRows(rows),
     color: color || "#999",
+    hasExistingRecurring,
     selected: new Set()
   };
+
+  const deleteBtn = document.getElementById("recurring-delete");
+    if (deleteBtn) deleteBtn.hidden = !hasExistingRecurring;
 
   document.getElementById("recurring-choice-step").hidden = false;
   document.getElementById("recurring-calendar-step").hidden = true;
@@ -5352,6 +5358,39 @@ document.getElementById("pending-requests-close")
       await renderPendingRequestsUi(currentTable.id);
     }
   });
+
+document.getElementById("recurring-delete")?.addEventListener("click", async () => {
+  const ok = await confirmModal({
+    title: "Delete recurring availability?",
+    message: "This will stop your saved recurring availability from repeating in this calendar. Your current visible availability will stay as it is.",
+    okText: "Delete recurring availability",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  const { data, error } = await supabase.rpc("delete_my_recurring_availability", {
+    p_board_id: Number(recurringAvailabilityState.boardId)
+  });
+
+  if (error || !data?.ok) {
+    console.error("Delete recurring availability failed:", error || data);
+
+    showConfirmPopup("Recurring availability could not be deleted. Please try again.", {
+      title: "Delete failed"
+    });
+
+    return;
+  }
+
+  closeRecurringAvailabilityModal();
+
+  showConfirmPopup("Recurring availability deleted.", {
+    title: "Deleted"
+  });
+
+  await loadBoards();
+});
   
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
   if (!isBoardOwner) return;
@@ -5647,7 +5686,12 @@ if (action === "recurring-availability") {
     user?.color ||
     "#999";
 
-  openRecurringAvailabilityModal(boardId, rows, recurringColor);
+  openRecurringAvailabilityModal(
+    boardId,
+    rows,
+    recurringColor,
+    card.dataset.hasRecurring === "1"
+  );
   return;
 }
     
