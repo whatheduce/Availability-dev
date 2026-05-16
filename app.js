@@ -5428,39 +5428,6 @@ document.getElementById("pending-requests-close")
       await renderPendingRequestsUi(currentTable.id);
     }
   });
-
-document.getElementById("recurring-delete")?.addEventListener("click", async () => {
-  const ok = await confirmModal({
-    title: "Delete recurring availability?",
-    message: "This will stop your saved recurring availability from repeating in this calendar. Your current visible availability will stay as it is.",
-    okText: "Delete recurring availability",
-    cancelText: "Cancel"
-  });
-
-  if (!ok) return;
-
-  const { data, error } = await supabase.rpc("delete_my_recurring_availability", {
-    p_board_id: Number(recurringAvailabilityState.boardId)
-  });
-
-  if (error || !data?.ok) {
-    console.error("Delete recurring availability failed:", error || data);
-
-    showConfirmPopup("Recurring availability could not be deleted. Please try again.", {
-      title: "Delete failed"
-    });
-
-    return;
-  }
-
-  closeRecurringAvailabilityModal();
-
-  showConfirmPopup("Recurring availability deleted.", {
-    title: "Deleted"
-  });
-
-  await loadBoards();
-});
   
 document.getElementById("footer-edit-btn")?.addEventListener("click", () => {
   if (!isBoardOwner) return;
