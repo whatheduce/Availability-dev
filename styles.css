@@ -1112,6 +1112,7 @@ td.month-break:not(.gold-cell):hover {
 
 #legend{
   max-width: 320px;
+  min-width: 220px;
   display: block;
   margin-bottom: 20px;
 }
