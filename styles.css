@@ -5868,14 +5868,14 @@ html.route-auth #landing-page {
   }
 
   .board-pill-shell {
-    width: 120px;
-    height: 146px;
+    width: 154px;
+    height: 190px;
   }
 
   .board-pill-shell > .board-pill {
     width: 200px;
     height: 240px;
-    transform: scale(0.56);
+    transform: scale(0.7);
     transform-origin: top left;
     margin: 0;
   }
