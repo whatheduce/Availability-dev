@@ -6304,6 +6304,11 @@ html.route-auth #landing-page {
    padding: 12px 8px;
  }
 
+ .recurring-availability-card {
+  max-width: 90%;
+  padding: 16px 16px 14px;
+ }
+  
  .modal-overlay {
   padding: 0px;
  }
