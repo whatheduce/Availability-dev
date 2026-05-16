@@ -2836,6 +2836,18 @@ window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
 // CALENDAR BUILD / INTERACTION
 // =========================
 
+function getBoardOwnerIsPro() {
+  return currentTable?.owner_is_pro === true;
+}
+
+//----------  
+function getBoardVisibleDayCountForClient() {
+  if (!currentTable) return 30;
+  if (isWholeDayBoard()) return 30; // handled separately by whole-day renderer
+  return getBoardOwnerIsPro() ? 90 : 30;
+}
+
+//----------  
 function buildCalendar() {
   const table = document.getElementById("availabilityTable");
   table.innerHTML = "";
@@ -2843,7 +2855,7 @@ function buildCalendar() {
   if (!currentTable) return;
 
   const times = currentTable.row_structure || [];
-  const days = 30;
+  const days = getBoardVisibleDayCountForClient();
 
   // --- Header row (ONE time only) ---
   const headerRow = document.createElement("tr");
