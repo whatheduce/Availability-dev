@@ -5568,7 +5568,6 @@ html.route-auth #landing-page {
 
 #create-board-btn {
   min-height: 36px;
-  display: flex;
   align-items: center;
 }
 
