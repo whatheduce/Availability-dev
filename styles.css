@@ -4098,8 +4098,18 @@ body.notifications-view #dash-topbar {
 
 .recurring-modal-actions {
   justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.recurring-modal-actions-left {
+  display: flex;
   gap: 12px;
-  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.recurring-modal-actions-left .modal-btn {
+  min-width: 230px;
 }
 
 .recurring-modal-actions-right {
