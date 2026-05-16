@@ -4132,7 +4132,7 @@ body.notifications-view #dash-topbar {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 18px;
+  gap: 12px;
   margin-top: 24px;
 }
 
@@ -4140,10 +4140,13 @@ body.notifications-view #dash-topbar {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  height: 100px;
 }
 
 .recurring-delete-confirm-left .modal-btn {
   min-width: 240px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 #timezone-search {
