@@ -2025,6 +2025,26 @@ async function loadBoards() {
     return;
   }
 
+  const boardIds = (data || [])
+  .map(x => x.board_id)
+  .filter(Boolean);
+
+let recurringBoardIds = new Set();
+
+if (boardIds.length) {
+  const { data: recurringRows, error: recurringErr } = await supabase
+    .from("recurring_availability")
+    .select("board_id")
+    .eq("user_id", au.id)
+    .in("board_id", boardIds);
+
+  if (recurringErr) {
+    console.warn("Failed to load recurring availability status:", recurringErr);
+  } else {
+    recurringBoardIds = new Set((recurringRows || []).map(r => Number(r.board_id)));
+  }
+}
+  
   const owned = (data || [])
   .filter(x => x.role === "owner" && x.tables)
   .sort((a, b) => Number(a.tables.id) - Number(b.tables.id));
@@ -2068,7 +2088,9 @@ for (let i = 0; i < maxHostedSlots; i++) {
 
       <div class="board-actions-menu" hidden>
         <button class="board-actions-item" type="button" data-action="add-user">Add user</button>
-        <button class="board-actions-item" type="button" data-action="recurring-availability">Add Recurring Availability</button>
+        <button class="board-actions-item" type="button" data-action="recurring-availability">
+          ${recurringBoardIds.has(Number(b.tables.id)) ? "Edit Recurring Availability" : "Add Recurring Availability"}
+        </button>
         <button class="board-actions-item" type="button" data-action="delete">Delete</button>
       </div>
 
