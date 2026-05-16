@@ -4084,6 +4084,21 @@ body.notifications-view #dash-topbar {
   transform: translate(-50%, -50%);
 }
 
+.recurring-modal-actions {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recurring-modal-actions-right {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.recurring-delete-btn {
+  color: #9f1d1d;
+}
+
 #timezone-search {
   width: 100%;
   box-sizing: border-box;
