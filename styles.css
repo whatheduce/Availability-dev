@@ -2419,6 +2419,7 @@ body.notifications-view #dash-topbar {
 
 #acct-back-dashboard{
   margin-top: 46px;
+  width: 154px;
 }
 
 .pro-upsell-card {
@@ -5646,11 +5647,6 @@ html.route-auth #landing-page {
 
   .pro-upsell-card {
     width: 300px;
-  }
-
-  #acct-back-dashboard {
-   margin-top: 18px;
-   width: 154px;
   }
 
   .drawer {
