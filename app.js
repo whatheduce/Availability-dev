@@ -2032,11 +2032,12 @@ async function loadBoards() {
 let recurringBoardIds = new Set();
 
 if (boardIds.length) {
-  const { data: recurringRows, error: recurringErr } = await supabase
-    .from("recurring_availability")
-    .select("board_id")
-    .eq("user_id", au.id)
-    .in("board_id", boardIds);
+  const { data: recurringRows, error: recurringErr } = await supabase.rpc(
+    "get_my_recurring_board_ids",
+    {
+      p_board_ids: boardIds.map(Number)
+      }
+  );
 
   if (recurringErr) {
     console.warn("Failed to load recurring availability status:", recurringErr);
