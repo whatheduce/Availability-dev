@@ -5358,10 +5358,6 @@ html.route-auth #landing-page {
     grid-template-columns: 1fr;
   }
 
-  .board-pill--square {
-  gap: 4px;
-}
-
  #board-footer.side-card {
    min-width: 350px;
  }
@@ -5537,14 +5533,6 @@ html.route-auth #landing-page {
     overflow: hidden;
   }
 
-  #dash-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
 
   .dashboard-dev-note {
     margin-top: auto;
@@ -5579,7 +5567,6 @@ html.route-auth #landing-page {
     font-size: 18px;
   } 
  
-  #dash-body,
   #dash-account {
     padding: 0 14px 16px;
   }
