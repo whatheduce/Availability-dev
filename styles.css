@@ -5792,6 +5792,16 @@ html.route-auth #landing-page {
   .recurring-modal-actions-right {
     gap: 8px;
   }
+
+ .recurring-delete-btn {
+   padding: 6px 4px;
+   width: 120px;
+ }
+
+ .recurring-save {
+   padding: 6px 4px;
+   width: 76px;
+ }
 }
 
 /* ================================================================================================================================================================================================================= */
