@@ -5533,7 +5533,6 @@ html.route-auth #landing-page {
     overflow: hidden;
   }
 
-
   .dashboard-dev-note {
     margin-top: auto;
     position: fixed;
@@ -5582,14 +5581,6 @@ html.route-auth #landing-page {
 
   .dashboard-section-divider {
     margin: 4px 0 10px;
-  }
-
-  .board-strip {
-    gap: 18px;
-    padding-bottom: 10px;
-    height: auto;
-    align-items: flex-start;
-    min-height: 176px;
   }
  
   .dash-main {
@@ -5831,27 +5822,6 @@ html.route-auth #landing-page {
 
   .dashboard-section-divider {
     margin: 4px 0 8px;
-  }
- 
-  .board-strip {
-    gap: 14px;
-    padding-bottom: 8px;
-    height: auto;
-    align-items: flex-start;
-    min-height: 176px;
-  }
-
-  .board-pill-shell {
-    width: 154px;
-    height: 190px;
-  }
-
-  .board-pill-shell > .board-pill {
-    width: 200px;
-    height: 240px;
-    transform: scale(0.7);
-    transform-origin: top left;
-    margin: 0;
   }
 
   .board-pill--slot {
