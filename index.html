@@ -368,8 +368,6 @@
           <li>Higher Gold Thresholds</li>
           <li>User profile icons</li>
           <li>Calendar spans 90 days</li>
-          <li>Auto recurring weekly inputs</li>
-          <li>Email notifications</li>
           <li>More in the works...</li>
         </ul>
       </div>
@@ -1048,16 +1046,17 @@
       <div class="recurring-calendar-wrap">
         <table id="recurring-availability-table"></table>
       </div>
+    </div>
 
-      <div class="modal-actions recurring-modal-actions">
-        <button id="recurring-delete" class="modal-btn recurring-delete-btn" type="button" hidden>
-          Delete recurring availability
-        </button>
+    <div class="modal-actions recurring-modal-actions">
+      <button id="recurring-delete" class="modal-btn recurring-delete-btn" type="button" hidden>
+        Delete recurring availability
+      </button>
 
       <div class="recurring-modal-actions-right">
-        <button id="recurring-back" class="modal-btn" type="button">Back</button>
+        <button id="recurring-back" class="modal-btn" type="button" hidden>Back</button>
 
-        <button id="recurring-save" class="modal-btn modal-btn--primary" type="button">
+        <button id="recurring-save" class="modal-btn modal-btn--primary" type="button" hidden>
           Save to calendar
         </button>
 
@@ -1065,10 +1064,9 @@
           Cancel
         </button>
       </div>
-      </div>
+    </div>
   </div>
-  </div>  
-</div>    
+</div>
 
 <!-- Remove User Modal -->
 <div id="remove-user-modal" class="modal-overlay" hidden>
