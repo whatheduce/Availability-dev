@@ -4575,7 +4575,15 @@ function openRecurringAvailabilityModal(boardId, rows = [], color = "#999", hasE
   };
 
   const deleteBtn = document.getElementById("recurring-delete");
-    if (deleteBtn) deleteBtn.hidden = !hasExistingRecurring;
+  const deleteClearBtn = document.getElementById("recurring-delete-clear");
+
+    if (deleteBtn) {
+      deleteBtn.hidden = !hasExistingRecurring;
+    }
+
+    if (deleteClearBtn) {
+      deleteClearBtn.hidden = !hasExistingRecurring;
+    }
 
   document.getElementById("recurring-back").hidden = true;
   document.getElementById("recurring-save").hidden = true;
@@ -5476,6 +5484,38 @@ document.getElementById("recurring-availability-table")?.addEventListener("click
   toggleRecurringCell(cell);
 });
 
+document.getElementById("recurring-delete-clear")?.addEventListener("click", async () => {
+  const ok = await confirmModal({
+    title: "Delete recurring availability and clear calendar?",
+    message: "This will stop your recurring availability and remove all your current visible availability from this calendar.",
+    okText: "Delete and clear",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  const { data, error } = await supabase.rpc("delete_my_recurring_availability", {
+    p_board_id: Number(recurringAvailabilityState.boardId),
+    p_clear_existing: true
+  });
+
+  if (error || !data?.ok) {
+    console.error("Delete recurring + clear failed:", error || data);
+    showConfirmPopup("Recurring availability could not be deleted. Please try again.", {
+      title: "Delete failed"
+    });
+    return;
+  }
+
+  closeRecurringAvailabilityModal();
+
+  showConfirmPopup("Recurring availability and current availability deleted.", {
+    title: "Deleted"
+  });
+
+  await loadBoards();
+});
+  
 document.getElementById("recurring-save")?.addEventListener("click", async () => {
   const ok = await confirmModal({
     title: "Replace availability?",
