@@ -5645,12 +5645,12 @@ html.route-auth #landing-page {
   }
 
   .pro-upsell-card {
-    width: 92%;
+    width: 300px;
   }
 
   #acct-back-dashboard {
-    margin-top: 18px;
-   width: 50%;
+   margin-top: 18px;
+   width: 154px;
   }
 
   .drawer {
