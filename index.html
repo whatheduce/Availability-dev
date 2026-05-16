@@ -1059,15 +1059,6 @@
     >
       Delete recurring availability
     </button>
-
-    <button
-      id="recurring-delete-clear"
-      class="modal-btn recurring-delete-btn"
-      type="button"
-      hidden
-    >
-      Delete recurring + clear calendar
-    </button>
   </div>
 
   <div class="recurring-modal-actions-right">
@@ -1096,6 +1087,33 @@
   </div>
 </div>
 
+<!-- Recurring Delete Modal -->  
+<div id="recurring-delete-modal" class="modal-overlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-title">Delete recurring availability?</div>
+
+    <div class="modal-message">
+      Choose whether to only stop the repeating pattern, or also remove your current visible availability from this calendar.
+    </div>
+
+    <div class="recurring-delete-confirm-actions">
+      <div class="recurring-delete-confirm-left">
+        <button id="recurring-delete-only-confirm" class="modal-btn recurring-delete-btn" type="button">
+          Delete recurring availability
+        </button>
+
+        <button id="recurring-delete-clear-confirm" class="modal-btn recurring-delete-btn" type="button">
+          Delete recurring + clear calendar
+        </button>
+      </div>
+
+      <button id="recurring-delete-cancel" class="modal-btn" type="button">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+  
 <!-- Remove User Modal -->
 <div id="remove-user-modal" class="modal-overlay" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="remove-user-title">
