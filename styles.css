@@ -5604,19 +5604,6 @@ html.route-auth #landing-page {
     align-items: flex-start;
     min-height: 176px;
   }
-
-  .board-pill-shell {
-    width: 144px;
-    height: 176px;
-  }
-
-  .board-pill-shell > .board-pill {
-    width: 200px;
-    height: 240px;
-    transform: scale(0.68);
-    transform-origin: top left;
-    margin: 0;
-  }
  
   .dash-main {
     font-size: 19px;
