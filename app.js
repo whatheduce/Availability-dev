@@ -4553,6 +4553,10 @@ function openRecurringAvailabilityModal(boardId, rows = [], color = "#999", hasE
   const deleteBtn = document.getElementById("recurring-delete");
     if (deleteBtn) deleteBtn.hidden = !hasExistingRecurring;
 
+  document.getElementById("recurring-back").hidden = true;
+  document.getElementById("recurring-save").hidden = true;
+  document.getElementById("recurring-cancel").hidden = false;
+
   document.getElementById("recurring-choice-step").hidden = false;
   document.getElementById("recurring-calendar-step").hidden = true;
   document.getElementById("recurring-availability-modal").hidden = false;
@@ -4573,6 +4577,7 @@ function showRecurringCalendar(days) {
 
   document.getElementById("recurring-back").hidden = false;
   document.getElementById("recurring-save").hidden = false;
+  document.getElementById("recurring-cancel").hidden = false;
 
   buildRecurringAvailabilityTable(recurringAvailabilityState.days);
 }
