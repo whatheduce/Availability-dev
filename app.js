@@ -4662,6 +4662,36 @@ function toggleRecurringCell(cell) {
   }
 }
 
+//----------   
+async function deleteRecurringAvailability({ clearExisting = false } = {}) {
+  const { data, error } = await supabase.rpc("delete_my_recurring_availability", {
+    p_board_id: Number(recurringAvailabilityState.boardId),
+    p_clear_existing: clearExisting
+  });
+
+  if (error || !data?.ok) {
+    console.error("Delete recurring availability failed:", error || data);
+
+    showConfirmPopup("Recurring availability could not be deleted. Please try again.", {
+      title: "Delete failed"
+    });
+
+    return;
+  }
+
+  document.getElementById("recurring-delete-modal").hidden = true;
+  closeRecurringAvailabilityModal();
+
+  showConfirmPopup(
+    clearExisting
+      ? "Recurring availability and current availability deleted."
+      : "Recurring availability deleted.",
+    { title: "Deleted" }
+  );
+
+  await loadBoards();
+}
+
 
 
 // =========================
@@ -5484,37 +5514,21 @@ document.getElementById("recurring-availability-table")?.addEventListener("click
   toggleRecurringCell(cell);
 });
 
-document.getElementById("recurring-delete-clear")?.addEventListener("click", async () => {
-  const ok = await confirmModal({
-    title: "Delete recurring availability and clear calendar?",
-    message: "This will stop your recurring availability and remove all your current visible availability from this calendar.",
-    okText: "Delete and clear",
-    cancelText: "Cancel"
-  });
-
-  if (!ok) return;
-
-  const { data, error } = await supabase.rpc("delete_my_recurring_availability", {
-    p_board_id: Number(recurringAvailabilityState.boardId),
-    p_clear_existing: true
-  });
-
-  if (error || !data?.ok) {
-    console.error("Delete recurring + clear failed:", error || data);
-    showConfirmPopup("Recurring availability could not be deleted. Please try again.", {
-      title: "Delete failed"
-    });
-    return;
-  }
-
-  closeRecurringAvailabilityModal();
-
-  showConfirmPopup("Recurring availability and current availability deleted.", {
-    title: "Deleted"
-  });
-
-  await loadBoards();
+document.getElementById("recurring-delete")?.addEventListener("click", () => {
+  document.getElementById("recurring-delete-modal").hidden = false;
 });
+
+document.getElementById("recurring-delete-cancel")?.addEventListener("click", () => {
+  document.getElementById("recurring-delete-modal").hidden = true;
+});
+
+document.getElementById("recurring-delete-only-confirm")?.addEventListener("click", async () => {
+  await deleteRecurringAvailability({ clearExisting: false });
+});
+
+document.getElementById("recurring-delete-clear-confirm")?.addEventListener("click", async () => {
+  await deleteRecurringAvailability({ clearExisting: true });
+});  
   
 document.getElementById("recurring-save")?.addEventListener("click", async () => {
   const ok = await confirmModal({
