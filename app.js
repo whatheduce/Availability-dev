@@ -2230,8 +2230,13 @@ const { data: refreshed, error: refreshErr } = await supabase
   .single();
 
 if (!refreshErr && refreshed) {
-  currentTable = refreshed;
-  window.currentTable = currentTable;
+  currentTable = {
+  ...currentTable,
+  ...refreshed,
+  owner_is_pro: currentTable.owner_is_pro
+};
+
+window.currentTable = currentTable;
 }
   // Always hide board creation when viewing a board
 document.getElementById("create-board").style.display = "none";
