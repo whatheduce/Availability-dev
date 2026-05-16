@@ -2839,6 +2839,7 @@ window.location.href = `/?m=${encodeURIComponent(ownerToken)}`;
 function getBoardOwnerIsPro() {
   return currentTable?.owner_is_pro === true;
 }
+window.getBoardOwnerIsPro = getBoardOwnerIsPro;
 
 //----------  
 function getBoardVisibleDayCountForClient() {
