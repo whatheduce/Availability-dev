@@ -4571,6 +4571,9 @@ function showRecurringCalendar(days) {
   document.getElementById("recurring-choice-step").hidden = true;
   document.getElementById("recurring-calendar-step").hidden = false;
 
+  document.getElementById("recurring-back").hidden = false;
+  document.getElementById("recurring-save").hidden = false;
+
   buildRecurringAvailabilityTable(recurringAvailabilityState.days);
 }
 
@@ -5427,6 +5430,9 @@ document.getElementById("recurring-cancel")?.addEventListener("click", closeRecu
 document.getElementById("recurring-back")?.addEventListener("click", () => {
   document.getElementById("recurring-choice-step").hidden = false;
   document.getElementById("recurring-calendar-step").hidden = true;
+
+  document.getElementById("recurring-back").hidden = true;
+  document.getElementById("recurring-save").hidden = true;
 });
 
 document.querySelectorAll(".recurring-choice-btn").forEach((btn) => {
