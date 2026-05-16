@@ -4123,6 +4123,24 @@ body.notifications-view #dash-topbar {
   background: rgba(255, 59, 48, 0.12);
 }
 
+.recurring-delete-confirm-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.recurring-delete-confirm-left {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.recurring-delete-confirm-left .modal-btn {
+  min-width: 240px;
+}
+
 #timezone-search {
   width: 100%;
   box-sizing: border-box;
