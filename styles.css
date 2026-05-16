@@ -4087,6 +4087,7 @@ body.notifications-view #dash-topbar {
 .recurring-modal-actions {
   justify-content: space-between;
   gap: 12px;
+  margin-top: 24px;
 }
 
 .recurring-modal-actions-right {
