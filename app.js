@@ -2848,9 +2848,9 @@ window.getBoardOwnerIsPro = getBoardOwnerIsPro;
 
 //----------  
 function getBoardVisibleDayCountForClient() {
-  if (!currentTable) return 30;
-  if (isWholeDayBoard()) return 30; // handled separately by whole-day renderer
-  return getBoardOwnerIsPro() ? 90 : 30;
+  if (!currentTable) return 21;
+  if (isWholeDayBoard()) return 21;
+  return getBoardOwnerIsPro() ? 60 : 21;
 }
 
 //----------  
