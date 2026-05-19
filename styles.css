@@ -983,11 +983,12 @@ td.month-break:not(.gold-cell):hover {
    ========================= */
 
 .whole-day-wrap {
-  display: grid;
+  display: flex;
   grid-template-columns: repeat(2, minmax(340px, 1fr));
   gap: 18px;
   align-items: start;
   min-width: 760px;
+  flex-direction: row;
 }
 
 .whole-day-month-card {
@@ -997,6 +998,7 @@ td.month-break:not(.gold-cell):hover {
   box-shadow: 0 10px 24px rgba(96, 72, 48, 0.08);
   backdrop-filter: blur(10px);
   overflow: hidden;
+  min-width: 600px;
 }
 
 .whole-day-month-card__title {
@@ -5829,6 +5831,10 @@ html.route-auth #landing-page {
    padding: 6px 4px;
    width: 120px;
  }
+
+ .whole-day-month-card {
+  min-width: 460px;
+ }
 }
 
 /* ================================================================================================================================================================================================================= */
@@ -6175,6 +6181,7 @@ html.route-auth #landing-page {
     max-width: calc(100vw - 24px);
     scroll-snap-align: center;
     scroll-snap-stop: always;
+    min-width: 0;
   }
 
 .whole-day-cell__dots {
