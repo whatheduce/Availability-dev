@@ -266,7 +266,7 @@ function renderWholeDayCalendar() {
   if (!calendar) return;
 
   const { year, month, day } = getBoardTodayParts();
-  const monthsToShow = window.getBoardOwnerIsPro?.() ? 4 : 2;
+  const monthsToShow = window.getBoardOwnerIsPro?.() ? 3 : 2;
 
   const months = [];
   let next = { year, monthIndex: month - 1 };
