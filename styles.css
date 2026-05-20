@@ -1599,6 +1599,11 @@ td:not(.gold-cell):hover {
   color: #6f6256;
 }
 
+.create-shell__subtext-details {
+ font-size: 12px;
+ font-style: italic;
+}
+
 .create-layout {
   display: grid;
   grid-template-columns: minmax(430px, 500px) minmax(500px, 680px);
