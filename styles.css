@@ -4157,6 +4157,22 @@ body.notifications-view #dash-topbar {
   font-weight: 600;
 }
 
+.recurring-today-pill {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(229, 138, 31, 0.16);
+  color: #8a4b05;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.recurring-today-column {
+  background: rgba(229, 138, 31, 0.06);
+}
+
 #timezone-search {
   width: 100%;
   box-sizing: border-box;
