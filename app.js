@@ -5026,26 +5026,26 @@ drawer?.addEventListener("click", async (e) => {
   }
 
     if (btn.id === "drawer-notifications") {
-    if (window.innerWidth < 900) {
-      hideDrawerOnly();
-      document.body.classList.add("notifications-view");
+      if (window.innerWidth < 900) {
+        hideDrawerOnly();
+        document.body.classList.add("notifications-view");
 
-      await hydrateNotificationSettings();
-      showNotificationsPanel();
-      return;
-    }
+        showNotificationsPanel();
+        await hydrateNotificationSettings();
+        return;
+      }
 
-    document.body.classList.add("drawer-open");
-    document.body.classList.add("settings-split");
-    document.body.classList.add("notifications-view");
+  document.body.classList.add("drawer-open");
+  document.body.classList.add("settings-split");
+  document.body.classList.add("notifications-view");
 
-    drawer?.setAttribute("aria-hidden", "false");
-    backdrop?.setAttribute("aria-hidden", "true");
+  drawer?.setAttribute("aria-hidden", "false");
+  backdrop?.setAttribute("aria-hidden", "true");
 
-    await hydrateNotificationSettings();  
-    showNotificationsPanel();
-    return;
-  }
+  showNotificationsPanel();
+  await hydrateNotificationSettings();
+  return;
+}
 
   // (optional later) handle other drawer buttons here:
   // if (btn.id === "drawer-notifications") ...
