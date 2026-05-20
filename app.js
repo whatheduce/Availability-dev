@@ -4626,9 +4626,25 @@ function buildRecurringAvailabilityTable(days) {
     ? ["Mon 1", "Tue 1", "Wed 1", "Thu 1", "Fri 1", "Sat 1", "Sun 1", "Mon 2", "Tue 2", "Wed 2", "Thu 2", "Fri 2", "Sat 2", "Sun 2"]
     : ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+  const today = new Date();
+  const todayMonIndex = (today.getDay() + 6) % 7; // Mon = 0, Sun = 6
+
   const headerRow = document.createElement("tr");
-  headerRow.innerHTML = `<th></th>${dayLabels.map(label => `<th>${label}</th>`).join("")}`;
-  table.appendChild(headerRow);
+  headerRow.innerHTML = `
+    <th></th>
+    ${dayLabels.map((label, i) => {
+      const isTodayColumn = i === todayMonIndex;
+
+    return `
+      <th class="${isTodayColumn ? "recurring-today-column" : ""}">
+        ${isTodayColumn ? `<div class="recurring-today-pill">Today</div>` : ""}
+        <div>${label}</div>
+      </th>
+    `;
+  }).join("")}
+`;
+
+table.appendChild(headerRow);
 
   rows.forEach((timeObj) => {
     const label = timeObj;
