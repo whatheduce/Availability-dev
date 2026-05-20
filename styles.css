@@ -4443,6 +4443,10 @@ body.notifications-view #dash-topbar {
   border-radius: 8px;
 }
 
+#return-dashboard-btn {
+  margin-bottom: 18px;
+}
+
 
 
 /* =========================
