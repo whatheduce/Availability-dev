@@ -290,9 +290,17 @@ async function handleAuthSubmit() {
       return;
     }
 
-    showAuthOverlay("Account created. Please check your email to confirm, then come back and sign in.");
-    authMode = "signin";
-    return;
+    hideAuthOverlay();
+
+    showConfirmPopup(
+      "We’ve sent you an email to confirm your account. Please click the validation link in that email to sign in.",
+      {
+        title: "Check your email"
+      }
+);
+
+authMode = "signin";
+return;
   }
 
   // signin
