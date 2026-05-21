@@ -284,8 +284,15 @@ async function handleAuthSubmit() {
       return;
     }
 
+    showLoadingCog?.();
+
     const { error } = await supabase.auth.signUp({ email, password });
+
+    hideLoadingCog?.();
+    
     if (error) {
+      hideLoadingCog?.();
+      
       showAuthOverlay(error.message || "Sign up failed.");
       return;
     }
