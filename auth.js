@@ -293,9 +293,16 @@ async function handleAuthSubmit() {
 
     if (isLoading) {
       submitBtn.innerHTML = `
-        <span style="display:flex; align-items:center; justify-content:center; gap:8px; top: 2px;">
-        <span class="notice-spinner"></span>
-        <span>${text}</span>
+        <span style="display:flex; align-items:center; justify-content:center; gap:10px;">
+          <span 
+            class="notice-spinner"
+            style="
+              top:0;
+              border-color: rgba(255,255,255,0.28);
+              border-top-color: #fff;
+            "
+          ></span>
+          <span>${text}</span>
         </span>
       `;
     } else {
