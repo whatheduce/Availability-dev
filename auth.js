@@ -269,6 +269,13 @@ async function handleAuthSubmit() {
     return;
   }
 
+  const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!emailLooksValid) {
+      showAuthError("Please enter a valid email address");
+      return;
+    }
+
   if (!password) {
     showAuthError("Please enter your password");
     return;
