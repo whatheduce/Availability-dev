@@ -293,7 +293,7 @@ async function handleAuthSubmit() {
 
     if (isLoading) {
       submitBtn.innerHTML = `
-        <span style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <span style="display:flex; align-items:center; justify-content:center; gap:8px; top: 2px;">
         <span class="notice-spinner"></span>
         <span>${text}</span>
         </span>
