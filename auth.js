@@ -258,8 +258,11 @@ async function handleAuthSubmit() {
   const emailEl = document.getElementById("auth-email");
   const passEl = document.getElementById("auth-password");
   const msgEl = document.getElementById("auth-msg");
+  const submitBtn = document.getElementById("auth-submit");
+
   const email = (emailEl?.value || "").trim();
   const password = (passEl?.value || "").trim();
+  const originalSubmitText = submitBtn?.textContent?.trim() || (authMode === "signup" ? "Sign Up" : "Sign In");
 
   if (!email) {
     showAuthError("Please enter your email");
@@ -276,6 +279,21 @@ async function handleAuthSubmit() {
     msgEl.textContent = "";
   }
 
+  const setAuthButtonLoading = (isLoading, text = "Loading...") => {
+    if (!submitBtn) return;
+
+    submitBtn.disabled = isLoading;
+
+    if (isLoading) {
+      submitBtn.innerHTML = `
+        <span class="notice-spinner" style="display:inline-block; top:0; margin-right:8px; vertical-align:middle;"></span>
+        <span>${text}</span>
+      `;
+    } else {
+      submitBtn.textContent = originalSubmitText;
+    }
+  };
+
   if (authMode === "signup") {
     if (password.length < 8) {
       showAuthOverlay("Password must be at least 8 characters. We recommend using a mix of letters and numbers.");
@@ -287,15 +305,13 @@ async function handleAuthSubmit() {
       return;
     }
 
-    showLoadingCog?.();
+    setAuthButtonLoading(true, "Signing up...");
 
     const { error } = await supabase.auth.signUp({ email, password });
 
-    hideLoadingCog?.();
-    
+    setAuthButtonLoading(false);
+
     if (error) {
-      hideLoadingCog?.();
-      
       showAuthOverlay(error.message || "Sign up failed.");
       return;
     }
@@ -307,14 +323,19 @@ async function handleAuthSubmit() {
       {
         title: "Check your email"
       }
-);
+    );
 
-authMode = "signin";
-return;
+    authMode = "signin";
+    return;
   }
 
   // signin
+  setAuthButtonLoading(true, "Signing in...");
+
   const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  setAuthButtonLoading(false);
+
   if (error) {
     showAuthError("Incorrect email or password");
     return;
