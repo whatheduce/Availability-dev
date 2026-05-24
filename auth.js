@@ -552,9 +552,14 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     });
 
     if (error) {
-      showConfirmPopup(error.message || "Something went wrong. Please try again.", {
-        title: "Forgot password"
-      });
+      console.error("handle-auth-email error:", error);
+      console.error("handle-auth-email data:", data);
+
+      showConfirmPopup(
+        "We couldn’t send another email just yet. Please wait a minute, then try again.",
+        { title: "Please wait" }
+      );
+
       return;
     }
 
