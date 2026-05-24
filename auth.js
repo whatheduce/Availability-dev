@@ -28,7 +28,7 @@ function showAuthOverlay(msg = "", opts = {}) {
   const forgotBtn = document.getElementById("auth-forgot");
   const passwordInput = document.getElementById("auth-password");
   const confirmInput = document.getElementById("auth-password-confirm");
-  const submitBtn = document.getElementById("auth-submit-btn");
+  const submitBtn = document.getElementById("auth-submit");
   allowAuthClickAway = !!opts.allowClickAway;
 
   if (!overlay || !toggle || !subtitle) return;
@@ -78,6 +78,7 @@ function showAuthOverlay(msg = "", opts = {}) {
       toggle.textContent = "I already have an account";
       subtitle.textContent = "Create your account and confirm your email to get started.";
 
+      if (submitBtn) submitBtn.textContent = "Sign Up";
       if (forgotBtn) forgotBtn.style.display = "none";
       if (passwordInput) passwordInput.placeholder = "Password (8+ characters)";
       if (confirmInput) {
