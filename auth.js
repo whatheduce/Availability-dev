@@ -484,7 +484,7 @@ function bindAuthUi() {
   const authCard = document.getElementById("auth-modal");
 
   if (authOverlay && authCard) {
-    authOverlay.addEventListener("click", (e) => {
+    authOverlay.addEventListener("pointerdown", (e) => {
       if (!allowAuthClickAway) return;
       if (e.target !== authOverlay) return;
 
