@@ -552,7 +552,7 @@ document.getElementById("auth-forgot")?.addEventListener("click", async () => {
     });
 
     if (error) {
-      showConfirmPopup("Something went wrong. Please try again.", {
+      showConfirmPopup(error.message || "Something went wrong. Please try again.", {
         title: "Forgot password"
       });
       return;
