@@ -3880,9 +3880,11 @@ const addInviteEmailInput = () => {
 
   input.id = `invite-email-${nextNumber}`;
   input.className = "modal-input invite-email-input";
-  input.type = "email";
+  input.type = "text";
+  input.inputMode = "email";
   input.placeholder = "name@example.com";
   input.autocomplete = "off";
+  input.spellcheck = false;
 
   emailListEl.appendChild(input);
 };
