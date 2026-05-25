@@ -3891,7 +3891,12 @@ const syncInviteEmailInputs = () => {
   const inputs = getInviteEmailInputs();
   const lastInput = inputs[inputs.length - 1];
 
-  if (lastInput?.value.trim() && inputs.length < MAX_INVITE_EMAILS) {
+  if (
+    lastInput &&
+    lastInput === document.activeElement &&
+    lastInput.value.trim() &&
+    inputs.length < MAX_INVITE_EMAILS
+  ) {
     addInviteEmailInput();
   }
 };
@@ -3901,7 +3906,7 @@ emailListEl.addEventListener("input", syncInviteEmailInputs);
   const close = () => {
     overlay.hidden = true;
     document.removeEventListener("keydown", onKeyDown, true);
-    overlay.removeEventListener("click", onOverlayClick, true);
+    overlay.removeEventListener("pointerdown", onOverlayClick, true);
   };
 
   const onOverlayClick = (e) => {
@@ -4052,7 +4057,7 @@ if (!au) {
   cancelBtn.onclick = (e) => { e.preventDefault(); close(); };
 
   document.addEventListener("keydown", onKeyDown, true);
-  overlay.addEventListener("click", onOverlayClick, true);
+  overlay.addEventListener("pointerdown", onOverlayClick, true);
 
   // focus the email field
   setTimeout(() => {
