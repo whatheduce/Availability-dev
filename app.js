@@ -3841,22 +3841,63 @@ function isValidEmail(email) {
 //----------   
 function openInviteModal({ inviteToken, boardName, boardId }) {
   const overlay = document.getElementById("invite-modal");
-  const emailEl = document.getElementById("invite-email");
+  const emailListEl = document.getElementById("invite-email-list");
   const sendBtn = document.getElementById("invite-send");
   const cancelBtn = document.getElementById("invite-cancel");
   const errEl = document.getElementById("invite-error");
 
-  if (!overlay || !emailEl || !sendBtn || !cancelBtn || !errEl) return;
+ if (!overlay || !emailListEl || !sendBtn || !cancelBtn || !errEl) return;
 
 inviteContext = { boardId, inviteToken, boardName: boardName || "" };
 
   // reset UI
   errEl.style.display = "none";
   errEl.textContent = "";
-  emailEl.value = "";
+  emailListEl.innerHTML = `
+  <input
+    id="invite-email-1"
+    class="modal-input invite-email-input"
+    type="email"
+    placeholder="name@example.com"
+    autocomplete="email"
+  />
+`;
 
   overlay.hidden = false;
 
+const MAX_INVITE_EMAILS = 10;
+
+const getInviteEmailInputs = () =>
+  Array.from(emailListEl.querySelectorAll(".invite-email-input"));
+
+const addInviteEmailInput = () => {
+  const inputs = getInviteEmailInputs();
+
+  if (inputs.length >= MAX_INVITE_EMAILS) return;
+
+  const nextNumber = inputs.length + 1;
+  const input = document.createElement("input");
+
+  input.id = `invite-email-${nextNumber}`;
+  input.className = "modal-input invite-email-input";
+  input.type = "email";
+  input.placeholder = "name@example.com";
+  input.autocomplete = "email";
+
+  emailListEl.appendChild(input);
+};
+
+const syncInviteEmailInputs = () => {
+  const inputs = getInviteEmailInputs();
+  const lastInput = inputs[inputs.length - 1];
+
+  if (lastInput?.value.trim() && inputs.length < MAX_INVITE_EMAILS) {
+    addInviteEmailInput();
+  }
+};
+
+emailListEl.addEventListener("input", syncInviteEmailInputs);
+  
   const close = () => {
     overlay.hidden = true;
     document.removeEventListener("keydown", onKeyDown, true);
@@ -3873,17 +3914,25 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
   };
 
   const onSend = async (e) => {
-  const email = (emailEl.value || "").trim();
+  const emails = Array.from(
+    new Set(
+    getInviteEmailInputs()
+      .map((input) => (input.value || "").trim().toLowerCase())
+      .filter(Boolean)
+  )
+);
 
-    if (!email) {
-      errEl.style.display = "block";
-      errEl.textContent = "Please enter an email address.";
-      return;
-    }
-
-if (!isValidEmail(email)) {
+if (!emails.length) {
   errEl.style.display = "block";
-  errEl.textContent = "Please enter a valid email address.";
+  errEl.textContent = "Please enter at least one email address.";
+  return;
+}
+
+const invalidEmail = emails.find((email) => !isValidEmail(email));
+
+if (invalidEmail) {
+  errEl.style.display = "block";
+  errEl.textContent = `Please check this email address: ${invalidEmail}`;
   return;
 }
 
@@ -3925,50 +3974,53 @@ if (memberCount >= memberLimit) {
   const inviteLink = buildInviteLink(inviteToken);
   const boardName = inviteContext?.boardName || "Availability Calendar";
 
-  const { data, error } = await supabase.functions.invoke("send-invite", {
-    body: {
-      toEmail: email,
-      boardId,
-      boardName,
-      inviteToken,
-      inviteLink
-    }
-  });
+  for (const email of emails) {
+    const { error } = await supabase.functions.invoke("send-invite", {
+      body: {
+        toEmail: email,
+        boardId,
+        boardName,
+        inviteToken,
+        inviteLink
+      }
+    });
 
   if (error) throw error;
+}
 
-  const au = await auth.getAuthUser();
-  console.log("invite save auth user:", au);
-  console.log("invite save boardId/email:", boardId, email);
+const au = await auth.getAuthUser();
 
-  if (!au) {
-    console.warn("Invite save skipped: auth.getAuthUser() returned null");
-  } else {
-    const payload = {
-      board_id: boardId,
-      email: email.toLowerCase().trim(),
-      role: "member",
-      created_by: au.id
-    };
+console.log("invite save auth user:", au);
+console.log("invite save boardId/emails:", boardId, emails);
 
-    console.log("board_invites payload:", payload);
+if (!au) {
+  console.warn("Invite save skipped: auth.getAuthUser() returned null");
+} else {
+  const payload = emails.map((email) => ({
+    board_id: boardId,
+    email: email.toLowerCase().trim(),
+    role: "member",
+    created_by: au.id
+  }));
 
-    const { data: inviteSaveData, error: inviteSaveErr } = await supabase
-      .from("board_invites")
-      .insert(payload)
-      .select();
+  console.log("board_invites payload:", payload);
 
-    console.log("board_invites insert result:", inviteSaveData);
-    console.log("board_invites insert error full:", inviteSaveErr);
-    console.log("board_invites insert error json:", JSON.stringify(inviteSaveErr, null, 2));
+  const { data: inviteSaveData, error: inviteSaveErr } = await supabase
+    .from("board_invites")
+    .insert(payload)
+    .select();
 
-    if (inviteSaveErr) {
-      console.warn("Failed to save invite record code:", inviteSaveErr.code);
-      console.warn("Failed to save invite record message:", inviteSaveErr.message);
-      console.warn("Failed to save invite record details:", inviteSaveErr.details);
-      console.warn("Failed to save invite record hint:", inviteSaveErr.hint);
-    }
+  console.log("board_invites insert result:", inviteSaveData);
+  console.log("board_invites insert error full:", inviteSaveErr);
+  console.log("board_invites insert error json:", JSON.stringify(inviteSaveErr, null, 2));
+
+  if (inviteSaveErr) {
+    console.warn("Failed to save invite record code:", inviteSaveErr.code);
+    console.warn("Failed to save invite record message:", inviteSaveErr.message);
+    console.warn("Failed to save invite record details:", inviteSaveErr.details);
+    console.warn("Failed to save invite record hint:", inviteSaveErr.hint);
   }
+}
 
   await renderCalendarInviteStats();
 
@@ -3976,7 +4028,9 @@ if (memberCount >= memberLimit) {
 
   await confirmModal({
     title: "Invite sent",
-    message: `Invite email sent to ${email}.`,
+    message: emails.length === 1
+    ? `Invite email sent to ${emails[0]}.`
+    : `Invite emails sent to ${emails.length} people.`,
     okText: "Close",
     cancelText: ""
   });
