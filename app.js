@@ -3883,7 +3883,7 @@ const addInviteEmailInput = () => {
   input.type = "text";
   input.inputMode = "email";
   input.placeholder = "name@example.com";
-  input.autocomplete = "off";
+  input.autocomplete = "new-password";
   input.spellcheck = false;
 
   emailListEl.appendChild(input);
