@@ -3859,7 +3859,7 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
     class="modal-input invite-email-input"
     type="email"
     placeholder="name@example.com"
-    autocomplete="email"
+    autocomplete="off"
   />
 `;
 
@@ -3882,7 +3882,7 @@ const addInviteEmailInput = () => {
   input.className = "modal-input invite-email-input";
   input.type = "email";
   input.placeholder = "name@example.com";
-  input.autocomplete = "email";
+  input.autocomplete = "off";
 
   emailListEl.appendChild(input);
 };
