@@ -4002,6 +4002,12 @@ body.notifications-view #dash-topbar {
   margin-top:10px;
 }
 
+.invite-email-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .modal-error{
   margin-top:10px;
   font-size:13px;
