@@ -1013,8 +1013,17 @@
       Enter an email address and we’ll generate an invite link for this calendar.
     </div>
 
-    <label class="modal-label" for="invite-email">Email</label>
-    <input id="invite-email" class="modal-input" type="email" placeholder="name@example.com" autocomplete="email" />
+    <label class="modal-label" for="invite-email-1">Emails</label>
+
+    <div id="invite-email-list" class="invite-email-list">
+      <input
+        id="invite-email-1"
+        class="modal-input invite-email-input"
+        type="email"
+        placeholder="name@example.com"
+        autocomplete="email"
+      />
+    </div>
 
     <div id="invite-error" class="modal-error" style="display:none;"></div>
 
