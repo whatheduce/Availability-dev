@@ -3854,14 +3854,17 @@ inviteContext = { boardId, inviteToken, boardName: boardName || "" };
   errEl.style.display = "none";
   errEl.textContent = "";
   emailListEl.innerHTML = `
-  <input
-    id="invite-email-1"
-    class="modal-input invite-email-input"
-    type="email"
-    placeholder="name@example.com"
-    autocomplete="off"
-  />
-`;
+    <input
+      id="invite-email-1"
+      class="modal-input invite-email-input"
+      type="text"
+      inputmode="email"
+      placeholder="name@example.com"
+      autocomplete="new-password"
+      autocapitalize="none"
+      spellcheck="false"
+    />
+  `;
 
   overlay.hidden = false;
 
