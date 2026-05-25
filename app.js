@@ -4055,7 +4055,9 @@ if (!au) {
   overlay.addEventListener("click", onOverlayClick, true);
 
   // focus the email field
-  setTimeout(() => emailEl.focus(), 0);
+  setTimeout(() => {
+    getInviteEmailInputs()[0]?.focus();
+  }, 0);
 }
 
 
