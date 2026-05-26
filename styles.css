@@ -1645,6 +1645,7 @@ td:not(.gold-cell):hover {
  color: #665341;
  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 -1px 0 rgba(92, 73, 57, 0.06), 0 1.5px 2px rgba(92, 73, 57, 0.05);
  width: fit-content !important;
+ margin: 20px auto;
 }
 
 .create-panel__heading {
