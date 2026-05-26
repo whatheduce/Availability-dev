@@ -670,8 +670,12 @@
   </div>
 
   <div class="create-panel">
-    <div class="create-panel__heading">Upcoming Availability Calendar</div>
+    <button type="button" id="structure-toggle" class="create-panel__heading create-panel__toggle">
+      <span>Upcoming Availability Calendar</span>
+      <span class="create-panel__arrow">⌄</span>
+    </button>
 
+ <div id="structure-panel-content" class="create-panel__collapsible">
     <div id="gold-threshold-wrap" class="create-field">
       <label for="gold-threshold" class="create-label">Gold Threshold</label>
 
@@ -728,6 +732,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <button id="go-create" class="primary-btn create-submit-btn" style="display:none;">
