@@ -1674,14 +1674,17 @@ td:not(.gold-cell):hover {
   background: transparent;
   padding: 0;
   cursor: pointer;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   text-align: left;
-  font: inherit;
-  color: inherit;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #665341;
 }
 
 .create-panel__toggle span:first-child {
