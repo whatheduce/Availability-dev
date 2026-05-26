@@ -313,8 +313,16 @@ if (showErrors && !hasStructure) {
 }
 
 function bindBoardSetupUi() {
-  const boardNameInput = document.getElementById("board-name");
+  const structureToggle = document.getElementById("structure-toggle");
+  const structurePanel = document.querySelector(".create-panel--structure");
 
+  if (structureToggle && structurePanel) {
+    structureToggle.addEventListener("click", () => {
+      structurePanel.classList.toggle("collapsed");
+    });
+  }
+  
+  const boardNameInput = document.getElementById("board-name");
   if (boardNameInput) {
     boardNameInput.maxLength = MAX_BOARD_NAME_LENGTH;
     boardNameInput.addEventListener("input", () => {
