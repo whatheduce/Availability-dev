@@ -1640,7 +1640,7 @@ td:not(.gold-cell):hover {
  line-height: 1.2;
  color: #665341;
  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65), 0 -1px 0 rgba(92, 73, 57, 0.06), 0 1.5px 2px rgba(92, 73, 57, 0.05);
- width: fit-content;
+ width: fit-content !important;
 }
 
 .create-panel__heading {
