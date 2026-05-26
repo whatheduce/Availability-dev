@@ -1547,7 +1547,7 @@ td:not(.gold-cell):hover {
 }
 
 .structure-about {
-  margin: 10px 0 0;
+  margin: 10px 0 4px;
   font-size: 13px;
   color: rgba(65, 55, 42, 0.72);
   line-height: 1.4;
