@@ -1796,6 +1796,7 @@ td:not(.gold-cell):hover {
   background: rgba(255, 255, 255, 0.92);
   font: inherit;
   color: #332920;
+  font-size: 14px;
   min-height: 46px;
 }
 
@@ -1856,6 +1857,7 @@ td:not(.gold-cell):hover {
   min-width: 0;
   position: relative;
   overflow: hidden;
+  max-width: 280px;
 }
 
 .structure-card:hover {
@@ -6084,8 +6086,8 @@ html.route-auth #landing-page {
     margin: 10px 0 0 8px;
   }
 
- .create-input, .create-select {
-  font-size: 14px;
+ .create-select {
+   max-width: 300px;
  }
  
   .board-strip-fade::after {
