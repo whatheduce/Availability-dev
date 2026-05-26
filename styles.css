@@ -1689,6 +1689,7 @@ td:not(.gold-cell):hover {
   background: rgba(255, 255, 255, 0.92);
   font: inherit;
   color: #332920;
+  min-height: 46px;
 }
 
 .create-input:focus,
