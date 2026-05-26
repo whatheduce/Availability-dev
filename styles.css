@@ -1744,7 +1744,7 @@ td:not(.gold-cell):hover {
   border-right: 2px solid white;
   border-bottom: 2px solid white;
 
-  transform: rotate(45deg) translateY(-1px);
+  transform: rotate(45deg) translate(-1px, -1px);
   transition: transform 0.2s ease;
 }
 
@@ -1758,7 +1758,7 @@ td:not(.gold-cell):hover {
   display: none;
 }
 
-.create-panel--structure:not(.collapsed) .create-panel__arrow {
+.create-panel--structure.collapsed .create-panel__arrow {
   transform: rotate(180deg);
 }
 
