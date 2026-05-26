@@ -693,14 +693,6 @@ body.logged-in #landing-bg::after{
   text-align: center;
   }    
 
-    .centered-container input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-
     .primary-btn {
       padding: 10px 18px;
       font-size: 15px;
@@ -1560,10 +1552,6 @@ td:not(.gold-cell):hover {
   margin: -36px auto 0;
 }
 
-.create-shell__header {
-  margin-bottom: 20px;
-}
-
 .create-shell__header h2 {
   position: relative;
   display: inline-block;
@@ -1629,9 +1617,10 @@ td:not(.gold-cell):hover {
   background: rgba(255, 252, 247, 0.88);
   border: 1px solid rgba(126, 104, 82, 0.16);
   border-radius: 18px;
-  padding: 20px;
+  padding: 14px;
   box-shadow: 0 14px 34px rgba(92, 71, 50, 0.08);
   backdrop-filter: blur(10px);
+  margin-top: 20px;
 }
 
 .create-panel__heading {
@@ -5373,10 +5362,6 @@ html.route-auth #landing-page {
  #calendar-side {
   gap: 0;
  }
- 
-    .create-basics-row {
-    grid-template-columns: 1fr;
-  }
 
   .structure-columns {
     grid-template-columns: 1fr 1fr;
