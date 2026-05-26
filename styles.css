@@ -1641,7 +1641,7 @@ td:not(.gold-cell):hover {
   position: relative;
 }
 
-.create-panel__heading::before {
+.create-panel__heading:not(.create-panel_toggle)::before {
   content: "";
   width: 8px;
   height: 8px;
@@ -1696,7 +1696,6 @@ td:not(.gold-cell):hover {
   height: 9px;
   border-radius: 999px;
   background: #b88746;
-  flex: 0 0 auto;
 }
 
 .create-panel__arrow {
