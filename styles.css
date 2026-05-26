@@ -1605,15 +1605,6 @@ td:not(.gold-cell):hover {
  margin-top: 4px;
 }
 
-.create-layout {
-  display: flex;
-  flex-direction: column;
-  grid-template-columns: minmax(0, 680px);
-  gap: 24px;
-  align-items: start;
-  justify-content: start;
-}
-
 .create-basics-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -5382,10 +5373,6 @@ html.route-auth #landing-page {
  #calendar-side {
   gap: 0;
  }
-
-  .create-layout {
-    grid-template-columns: 1fr;
-  }
  
     .create-basics-row {
     grid-template-columns: 1fr;
@@ -5437,10 +5424,6 @@ html.route-auth #landing-page {
 
   .settings-row-3 {
     grid-template-columns: 120px 1fr auto;
-  }
-
-  .create-layout {
-    grid-template-columns: 1fr;
   }
 
  #board-footer.side-card {
