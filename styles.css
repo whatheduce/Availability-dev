@@ -1606,7 +1606,8 @@ td:not(.gold-cell):hover {
 }
 
 .create-layout {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   grid-template-columns: minmax(0, 680px);
   gap: 24px;
   align-items: start;
@@ -1735,10 +1736,6 @@ td:not(.gold-cell):hover {
   color: #7a6757;
   margin-top: 6px;
   line-height: 1.45;
-}
-
-#gold-threshold-wrap {
-  margin-top: 36px;
 }
 
 .structure-columns {
