@@ -1732,10 +1732,9 @@ td:not(.gold-cell):hover {
 }
 
 .structure-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
-  align-items: start;
 }
 
 .structure-column__heading {
