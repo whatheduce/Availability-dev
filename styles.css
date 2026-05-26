@@ -1553,6 +1553,10 @@ td:not(.gold-cell):hover {
   line-height: 1.4;
 }
 
+.create-panel--structure {
+  max-width: 660px;
+}
+
 .create-panel--structure:not(.collapsed) .structure-about {
   margin-bottom: 18px;
 }
