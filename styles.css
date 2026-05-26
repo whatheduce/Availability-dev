@@ -1607,20 +1607,30 @@ td:not(.gold-cell):hover {
 
 .create-layout {
   display: grid;
-  grid-template-columns: minmax(430px, 500px) minmax(500px, 680px);
+  grid-template-columns: minmax(0, 680px);
   gap: 24px;
-  align-items: stretch;
+  align-items: start;
   justify-content: start;
 }
 
-.create-left-column {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
+.create-basics-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
 }
 
-.create-panel--basics {
-  flex: 0 0 auto;
+.create-basics-row .create-field + .create-field {
+  margin-top: 0;
+}
+
+#create-board .create-panel {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#gold-threshold-wrap {
+  margin-top: 0;
+  margin-bottom: 24px;
 }
 
 .create-panel {
@@ -1950,22 +1960,6 @@ body.create-view #go-create {
     0 0 0 4px rgba(212,154,86,0.18),
     0 1px 0 rgba(255,255,255,0.76) inset,
     0 18px 34px rgba(120,84,41,0.16);
-}
-
-@media (max-width: 1100px) {
-  .create-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .structure-columns {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 760px) {
-  .structure-columns {
-    grid-template-columns: 1fr;
-  }
 }
 
 .custom-structure-card {
@@ -5391,6 +5385,18 @@ html.route-auth #landing-page {
  #calendar-side {
   gap: 0;
  }
+
+  .create-layout {
+    grid-template-columns: 1fr;
+  }
+ 
+    .create-basics-row {
+    grid-template-columns: 1fr;
+  }
+
+  .structure-columns {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* ================================================================================================================================================================================================================= */
@@ -5600,6 +5606,10 @@ html.route-auth #landing-page {
 
 /* ================================================================================================================================================================================================================= */
 @media (max-width: 720px) {
+  .structure-columns {
+    grid-template-columns: 1fr;
+  }
+ 
  .board-preview {
   --mini-scale: 0.85;
 }
