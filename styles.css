@@ -1641,7 +1641,7 @@ td:not(.gold-cell):hover {
   position: relative;
 }
 
-.create-panel__heading:not(.create-panel_toggle)::before {
+.create-panel__heading:not(.create-panel__toggle)::before {
   content: "";
   width: 8px;
   height: 8px;
