@@ -1707,10 +1707,6 @@ td:not(.gold-cell):hover {
   transition: transform 0.18s ease;
 }
 
-.create-panel--structure.collapsed {
-  padding-bottom: 18px;
-}
-
 .create-panel--structure.collapsed .create-panel__collapsible {
   display: none;
 }
