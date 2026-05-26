@@ -1546,6 +1546,17 @@ td:not(.gold-cell):hover {
   color: #6b5c4f;
 }
 
+.structure-about {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: rgba(65, 55, 42, 0.72);
+  line-height: 1.4;
+}
+
+.create-panel--structure:not(.collapsed) .structure-about {
+  margin-bottom: 18px;
+}
+
 .create-shell {
   text-align: left;
   max-width: 1180px;
