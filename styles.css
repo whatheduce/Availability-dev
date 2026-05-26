@@ -1674,11 +1674,33 @@ td:not(.gold-cell):hover {
   background: transparent;
   padding: 0;
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.create-panel__toggle span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.create-panel__toggle span:first-child::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #b88746;
+  flex: 0 0 auto;
 }
 
 .create-panel__arrow {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
   transition: transform 0.18s ease;
 }
