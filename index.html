@@ -648,27 +648,31 @@
       </div>
     </div>
 
-    <div class="create-layout">
-      
-<!-- LEFT: Basics + Action -->
-<div class="create-left-column">
+<div class="create-layout">
+
   <div class="create-panel create-panel--basics">
     <div class="create-panel__heading">Board Basics</div>
 
-    <div class="create-field">
-      <label for="board-name" class="create-label">Calendar Name</label>
-      <input id="board-name" class="create-input" placeholder="Calendar name" />
-    </div>
+    <div class="create-basics-row">
+      <div class="create-field">
+        <label for="board-name" class="create-label">Calendar Name</label>
+        <input id="board-name" class="create-input" placeholder="Calendar name" />
+      </div>
 
-    <div class="create-field">
-      <label for="host-timezone" class="create-label">Calendar Timezone</label>
-      <select id="host-timezone" class="create-select">
-        <option>Loading timezones…</option>
-      </select>
-      <div class="create-help">
-        Used for the calendar’s day rollover and date labels.
+      <div class="create-field">
+        <label for="host-timezone" class="create-label">Calendar Timezone</label>
+        <select id="host-timezone" class="create-select">
+          <option>Loading timezones…</option>
+        </select>
+        <div class="create-help">
+          Used for the calendar’s day rollover and date labels.
+        </div>
       </div>
     </div>
+  </div>
+
+  <div class="create-panel">
+    <div class="create-panel__heading">Upcoming Availability Calendar</div>
 
     <div id="gold-threshold-wrap" class="create-field">
       <label for="gold-threshold" class="create-label">Gold Threshold</label>
@@ -681,63 +685,58 @@
         Cells turn gold when dots meet or exceed this number.
       </div>
     </div>
+
+    <div class="structure-columns">
+      <div class="structure-column">
+        <div class="structure-column__heading">Free Structures</div>
+
+        <div id="whole-day-card" class="structure-card">
+          <div class="structure-title">Whole Day</div>
+          <div class="structure-subtitle">Single all-day row</div>
+        </div>
+
+        <div id="am-pm-card" class="structure-card">
+          <div class="structure-title">AM / PM</div>
+          <div class="structure-subtitle">Day • Night</div>
+        </div>
+
+        <div id="meals-card" class="structure-card">
+          <div class="structure-title">Meals</div>
+          <div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
+        </div>
+
+        <div id="shifts-card" class="structure-card">
+          <div class="structure-title">Shifts</div>
+          <div class="structure-subtitle">Morning • Day • Afternoon • Night</div>
+        </div>
+
+        <div id="custom-card" class="structure-card">
+          <div class="structure-title">Custom</div>
+          <div class="structure-subtitle">Create up to 5 custom row labels</div>
+        </div>
+      </div>
+
+      <div class="structure-column">
+        <div class="structure-column__heading">Pro Structures</div>
+
+        <div id="hours-card" class="structure-card structure-card--locked" aria-disabled="true">
+          <div class="structure-title">Hours <span class="structure-lock">🔒</span></div>
+          <div class="structure-subtitle">24 hourly rows</div>
+        </div>
+
+        <div id="extended-custom-card" class="structure-card structure-card--locked" aria-disabled="true">
+          <div class="structure-title">Extensive Custom <span class="structure-lock">🔒</span></div>
+          <div class="structure-subtitle">Create up to 24 custom row labels</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <button id="go-create" class="primary-btn create-submit-btn" style="display:none;">
     Create Calendar
   </button>
+
 </div>
-
-      <!-- RIGHT: Structures -->
-      <div class="create-panel">
-        <div class="create-panel__heading">Upcoming Availability Calendar</div>
-
-        <div class="structure-columns">
-          <div class="structure-column">
-            <div class="structure-column__heading">Free Structures</div>
-
-            <div id="whole-day-card" class="structure-card">
-              <div class="structure-title">Whole Day</div>
-              <div class="structure-subtitle">Single all-day row</div>
-            </div>
-
-            <div id="am-pm-card" class="structure-card">
-              <div class="structure-title">AM / PM</div>
-              <div class="structure-subtitle">Day • Night</div>
-            </div>
-
-            <div id="meals-card" class="structure-card">
-              <div class="structure-title">Meals</div>
-              <div class="structure-subtitle">Breakfast • Lunch • Dinner</div>
-            </div>
-
-            <div id="shifts-card" class="structure-card">
-              <div class="structure-title">Shifts</div>
-              <div class="structure-subtitle">Morning • Day • Afternoon • Night</div>
-            </div>
-
-            <div id="custom-card" class="structure-card">
-              <div class="structure-title">Custom</div>
-              <div class="structure-subtitle">Create up to 5 custom row labels</div>
-            </div>
-          </div>
-
-          <div class="structure-column">
-            <div class="structure-column__heading">Pro Structures</div>
-
-            <div id="hours-card" class="structure-card structure-card--locked" aria-disabled="true">
-              <div class="structure-title">Hours <span class="structure-lock">🔒</span></div>
-              <div class="structure-subtitle">24 hourly rows</div>
-            </div>
-
-            <div id="extended-custom-card" class="structure-card structure-card--locked" aria-disabled="true">
-              <div class="structure-title">Extensive Custom <span class="structure-lock">🔒</span></div>
-              <div class="structure-subtitle">Create up to 24 custom row labels</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div id="details-step" style="display:none;">
