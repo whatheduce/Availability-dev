@@ -1713,9 +1713,45 @@ td:not(.gold-cell):hover {
 }
 
 .create-panel__arrow {
-  font-size: 18px;
-  line-height: 1;
-  transition: transform 0.18s ease;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(191, 145, 76, 0.95),
+      rgba(163, 120, 58, 0.95)
+    );
+
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.create-panel__chevron {
+  width: 9px;
+  height: 9px;
+
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+
+  transform: rotate(45deg) translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+.create-panel__toggle:hover .create-panel__arrow {
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.35);
 }
 
 .create-panel--structure.collapsed .create-panel__collapsible {
