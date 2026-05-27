@@ -1836,18 +1836,13 @@ td:not(.gold-cell):hover {
 
 .structure-create-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(220px, 0.85fr);
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, 1fr);
   gap: 28px;
   align-items: start;
 }
 
 .create-structure-availability-calendar {
-  position: sticky;
-  top: 24px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 34px;
+  margin-top: 24px;
 }
 
 .create-structure-availability-calendar .create-submit-btn {
@@ -1993,10 +1988,6 @@ body.create-view #go-create {
 }
 
 #create-board #go-create {
-  width: 60%;
-  margin-top: 15%;
-
-  flex: 0 0 auto;
   min-height: 124px;
   height: 124px;
 
