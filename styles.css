@@ -1768,11 +1768,13 @@ td:not(.gold-cell):hover {
     inset 0 1px 0 rgba(255,255,255,0.35);
 }
 
-.create-panel--structure.collapsed .create-panel__collapsible {
+.create-panel--structure.collapsed .create-panel__collapsible
+.create-panel--consensus.collapsed .create-panel__collapsible {
   display: none;
 }
 
-.create-panel--structure.collapsed .create-panel__arrow {
+.create-panel--structure.collapsed .create-panel__arrow
+.create-panel--consensus:not(.collapsed) .create-panel__arrow {
   transform: rotate(180deg);
 }
 
