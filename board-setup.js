@@ -313,18 +313,18 @@ if (showErrors && !hasStructure) {
 }
 
 function bindBoardSetupUi() {
-const structurePanels = document.querySelectorAll(
-  ".create-panel--structure, .create-panel--consensus"
-);
+  const structurePanels = document.querySelectorAll(
+    ".create-panel--structure, .create-panel--consensus"
+  );
 
-function resetPanelFields(panel) {
-  panel.querySelectorAll("input, textarea, select").forEach((field) => {
+  function resetPanelFields(panel) {
+    panel.querySelectorAll("input, textarea, select").forEach((field) => {
     if (field.type === "checkbox" || field.type === "radio") {
       field.checked = field.defaultChecked;
       return;
     }
 
-    field.value = field.defaultValue || "";
+    field.value = "";
   });
 
   panel.querySelectorAll(".is-invalid").forEach((el) => {
@@ -334,6 +334,23 @@ function resetPanelFields(panel) {
   panel.querySelectorAll(".active").forEach((el) => {
     el.classList.remove("active");
   });
+
+  if (panel.classList.contains("create-panel--structure")) {
+    selectedStructure = null;
+
+    const goldThreshold = document.getElementById("gold-threshold");
+    if (goldThreshold) goldThreshold.value = "";
+
+    const createCalendarBtn = document.getElementById("go-create");
+    if (createCalendarBtn) createCalendarBtn.style.display = "none";
+
+    updateGoCreateVisibility();
+  }
+
+  if (panel.classList.contains("create-panel--consensus")) {
+    const createConsensusBtn = document.getElementById("create-consensus-board");
+    if (createConsensusBtn) createConsensusBtn.style.display = "none";
+  }
 }
 
 structurePanels.forEach((panel) => {
