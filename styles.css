@@ -1746,9 +1746,9 @@ td:not(.gold-cell):hover {
     0 2px 8px rgba(0,0,0,0.10),
     inset 0 1px 0 rgba(255,255,255,0.35);
 
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
+
+  transform: rotate(0deg);
 }
 
 .create-panel__chevron {
@@ -1773,7 +1773,7 @@ td:not(.gold-cell):hover {
   display: none;
 }
 
-.create-panel--structure.collapsed .create-panel__arrow,
+.create-panel--structure:not(.collapsed) .create-panel__arrow,
 .create-panel--consensus:not(.collapsed) .create-panel__arrow {
   transform: rotate(180deg);
 }
