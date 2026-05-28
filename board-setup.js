@@ -321,6 +321,15 @@ function bindBoardSetupUi() {
       structurePanel.classList.toggle("collapsed");
     });
   }
+
+  const consensusToggle = document.getElementById("consensus-toggle");
+  const consensusPanel = document.querySelector(".create-panel--consensus");
+
+  if (consensusToggle && consensusPanel) {
+    consensusToggle.addEventListener("click", () => {
+      consensusPanel.classList.toggle("collapsed");
+    });
+  }
   
   const boardNameInput = document.getElementById("board-name");
   if (boardNameInput) {
