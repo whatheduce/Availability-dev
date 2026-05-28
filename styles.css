@@ -2092,7 +2092,8 @@ body.create-view #go-create {
   display: block;
 }
 
-#create-board #go-create {
+#create-board #go-create,
+#create-board #create-consensus-board {
   min-height: 124px;
   height: 124px;
 
@@ -2100,67 +2101,55 @@ body.create-view #go-create {
   align-items: center;
   justify-content: center;
 
-  align-self: center;
-
   padding: 18px 24px;
-
   border-radius: 22px;
   border: 1px solid rgba(191, 145, 74, 0.72);
 
   background:
     linear-gradient(
       180deg,
-      rgba(246, 225, 170, 0.98),
-      rgba(231, 196, 118, 0.98)
+      rgba(248, 223, 146, 1) 0%,
+      rgba(226, 183, 84, 1) 100%
     );
 
-  color: #4a3520;
+  color: #3e2a17;
   font: inherit;
   font-size: 22px;
   font-weight: 800;
-  letter-spacing: 0.01em;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.28);
+  letter-spacing: 0.02em;
 
   box-shadow:
-   inset 0 0 0 1px rgba(255,255,255,0.72),
-   inset 0 0 0 6px rgba(255,244,214,0.48),
-   0 18px 34px rgba(120,84,41,0.16);
+   inset 0 0 0 1px rgba(255,255,255,0.62),
+   inset 0 0 0 6px rgba(255,245,214,0.36),
+   0 18px 34px rgba(184,135,70,0.30);
 
   cursor: pointer;
 
   transition:
     transform 140ms ease,
     box-shadow 140ms ease,
-    border-color 140ms ease,
-    background 140ms ease;
+    filter 140ms ease;
 }
 
-#create-board #go-create:hover {
-  transform: translateY(-1px);
+#create-board #go-create:hover,
+#create-board #create-consensus-board:hover {
+  transform: translateY(-2px);
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(250, 232, 182, 1),
-      rgba(238, 205, 126, 1)
-    );
-
-  border-color: rgba(191, 145, 74, 0.84);
+  filter: brightness(1.03);
 
   box-shadow:
-    inset 0 0 0 2px rgba(255, 248, 224, 0.62),
-    inset 0 1px 0 rgba(255,255,255,0.78),
-    0 22px 38px rgba(120,84,41,0.18);
+    inset 0 1px 0 rgba(255,255,255,0.62),
+    inset 0 0 0 5px rgba(255,245,214,0.34),
+    0 16px 36px rgba(184, 135, 70, 0.32);
 }
 
-#create-board #go-create:active {
-  transform: translateY(0);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.72) inset,
-    0 10px 20px rgba(120,84,41,0.12);
+#create-board #go-create:active,
+#create-board #create-consensus-board:active {
+  transform: translateY(1px);
 }
 
-#create-board #go-create:focus-visible {
+#create-board #go-create:focus-visible,
+#create-board #create-consensus-board:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 4px rgba(212,154,86,0.18),
