@@ -1553,7 +1553,8 @@ td:not(.gold-cell):hover {
   line-height: 1.4;
 }
 
-.create-panel--structure {
+.create-panel--structure,
+.create-panel--consensus {
   max-width: 660px;
 }
 
