@@ -1567,12 +1567,12 @@ td:not(.gold-cell):hover {
 .create-shell__header h2 {
   position: relative;
   display: inline-block;
-  margin: 0 0 8px;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: -0.018em;
-  line-height: 1.08;
-  color: #2f241a;
+  margin: 0 0 10px;
+  font-size: 46px;
+  font-weight: 900;
+  letter-spacing: -1.6px;
+  line-height: 1;
+  color: #2f2116;
   text-shadow:
     0 1px 0 rgba(255,255,255,0.55),
     0 2px 4px rgba(80,58,38,0.05);
@@ -1592,6 +1592,10 @@ td:not(.gold-cell):hover {
     rgba(198,145,92,0.18),
     rgba(198,145,92,0)
   );
+}
+
+.create-shell h2 span {
+  color: #b88746;
 }
 
 .create-shell__subtext {
