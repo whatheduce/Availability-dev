@@ -313,23 +313,51 @@ if (showErrors && !hasStructure) {
 }
 
 function bindBoardSetupUi() {
-  const structureToggle = document.getElementById("structure-toggle");
-  const structurePanel = document.querySelector(".create-panel--structure");
+const structurePanels = document.querySelectorAll(
+  ".create-panel--structure, .create-panel--consensus"
+);
 
-  if (structureToggle && structurePanel) {
-    structureToggle.addEventListener("click", () => {
-      structurePanel.classList.toggle("collapsed");
+function resetPanelFields(panel) {
+  panel.querySelectorAll("input, textarea, select").forEach((field) => {
+    if (field.type === "checkbox" || field.type === "radio") {
+      field.checked = field.defaultChecked;
+      return;
+    }
+
+    field.value = field.defaultValue || "";
+  });
+
+  panel.querySelectorAll(".is-invalid").forEach((el) => {
+    el.classList.remove("is-invalid");
+  });
+
+  panel.querySelectorAll(".active").forEach((el) => {
+    el.classList.remove("active");
+  });
+}
+
+structurePanels.forEach((panel) => {
+  const toggle = panel.querySelector(".create-panel__toggle");
+
+  if (!toggle) return;
+
+  toggle.addEventListener("click", () => {
+    const isCurrentlyClosed = panel.classList.contains("collapsed");
+
+    structurePanels.forEach((otherPanel) => {
+      if (otherPanel !== panel) {
+        otherPanel.classList.add("collapsed");
+        resetPanelFields(otherPanel);
+      }
     });
-  }
 
-  const consensusToggle = document.getElementById("consensus-toggle");
-  const consensusPanel = document.querySelector(".create-panel--consensus");
+    panel.classList.toggle("collapsed");
 
-  if (consensusToggle && consensusPanel) {
-    consensusToggle.addEventListener("click", () => {
-      consensusPanel.classList.toggle("collapsed");
-    });
-  }
+    if (!isCurrentlyClosed) {
+      resetPanelFields(panel);
+    }
+  });
+});
   
   const boardNameInput = document.getElementById("board-name");
   if (boardNameInput) {
