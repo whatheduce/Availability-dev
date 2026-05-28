@@ -769,10 +769,63 @@
   </p>
 
   <div id="consensus-panel-content" class="create-panel__collapsible">
-    <div class="coming-soon-panel">
-      Instant Consensus Board setup options coming soon.
+  <div class="consensus-setup-grid">
+    <div class="consensus-setup-fields">
+
+      <div class="create-field">
+        <label for="consensus-question" class="create-label">Vote Question</label>
+        <input
+          id="consensus-question"
+          class="create-input"
+          type="text"
+          placeholder="e.g. Where should we eat?"
+        />
+        <div class="create-help">
+          This is the question users will vote on.
+        </div>
+      </div>
+
+      <div class="create-field">
+        <label for="consensus-password" class="create-label">Board Password</label>
+        <input
+          id="consensus-password"
+          class="create-input"
+          type="password"
+          placeholder="Create a password"
+          autocomplete="new-password"
+        />
+        <div class="create-help">
+          Invited users will enter this password before voting.
+        </div>
+      </div>
+
+      <div class="consensus-switch-row">
+        <div>
+          <div class="create-label">Allow multiple selections</div>
+          <div class="create-help">
+            Users can select more than one option before submitting.
+          </div>
+        </div>
+
+        <button
+          id="consensus-multiple-toggle"
+          class="consensus-toggle-switch is-on"
+          type="button"
+          aria-pressed="true"
+        >
+          <span></span>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="create-consensus-board-action">
+      <button id="create-consensus-board" class="primary-btn create-submit-btn" style="display:none;">
+        Create Consensus Board
+      </button>
     </div>
   </div>
+</div>
 </div>    
 
     
