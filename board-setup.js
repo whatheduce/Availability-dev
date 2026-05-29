@@ -140,6 +140,23 @@ function updateGoCreateVisibility({ showErrors = false } = {}) {
 }
 
 //----------
+function updateConsensusCreateVisibility() {
+  const btn = document.getElementById("create-consensus-board");
+  if (!btn) return;
+
+  const boardName = document.getElementById("board-name")?.value.trim() || "";
+  const voteQuestion = document.getElementById("consensus-question")?.value.trim() || "";
+  const boardPassword = document.getElementById("consensus-password")?.value.trim() || "";
+
+  const canCreate =
+    boardName.length > 0 &&
+    voteQuestion.length > 0 &&
+    boardPassword.length >= 6;
+
+  btn.style.display = canCreate ? "inline-block" : "none";
+}
+
+//----------
 function updateCustomCardPreview() {
   const customCard = document.getElementById("custom-card");
   if (!customCard) return;
@@ -350,6 +367,8 @@ function bindBoardSetupUi() {
   if (panel.classList.contains("create-panel--consensus")) {
     const createConsensusBtn = document.getElementById("create-consensus-board");
     if (createConsensusBtn) createConsensusBtn.style.display = "none";
+
+      updateConsensusCreateVisibility();
   }
 }
 
@@ -375,12 +394,23 @@ structurePanels.forEach((panel) => {
     }
   });
 });
+
+  const consensusQuestionInput = document.getElementById("consensus-question");
+    if (consensusQuestionInput) {
+      consensusQuestionInput.addEventListener("input", updateConsensusCreateVisibility);
+    }
+
+  const consensusPasswordInput = document.getElementById("consensus-password");
+    if (consensusPasswordInput) {
+      consensusPasswordInput.addEventListener("input", updateConsensusCreateVisibility);
+    }
   
   const boardNameInput = document.getElementById("board-name");
   if (boardNameInput) {
     boardNameInput.maxLength = MAX_BOARD_NAME_LENGTH;
     boardNameInput.addEventListener("input", () => {
       updateGoCreateVisibility();
+      updateConsensusCreateVisibility();
     });
   }
 
