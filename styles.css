@@ -1554,10 +1554,6 @@ td:not(.gold-cell):hover {
   color: #6b5c4f;
 }
 
-.consensus-panel-content {
- padding-top: 18px;
-}
-
 .create-shell {
   text-align: left;
   max-width: 1180px;
