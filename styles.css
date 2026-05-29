@@ -1558,11 +1558,7 @@ td:not(.gold-cell):hover {
   max-width: 660px;
 }
 
-.consensus-panel-content {
- padding-top: 18px;
-}
-
-.create-panel--structure:not(.collapsed) .structure-about {
+.create-panel:not(.collapsed) .structure-about {
   margin-bottom: 18px;
 }
 
