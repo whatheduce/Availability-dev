@@ -1942,6 +1942,26 @@ td:not(.gold-cell):hover {
   color: #6b5c4f;
 }
 
+.consensus-board-preview {
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+.consensus-board-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #3f3329;
+  margin-bottom: 6px;
+}
+
+.consensus-board-question {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #6b5c4f;
+}
+
+
+
 .create-field + .create-field {
   margin-top: 24px;
 }
