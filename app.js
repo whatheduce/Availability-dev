@@ -195,13 +195,60 @@ function showDashboard() {
 }
 
 //----------
+function renderTempConsensusBoardCard() {
+  const ownedBoards = document.getElementById("owned-boards");
+  if (!ownedBoards) return;
+
+  const saved = localStorage.getItem("tempConsensusBoard");
+  if (!saved) return;
+
+  const board = JSON.parse(saved);
+
+  const card = document.createElement("div");
+  card.className = "board-card consensus-board-card";
+  card.addEventListener("click", () => {
+    document.getElementById("dashboard").style.display = "none";
+    document.getElementById("create-board").style.display = "none";
+
+    const boardView = document.getElementById("consensus-board-view");
+    if (boardView) boardView.style.display = "block";
+  });
+
+  card.innerHTML = `
+    <div class="consensus-card-title">Instant Consensus Board</div>
+    <div class="consensus-card-name">${escapeHtml(board.name)}</div>
+
+    <div class="consensus-card-preview">
+      <div class="consensus-card-pill">Blind vote</div>
+      <div class="consensus-card-question">${escapeHtml(board.question || "No question yet")}</div>
+    </div>
+
+    <div class="consensus-card-footer">Hosted</div>
+  `;
+
+  ownedBoards.prepend(card);
+}
+
+//----------
 function showConsensusBoardView() {
+  const boardName = document.getElementById("board-name")?.value.trim() || "Untitled Board";
+  const voteQuestion = document.getElementById("consensus-question")?.value.trim() || "";
+
+  const tempConsensusBoard = {
+    id: crypto.randomUUID(),
+    type: "consensus",
+    name: boardName,
+    question: voteQuestion,
+    createdAt: new Date().toISOString()
+  };
+
+  localStorage.setItem("tempConsensusBoard", JSON.stringify(tempConsensusBoard));
+
   document.getElementById("create-board").style.display = "none";
+  document.getElementById("dashboard").style.display = "none";
 
   const boardView = document.getElementById("consensus-board-view");
-  if (boardView) {
-    boardView.style.display = "block";
-  }
+  if (boardView) boardView.style.display = "block";
 }
 
 //----------
@@ -2079,12 +2126,39 @@ if (boardIds.length) {
 // Hosted
 const maxHostedSlots = 10;
 const openHostedSlots = user?.is_pro ? 10 : 2;
-
+const tempConsensusBoard = JSON.parse(
+  localStorage.getItem("tempConsensusBoard") || "null"
+);
 const hostedSlotsHtml = [];
-
+const ownedWithTempConsensus = tempConsensusBoard
+  ? [{ type: "consensus", data: tempConsensusBoard }, ...owned]
+  : owned;
+  
 for (let i = 0; i < maxHostedSlots; i++) {
-  const b = owned[i];
+  const b = ownedWithTempConsensus[i];
+  
+  if (b?.type === "consensus") {
+  hostedSlotsHtml.push(`
+  <div class="board-pill-shell">
+     <div
+      class="board-pill board-pill--square consensus-board-pill"
+      data-kind="consensus"
+      data-consensus-id="${escapeHtml(b.data.id)}"
+    >
+      <div class="board-pill-title board-pill-title--top">Instant Consensus Board</div>
 
+      <div class="consensus-board-preview">
+         <div class="consensus-board-name">${escapeHtml(b.data.name)}</div>
+         <div class="consensus-board-question">${escapeHtml(b.data.question || "No vote question yet")}</div>
+      </div>
+
+      <div class="board-pill-meta">Hosted</div>
+     </div>
+  </div>
+  `);
+  continue;
+}
+  
   if (b?.tables) {
   hostedSlotsHtml.push(`
   <div class="board-pill-shell">
