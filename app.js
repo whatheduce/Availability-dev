@@ -195,6 +195,16 @@ function showDashboard() {
 }
 
 //----------
+function showConsensusBoardView() {
+  document.getElementById("create-board").style.display = "none";
+
+  const boardView = document.getElementById("consensus-board-view");
+  if (boardView) {
+    boardView.style.display = "block";
+  }
+}
+
+//----------
 async function showCreateBoard() {
   document.body.classList.add("create-view");
   document.body.style.visibility = "visible";
@@ -4857,11 +4867,23 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
     goCreateBtn.addEventListener("click", createBoard);
   }
 
+  const createConsensusBtn =
+  document.getElementById("create-consensus-board");
+    if (createConsensusBtn) {
+      createConsensusBtn.addEventListener("click", showConsensusBoardView);
+  }
+  
   // Create page → Return to Dashboard
   const returnBtn = document.getElementById("return-dashboard-btn");
-  if (returnBtn) {
-    returnBtn.addEventListener("click", showDashboard);
+    if (returnBtn) {
+      returnBtn.addEventListener("click", showDashboard);
   }
+
+  const consensusReturnBtn =
+  document.getElementById("consensus-return-dashboard-btn");
+    if (consensusReturnBtn) {
+      consensusReturnBtn.addEventListener("click", showDashboard);
+}
 
   const setupGrid = document.getElementById("setup-colour-grid");
   renderSwatchGrid(setupGrid, setupSelectedColour, (hex) => {
