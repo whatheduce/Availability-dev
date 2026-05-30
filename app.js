@@ -187,6 +187,9 @@ function showDashboard() {
     loading.style.display = "none";
   }
 
+  const consensusView = document.getElementById("consensus-board-view");
+    if (consensusView) consensusView.style.display = "none";
+  
   const dash = document.getElementById("dashboard");
   const createBoard = document.getElementById("create-board");
 
