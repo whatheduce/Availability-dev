@@ -5996,30 +5996,37 @@ if (action === "recurring-availability") {
     return;
   }
 
-  // Handle normal card click
-  const card = e.target.closest(".board-pill[data-kind]");
-  if (card) {
-    if (
-      e.target.closest(".board-actions-btn") ||
-      e.target.closest(".board-actions-menu")
-    ) {
-      return;
-    }
-
-    const kind = card.dataset.kind;
-
-    if (kind === "hosted") {
-      const ownerToken = card.dataset.ownerToken;
-      if (ownerToken) openManageBoard(ownerToken);
-      return;
-    }
-
-    if (kind === "joined") {
-      const inviteToken = card.dataset.inviteToken;
-      if (inviteToken) openBoard(inviteToken);
-      return;
-    }
+// Handle normal card click
+const card = e.target.closest(".board-pill[data-kind]");
+if (card) {
+  if (
+    e.target.closest(".board-actions-btn") ||
+    e.target.closest(".board-actions-menu")
+  ) {
+    return;
   }
+
+  const kind = card.dataset.kind;
+
+  if (kind === "consensus") {
+    showConsensusBoardView({
+      id: card.dataset.consensusId
+    });
+    return;
+  }
+
+  if (kind === "hosted") {
+    const ownerToken = card.dataset.ownerToken;
+    if (ownerToken) openManageBoard(ownerToken);
+    return;
+  }
+
+  if (kind === "joined") {
+    const inviteToken = card.dataset.inviteToken;
+    if (inviteToken) openBoard(inviteToken);
+    return;
+  }
+}
   
   // Click outside closes any open menus
   document.querySelectorAll(".board-actions-menu:not([hidden])")
