@@ -283,8 +283,6 @@ async function createConsensusBoard() {
     return;
   }
 
-  currentConsensusBoard = data;
-
   await loadBoards();
   showConsensusBoardView(data);
 }
