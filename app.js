@@ -2181,7 +2181,7 @@ for (let i = 0; i < maxHostedSlots; i++) {
     >
       <div class="board-pill-title board-pill-title--top">Instant Consensus Board</div>
 
-      <div class="consensus-board-preview">
+      <div class="board-preview consensus-board-preview">
          <div class="consensus-board-name">${escapeHtml(b.data.name)}</div>
          <div class="consensus-board-question">${escapeHtml(b.data.question || "No vote question yet")}</div>
       </div>
