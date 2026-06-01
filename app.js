@@ -243,22 +243,50 @@ function showConsensusBoardView(board = null) {
 
 //----------
 async function createConsensusBoard() {
-  const boardName =
-    document.getElementById("board-name")?.value.trim() || "";
+  const au = await auth.getAuthUser();
 
-  const voteQuestion =
-    document.getElementById("consensus-question")?.value.trim() || "";
+  const name = document.getElementById("board-name")?.value.trim() || "";
+  const question = document.getElementById("consensus-question")?.value.trim() || "";
+  const password = document.getElementById("consensus-password")?.value.trim() || "";
 
-  const boardPassword =
-    document.getElementById("consensus-password")?.value.trim() || "";
+  const allowMultiple =
+    document
+      .getElementById("consensus-multiple-toggle")
+      ?.classList.contains("is-on") ?? true;
 
-  console.log("Creating consensus board:", {
-    boardName,
-    voteQuestion,
-    boardPassword
-  });
+  if (!name || !question || password.length < 6) {
+    showConfirmPopup("Please enter a board name, vote question, and password of at least 6 characters.", {
+      title: "Missing details"
+    });
+    return;
+  }
 
-  showConsensusBoardView();
+  const passwordHash = await sha256Text(password);
+
+  const { data, error } = await supabase
+    .from("consensus_boards")
+    .insert({
+      owner_id: au.id,
+      name,
+      question,
+      password_hash: passwordHash,
+      allow_multiple: allowMultiple
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("Create consensus board failed:", error);
+    showConfirmPopup("Could not create consensus board. Please try again.", {
+      title: "Create failed"
+    });
+    return;
+  }
+
+  currentConsensusBoard = data;
+
+  await loadBoards();
+  showConsensusBoardView(data);
 }
 
 //----------
