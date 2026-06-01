@@ -233,25 +233,32 @@ function renderTempConsensusBoardCard() {
 }
 
 //----------
-function showConsensusBoardView() {
-  const boardName = document.getElementById("board-name")?.value.trim() || "Untitled Board";
-  const voteQuestion = document.getElementById("consensus-question")?.value.trim() || "";
-
-  const tempConsensusBoard = {
-    id: crypto.randomUUID(),
-    type: "consensus",
-    name: boardName,
-    question: voteQuestion,
-    createdAt: new Date().toISOString()
-  };
-
-  localStorage.setItem("tempConsensusBoard", JSON.stringify(tempConsensusBoard));
-
-  document.getElementById("create-board").style.display = "none";
+function showConsensusBoardView(board = null) {
   document.getElementById("dashboard").style.display = "none";
+  document.getElementById("create-board").style.display = "none";
 
-  const boardView = document.getElementById("consensus-board-view");
-  if (boardView) boardView.style.display = "block";
+  const view = document.getElementById("consensus-board-view");
+  if (view) view.style.display = "block";
+}
+
+//----------
+async function createConsensusBoard() {
+  const boardName =
+    document.getElementById("board-name")?.value.trim() || "";
+
+  const voteQuestion =
+    document.getElementById("consensus-question")?.value.trim() || "";
+
+  const boardPassword =
+    document.getElementById("consensus-password")?.value.trim() || "";
+
+  console.log("Creating consensus board:", {
+    boardName,
+    voteQuestion,
+    boardPassword
+  });
+
+  showConsensusBoardView();
 }
 
 //----------
@@ -504,6 +511,17 @@ function getLocalBoardColor(boardId, userId) {
   return localBoardColorCache.get(`${boardId}|${userId}`) || null;
 }
 window.getLocalBoardColor = getLocalBoardColor;
+
+//----------
+async function sha256Text(value) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(value);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 //----------
 function setLocalBoardColor(boardId, userId, color) {
@@ -2123,22 +2141,35 @@ if (boardIds.length) {
         return Number(a.tables.id) - Number(b.tables.id);
     });
 
+  const { data: consensusBoards, error: consensusErr } = await supabase
+    .from("consensus_boards")
+    .select("*")
+    .eq("owner_id", au.id)
+    .order("created_at", { ascending: true });
+
+    if (consensusErr) {
+      console.warn("Failed to load consensus boards:", consensusErr);
+    }
   const ownedEl = document.getElementById("owned-boards");
   const joinedEl = document.getElementById("joined-boards");
 
 // Hosted
 const maxHostedSlots = 10;
 const openHostedSlots = user?.is_pro ? 10 : 2;
-const tempConsensusBoard = JSON.parse(
-  localStorage.getItem("tempConsensusBoard") || "null"
-);
+const ownedConsensusBoards = (consensusBoards || []).map((board) => ({
+  type: "consensus",
+  data: board
+}));
+
+const ownedWithConsensus = [
+  ...ownedConsensusBoards,
+  ...owned
+];
+
 const hostedSlotsHtml = [];
-const ownedWithTempConsensus = tempConsensusBoard
-  ? [{ type: "consensus", data: tempConsensusBoard }, ...owned]
-  : owned;
   
 for (let i = 0; i < maxHostedSlots; i++) {
-  const b = ownedWithTempConsensus[i];
+  const b = ownedWithConsensus[i];
   
   if (b?.type === "consensus") {
   hostedSlotsHtml.push(`
@@ -4946,9 +4977,13 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
 
   const createConsensusBtn =
   document.getElementById("create-consensus-board");
+
     if (createConsensusBtn) {
-      createConsensusBtn.addEventListener("click", showConsensusBoardView);
-  }
+      createConsensusBtn.addEventListener(
+        "click",
+        createConsensusBoard
+      );
+    }
   
   // Create page → Return to Dashboard
   const returnBtn = document.getElementById("return-dashboard-btn");
