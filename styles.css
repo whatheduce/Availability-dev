@@ -1848,39 +1848,6 @@ td:not(.gold-cell):hover {
   margin: 0;
 }
 
-#create-board #create-consensus-board {
-  min-height: 124px;
-  height: 124px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 18px 24px;
-  border-radius: 22px;
-  border: 1px solid rgba(191, 145, 74, 0.72);
-
-  background:
-    linear-gradient(
-      180deg,
-      rgba(246, 225, 170, 0.98),
-      rgba(231, 196, 118, 0.98)
-    );
-
-  color: #4a3520;
-  font: inherit;
-  font-size: 20px;
-  font-weight: 800;
-  text-align: center;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,0.72),
-    inset 0 0 0 6px rgba(255,244,214,0.48),
-    0 18px 34px rgba(120,84,41,0.16);
-
-  cursor: pointer;
-}
-
 /* =========================
        CONSENSUS BOARD
    ========================= */
