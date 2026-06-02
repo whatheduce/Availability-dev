@@ -1902,6 +1902,45 @@ td:not(.gold-cell):hover {
   color: #6b5c4f;
 }
 
+.consensus-options-section {
+  padding: 0 24px 24px;
+  max-width: 700px;
+}
+
+.consensus-options-help {
+  font-size: 13px;
+  color: rgba(65,55,42,0.72);
+  line-height: 1.45;
+  margin-bottom: 16px;
+}
+
+.consensus-option-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.consensus-option-row label {
+  width: 24px;
+  font-weight: 700;
+  color: #665341;
+}
+
+.consensus-option-input {
+  flex: 1;
+  min-height: 46px;
+
+  padding: 11px 13px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(126,104,82,0.18);
+
+  background: rgba(255,255,255,0.92);
+
+  font: inherit;
+}
+
 
 
 .create-field + .create-field {
