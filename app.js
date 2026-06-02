@@ -234,6 +234,8 @@ function renderTempConsensusBoardCard() {
 
 //----------
 function showConsensusBoardView(board = null) {
+  resetConsensusOptions()
+  
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("create-board").style.display = "none";
 
@@ -561,6 +563,21 @@ async function sha256Text(value) {
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+//----------
+function resetConsensusOptions() {
+  const container = document.getElementById("consensus-options-list");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="consensus-option-row">
+      ...
+    </div>
+    <div class="consensus-option-row">
+      ...
+    </div>
+  `;
 }
 
 //----------
@@ -4960,6 +4977,47 @@ const auth = createAuthModule({
 // APP INITIALISATION
 // =========================
 
+function bindConsensusOptionInputs() {
+  const container = document.getElementById("consensus-options-list");
+  if (!container) return;
+
+  container.addEventListener("input", (e) => {
+    const input = e.target.closest(".consensus-option-input");
+    if (!input) return;
+
+    const rows = [
+      ...container.querySelectorAll(".consensus-option-row")
+    ];
+
+    const lastRow = rows[rows.length - 1];
+    const lastInput =
+      lastRow.querySelector(".consensus-option-input");
+
+    if (
+      rows.length < 8 &&
+      lastInput.value.trim()
+    ) {
+      const nextNumber = rows.length + 1;
+
+      const row = document.createElement("div");
+      row.className = "consensus-option-row";
+
+      row.innerHTML = `
+        <label>${nextNumber}</label>
+        <input
+          type="text"
+          class="consensus-option-input"
+          data-option-index="${nextNumber}"
+          placeholder="Option ${nextNumber}"
+        >
+      `;
+
+      container.appendChild(row);
+    }
+  });
+}
+
+//----------   
 function bindUiListenersOnce() {
   if (uiListenersBound) return;
   uiListenersBound = true;
@@ -5016,6 +5074,8 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
   if (goCreateBtn) {
     goCreateBtn.addEventListener("click", createBoard);
   }
+
+  bindConsensusOptionInputs();
 
   const createConsensusBtn =
   document.getElementById("create-consensus-board");
