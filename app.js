@@ -237,6 +237,20 @@ function showConsensusBoardView(board = null) {
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("create-board").style.display = "none";
 
+  const calendarTopbar = document.getElementById("calendar-topbar");
+  const calendar = document.getElementById("calendar");
+  const calendarSide = document.getElementById("calendar-side");
+
+  if (calendarTopbar) calendarTopbar.style.display = "none";
+  if (calendar) calendar.style.display = "none";
+  if (calendarSide) calendarSide.style.display = "none";
+
+  const title = document.getElementById("consensus-title");
+  const question = document.getElementById("consensus-question-display");
+
+  if (title) title.textContent = board?.name || "Consensus Board";
+  if (question) question.textContent = board?.question || "";
+
   const view = document.getElementById("consensus-board-view");
   if (view) view.style.display = "block";
 }
@@ -2204,6 +2218,8 @@ for (let i = 0; i < maxHostedSlots; i++) {
       class="board-pill board-pill--square consensus-board-pill"
       data-kind="consensus"
       data-consensus-id="${escapeHtml(b.data.id)}"
+      data-consensus-name="${escapeHtml(b.data.name)}"
+      data-consensus-question="${escapeHtml(b.data.question || "")}"
     >
       <div class="board-pill-title board-pill-title--top">Instant Consensus Board</div>
 
@@ -6010,10 +6026,12 @@ if (card) {
 
   if (kind === "consensus") {
     showConsensusBoardView({
-      id: card.dataset.consensusId
+      id: card.dataset.consensusId,
+      name: card.dataset.consensusName,
+      question: card.dataset.consensusQuestion
     });
-    return;
-  }
+  return;
+}
 
   if (kind === "hosted") {
     const ownerToken = card.dataset.ownerToken;
