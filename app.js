@@ -572,10 +572,23 @@ function resetConsensusOptions() {
 
   container.innerHTML = `
     <div class="consensus-option-row">
-      ...
+      <label>1</label>
+      <input
+        type="text"
+        class="consensus-option-input"
+        data-option-index="1"
+        placeholder="Option 1"
+      >
     </div>
+
     <div class="consensus-option-row">
-      ...
+      <label>2</label>
+      <input
+        type="text"
+        class="consensus-option-input"
+        data-option-index="2"
+        placeholder="Option 2"
+      >
     </div>
   `;
 }
