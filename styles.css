@@ -1947,6 +1947,18 @@ td:not(.gold-cell):hover {
   font: inherit;
 }
 
+.consensus-option-input:disabled {
+  background: rgba(215, 210, 200, 0.55);
+  border-color: rgba(126, 104, 82, 0.12);
+  color: rgba(65, 55, 42, 0.7);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.consensus-option-row.vote-locked {
+  opacity: 0.85;
+}
+
 
 
 .create-field + .create-field {
