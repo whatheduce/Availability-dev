@@ -594,6 +594,24 @@ function resetConsensusOptions() {
 }
 
 //----------
+function updateCreateVoteButton() {
+  const btn = document.getElementById("create-vote-btn");
+  if (!btn) return;
+
+  const inputs = document.querySelectorAll(
+    ".consensus-option-input"
+  );
+
+  const filled = [...inputs].filter(
+    i => i.value.trim() !== ""
+  );
+
+  btn.style.display = filled.length >= 2
+    ? "inline-block"
+    : "none";
+}
+
+//----------
 function setLocalBoardColor(boardId, userId, color) {
   if (!boardId || !userId) return;
 
@@ -5027,7 +5045,42 @@ function bindConsensusOptionInputs() {
 
       container.appendChild(row);
     }
+
+    updateCreateVoteButton();
   });
+}
+
+//----------
+function createVote() {
+  const inputs = [
+    ...document.querySelectorAll(
+      ".consensus-option-input"
+    )
+  ];
+
+  const options = inputs
+    .map(i => i.value.trim())
+    .filter(Boolean);
+
+  if (options.length < 2) return;
+
+  currentConsensusBoard.options = options;
+  currentConsensusBoard.vote_locked = true;
+
+  inputs.forEach(input => {
+    if (!input.value.trim()) {
+      input.closest(".consensus-option-row")?.remove();
+    }
+  });
+
+  document
+    .querySelectorAll(".consensus-option-input")
+    .forEach(input => {
+      input.disabled = true;
+    });
+
+  const btn = document.getElementById("create-vote-btn");
+  if (btn) btn.style.display = "none";
 }
 
 //----------   
@@ -5110,7 +5163,16 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
   document.getElementById("consensus-return-dashboard-btn");
     if (consensusReturnBtn) {
       consensusReturnBtn.addEventListener("click", showDashboard);
-}
+  }
+
+  const createVoteBtn =
+  document.getElementById("create-vote-btn");
+    if (createVoteBtn) {
+      createVoteBtn.addEventListener(
+        "click",
+        createVote
+      );
+    }
 
   const setupGrid = document.getElementById("setup-colour-grid");
   renderSwatchGrid(setupGrid, setupSelectedColour, (hex) => {
