@@ -1848,6 +1848,12 @@ td:not(.gold-cell):hover {
   margin: 0;
 }
 
+.consensus-vote-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 /* =========================
        CONSENSUS BOARD
    ========================= */
