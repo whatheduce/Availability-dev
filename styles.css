@@ -2161,7 +2161,8 @@ body.create-view #go-create {
 }
 
 #create-board #go-create,
-#create-board #create-consensus-board {
+#create-board #create-consensus-board,
+#consensus-board-view #create-vote-btn {
   min-height: 124px;
   height: 124px;
 
@@ -2200,7 +2201,8 @@ body.create-view #go-create {
 }
 
 #create-board #go-create:hover,
-#create-board #create-consensus-board:hover {
+#create-board #create-consensus-board:hover,
+#consensus-board-view #create-vote-btn:hover {
   transform: translateY(-2px);
 
   filter: brightness(1.03);
@@ -2212,17 +2214,27 @@ body.create-view #go-create {
 }
 
 #create-board #go-create:active,
-#create-board #create-consensus-board:active {
+#create-board #create-consensus-board:active,
+#consensus-board-view #create-vote-btn:active {
   transform: translateY(1px);
 }
 
 #create-board #go-create:focus-visible,
-#create-board #create-consensus-board:focus-visible {
+#create-board #create-consensus-board:focus-visible,
+#consensus-board-view #create-vote-btn: focus-visible {
   outline: none;
   box-shadow:
     0 0 0 4px rgba(212,154,86,0.18),
     0 1px 0 rgba(255,255,255,0.76) inset,
     0 18px 34px rgba(120,84,41,0.16);
+}
+
+#consensus-board-view #create-vote-btn {
+  width: 220px;
+  height: 58px;
+  min-height: 58px;
+  font-size: 16px;
+  border-radius: 16px;
 }
 
 .custom-structure-card {
