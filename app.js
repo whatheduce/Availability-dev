@@ -140,6 +140,7 @@ let recurringAvailabilityState = {
   hasExistingRecurring: false,
   selected: new Set()
 };
+let currentConsensusBoard = null;
 
 
 
@@ -234,8 +235,8 @@ function renderTempConsensusBoardCard() {
 
 //----------
 function showConsensusBoardView(board = null) {
-  resetConsensusOptions()
-  
+  currentConsensusBoard = board;
+
   document.getElementById("dashboard").style.display = "none";
   document.getElementById("create-board").style.display = "none";
 
@@ -252,6 +253,8 @@ function showConsensusBoardView(board = null) {
 
   if (title) title.textContent = board?.name || "Consensus Board";
   if (question) question.textContent = board?.question || "";
+
+  resetConsensusOptions();
 
   const view = document.getElementById("consensus-board-view");
   if (view) view.style.display = "block";
