@@ -5077,11 +5077,17 @@ function createVote() {
   });
 
   document
-    .querySelectorAll(".consensus-option-input")
-    .forEach(input => {
-      input.disabled = true;
-    });
+  .querySelectorAll(".consensus-option-row")
+  .forEach(row => {
+    row.classList.add("vote-locked");
+  });
 
+document
+  .querySelectorAll(".consensus-option-input")
+  .forEach(input => {
+    input.disabled = true;
+  });
+  
   const btn = document.getElementById("create-vote-btn");
   if (btn) btn.style.display = "none";
 }
