@@ -121,6 +121,18 @@ async function rebuildDotsForCell(cell) {
   const dotContainer = document.createElement("div");
   dotContainer.className = "dot-container";
 
+  // Keep dots in the same order as the legend
+  const legendOrder = Array.from(
+    document.querySelectorAll(".legend-item[data-user-id]")
+  ).map(el => el.dataset.userId);
+
+  data.sort((a, b) => {
+    const aIndex = legendOrder.indexOf(a.user_id);
+    const bIndex = legendOrder.indexOf(b.user_id);
+
+    return aIndex - bIndex;
+  });
+  
   data.forEach(entry => {
     const prof = entry.user_id ? profilesMap[entry.user_id] : null;
     const displayName = prof?.name || entry.name || "—";
