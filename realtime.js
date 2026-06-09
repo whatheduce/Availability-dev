@@ -220,6 +220,7 @@ async function handleAvailabilityChange(payload) {
     dot.dataset.name = displayName;
 
     dotContainer.appendChild(dot);
+    window.sortDotsByLegendOrder?.(cell);
   } else {
     const existing = entry.user_id
       ? cell.querySelector(`.dot[data-user-id="${entry.user_id}"]`)
