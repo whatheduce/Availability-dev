@@ -255,6 +255,10 @@ function showConsensusBoardView(board = null) {
   if (question) question.textContent = board?.question || "";
 
   resetConsensusOptions();
+  
+  if (board?.vote_locked && Array.isArray(board.options)) {
+    renderLockedConsensusOptions(board.options);
+  }
 
   const view = document.getElementById("consensus-board-view");
   if (view) view.style.display = "block";
@@ -566,6 +570,27 @@ async function sha256Text(value) {
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+//----------
+function renderLockedConsensusOptions(options = []) {
+  const container = document.getElementById("consensus-options-list");
+  if (!container) return;
+
+  container.innerHTML = options.map((option, index) => `
+    <div class="consensus-option-row vote-locked">
+      <label>${index + 1}</label>
+      <input
+        type="text"
+        class="consensus-option-input"
+        value="${escapeHtml(option)}"
+        disabled
+      >
+    </div>
+  `).join("");
+
+  const btn = document.getElementById("create-vote-btn");
+  if (btn) btn.style.display = "none";
 }
 
 //----------
@@ -2271,6 +2296,8 @@ for (let i = 0; i < maxHostedSlots; i++) {
       data-consensus-id="${escapeHtml(b.data.id)}"
       data-consensus-name="${escapeHtml(b.data.name)}"
       data-consensus-question="${escapeHtml(b.data.question || "")}"
+      data-vote-locked="${b.data.vote_locked ? "1" : "0"}"
+      data-options="${escapeHtml(JSON.stringify(b.data.options || []))}"
     >
       <div class="board-pill-title board-pill-title--top">Instant Consensus Board</div>
 
@@ -5054,11 +5081,9 @@ function bindConsensusOptionInputs() {
 }
 
 //----------
-function createVote() {
+async function createVote() {
   const inputs = [
-    ...document.querySelectorAll(
-      ".consensus-option-input"
-    )
+    ...document.querySelectorAll(".consensus-option-input")
   ];
 
   const options = inputs
@@ -5067,8 +5092,30 @@ function createVote() {
 
   if (options.length < 2) return;
 
-  currentConsensusBoard.options = options;
-  currentConsensusBoard.vote_locked = true;
+  if (!currentConsensusBoard?.id) {
+    console.error("No current consensus board selected.");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("consensus_boards")
+    .update({
+      options,
+      vote_locked: true
+    })
+    .eq("id", currentConsensusBoard.id)
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("Failed to create vote:", error);
+    showConfirmPopup("Could not create vote. Please try again.", {
+      title: "Create vote failed"
+    });
+    return;
+  }
+
+  currentConsensusBoard = data;
 
   inputs.forEach(input => {
     if (!input.value.trim()) {
@@ -5076,20 +5123,18 @@ function createVote() {
     }
   });
 
-  document
-  .querySelectorAll(".consensus-option-row")
-  .forEach(row => {
+  document.querySelectorAll(".consensus-option-row").forEach(row => {
     row.classList.add("vote-locked");
   });
 
-document
-  .querySelectorAll(".consensus-option-input")
-  .forEach(input => {
+  document.querySelectorAll(".consensus-option-input").forEach(input => {
     input.disabled = true;
   });
-  
+
   const btn = document.getElementById("create-vote-btn");
   if (btn) btn.style.display = "none";
+
+  await loadBoards();
 }
 
 //----------   
@@ -6172,7 +6217,9 @@ if (card) {
     showConsensusBoardView({
       id: card.dataset.consensusId,
       name: card.dataset.consensusName,
-      question: card.dataset.consensusQuestion
+      question: card.dataset.consensusQuestion,
+      vote_locked: card.dataset.voteLocked === "1",
+      options: JSON.parse(card.dataset.options || "[]")
     });
   return;
 }
