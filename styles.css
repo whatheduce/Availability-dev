@@ -1993,6 +1993,10 @@ td:not(.gold-cell):hover {
   text-align: center;
 }
 
+#consensus-board-view {
+  position: relative;
+}
+
 
 
 
