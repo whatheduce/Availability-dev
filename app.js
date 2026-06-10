@@ -5092,6 +5092,15 @@ async function createVote() {
 
   if (options.length < 2) return;
 
+  const ok = await confirmModal({
+    title: "Lock vote options?",
+    message: "This will lock your vote options in. They cannot be changed once locked.",
+    okText: "Lock in",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
   if (!currentConsensusBoard?.id) {
     console.error("No current consensus board selected.");
     return;
