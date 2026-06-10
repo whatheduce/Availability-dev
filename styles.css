@@ -1959,6 +1959,42 @@ td:not(.gold-cell):hover {
   opacity: 0.85;
 }
 
+.consensus-vote-preview {
+  position: absolute;
+  top: 150px;
+  right: 40px;
+  width: min(52vw, 720px);
+}
+
+.consensus-vote-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.consensus-vote-card {
+  min-height: 120px;
+  border-radius: 22px;
+  border: 1px solid rgba(126, 104, 82, 0.16);
+  background: rgba(255, 252, 247, 0.9);
+  box-shadow: 0 14px 34px rgba(92, 71, 50, 0.08);
+  backdrop-filter: blur(10px);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 22px;
+  box-sizing: border-box;
+
+  font-size: 22px;
+  font-weight: 800;
+  color: #332920;
+  text-align: center;
+}
+
+
+
 
 
 .create-field + .create-field {
@@ -5876,6 +5912,16 @@ html.route-auth #landing-page {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+  }
+
+   .consensus-vote-preview {
+    position: static;
+    width: auto;
+    padding: 20px 24px;
+  }
+
+  .consensus-vote-grid {
+    grid-template-columns: 1fr;
   }
 }
 
