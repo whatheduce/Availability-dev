@@ -259,6 +259,8 @@ function showConsensusBoardView(board = null) {
   if (board?.vote_locked && Array.isArray(board.options)) {
     renderLockedConsensusOptions(board.options);
   }
+  
+  renderConsensusVoteCards(board?.vote_locked ? board.options : []);
 
   const view = document.getElementById("consensus-board-view");
   if (view) view.style.display = "block";
@@ -570,6 +572,22 @@ async function sha256Text(value) {
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+//----------
+function renderConsensusVoteCards(options = []) {
+  const preview = document.getElementById("consensus-vote-preview");
+  const grid = document.getElementById("consensus-vote-grid");
+
+  if (!preview || !grid) return;
+
+  grid.innerHTML = options.map(option => `
+    <div class="consensus-vote-card">
+      ${escapeHtml(option)}
+    </div>
+  `).join("");
+
+  preview.hidden = options.length === 0;
 }
 
 //----------
@@ -5125,6 +5143,8 @@ async function createVote() {
   }
 
   currentConsensusBoard = data;
+
+  renderConsensusVoteCards(options);
 
   inputs.forEach(input => {
     if (!input.value.trim()) {
