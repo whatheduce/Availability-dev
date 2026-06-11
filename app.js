@@ -4094,7 +4094,7 @@ function isValidEmail(email) {
 }
 
 //----------   
-function openInviteModal({ inviteToken, boardName, boardId }) {
+function openInviteModal({ inviteToken, boardName, boardId, inviteType = "calendar" }) {
   const overlay = document.getElementById("invite-modal");
   const emailListEl = document.getElementById("invite-email-list");
   const sendBtn = document.getElementById("invite-send");
@@ -4103,7 +4103,12 @@ function openInviteModal({ inviteToken, boardName, boardId }) {
 
  if (!overlay || !emailListEl || !sendBtn || !cancelBtn || !errEl) return;
 
-inviteContext = { boardId, inviteToken, boardName: boardName || "" };
+inviteContext = {
+  boardId,
+  inviteToken,
+  boardName: boardName || "",
+  inviteType
+};
 
   // reset UI
   errEl.style.display = "none";
@@ -4209,7 +4214,28 @@ try {
   sendBtn.disabled = true;
   sendBtn.innerHTML = `<span class="notice-spinner" style="display:inline-block; width:14px; height:14px; top:0; margin-right:8px; vertical-align:middle;"></span><span>Sending...</span>`;
 
-  await new Promise(requestAnimationFrame);
+  await new Promise(requestAnimationFrame);    
+
+if (inviteContext?.inviteType === "consensus") {
+  await sendConsensusInvites(emails, {
+    boardId: inviteContext.boardId,
+    inviteToken: inviteContext.inviteToken,
+    boardName: inviteContext.boardName
+  });
+
+  close();
+
+  await confirmModal({
+    title: "Invite sent",
+    message: emails.length === 1
+      ? `Invite email sent to ${emails[0]}.`
+      : `Invite emails sent to ${emails.length} people.`,
+    okText: "Close",
+    cancelText: ""
+  });
+
+  return;
+}
 
   const boardId = inviteContext?.boardId;
   if (!boardId) {
@@ -5098,13 +5124,32 @@ function bindConsensusOptionInputs() {
 }
 
 //----------
+async function sendConsensusInvites(emails, { boardId, inviteToken, boardName }) {
+  console.log("Consensus invite send:", {
+    emails,
+    boardId,
+    inviteToken,
+    boardName
+  });
+
+  // Next step:
+  // save invited emails to consensus_invites
+  // invoke a send-consensus-invite edge function
+}
+
+//----------
 function openConsensusInviteModal() {
   if (!currentConsensusBoard?.id) {
     console.error("No consensus board selected.");
     return;
   }
 
-  console.log("Open Add Voters modal for:", currentConsensusBoard);
+  openInviteModal({
+    boardId: currentConsensusBoard.id,
+    inviteToken: currentConsensusBoard.invite_token,
+    boardName: currentConsensusBoard.name || "Consensus Board",
+    inviteType: "consensus"
+  });
 }
 
 //----------
