@@ -1911,6 +1911,7 @@ td:not(.gold-cell):hover {
 .consensus-options-section {
   padding: 0 24px 24px;
   max-width: 700px;
+  width: 40%;
 }
 
 .consensus-options-help {
@@ -1961,8 +1962,8 @@ td:not(.gold-cell):hover {
 
 .consensus-vote-preview {
   position: absolute;
-  top: 150px;
-  right: 40px;
+  top: 200px;
+  left: 45%;
   width: min(52vw, 720px);
 }
 
@@ -5927,6 +5928,10 @@ html.route-auth #landing-page {
   .consensus-vote-grid {
     grid-template-columns: 1fr;
   }
+
+ .consensus-options-section {
+  width: 80%;
+ }
 }
 
 /* ================================================================================================================================================================================================================= */
