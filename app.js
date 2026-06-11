@@ -607,8 +607,7 @@ function renderLockedConsensusOptions(options = []) {
     </div>
   `).join("");
 
-  const btn = document.getElementById("create-vote-btn");
-  if (btn) btn.style.display = "none";
+  showAddVotersButton();
 }
 
 //----------
@@ -5099,6 +5098,26 @@ function bindConsensusOptionInputs() {
 }
 
 //----------
+function openConsensusInviteModal() {
+  if (!currentConsensusBoard?.id) {
+    console.error("No consensus board selected.");
+    return;
+  }
+
+  console.log("Open Add Voters modal for:", currentConsensusBoard);
+}
+
+//----------
+function showAddVotersButton() {
+  const btn = document.getElementById("create-vote-btn");
+  if (!btn) return;
+
+  btn.textContent = "Add Voters";
+  btn.dataset.mode = "add-voters";
+  btn.style.display = "inline-flex";
+}
+
+//----------
 async function createVote() {
   const inputs = [
     ...document.querySelectorAll(".consensus-option-input")
@@ -5160,8 +5179,7 @@ async function createVote() {
     input.disabled = true;
   });
 
-  const btn = document.getElementById("create-vote-btn");
-  if (btn) btn.style.display = "none";
+  showAddVotersButton();
 
   await loadBoards();
 }
@@ -5242,19 +5260,21 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
       returnBtn.addEventListener("click", showDashboard);
   }
 
-  const consensusReturnBtn =
-  document.getElementById("consensus-return-dashboard-btn");
-    if (consensusReturnBtn) {
-      consensusReturnBtn.addEventListener("click", showDashboard);
+  const consensusReturnBtn = document.getElementById("consensus-return-dashboard-btn");
+   if (consensusReturnBtn) {
+    consensusReturnBtn.addEventListener("click", showDashboard);
   }
 
-  const createVoteBtn =
-  document.getElementById("create-vote-btn");
+  const createVoteBtn = document.getElementById("create-vote-btn");
     if (createVoteBtn) {
-      createVoteBtn.addEventListener(
-        "click",
-        createVote
-      );
+      createVoteBtn.addEventListener("click", () => {
+        if (createVoteBtn.dataset.mode === "add-voters") {
+          openConsensusInviteModal();
+          return;
+        }
+
+        createVote();
+      });
     }
 
   const setupGrid = document.getElementById("setup-colour-grid");
