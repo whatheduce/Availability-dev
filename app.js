@@ -5125,16 +5125,40 @@ function bindConsensusOptionInputs() {
 
 //----------
 async function sendConsensusInvites(emails, { boardId, inviteToken, boardName }) {
-  console.log("Consensus invite send:", {
-    emails,
-    boardId,
-    inviteToken,
-    boardName
-  });
+  const au = await auth.getAuthUser();
 
-  // Next step:
-  // save invited emails to consensus_invites
-  // invoke a send-consensus-invite edge function
+  if (!au?.id) {
+    throw new Error("You must be signed in to invite voters.");
+  }
+
+  if (!boardId || !inviteToken) {
+    throw new Error("Missing consensus board details.");
+  }
+
+  const inviteLink = `${window.location.origin}${window.location.pathname}?c=${encodeURIComponent(inviteToken)}`;
+
+  const payload = emails.map((email) => ({
+    board_id: boardId,
+    email: email.toLowerCase().trim()
+  }));
+
+  const { error: inviteSaveErr } = await supabase
+    .from("consensus_invites")
+    .upsert(payload, {
+      onConflict: "board_id,email"
+    });
+
+  if (inviteSaveErr) {
+    console.error("Failed to save consensus invites:", inviteSaveErr);
+    throw inviteSaveErr;
+  }
+
+  console.log("Consensus invites saved:", {
+    boardId,
+    boardName,
+    inviteLink,
+    emails
+  });
 }
 
 //----------
