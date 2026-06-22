@@ -2310,6 +2310,7 @@ for (let i = 0; i < maxHostedSlots; i++) {
      <div
       class="board-pill board-pill--square consensus-board-pill"
       data-kind="consensus"
+      data-invite-token="${escapeHtml(b.data.invite_token || "")}"
       data-consensus-id="${escapeHtml(b.data.id)}"
       data-consensus-name="${escapeHtml(b.data.name)}"
       data-consensus-question="${escapeHtml(b.data.question || "")}"
@@ -6336,6 +6337,7 @@ if (card) {
       id: card.dataset.consensusId,
       name: card.dataset.consensusName,
       question: card.dataset.consensusQuestion,
+      invite_token: card.dataset.inviteToken,
       vote_locked: card.dataset.voteLocked === "1",
       options: JSON.parse(card.dataset.options || "[]")
     });
