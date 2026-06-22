@@ -295,6 +295,7 @@ async function createConsensusBoard() {
       name,
       question,
       password_hash: passwordHash,
+      password_plaintext: password,
       allow_multiple: allowMultiple
     })
     .select("*")
@@ -4218,6 +4219,21 @@ try {
   await new Promise(requestAnimationFrame);    
 
 if (inviteContext?.inviteType === "consensus") {
+  sendBtn.disabled = false;
+  sendBtn.innerHTML = originalSendHtml;
+
+  const ok = await confirmModal({
+    title: "Call vote?",
+    message: `This will invite ${emails.length} voter${emails.length === 1 ? "" : "s"} for voting. Invites will be locked and the vote will be called.`,
+    okText: "Send invites",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = `<span class="notice-spinner" style="display:inline-block; width:14px; height:14px; top:0; margin-right:8px; vertical-align:middle;"></span><span>Sending...</span>`;
+
   await sendConsensusInvites(emails, {
     boardId: inviteContext.boardId,
     inviteToken: inviteContext.inviteToken,
@@ -5160,6 +5176,16 @@ async function sendConsensusInvites(emails, { boardId, inviteToken, boardName })
     inviteLink,
     emails
   });
+
+  const { error: lockErr } = await supabase
+  .from("consensus_boards")
+  .update({
+    password_plaintext: null,
+    invites_locked: true
+  })
+  .eq("id", boardId);
+
+if (lockErr) throw lockErr;
 }
 
 //----------
