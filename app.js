@@ -5197,6 +5197,12 @@ async function sendConsensusInvites(emails, { boardId, inviteToken, boardName })
   .eq("id", boardId);
 
 if (lockErr) throw lockErr;
+
+currentConsensusBoard = {
+  ...currentConsensusBoard,
+  password_plaintext: null,
+  invites_locked: true
+};
 }
 
 //----------
