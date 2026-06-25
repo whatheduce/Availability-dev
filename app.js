@@ -5177,6 +5177,17 @@ async function sendConsensusInvites(emails, { boardId, inviteToken, boardName })
     emails
   });
 
+  for (const email of emails) {
+    const { error } = await supabase.functions.invoke("send-consensus-invite", {
+      body: {
+        toEmail: email,
+        boardId
+      }
+    });
+
+  if (error) throw error;
+}
+
   const { error: lockErr } = await supabase
   .from("consensus_boards")
   .update({
