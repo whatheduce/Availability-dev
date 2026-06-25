@@ -2159,7 +2159,22 @@ function getWeekdayLabels7(timeZone) {
 // BOARD / TABLE DATA LOADING
 // =========================
 
+async function showConsensusLoginView(token) {
+  hideLandingPage();
 
+  document.body.style.visibility = "visible";
+
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("create-board").style.display = "none";
+  document.getElementById("consensus-board-view").style.display = "none";
+
+  const view = document.getElementById("consensus-login-view");
+  if (view) view.style.display = "flex";
+
+  console.log("Consensus invite token:", token);
+}
+
+//----------  
 async function getBoardMemberCount(boardId) {
   if (!boardId) return 0;
 
