@@ -6461,6 +6461,11 @@ async function startApp() {
 
   const { data: { session } } = await supabase.auth.getSession();
 
+  if (consensusInviteToken) {
+    await showConsensusLoginView(consensusInviteToken);
+    return;
+  }
+
   // If a recovery session exists but user is no longer on the recovery page,
   // force sign-out so they cannot land straight in the dashboard
   if (recoveryInProgress && session) {
