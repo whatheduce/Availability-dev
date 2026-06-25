@@ -1998,6 +1998,56 @@ td:not(.gold-cell):hover {
   position: relative;
 }
 
+/* =========================
+       CONSENSUS LOGIN
+   ========================= */
+
+#consensus-login-view {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.consensus-login-card {
+  width: min(460px, 100%);
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(255, 252, 247, 0.92);
+  border: 1px solid rgba(126, 104, 82, 0.16);
+  box-shadow: 0 18px 46px rgba(92, 71, 50, 0.12);
+}
+
+.consensus-login-kicker {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b88746;
+  margin-bottom: 10px;
+}
+
+#consensus-login-title {
+  margin: 0 0 10px;
+  color: #2f2116;
+}
+
+#consensus-login-question {
+  margin: 0 0 22px;
+  color: #6b5c4f;
+  line-height: 1.45;
+}
+
+#consensus-login-submit {
+  margin-top: 18px;
+  width: 100%;
+  min-height: 52px;
+  height: 52px;
+  border-radius: 16px;
+}
+
 
 
 
