@@ -30,6 +30,7 @@ window.supabase = supabase;
 const params = new URLSearchParams(window.location.search);
 const inviteToken = params.get("t");
 const manageToken = params.get("m");
+const consensusInviteToken = params.get("c");
 window.manageToken = manageToken;
 const pendingAdds = new Set();   // prevent spam insert per user+cell
 const inFlightCells = new Set(); // per-cell lock
