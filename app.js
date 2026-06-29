@@ -2170,6 +2170,44 @@ function getWeekdayLabels7(timeZone) {
 // BOARD / TABLE DATA LOADING
 // =========================
 
+async function verifyConsensusPassword() {
+  const password = document
+    .getElementById("consensus-login-password")
+    ?.value.trim();
+
+  const errEl = document.getElementById("consensus-login-error");
+
+  if (!password) return;
+
+  const passwordHash = await sha256Text(password);
+
+  const { data: board, error } = await supabase
+    .from("consensus_boards")
+    .select("id, name, question, options, password_hash, vote_locked, allow_multiple")
+    .eq("invite_token", consensusInviteToken)
+    .maybeSingle();
+
+  if (error || !board) {
+    errEl.textContent = "Vote board not found.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  if (passwordHash !== board.password_hash) {
+    errEl.textContent = "Incorrect password.";
+    errEl.style.display = "block";
+    return;
+  }
+
+  errEl.style.display = "none";
+
+  console.log("Consensus password accepted:", board);
+
+  // temporary next step
+  alert("Password accepted. Voting page comes next.");
+}
+
+//----------
 async function showConsensusLoginView(token) {
   document.documentElement.classList.remove("route-landing");
   document.documentElement.classList.add("route-auth");
@@ -6177,7 +6215,13 @@ document.getElementById("recurring-delete-only-confirm")?.addEventListener("clic
 
 document.getElementById("recurring-delete-clear-confirm")?.addEventListener("click", async () => {
   await deleteRecurringAvailability({ clearExisting: true });
-});  
+});
+
+document.getElementById("consensus-login-submit")?.addEventListener("click", verifyConsensusPassword);
+
+document.getElementById("consensus-login-password")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") verifyConsensusPassword();
+  });
   
 document.getElementById("recurring-save")?.addEventListener("click", async () => {
   const ok = await confirmModal({
