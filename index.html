@@ -12,7 +12,7 @@
   <script>
   (function () {
     const params = new URLSearchParams(window.location.search);
-    const isAuthRoute = !!(params.get("t") || params.get("m"));
+    const isAuthRoute = !!(params.get("t") || params.get("m") || params.get("c"));
     document.documentElement.classList.add(isAuthRoute ? "route-auth" : "route-landing");
   })();
 </script>
