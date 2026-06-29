@@ -2160,16 +2160,42 @@ function getWeekdayLabels7(timeZone) {
 // =========================
 
 async function showConsensusLoginView(token) {
-  hideLandingPage();
+  document.documentElement.classList.remove("route-landing");
+  document.documentElement.classList.add("route-auth");
 
+  document.body.classList.remove("show-landing-bg");
+  document.body.classList.remove("create-view");
   document.body.style.visibility = "visible";
 
-  document.getElementById("dashboard").style.display = "none";
-  document.getElementById("create-board").style.display = "none";
-  document.getElementById("consensus-board-view").style.display = "none";
+  hideLandingPage();
+
+  const idsToHide = [
+    "landing-bg",
+    "landing-page",
+    "dashboard",
+    "create-board",
+    "consensus-board-view",
+    "calendar-topbar",
+    "calendar",
+    "calendar-side",
+    "calendar-loading",
+    "profile-setup",
+    "route-error"
+  ];
+
+  idsToHide.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if ("hidden" in el) el.hidden = true;
+    el.style.display = "none";
+  });
 
   const view = document.getElementById("consensus-login-view");
-  if (view) view.style.display = "flex";
+  if (view) {
+    view.hidden = false;
+    view.style.display = "flex";
+  }
 
   console.log("Consensus invite token:", token);
 }
