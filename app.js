@@ -5241,8 +5241,17 @@ function showAddVotersButton() {
   const btn = document.getElementById("create-vote-btn");
   if (!btn) return;
 
+  if (currentConsensusBoard?.invites_locked) {
+    btn.textContent = "Invites Locked";
+    btn.dataset.mode = "locked";
+    btn.disabled = true;
+    btn.style.display = "inline-flex";
+    return;
+  }
+
   btn.textContent = "Add Voters";
   btn.dataset.mode = "add-voters";
+  btn.disabled = false;
   btn.style.display = "inline-flex";
 }
 
@@ -5397,6 +5406,10 @@ const deleteAccountConfirmInput = document.getElementById("delete-account-confir
   const createVoteBtn = document.getElementById("create-vote-btn");
     if (createVoteBtn) {
       createVoteBtn.addEventListener("click", () => {
+        if (createVoteBtn.dataset.mode === "locked") {
+          return;
+        }
+
         if (createVoteBtn.dataset.mode === "add-voters") {
           openConsensusInviteModal();
           return;
