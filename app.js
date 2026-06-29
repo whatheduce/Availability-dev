@@ -256,12 +256,23 @@ function showConsensusBoardView(board = null) {
   if (question) question.textContent = board?.question || "";
 
   resetConsensusOptions();
-  
-  if (board?.vote_locked && Array.isArray(board.options)) {
-    renderLockedConsensusOptions(board.options);
-  }
-  
-  renderConsensusVoteCards(board?.vote_locked ? board.options : []);
+
+    if (!board?.vote_locked) {
+      const createVoteBtn = document.getElementById("create-vote-btn");
+
+      if (createVoteBtn) {
+        createVoteBtn.textContent = "Create Vote";
+        createVoteBtn.dataset.mode = "create-vote";
+        createVoteBtn.disabled = false;
+        createVoteBtn.style.display = "none";
+      }
+    }
+
+    if (board?.vote_locked && Array.isArray(board.options)) {
+      renderLockedConsensusOptions(board.options);
+    }
+
+renderConsensusVoteCards(board?.vote_locked ? board.options : []);
 
   const view = document.getElementById("consensus-board-view");
   if (view) view.style.display = "block";
