@@ -5228,6 +5228,13 @@ function openConsensusInviteModal() {
     return;
   }
 
+  if (!currentConsensusBoard?.vote_locked) {
+    showConfirmPopup("Please create and lock the vote options before inviting voters.", {
+      title: "Create vote first"
+    });
+    return;
+  }
+
   openInviteModal({
     boardId: currentConsensusBoard.id,
     inviteToken: currentConsensusBoard.invite_token,
