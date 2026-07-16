@@ -2170,41 +2170,109 @@ function getWeekdayLabels7(timeZone) {
 // BOARD / TABLE DATA LOADING
 // =========================
 
+function showConsensusVoterNameView(board) {
+  const loginView =
+    document.getElementById("consensus-login-view");
+
+  if (loginView) {
+    loginView.style.display = "none";
+  }
+
+  console.log("Consensus access granted:", board);
+
+  alert(
+    `Password accepted for "${board.name}". Name entry comes next.`
+  );
+}
+
+//----------
 async function verifyConsensusPassword() {
-  const password = document
-    .getElementById("consensus-login-password")
-    ?.value.trim();
+  const passwordInput =
+    document.getElementById("consensus-login-password");
 
-  const errEl = document.getElementById("consensus-login-error");
+  const errorEl =
+    document.getElementById("consensus-login-error");
 
-  if (!password) return;
+  const submitBtn =
+    document.getElementById("consensus-login-submit");
 
-  const passwordHash = await sha256Text(password);
+  const password = passwordInput?.value.trim() || "";
 
-  const { data: board, error } = await supabase
-    .from("consensus_boards")
-    .select("id, name, question, options, password_hash, vote_locked, allow_multiple")
-    .eq("invite_token", consensusInviteToken)
-    .maybeSingle();
-
-  if (error || !board) {
-    errEl.textContent = "Vote board not found.";
-    errEl.style.display = "block";
+  if (!password) {
+    if (errorEl) {
+      errorEl.textContent = "Please enter the board password.";
+      errorEl.style.display = "block";
+    }
     return;
   }
 
-  if (passwordHash !== board.password_hash) {
-    errEl.textContent = "Incorrect password.";
-    errEl.style.display = "block";
+  if (!consensusInviteToken) {
+    if (errorEl) {
+      errorEl.textContent = "This vote invitation is invalid.";
+      errorEl.style.display = "block";
+    }
     return;
   }
 
-  errEl.style.display = "none";
+  const originalText = submitBtn?.textContent || "Continue";
 
-  console.log("Consensus password accepted:", board);
+  try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Checking...";
+    }
 
-  // temporary next step
-  alert("Password accepted. Voting page comes next.");
+    if (errorEl) {
+      errorEl.textContent = "";
+      errorEl.style.display = "none";
+    }
+
+    const passwordHash = await sha256Text(password);
+
+    const { data, error } = await supabase.rpc(
+      "verify_consensus_invite_password",
+      {
+        p_invite_token: consensusInviteToken,
+        p_password_hash: passwordHash
+      }
+    );
+
+    if (error) {
+      console.error("Consensus password check failed:", error);
+
+      if (errorEl) {
+        errorEl.textContent =
+          "Could not check the password. Please try again.";
+        errorEl.style.display = "block";
+      }
+
+      return;
+    }
+
+    const board = Array.isArray(data) ? data[0] : data;
+
+    if (!board) {
+      if (errorEl) {
+        errorEl.textContent = "Incorrect password.";
+        errorEl.style.display = "block";
+      }
+
+      if (passwordInput) {
+        passwordInput.select();
+      }
+
+      return;
+    }
+
+    currentConsensusBoard = board;
+
+    showConsensusVoterNameView(board);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  }
 }
 
 //----------
