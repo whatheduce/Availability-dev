@@ -2250,11 +2250,14 @@ async function showConsensusLoginView(token) {
   const questionEl = document.getElementById("consensus-login-question");
   const errorEl = document.getElementById("consensus-login-error");
 
-  const { data: board, error } = await supabase
-    .from("consensus_boards")
-    .select("name, question")
-    .eq("invite_token", token)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc(
+    "get_consensus_invite_preview",
+    {
+      p_invite_token: token
+    }
+  );
+
+const board = Array.isArray(data) ? data[0] : data;
 
   if (error || !board) {
     if (titleEl) titleEl.textContent = "Vote Invitation";
