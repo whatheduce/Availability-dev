@@ -2502,28 +2502,54 @@ for (let i = 0; i < maxHostedSlots; i++) {
   
   if (b?.type === "consensus") {
   hostedSlotsHtml.push(`
-  <div class="board-pill-shell">
-     <div
-      class="board-pill board-pill--square consensus-board-pill"
-      data-kind="consensus"
-      data-invite-token="${escapeHtml(b.data.invite_token || "")}"
-      data-consensus-id="${escapeHtml(b.data.id)}"
-      data-consensus-name="${escapeHtml(b.data.name)}"
-      data-consensus-question="${escapeHtml(b.data.question || "")}"
-      data-vote-locked="${b.data.vote_locked ? "1" : "0"}"
-      data-options="${escapeHtml(JSON.stringify(b.data.options || []))}"
-    >
-      <div class="board-pill-title board-pill-title--top">Instant Consensus Board</div>
+    <div class="board-pill-shell">
+      <div
+        class="board-pill board-pill--square consensus-board-pill"
+        data-kind="consensus"
+        data-invite-token="${escapeHtml(b.data.invite_token || "")}"
+        data-consensus-id="${escapeHtml(b.data.id)}"
+        data-consensus-name="${escapeHtml(b.data.name)}"
+        data-consensus-question="${escapeHtml(b.data.question || "")}"
+        data-vote-locked="${b.data.vote_locked ? "1" : "0"}"
+        data-options="${escapeHtml(JSON.stringify(b.data.options || []))}"
+      >
+        <button
+          class="board-actions-btn"
+          type="button"
+          aria-label="Consensus board actions"
+        >
+          +
+        </button>
 
-      <div class="board-preview consensus-board-preview">
-         <div class="consensus-board-name">${escapeHtml(b.data.name)}</div>
-         <div class="consensus-board-question">${escapeHtml(b.data.question || "No vote question yet")}</div>
+        <div class="board-actions-menu" hidden>
+          <button
+            class="board-actions-item"
+            type="button"
+            data-action="delete-consensus"
+          >
+            Delete
+          </button>
+        </div>
+
+        <div class="board-pill-title board-pill-title--top">
+          Instant Consensus Board
+        </div>
+
+        <div class="board-preview consensus-board-preview">
+          <div class="consensus-board-name">
+            ${escapeHtml(b.data.name)}
+          </div>
+
+          <div class="consensus-board-question">
+            ${escapeHtml(b.data.question || "No vote question yet")}
+          </div>
+        </div>
+
+        <div class="board-pill-meta">Hosted</div>
       </div>
-
-      <div class="board-pill-meta">Hosted</div>
-     </div>
-  </div>
+    </div>
   `);
+
   continue;
 }
   
@@ -6437,9 +6463,12 @@ document.addEventListener("click", async (e) => {
     if (menu) menu.hidden = true;
 
     const action = item.dataset.action;
-    const boardId = card.dataset.boardId;
-
     const kind = card.dataset.kind;
+
+    const boardId =
+      kind === "consensus"
+        ? card.dataset.consensusId
+        : card.dataset.boardId;
 
 // Joined: remove calendar (stub for now)
 if (kind === "joined" && action === "remove") {
@@ -6522,6 +6551,53 @@ if (memberCount >= memberLimit) {
   });
   return;
 }
+    
+   if (kind === "consensus" && action === "delete-consensus") {
+  const boardName =
+    card.dataset.consensusName ||
+    card.querySelector(".consensus-board-name")?.textContent?.trim() ||
+    "this consensus board";
+
+  const ok = await confirmModal({
+    title: "Delete consensus board?",
+    message: `Delete "${boardName}"? All invitations, votes and other board data will also be permanently deleted.`,
+    okText: "Delete",
+    cancelText: "Cancel"
+  });
+
+  if (!ok) return;
+
+  try {
+    item.disabled = true;
+    item.textContent = "Deleting…";
+
+    const { error } = await supabase.rpc("delete_consensus_board", {
+      p_board_id: boardId
+    });
+
+    if (error) throw error;
+
+    card.closest(".board-pill-shell")?.remove();
+
+    if (typeof loadBoards === "function") {
+      await loadBoards();
+    }
+  } catch (err) {
+    console.error("Delete consensus board failed:", err);
+
+    item.disabled = false;
+    item.textContent = "Delete";
+
+    await confirmModal({
+      title: "Could not delete board",
+      message: "The consensus board could not be deleted. Please try again.",
+      okText: "OK",
+      cancelText: ""
+    });
+  }
+
+  return;
+} 
     
     if (action === "delete") {
       // Confirm (no alert UI yet — we can swap to a custom modal next)
