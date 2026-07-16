@@ -2246,7 +2246,40 @@ async function showConsensusLoginView(token) {
     view.style.display = "flex";
   }
 
-  console.log("Consensus invite token:", token);
+  const titleEl = document.getElementById("consensus-login-title");
+  const questionEl = document.getElementById("consensus-login-question");
+  const errorEl = document.getElementById("consensus-login-error");
+
+  const { data: board, error } = await supabase
+    .from("consensus_boards")
+    .select("name, question")
+    .eq("invite_token", token)
+    .maybeSingle();
+
+  if (error || !board) {
+    if (titleEl) titleEl.textContent = "Vote Invitation";
+    if (questionEl) questionEl.textContent = "";
+
+    if (errorEl) {
+      errorEl.textContent = "This vote invitation could not be found.";
+      errorEl.style.display = "block";
+    }
+
+    return;
+  }
+
+  if (titleEl) {
+    titleEl.textContent = board.name || "Vote Invitation";
+  }
+
+  if (questionEl) {
+    questionEl.textContent = board.question || "";
+  }
+
+  if (errorEl) {
+    errorEl.textContent = "";
+    errorEl.style.display = "none";
+  }
 }
 
 //----------  
