@@ -2268,11 +2268,65 @@ function showConsensusVoterNameView(board) {
   const loginView =
     document.getElementById("consensus-login-view");
 
+  const voterView =
+    document.getElementById("consensus-voter-view");
+
+  const titleEl =
+    document.getElementById("consensus-voter-title");
+
+  const questionEl =
+    document.getElementById("consensus-voter-question");
+
+  const optionsEl =
+    document.getElementById("consensus-voter-options");
+
+  const multipleHelpEl =
+    document.getElementById("consensus-voter-multiple-help");
+
+  const submitBtn =
+    document.getElementById("consensus-submit-vote");
+
   if (loginView) {
     loginView.style.display = "none";
   }
 
-  alert(`Password accepted for "${board.name}".`);
+  if (voterView) {
+    voterView.style.display = "block";
+  }
+
+  if (titleEl) {
+    titleEl.textContent = board?.name || "Vote";
+  }
+
+  if (questionEl) {
+    questionEl.textContent = board?.question || "";
+  }
+
+  const options = Array.isArray(board?.options)
+    ? board.options
+    : [];
+
+  if (multipleHelpEl) {
+    multipleHelpEl.textContent = board?.allow_multiple
+      ? "or select multiple options."
+      : ".";
+  }
+
+  if (optionsEl) {
+    optionsEl.innerHTML = options.map((option, index) => `
+      <button
+        type="button"
+        class="consensus-voter-option"
+        data-option-index="${index}"
+      >
+        ${escapeHtml(option)}
+      </button>
+    `).join("");
+  }
+
+  if (submitBtn) {
+    submitBtn.style.display = "none";
+  }
 }
 
 //----------
@@ -6317,6 +6371,41 @@ document.getElementById("consensus-login-password")?.addEventListener("keydown",
       verifyConsensusPassword();
     }
   });
+
+document
+  .getElementById("consensus-voter-options")?.addEventListener("click", (e) => {
+    const optionBtn = e.target.closest(
+      ".consensus-voter-option"
+    );
+
+    if (!optionBtn || !currentConsensusBoard) return;
+
+    const allowMultiple =
+      !!currentConsensusBoard.allow_multiple;
+
+    if (!allowMultiple) {
+      document
+        .querySelectorAll(".consensus-voter-option")
+        .forEach((btn) => {
+          btn.classList.remove("is-selected");
+        });
+    }
+
+    optionBtn.classList.toggle("is-selected");
+
+    const selectedCount =
+      document.querySelectorAll(
+        ".consensus-voter-option.is-selected"
+      ).length;
+
+    const submitBtn =
+      document.getElementById("consensus-submit-vote");
+
+    if (submitBtn) {
+      submitBtn.style.display =
+        selectedCount > 0 ? "block" : "none";
+    }
+  });  
   
 document.getElementById("recurring-cancel")?.addEventListener("click", closeRecurringAvailabilityModal);
 
