@@ -2170,22 +2170,6 @@ function getWeekdayLabels7(timeZone) {
 // BOARD / TABLE DATA LOADING
 // =========================
 
-function showConsensusVoterNameView(board) {
-  const loginView =
-    document.getElementById("consensus-login-view");
-
-  if (loginView) {
-    loginView.style.display = "none";
-  }
-
-  console.log("Consensus access granted:", board);
-
-  alert(
-    `Password accepted for "${board.name}". Name entry comes next.`
-  );
-}
-
-//----------
 async function verifyConsensusPassword() {
   const passwordInput =
     document.getElementById("consensus-login-password");
