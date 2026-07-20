@@ -2206,14 +2206,6 @@ async function verifyConsensusPassword() {
     return;
   }
 
-  if (!consensusInviteToken) {
-    if (errorEl) {
-      errorEl.textContent = "This vote invitation is invalid.";
-      errorEl.style.display = "block";
-    }
-    return;
-  }
-
   const originalText = submitBtn?.textContent || "Continue";
 
   try {
@@ -2238,7 +2230,7 @@ async function verifyConsensusPassword() {
     );
 
     if (error) {
-      console.error("Consensus password check failed:", error);
+      console.error("Consensus password verification failed:", error);
 
       if (errorEl) {
         errorEl.textContent =
@@ -2251,6 +2243,7 @@ async function verifyConsensusPassword() {
 
     const board = Array.isArray(data) ? data[0] : data;
 
+    // Wrong password returns no row
     if (!board) {
       if (errorEl) {
         errorEl.textContent = "Incorrect password.";
@@ -2258,13 +2251,24 @@ async function verifyConsensusPassword() {
       }
 
       if (passwordInput) {
+        passwordInput.focus();
         passwordInput.select();
       }
 
       return;
     }
 
+    // Correct password
     currentConsensusBoard = board;
+
+    if (errorEl) {
+      errorEl.textContent = "";
+      errorEl.style.display = "none";
+    }
+
+    if (passwordInput) {
+      passwordInput.value = "";
+    }
 
     showConsensusVoterNameView(board);
   } finally {
@@ -2273,6 +2277,18 @@ async function verifyConsensusPassword() {
       submitBtn.textContent = originalText;
     }
   }
+}
+
+//----------
+function showConsensusVoterNameView(board) {
+  const loginView =
+    document.getElementById("consensus-login-view");
+
+  if (loginView) {
+    loginView.style.display = "none";
+  }
+
+  alert(`Password accepted for "${board.name}".`);
 }
 
 //----------
@@ -6309,6 +6325,15 @@ document.getElementById("remove-user-modal")?.addEventListener("click", (e) => {
   }
 });
 
+document.getElementById("consensus-login-submit")?.addEventListener("click", verifyConsensusPassword);
+
+document.getElementById("consensus-login-password")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      verifyConsensusPassword();
+    }
+  });
+  
 document.getElementById("recurring-cancel")?.addEventListener("click", closeRecurringAvailabilityModal);
 
 document.getElementById("recurring-back")?.addEventListener("click", () => {
